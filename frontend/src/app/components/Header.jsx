@@ -1,0 +1,1 @@
+export default function Header(){return <div className="site-nav"><a className="brand" href="#home"><span>SS</span><div>Smriti <b>School</b><small>LEARN • GROW • LEAD</small></div></a><nav><a href="#about">About</a><a href="#events">Events</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav></div>}

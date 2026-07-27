@@ -1,0 +1,1 @@
+export default function Footer(){return <footer className="site-footer"><div><b>Smriti School</b><p>Inspiring curious, kind and capable learners.</p></div><p>© 2083 Smriti School • Kathmandu, Nepal</p></footer>}

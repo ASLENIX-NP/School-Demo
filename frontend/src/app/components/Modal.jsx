@@ -1,0 +1,1 @@
+export default function Modal({open,children,onClose}){return open?<div role="dialog" style={{position:'fixed',inset:0,background:'#001a2c88',display:'grid',placeItems:'center',zIndex:10}}><div className="page-card" style={{maxWidth:500}}>{children}<button className="button" onClick={onClose} style={{marginTop:15}}>Close</button></div></div>:null}

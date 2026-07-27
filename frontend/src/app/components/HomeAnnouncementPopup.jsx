@@ -1,0 +1,1 @@
+import Modal from "./Modal"; export default function HomeAnnouncementPopup({open,onClose}){return <Modal open={open} onClose={onClose}><h2>Welcome to Smriti School</h2><p>Admissions for the new academic session are now open.</p></Modal>}
