@@ -16,29 +16,51 @@ import ResetPassword from "./admin/ResetPassword";
 import Profile from "./admin/Profile";
 import Settings from "./admin/Settings";
 import StudentDetails from "./admin/StudentDetails";
+import ProtectedRoute from "./admin/ProtectedRoute";
+
 import Home from "./app/Home";
+import AboutPage from "./app/AboutPage";
+import AcademicsPage from "./app/AcademicsPage";
+import FacilitiesPage from "./app/FacilitiesPage";
+import NoticesPage from "./app/NoticesPage";
+import ContactPage from "./app/ContactPage";
+import Admissions from "./app/Admissions";
+import ScrollToTop from "./app/components/ScrollToTop";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/students" element={<Students />} />
-      <Route path="/teachers" element={<Teachers />} />
-      <Route path="/classes" element={<Classes />} />
-      <Route path="/subjects" element={<Subjects />} />
-      <Route path="/attendance" element={<Attendance />} />
-      <Route path="/fees" element={<Fees />} />
-      <Route path="/exams" element={<Exams />} />
-      <Route path="/students/add" element={<AddStudent />} />
-      <Route path="/students/:id" element={<StudentDetails />} />
-      <Route path="/teachers/add" element={<AddTeacher />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/settings" element={<Settings />} />
-    </Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/academics" element={<AcademicsPage />} />
+        <Route path="/facilities" element={<FacilitiesPage />} />
+        <Route path="/notices" element={<NoticesPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/admissions" element={<Admissions />} />
+
+        {/* Public Login Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
+        {/* Protected Admin Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
+        <Route path="/students/add" element={<ProtectedRoute><AddStudent /></ProtectedRoute>} />
+        <Route path="/students/:id" element={<ProtectedRoute><StudentDetails /></ProtectedRoute>} />
+        <Route path="/teachers" element={<ProtectedRoute><Teachers /></ProtectedRoute>} />
+        <Route path="/teachers/add" element={<ProtectedRoute><AddTeacher /></ProtectedRoute>} />
+        <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
+        <Route path="/subjects" element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
+        <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+        <Route path="/fees" element={<ProtectedRoute><Fees /></ProtectedRoute>} />
+        <Route path="/exams" element={<ProtectedRoute><Exams /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      </Routes>
+    </>
   );
 }
 
