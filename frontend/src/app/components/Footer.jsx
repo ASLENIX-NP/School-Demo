@@ -1,150 +1,635 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail, Award, ArrowUp, UserCheck, Heart, ChevronRight } from "lucide-react";
+import {
+    Check,
+    Globe,
+    Mail,
+    Phone,
+    MapPin,
+    School,
+    Pencil,
+    UploadCloud,
+  } from "lucide-react";
+  
+  import { FaFacebook, FaYoutube } from "react-icons/fa";
 
-export default function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+// Shared identity palette — same navy / forest-green / gold family used
+// across the Hero and homepage sections, so the footer reads as part of
+// the same site rather than a bolted-on dark-mode panel.
+const palette = {
+  navy: "#0A1628",
+  primary: "#1E3A5F",
+  secondary: "#2D6A4F",
+  gold: "#C9A84C",
+  goldLight: "#E8D5A3",
+  crimson: "#8B0000",
+};
+
+export const defaultFooterContent = {
+  logoUrl: "",
+  schoolName: "Baljagriti",
+  schoolSubtitle: "Secondary English Boarding School",
+  admissionBadgeText: "Admissions Open 2026",
+  showAdmissionBadge: true,
+
+  navLinks: [
+    { id: 1, label: "About", href: "/about", visible: true },
+    { id: 2, label: "Academics", href: "/academics", visible: true },
+    { id: 3, label: "Facilities", href: "/facilities", visible: true },
+    { id: 4, label: "Gallery", href: "/gallery", visible: true },
+    { id: 5, label: "Contact", href: "/contact", visible: true },
+  ],
+
+  socials: [
+    {
+      id: 1,
+      type: "facebook",
+      href: "https://www.facebook.com/baljagritiesschool",
+      label: "Facebook",
+      visible: true,
+    },
+    {
+      id: 2,
+      type: "website",
+      href: "https://baljagriti.edu.np/",
+      label: "Website",
+      visible: true,
+    },
+    {
+      id: 3,
+      type: "youtube",
+      href: "https://www.youtube.com/@BaljagritiEngSecondarySchool",
+      label: "YouTube",
+      visible: true,
+    },
+  ],
+
+  contact: {
+    address: "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
+    mapUrl:
+      "https://www.google.com/maps/search/?api=1&query=Baljagriti+English+Secondary+School+Hetauda",
+    phones: ["057-590144", "057-590145", "057-590146"],
+    email: "infobjess2046@gmail.com",
+  },
+
+  modalTitle: "Contact Baljagriti School",
+  modalHint: "Click any number to copy it.",
+  copiedText: "Copied",
+  closeButtonText: "Close",
+
+  copyrightText:
+    "© 2026 Baljagriti Secondary English Boarding School. All rights reserved.",
+};
+
+export function mergeFooterContent(saved = {}) {
+  return {
+    ...defaultFooterContent,
+    ...saved,
+    navLinks: Array.isArray(saved.navLinks)
+      ? saved.navLinks
+      : defaultFooterContent.navLinks,
+    socials: Array.isArray(saved.socials)
+      ? saved.socials
+      : defaultFooterContent.socials,
+    contact: {
+      ...defaultFooterContent.contact,
+      ...(saved.contact || {}),
+      phones: Array.isArray(saved.contact?.phones)
+        ? saved.contact.phones
+        : defaultFooterContent.contact.phones,
+    },
+  };
+}
+
+export function normalizeExternalUrl(value = "") {
+  const cleanValue = String(value || "").trim();
+
+  if (!cleanValue) return "#";
+  if (cleanValue.startsWith("mailto:") || cleanValue.startsWith("tel:")) return cleanValue;
+  if (cleanValue.startsWith("http://") || cleanValue.startsWith("https://")) return cleanValue;
+  if (cleanValue.startsWith("/")) return cleanValue;
+  if (cleanValue.startsWith("#")) return cleanValue;
+
+  return `https://${cleanValue}`;
+}
+
+export function normalizeMapUrl(value = "", fallbackAddress = "") {
+  const cleanValue = String(value || "").trim();
+  const cleanAddress = String(fallbackAddress || "").trim();
+
+  if (!cleanValue && cleanAddress) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddress)}`;
+  }
+
+  if (!cleanValue) return "#";
+  if (cleanValue.startsWith("http://") || cleanValue.startsWith("https://")) return cleanValue;
+
+  if (
+    cleanValue.startsWith("www.") ||
+    cleanValue.startsWith("maps.app.goo.gl") ||
+    cleanValue.startsWith("goo.gl") ||
+    cleanValue.startsWith("google.com")
+  ) {
+    return `https://${cleanValue}`;
+  }
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanValue)}`;
+}
+
+function getSocialIcon(type) {
+    if (type === "facebook") return FaFacebook;
+    if (type === "youtube") return FaYoutube;
+    return Globe;
+  }
+
+function stopEditNavigation(event, editMode) {
+  if (!editMode) return;
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function AdminPillButton({ icon: Icon, label, onClick, tone = "edit" }) {
+  const toneStyles = {
+    edit: {
+      background: palette.gold,
+      color: palette.navy,
+    },
+    add: {
+      background: palette.secondary,
+      color: "#FFFFFF",
+    },
+    delete: {
+      background: palette.crimson,
+      color: "#FFFFFF",
+    },
+    dark: {
+      background: palette.navy,
+      color: "#FFFFFF",
+    },
   };
 
   return (
-    <footer className="bg-slate-950 text-slate-300 pt-10 pb-6 sm:pt-16 sm:pb-8 border-t border-slate-800 relative overflow-hidden">
-      <div className="max-w-[1450px] mx-auto px-4 sm:px-8">
-        {/* 2-column grid on mobile, 4-column grid on desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10 mb-8 sm:mb-16">
-          {/* Brand Column (Span 2 cols on mobile) */}
-          <div className="col-span-2 md:col-span-1 space-y-3 sm:space-y-4">
-            <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-red-600 to-blue-600 p-0.5">
-                <div className="w-full h-full bg-slate-950 rounded-[10px] sm:rounded-[14px] flex items-center justify-center text-white font-black text-xs sm:text-base tracking-tighter">
-                  SS
+    <button
+      type="button"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onClick?.();
+      }}
+      className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-bold shadow-lg transition-all hover:-translate-y-0.5"
+      style={{
+        ...(toneStyles[tone] || toneStyles.edit),
+        border: "1px solid rgba(255,255,255,0.3)",
+      }}
+    >
+      <Icon className="w-3.5 h-3.5" />
+      {label}
+    </button>
+  );
+}
+
+function EditToolbar({ children, position = "top-right" }) {
+  const positionClass =
+    position === "top-left"
+      ? "left-0 top-0 -translate-y-1/2"
+      : position === "bottom-right"
+      ? "right-0 bottom-0 translate-y-1/2"
+      : "right-0 top-0 -translate-y-1/2";
+
+  return (
+    <div
+      className={`absolute ${positionClass} z-[80] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 flex flex-wrap gap-2`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function FooterLabel({ children }) {
+  return (
+    <span
+      className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase mb-5"
+      style={{ color: palette.goldLight }}
+    >
+      <span className="w-4 h-px" style={{ background: palette.gold }} />
+      {children}
+    </span>
+  );
+}
+
+export function Footer({
+  editMode = false,
+  contentOverride = null,
+  onEditTarget = () => {},
+  onAddTarget = () => {},
+  onDeleteTarget = () => {},
+}) {
+  const [content, setContent] = useState(
+    mergeFooterContent(contentOverride || defaultFooterContent)
+  );
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [copied, setCopied] = useState("");
+
+  const isMobile =
+    typeof navigator !== "undefined" &&
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  useEffect(() => {
+    if (contentOverride) {
+      setContent(mergeFooterContent(contentOverride));
+      return;
+    }
+
+    const loadFooterContent = async () => {
+      try {
+        const res = await axios.get(
+          "https://school-website-backend-ixx2.onrender.com/api/site-content/footer",
+          {
+            timeout: 12000,
+          }
+        );
+        const savedContent = res.data?.data?.content || {};
+        setContent(mergeFooterContent(savedContent));
+      } catch (error) {
+        console.error("Footer content load error:", error);
+        setContent(defaultFooterContent);
+      }
+    };
+
+    loadFooterContent();
+  }, [contentOverride]);
+
+  const copyPhone = async (phone) => {
+    try {
+      await navigator.clipboard.writeText(phone);
+      setCopied(phone);
+
+      setTimeout(() => {
+        setCopied("");
+      }, 2000);
+    } catch (error) {
+      console.error("Phone copy failed:", error);
+    }
+  };
+
+  const visibleLinks = content.navLinks.filter((link) => link.visible !== false);
+  const visibleSocials = content.socials.filter(
+    (social) => social.visible !== false
+  );
+
+  const mapHref = normalizeMapUrl(content.contact.mapUrl, content.contact.address);
+
+  return (
+    <footer
+      className="relative overflow-hidden"
+      style={{
+        background: `linear-gradient(180deg, ${palette.navy} 0%, #071120 100%)`,
+        borderTop: `3px solid ${palette.gold}`,
+      }}
+    >
+      {editMode && (
+        <div
+          className="relative z-[90] mx-auto max-w-[1400px] px-6 pt-5"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div
+            className="rounded-xl px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: `1px solid ${palette.gold}45`,
+            }}
+          >
+            <div>
+              <div className="text-white font-bold">Admin Footer Editor Active</div>
+              <div className="text-xs text-white/55 mt-1">
+                Hover footer areas to open the correct editor for logo, links, socials, contact details, and copyright.
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <AdminPillButton
+                icon={Pencil}
+                label="School Info"
+                onClick={() => onEditTarget({ type: "identity" })}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-14 md:py-16">
+        <div className="grid lg:grid-cols-[1.3fr_1fr_1.2fr] gap-10 lg:gap-8 pb-12">
+          {/* Identity column */}
+          <div
+            className={editMode ? "relative group rounded-2xl p-3 -m-3" : ""}
+            style={editMode ? { border: `1px dashed ${palette.gold}55` } : undefined}
+          >
+            {editMode && (
+              <EditToolbar position="top-left">
+                <AdminPillButton
+                  icon={UploadCloud}
+                  label="Logo/Text"
+                  onClick={() => onEditTarget({ type: "identity" })}
+                />
+              </EditToolbar>
+            )}
+
+            <div className="flex items-center gap-3 mb-5">
+              <div
+                className="w-12 h-12 rounded-xl bg-white overflow-hidden flex items-center justify-center flex-shrink-0"
+                style={{ border: `1px solid ${palette.gold}55` }}
+              >
+                {content.logoUrl ? (
+                  <img
+                    src={content.logoUrl}
+                    alt={content.schoolName}
+                    className="w-full h-full object-contain p-1"
+                  />
+                ) : (
+                  <School className="w-6 h-6" style={{ color: palette.navy }} />
+                )}
+              </div>
+
+              <div>
+                <div
+                  className="text-white text-lg font-bold leading-tight"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {content.schoolName}
+                </div>
+                <div className="text-xs" style={{ color: palette.goldLight }}>
+                  {content.schoolSubtitle}
                 </div>
               </div>
-              <div>
-                <h3 className="text-lg sm:text-xl font-black text-white leading-none" style={{ fontFamily: "var(--font-display)" }}>
-                  Smriti <span className="text-red-500">School</span>
-                </h3>
-                <small className="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-slate-400 block mt-0.5 sm:mt-1">
-                  Secondary English School
-                </small>
+            </div>
+
+            {content.showAdmissionBadge && content.admissionBadgeText && (
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-6"
+                style={{
+                  background: "rgba(201,168,76,0.1)",
+                  border: `1px solid ${palette.gold}35`,
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: palette.secondary }} />
+                <span className="text-[11px] font-semibold" style={{ color: palette.goldLight }}>
+                  {content.admissionBadgeText}
+                </span>
               </div>
-            </Link>
+            )}
 
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-sm">
-              Smriti Secondary School combines academic discipline, digital innovation, practical science, and character building from PG to Grade 10.
-            </p>
+            <div
+              className={`flex gap-2 ${
+                editMode ? "relative group/social" : ""
+              }`}
+            >
+              {editMode && (
+                <div className="absolute -top-2 left-0 z-[80] opacity-0 group-hover/social:opacity-100 transition-all duration-200">
+                  <AdminPillButton
+                    icon={Pencil}
+                    label="Edit Social"
+                    onClick={() => onEditTarget({ type: "socials" })}
+                  />
+                </div>
+              )}
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold text-red-300 bg-red-950/70 border border-red-800/60">
-              <Award className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400" />
-              <span>Learn • Grow • Lead</span>
+              {visibleSocials.map((social) => {
+                const Icon = getSocialIcon(social.type);
+
+                return (
+                  <a
+                    key={social.id}
+                    href={normalizeExternalUrl(social.href)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    onClick={(event) => stopEditNavigation(event, editMode)}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = palette.gold;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+                    }}
+                  >
+                    <Icon className="w-3.5 h-3.5" style={{ color: palette.goldLight }} />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
-          {/* Quick Nav Links */}
-          <div className="col-span-1">
-            <h4 className="text-xs sm:text-base font-black text-white mb-2.5 sm:mb-4 uppercase tracking-wider text-[10px] sm:text-xs">
-              Quick Pages
-            </h4>
-            <ul className="space-y-1.5 sm:space-y-2.5 text-xs sm:text-sm">
-              {[
-                { name: "Home", path: "/" },
-                { name: "About Us", path: "/about" },
-                { name: "Academics", path: "/academics" },
-                { name: "Facilities", path: "/facilities" },
-                { name: "Notices", path: "/notices" },
-                { name: "Contact", path: "/contact" },
-                { name: "Admissions", path: "/admissions" },
-              ].map((item) => (
-                <li key={item.name}>
-                  <Link
-                    to={item.path}
-                    className="text-slate-400 hover:text-red-400 transition-colors flex items-center gap-1 group"
-                  >
-                    <ChevronRight className="w-3 h-3 text-blue-500 group-hover:translate-x-0.5 transition-transform" />
-                    <span>{item.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Navigate column */}
+          <div
+            className={editMode ? "relative group rounded-2xl p-3 -m-3" : ""}
+          >
+            {editMode && (
+              <EditToolbar>
+                <AdminPillButton
+                  icon={Pencil}
+                  label="Edit Links"
+                  onClick={() => onEditTarget({ type: "navLinks" })}
+                />
+              </EditToolbar>
+            )}
 
-          {/* Academic Divisions Links */}
-          <div className="col-span-1">
-            <h4 className="text-xs sm:text-base font-black text-white mb-2.5 sm:mb-4 uppercase tracking-wider text-[10px] sm:text-xs">
-              Academics
-            </h4>
-            <ul className="space-y-1.5 sm:space-y-2.5 text-xs sm:text-sm">
-              {[
-                { name: "Pre-Primary (PG-UKG)", path: "/academics" },
-                { name: "Primary (Grade 1-5)", path: "/academics" },
-                { name: "Basic (Grade 6-8)", path: "/academics" },
-                { name: "Secondary (9-10)", path: "/academics" },
-                { name: "SEE Preparation", path: "/academics" },
-                { name: "Digital Science Labs", path: "/facilities" },
-              ].map((item) => (
-                <li key={item.name}>
-                  <Link
-                    to={item.path}
-                    className="text-slate-400 hover:text-sky-400 transition-colors flex items-center gap-1 group"
-                  >
-                    <ChevronRight className="w-3 h-3 text-red-500 group-hover:translate-x-0.5 transition-transform" />
-                    <span className="truncate">{item.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <FooterLabel>Navigate</FooterLabel>
 
-          {/* Campus Info & Admin Portal */}
-          <div className="col-span-2 md:col-span-1 pt-2 sm:pt-0">
-            <h4 className="text-xs sm:text-base font-black text-white mb-2.5 sm:mb-4 uppercase tracking-wider text-[10px] sm:text-xs">
-              Campus Info
-            </h4>
-            <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-slate-400">
-              <li className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                <span>Kathmandu / Hetauda, Nepal</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                <span>+977 01-XXXXXXX / 98XXXXXXXX</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                <span>info@smritischool.edu.np</span>
-              </li>
-              <li className="pt-1.5">
+            <div className="flex flex-col gap-3">
+              {visibleLinks.map((link) => (
                 <Link
-                  to="/login"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-bold text-white bg-gradient-to-r from-blue-900 to-slate-900 border border-blue-700/80 hover:border-red-500 transition-all"
+                  key={link.id}
+                  to={link.href || "/"}
+                  onClick={(event) => stopEditNavigation(event, editMode)}
+                  className="text-sm transition-colors duration-200 w-fit"
+                  style={{ color: "rgba(226,232,240,0.68)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(226,232,240,0.68)")}
                 >
-                  <UserCheck className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Admin Staff Portal ↗</span>
+                  {link.label}
                 </Link>
-              </li>
-            </ul>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact column */}
+          <div
+            className={editMode ? "relative group rounded-2xl p-3 -m-3" : ""}
+          >
+            {editMode && (
+              <EditToolbar>
+                <AdminPillButton
+                  icon={Pencil}
+                  label="Contact"
+                  onClick={() => onEditTarget({ type: "contact" })}
+                />
+                <AdminPillButton
+                  icon={Pencil}
+                  label="Popup"
+                  tone="dark"
+                  onClick={() => onEditTarget({ type: "phonePopup" })}
+                />
+              </EditToolbar>
+            )}
+
+            <FooterLabel>Get in Touch</FooterLabel>
+
+            <div className="flex flex-col gap-4 text-sm" style={{ color: "rgba(226,232,240,0.72)" }}>
+              <a
+                href={mapHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => stopEditNavigation(event, editMode)}
+                className="flex items-start gap-2.5 transition-colors duration-200"
+                onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(226,232,240,0.72)")}
+              >
+                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: palette.gold }} />
+                <span>{content.contact.address}</span>
+              </a>
+
+              <div className="flex items-start gap-2.5">
+                <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: palette.gold }} />
+
+                {isMobile && !editMode ? (
+                  <span className="flex flex-wrap items-center gap-x-1">
+                    {content.contact.phones.map((phone, index) => (
+                      <span key={`${phone}-${index}`} className="inline-flex items-center gap-1">
+                        <a
+                          href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
+                          className="transition-colors duration-200"
+                          onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = "inherit")}
+                        >
+                          {phone}
+                        </a>
+                        {index < content.contact.phones.length - 1 && <span>,</span>}
+                      </span>
+                    ))}
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowContactModal(true)}
+                    className="text-left transition-colors duration-200"
+                    onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "inherit")}
+                  >
+                    {content.contact.phones.join(", ")}
+                  </button>
+                )}
+              </div>
+
+              <a
+                href={`mailto:${content.contact.email}`}
+                onClick={(event) => stopEditNavigation(event, editMode)}
+                className="flex items-center gap-2.5 break-all transition-colors duration-200"
+                onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(226,232,240,0.72)")}
+              >
+                <Mail className="w-4 h-4 flex-shrink-0" style={{ color: palette.gold }} />
+                {content.contact.email}
+              </a>
+            </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-6 sm:pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] sm:text-xs text-slate-400 text-center sm:text-left">
-          <p>© {new Date().getFullYear()} Smriti Secondary English School.</p>
-
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> for Smriti School
-            </span>
-
-            <button
-              type="button"
-              onClick={scrollToTop}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-900 hover:bg-red-600 border border-slate-700 flex items-center justify-center text-white transition-colors"
-              title="Back to top"
-            >
-              <ArrowUp className="w-3.5 h-3.5" />
-            </button>
-          </div>
+        <div
+          className={`pt-7 text-xs text-center ${
+            editMode ? "relative group" : ""
+          }`}
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            color: "rgba(226,232,240,0.42)",
+          }}
+        >
+          {editMode && (
+            <EditToolbar>
+              <AdminPillButton
+                icon={Pencil}
+                label="Copyright"
+                onClick={() => onEditTarget({ type: "copyright" })}
+              />
+            </EditToolbar>
+          )}
+          {content.copyrightText}
         </div>
       </div>
+
+      {showContactModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/65 backdrop-blur-sm p-6">
+          <div
+            className="relative w-full max-w-md overflow-hidden rounded-2xl border shadow-2xl"
+            style={{
+              background: `linear-gradient(180deg, ${palette.navy} 0%, #0D1E36 100%)`,
+              borderColor: `${palette.gold}35`,
+            }}
+          >
+            <div className="h-1" style={{ background: palette.gold }} />
+
+            {copied && (
+              <div
+                className="absolute top-5 right-5 z-50 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold"
+                style={{
+                  background: palette.secondary,
+                  color: "#FFFFFF",
+                }}
+              >
+                <Check className="w-3.5 h-3.5" /> {content.copiedText}
+              </div>
+            )}
+
+            <div className="relative z-10 p-6">
+              <div className="flex items-center gap-3 pb-4">
+                <Phone className="w-5 h-5" style={{ color: palette.gold }} />
+                <h3 className="text-xl font-bold text-white">
+                  {content.modalTitle}
+                </h3>
+              </div>
+
+              <div className="space-y-3">
+                {content.contact.phones.map((phone, index) => (
+                  <button
+                    key={`${phone}-${index}`}
+                    type="button"
+                    onClick={() => copyPhone(phone)}
+                    className="w-full text-left p-4 rounded-xl transition-all duration-300 hover:-translate-y-0.5"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <span className="text-white text-lg">{phone}</span>
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-xs mt-4" style={{ color: "rgba(226,232,240,0.5)" }}>
+                {content.modalHint}
+              </p>
+
+              <button
+                type="button"
+                onClick={() => setShowContactModal(false)}
+                className="mt-6 w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
+                style={{
+                  color: palette.navy,
+                  background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 100%)`,
+                }}
+              >
+                {content.closeButtonText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </footer>
   );
 }
+
+export default Footer;

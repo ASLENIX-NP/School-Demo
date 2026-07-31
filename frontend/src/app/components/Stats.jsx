@@ -1,136 +1,155 @@
+// HomePage.jsx
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Camera, Pencil, X, Calendar, Bell, FileText, ChevronRight, Award, CheckCircle2, Sparkles, BookOpen, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  ArrowRight, 
+  Camera, 
+  Pencil, 
+  X, 
+  BookOpen, 
+  Users, 
+  Award, 
+  Calendar, 
+  ChevronRight,
+  GraduationCap,
+  School,
+  Sparkles,
+  Star,
+  Heart,
+  Globe,
+  TrendingUp,
+  Clock
+} from "lucide-react";
 import PdfNoticePreview from "./PdfNoticePreview";
 import HomeAnnouncementPopup from "./HomeAnnouncementPopup";
 
+// New modern color palette
 const palette = {
-  blue: "#2563EB",
-  red: "#EF4444",
-  sky: "#38BDF8",
-  crimson: "#DC2626",
+  primary: "#1E3A5F",      // Deep navy
+  secondary: "#2D6A4F",    // Forest green
+  accent: "#E9C46A",       // Warm gold
+  accent2: "#F4A261",      // Warm orange
+  light: "#F8F9FA",
+  dark: "#1A1A2E",
+  gray: "#6C757D",
+  lightGray: "#E9ECEF",
+  white: "#FFFFFF",
+  gradient1: "linear-gradient(135deg, #1E3A5F 0%, #2D6A4F 100%)",
+  gradient2: "linear-gradient(135deg, #E9C46A 0%, #F4A261 100%)",
+  gradient3: "linear-gradient(135deg, #2D6A4F 0%, #1E3A5F 100%)",
 };
 
 const API_URL = "https://school-website-backend-ixx2.onrender.com";
 
 export const defaultStatsSectionData = {
-  eyebrow: "Smriti Highlights",
-  title: "Numbers reflecting two decades of educational excellence.",
-  description:
-    "Smriti Secondary English School has been empowering young minds through dedicated faculty, modern digital infrastructure, practical science, and outstanding SEE results.",
-
+  eyebrow: "Our Impact",
+  title: "Creating Futures, One Student at a Time",
+  description: "Real numbers that reflect our commitment to excellence and holistic education in the Makwanpur region.",
   stats: [
     {
-      value: "2500",
+      value: "3800",
       suffix: "+",
       label: "Students Enrolled",
-      note: "From PG to Grade 10",
-      color: palette.blue,
+      note: "Across school programs",
+      color: palette.primary,
     },
     {
-      value: "140",
+      value: "240",
       suffix: "+",
-      label: "Dedicated Educators",
-      note: "Expert teaching faculty",
-      color: palette.red,
+      label: "Expert Teachers",
+      note: "Academic and support team",
+      color: palette.secondary,
     },
     {
-      value: "20",
+      value: "35",
       suffix: " yrs",
       label: "Years of Excellence",
-      note: "Empowering Nepal's youth",
-      color: palette.sky,
+      note: "Serving Makwanpur",
+      color: palette.accent,
     },
     {
-      value: "99.2",
+      value: "98",
       suffix: "%",
-      label: "SEE Board Pass Rate",
-      note: "Top exam achievement",
-      color: palette.crimson,
+      label: "Success Rate",
+      note: "Academic performance",
+      color: palette.accent2,
     },
   ],
-
   story: {
-    badge: "About Smriti School",
-    title: "Nurturing Character & Inspiring Academic Success",
+    badge: "Our Story",
+    title: "Building Tomorrow's Leaders Today",
     paragraphs: [
-      "Founded with a mission to deliver quality education, Smriti Secondary English School has developed into a premier educational institution built on values, curiosity, and care.",
-      "From Early Years to Grade 10, our school combines interactive digital learning, practical science labs, creative arts, and athletics to guide every student toward leadership.",
+      "Established with a vision to provide quality education in Makawanpur, Baljagriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
+      "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development.",
     ],
-    buttonText: "Discover Our Journey",
-    buttonLink: "#about",
-    image:
-      "https://images.unsplash.com/photo-1588072432836-e10032774350?w=1000&h=800&fit=crop&auto=format",
+    buttonText: "Read Our Story",
+    buttonLink: "/about",
+    image: "https://images.unsplash.com/photo-1588072432836-e10032774350?w=1000&h=800&fit=crop&auto=format",
     imageZoom: 1,
     imageOffsetX: 0,
     imageOffsetY: 0,
-    imageTopTitle: "Smriti School Campus",
-    imageTopSubtitle: "Kathmandu / Hetauda, Nepal",
-    imageBottomTitle: "Building Tomorrow's Leaders Today",
-    imageBottomDescription:
-      "Empowering young minds with modern digital computer learning, science experiments, and strong moral character.",
+    imageTopTitle: "Baljagriti School",
+    imageTopSubtitle: "Hetauda-2, Makwanpur",
+    imageBottomTitle: "Quality Education Since 2046 BS",
+    imageBottomDescription: "This image and text can later come from the admin dashboard.",
   },
-
   excellence: {
-    title: "Academic & Co-Curricular Distinction",
-    description:
-      "Our students consistently achieve outstanding results in national examinations and regional competitions.",
+    title: "Academic Excellence",
+    description: "Our students consistently achieve outstanding results in the SEE examinations under NEB.",
     cards: [
       {
-        title: "Top SEE Board Performance",
-        description:
-          "Consistently securing top pass rates and high distinction grades under the National Examination Board.",
+        title: "Best SEE Results",
+        description: "Consistently achieving top results in the Secondary Education Examination under the National Examination Board.",
       },
       {
         title: "GPA 4.00 Achievers",
-        description:
-          "Dedicated study programs and expert teacher mentorship produce top GPA achievers every academic session.",
+        description: "Our brightest students attain a perfect GPA of 4.00, a testament to our teaching quality and student dedication.",
       },
       {
-        title: "Holistic Youth Development",
-        description:
-          "Combining digital literacy, science innovation, robotics clubs, sports, and leadership experiences.",
+        title: "Holistic Development",
+        description: "Beyond academics, we foster creativity, leadership, and sportsmanship through diverse extracurricular programs.",
       },
     ],
   },
-
   notices: {
-    title: "Official Notices & School Announcements",
-    description: "Stay informed with school updates, examination schedules, and holiday notices.",
+    title: "Latest Notices",
+    description: "Stay informed with the latest announcements.",
   },
 };
 
 export function mergeStatsSectionData(saved = {}) {
   const savedStats = saved || {};
-
   return {
     ...defaultStatsSectionData,
     ...savedStats,
-    stats:
-      Array.isArray(savedStats.stats) && savedStats.stats.length > 0
-        ? defaultStatsSectionData.stats.map((item, index) => ({
-            ...item,
-            ...(savedStats.stats[index] || {}),
-            color: item.color,
-          }))
-        : defaultStatsSectionData.stats,
+    stats: Array.isArray(savedStats.stats) && savedStats.stats.length > 0
+      ? defaultStatsSectionData.stats.map((item, index) => ({
+          ...item,
+          ...(savedStats.stats[index] || {}),
+          color: item.color,
+        }))
+      : defaultStatsSectionData.stats,
     story: {
       ...defaultStatsSectionData.story,
       ...(savedStats.story || {}),
-      paragraphs:
-        Array.isArray(savedStats.story?.paragraphs) &&
-        savedStats.story.paragraphs.length > 0
-          ? [
-              savedStats.story.paragraphs[0] || defaultStatsSectionData.story.paragraphs[0],
-              savedStats.story.paragraphs[1] || defaultStatsSectionData.story.paragraphs[1],
-            ]
-          : defaultStatsSectionData.story.paragraphs,
+      paragraphs: Array.isArray(savedStats.story?.paragraphs) && savedStats.story.paragraphs.length > 0
+        ? [savedStats.story.paragraphs[0] || "", savedStats.story.paragraphs[1] || ""]
+        : defaultStatsSectionData.story.paragraphs,
+      imageZoom: clampStoryImageZoom(savedStats.story?.imageZoom),
+      imageOffsetX: clampStoryImageOffset(savedStats.story?.imageOffsetX),
+      imageOffsetY: clampStoryImageOffset(savedStats.story?.imageOffsetY),
     },
     excellence: {
       ...defaultStatsSectionData.excellence,
       ...(savedStats.excellence || {}),
+      cards: Array.isArray(savedStats.excellence?.cards) && savedStats.excellence.cards.length > 0
+        ? defaultStatsSectionData.excellence.cards.map((item, index) => ({
+            ...item,
+            ...(savedStats.excellence.cards[index] || {}),
+          }))
+        : defaultStatsSectionData.excellence.cards,
     },
     notices: {
       ...defaultStatsSectionData.notices,
@@ -139,306 +158,731 @@ export function mergeStatsSectionData(saved = {}) {
   };
 }
 
+function clampStoryImageOffset(value) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) return 0;
+  return Math.min(60, Math.max(-60, numberValue));
+}
+
+function clampStoryImageZoom(value) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) return 1;
+  return Math.min(3, Math.max(1, numberValue));
+}
+
+function getStoryImageCropStyle(story = {}) {
+  const zoom = clampStoryImageZoom(story.imageZoom);
+  const x = clampStoryImageOffset(story.imageOffsetX);
+  const y = clampStoryImageOffset(story.imageOffsetY);
+  return {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    objectPosition: "center",
+    transform: `translate(${x}%, ${y}%) scale(${zoom})`,
+    transformOrigin: "center center",
+    opacity: 0.85,
+  };
+}
+
+function EditIconButton({ editMode, target, onEditTarget, icon: Icon = Pencil, label = "Edit" }) {
+  if (!editMode) return null;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onEditTarget(target);
+      }}
+      className="absolute -top-2 -right-2 z-[90] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
+      style={{
+        background: palette.gradient2,
+        color: palette.dark,
+        border: `2px solid ${palette.white}`,
+      }}
+      title={label}
+    >
+      <Icon className="w-3.5 h-3.5" />
+    </button>
+  );
+}
+
+function EditableWrap({ editMode, target, onEditTarget, icon = Pencil, label = "Edit", className = "", children }) {
+  if (!editMode) return children;
+  return (
+    <div className={`relative group ${className}`}>
+      {children}
+      <EditIconButton editMode={editMode} target={target} onEditTarget={onEditTarget} icon={icon} label={label} />
+    </div>
+  );
+}
+
 function Counter({ target, suffix, editMode = false }) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
-  const numericTarget = Number.parseFloat(String(target || "0")) || 0;
+  const numericTarget = Number.parseInt(String(target || "0"), 10) || 0;
 
   useEffect(() => {
     if (editMode) {
       setCount(numericTarget);
       return;
     }
-
     const el = ref.current;
     if (!el) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setCount(0);
           const duration = 1500;
           const start = performance.now();
-
           const animate = (now) => {
             const progress = Math.min((now - start) / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 3);
-            const current = numericTarget % 1 === 0 ? Math.floor(numericTarget * eased) : (numericTarget * eased).toFixed(1);
-            setCount(current);
-
+            setCount(Math.floor(numericTarget * eased));
             if (progress < 1) {
               requestAnimationFrame(animate);
             }
           };
-
           requestAnimationFrame(animate);
         }
       },
       { threshold: 0.4 }
     );
-
     observer.observe(el);
     return () => observer.disconnect();
   }, [numericTarget, editMode]);
 
+  return <span ref={ref}>{count}{suffix}</span>;
+}
+
+const formatNoticeDate = (dateValue) => {
+  if (!dateValue) return "No date";
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return dateValue;
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const getNoticeExcerpt = (notice) => {
+  const text = notice?.description || notice?.content || "Click to read the full school notice and important update.";
+  return text.length > 110 ? `${text.slice(0, 110)}...` : text;
+};
+
+// Modern card component with gradient accents
+function ModernCard({ children, className = "", gradient = false, hover = true }) {
   return (
-    <span ref={ref}>
-      {count}
-      {suffix}
-    </span>
+    <div
+      className={`rounded-2xl p-6 transition-all duration-300 ${hover ? 'hover:-translate-y-1 hover:shadow-2xl' : ''} ${className}`}
+      style={{
+        background: gradient ? palette.gradient1 : palette.white,
+        boxShadow: "0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
+        border: `1px solid ${palette.lightGray}`,
+      }}
+    >
+      {children}
+    </div>
   );
 }
 
-const FALLBACK_NOTICES = [
-  {
-    _id: "1",
-    title: "Admissions Open for Session 2083 - Smriti School",
-    date: "2026-03-01",
-    description: "Application forms for new admissions in Play Group to Grade 9 are now available online and at the front office.",
-    category: "Admission"
-  },
-  {
-    _id: "2",
-    title: "SEE Examination Routine & Preparation Guidelines",
-    date: "2026-02-24",
-    description: "Routine and instructions for Grade 10 SEE candidates prepared by NEB academic coordinators.",
-    category: "Exam"
-  },
-  {
-    _id: "3",
-    title: "Annual Sports Week & Science Fair 2083",
-    date: "2026-02-18",
-    description: "Student registration is open for inter-house athletics, science model displays, and cultural competitions.",
-    category: "Event"
-  }
-];
+// Section header component
+function SectionHeader({ badge, title, description, editMode, onEditTarget }) {
+  return (
+    <EditableWrap editMode={editMode} target={{ type: "sectionHeader" }} onEditTarget={onEditTarget} label="Edit section header">
+      <div className="text-center max-w-3xl mx-auto mb-12">
+        <span 
+          className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
+          style={{
+            background: "rgba(30, 58, 95, 0.08)",
+            color: palette.primary,
+          }}
+        >
+          {badge}
+        </span>
+        <h2 
+          className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
+          style={{ 
+            color: palette.dark,
+            fontFamily: "var(--font-display)",
+            letterSpacing: "-0.02em",
+            lineHeight: 1.1,
+          }}
+        >
+          {title}
+        </h2>
+        {description && (
+          <p 
+            className="text-lg leading-relaxed max-w-2xl mx-auto"
+            style={{ color: palette.gray }}
+          >
+            {description}
+          </p>
+        )}
+        <div 
+          className="w-16 h-1 rounded-full mx-auto mt-4"
+          style={{ background: palette.gradient2 }}
+        />
+      </div>
+    </EditableWrap>
+  );
+}
 
-export function Stats({ editMode = false, contentOverride = null, onEditTarget = () => {} }) {
-  const [statsData, setStatsData] = useState(() => mergeStatsSectionData(contentOverride || defaultStatsSectionData));
-  const [notices, setNotices] = useState(FALLBACK_NOTICES);
+function Stats({ editMode = false, contentOverride = null, onEditTarget = () => {} }) {
+  const [statsData, setStatsData] = useState(() =>
+    mergeStatsSectionData(contentOverride || defaultStatsSectionData)
+  );
+  const [notices, setNotices] = useState([]);
   const [selectedNotice, setSelectedNotice] = useState(null);
+  const storyImageUrl = String(statsData.story?.image || "").trim();
 
   useEffect(() => {
     if (contentOverride) {
       setStatsData(mergeStatsSectionData(contentOverride));
+      return;
     }
+    let alive = true;
+    const loadStatsContent = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/site-content/home`, { timeout: 10000 });
+        if (!alive) return;
+        const savedStats = res.data?.data?.content?.statsSection;
+        setStatsData(mergeStatsSectionData(savedStats || defaultStatsSectionData));
+      } catch (error) {
+        console.error("Stats content load error:", error);
+        if (alive) {
+          setStatsData(mergeStatsSectionData(defaultStatsSectionData));
+        }
+      }
+    };
+    loadStatsContent();
+    return () => { alive = false; };
   }, [contentOverride]);
+
+  useEffect(() => {
+    if (editMode) return undefined;
+    let alive = true;
+    fetch(`${API_URL}/api/notices`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!alive) return;
+        const noticeList = Array.isArray(data) ? data : data?.data || [];
+        setNotices(noticeList.slice(0, 3));
+      })
+      .catch((err) => console.log(err));
+    return () => { alive = false; };
+  }, [editMode]);
 
   return (
     <>
       {!editMode && <HomeAnnouncementPopup />}
+      
+      <section className="relative overflow-hidden py-16 md:py-24" style={{ background: palette.light }}>
+        {/* Decorative elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div 
+            className="absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-5"
+            style={{ background: palette.primary }}
+          />
+          <div 
+            className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-5"
+            style={{ background: palette.secondary }}
+          />
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.02]"
+            style={{ background: palette.accent }}
+          />
+        </div>
 
-      <section id="about" className="py-16 sm:py-24 bg-slate-50 relative overflow-hidden">
-        <div className="max-w-[1450px] mx-auto px-5 sm:px-8 relative z-10">
-          {/* Highlights Header */}
-          <div className="mb-14 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider text-red-600 bg-red-100/80 border border-red-200 mb-3">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{statsData.eyebrow}</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
-                {statsData.title}
-              </h2>
-            </div>
-            <p className="max-w-xl text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
-              {statsData.description}
-            </p>
+        <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-16 md:mb-24">
+            {statsData.stats.map((stat, i) => {
+              return (
+              <EditableWrap
+                key={`${stat.label}-${i}`}
+                editMode={editMode}
+                target={{ type: "statsCard", index: i }}
+                onEditTarget={onEditTarget}
+                label="Edit number card"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
+                  className="group relative overflow-hidden rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2"
+                  style={{
+                    background: `linear-gradient(160deg, ${stat.color}17 0%, ${palette.white} 60%)`,
+                    border: `1px solid ${stat.color}30`,
+                    boxShadow: `0 4px 22px ${stat.color}1f`,
+                  }}
+                >
+                  <div
+                    className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-[0.10] transition-transform duration-300 group-hover:scale-125"
+                    style={{ background: stat.color }}
+                  />
+                  <div 
+                    className="absolute top-0 left-0 right-0 h-1 transition-all duration-300 group-hover:h-1.5"
+                    style={{ background: stat.color }}
+                  />
+                  <div className="relative pt-2">
+                    <div 
+                      className="text-4xl md:text-5xl font-bold mb-1"
+                      style={{ color: palette.dark }}
+                    >
+                      <Counter target={stat.value} suffix={stat.suffix} editMode={editMode} />
+                    </div>
+                    <div className="text-sm font-semibold" style={{ color: palette.primary }}>
+                      {stat.label}
+                    </div>
+                    <div className="text-xs mt-1" style={{ color: palette.gray }}>
+                      {stat.note}
+                    </div>
+                  </div>
+                </motion.div>
+              </EditableWrap>
+              );
+            })}
           </div>
 
-          {/* Stats grid cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-            {statsData.stats.map((stat, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.08 }}
-                className="rounded-3xl p-7 bg-white border border-slate-200/90 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 group"
+          {/* Story Section - New Layout */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
+            className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center mb-16 md:mb-24"
+          >
+            <EditableWrap
+              editMode={editMode}
+              target={{ type: "storyImage" }}
+              onEditTarget={onEditTarget}
+              icon={Camera}
+              label="Change story image"
+            >
+              <div 
+                className="relative rounded-2xl overflow-hidden min-h-[300px] md:min-h-[400px]"
+                style={{
+                  background: palette.dark,
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
+                }}
               >
-                <div className="w-12 h-1.5 rounded-full mb-6 transition-all duration-300 group-hover:w-20" style={{ background: stat.color }} />
-                <div className="text-4xl sm:text-5xl font-black text-slate-950 mb-2 tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
-                  <Counter target={stat.value} suffix={stat.suffix} editMode={editMode} />
+                {storyImageUrl ? (
+                  <img
+                    key={storyImageUrl}
+                    src={storyImageUrl}
+                    alt="Baljagriti school"
+                    draggable={false}
+                    className="absolute inset-0"
+                    style={getStoryImageCropStyle(statsData.story)}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-gray-400">
+                    <Camera className="w-12 h-12 mb-2" />
+                    <div className="text-xs font-bold uppercase tracking-wider">Add Story Image</div>
+                  </div>
+                )}
+                <div 
+                  className="absolute inset-0"
+                  style={{
+                    background: "linear-gradient(to top, rgba(26,26,46,0.6) 0%, rgba(26,26,46,0.1) 50%, rgba(26,26,46,0.3) 100%)",
+                  }}
+                />
+                <EditableWrap
+                  editMode={editMode}
+                  target={{ type: "storyImageText" }}
+                  onEditTarget={onEditTarget}
+                  label="Edit image text"
+                  className="absolute inset-0"
+                >
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <div 
+                      className="backdrop-blur-sm rounded-xl p-4"
+                      style={{
+                        background: "rgba(255,255,255,0.12)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                      }}
+                    >
+                      <div className="text-white text-lg font-bold">
+                        {statsData.story.imageBottomTitle}
+                      </div>
+                      <div className="text-white/70 text-sm mt-1">
+                        {statsData.story.imageBottomDescription}
+                      </div>
+                    </div>
+                  </div>
+                </EditableWrap>
+              </div>
+            </EditableWrap>
+
+            <div>
+              <EditableWrap
+                editMode={editMode}
+                target={{ type: "storyText" }}
+                onEditTarget={onEditTarget}
+                label="Edit story text"
+              >
+                <div>
+                  <span 
+                    className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
+                    style={{
+                      background: "rgba(45, 106, 79, 0.1)",
+                      color: palette.secondary,
+                    }}
+                  >
+                    {statsData.story.badge}
+                  </span>
+                  <h2 
+                    className="text-3xl md:text-4xl font-bold mb-4"
+                    style={{ 
+                      color: palette.dark,
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    {statsData.story.title}
+                  </h2>
+                  <div className="space-y-4 mb-6">
+                    {statsData.story.paragraphs.map((text, index) => (
+                      <p 
+                        key={index} 
+                        className="text-base md:text-lg leading-relaxed"
+                        style={{ color: palette.gray }}
+                      >
+                        {text}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-                <div className="text-lg font-bold text-slate-800">{stat.label}</div>
-                <div className="text-sm text-slate-500 font-medium mt-1">{stat.note}</div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Story Card */}
-          <div className="grid lg:grid-cols-2 gap-10 items-center mb-24">
-            <div className="relative rounded-[2.5rem] overflow-hidden min-h-[350px] sm:min-h-[420px] bg-slate-900 border border-slate-200 shadow-2xl group">
-              <img
-                src={statsData.story.image}
-                alt="Smriti School"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6 p-6 rounded-3xl bg-slate-900/80 backdrop-blur-md border border-white/20 text-white">
-                <div className="text-xs font-bold uppercase text-red-400 mb-1">{statsData.story.imageTopTitle}</div>
-                <h4 className="text-xl font-black text-white">{statsData.story.imageBottomTitle}</h4>
-                <p className="text-xs text-slate-300 mt-1">{statsData.story.imageBottomDescription}</p>
-              </div>
-            </div>
-
-            <div>
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider text-blue-700 bg-blue-100/80 border border-blue-200 mb-4">
-                <ShieldCheck className="w-4 h-4" />
-                <span>{statsData.story.badge}</span>
-              </span>
-
-              <h3 className="text-3xl sm:text-4xl font-black text-slate-950 mb-6 leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-                {statsData.story.title}
-              </h3>
-
-              <div className="space-y-4 text-slate-600 text-base sm:text-lg leading-relaxed font-medium mb-8">
-                {statsData.story.paragraphs.map((p, idx) => (
-                  <p key={idx}>{p}</p>
-                ))}
-              </div>
-
-              <a
-                href={statsData.story.buttonLink}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-white bg-slate-950 hover:bg-blue-600 transition-all duration-300 shadow-lg hover:scale-105 text-base"
+              </EditableWrap>
+              <EditableWrap
+                editMode={editMode}
+                target={{ type: "storyButton" }}
+                onEditTarget={onEditTarget}
+                label="Edit story button"
+                className="inline-block"
               >
-                <span>{statsData.story.buttonText}</span>
-                <ArrowRight className="w-5 h-5 text-red-400" />
-              </a>
+                <Link
+                  to={statsData.story.buttonLink || "/about"}
+                  onClick={(e) => {
+                    if (editMode) {
+                      e.preventDefault();
+                      return;
+                    }
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 hover:gap-3 hover:-translate-y-0.5 group"
+                  style={{
+                    color: palette.white,
+                    background: palette.gradient1,
+                    boxShadow: "0 8px 24px rgba(30, 58, 95, 0.25)",
+                  }}
+                >
+                  {statsData.story.buttonText}
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </EditableWrap>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Excellence Section */}
-          <div className="mb-24">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <span className="text-xs font-black uppercase tracking-widest text-red-600 bg-red-50 px-4 py-1.5 rounded-full border border-red-200 inline-block mb-3">
-                Commitment to Success
-              </span>
-              <h3 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
-                {statsData.excellence.title}
-              </h3>
-              <p className="text-slate-600 text-base sm:text-lg mt-3">
-                {statsData.excellence.description}
-              </p>
-            </div>
+          {/* Excellence Cards - Redesigned */}
+          <div className="mb-16 md:mb-24">
+            <SectionHeader
+              badge="Academic Focus"
+              title={statsData.excellence.title}
+              description={statsData.excellence.description}
+              editMode={editMode}
+              onEditTarget={onEditTarget}
+            />
 
             <div className="grid md:grid-cols-3 gap-6">
-              {statsData.excellence.cards.map((card, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-3xl p-7 bg-white border border-slate-200 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mb-6 font-bold group-hover:scale-110 transition-transform">
-                    {idx === 0 ? <Award className="w-6 h-6" /> : idx === 1 ? <CheckCircle2 className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
-                  </div>
-                  <h4 className="text-xl font-bold text-slate-950 mb-3" style={{ fontFamily: "var(--font-display)" }}>
-                    {card.title}
-                  </h4>
-                  <p className="text-slate-600 text-sm leading-relaxed font-medium">
-                    {card.description}
-                  </p>
-                </div>
-              ))}
+              {statsData.excellence.cards.map((card, i) => {
+                const gradients = [
+                  "linear-gradient(135deg, #1E3A5F 0%, #2D6A4F 100%)",
+                  "linear-gradient(135deg, #2D6A4F 0%, #1E3A5F 100%)",
+                  "linear-gradient(135deg, #E9C46A 0%, #F4A261 100%)",
+                ];
+                const cardTints = [palette.primary, palette.secondary, palette.accent2];
+                const tint = cardTints[i % cardTints.length];
+                
+                return (
+                  <EditableWrap
+                    key={`${card.title}-${i}`}
+                    editMode={editMode}
+                    target={{ type: "excellenceCard", index: i }}
+                    onEditTarget={onEditTarget}
+                    label="Edit excellence card"
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: false, amount: 0.25 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      className="group relative overflow-hidden rounded-2xl p-6 md:p-8 transition-all duration-300 hover:-translate-y-2"
+                      style={{
+                        background: `linear-gradient(160deg, ${tint}14 0%, ${palette.white} 55%)`,
+                        border: `1px solid ${tint}2e`,
+                        boxShadow: `0 4px 22px ${tint}1a`,
+                      }}
+                    >
+                      <div
+                        className="absolute -bottom-12 -right-12 w-40 h-40 rounded-full border-[10px] opacity-[0.07] pointer-events-none transition-transform duration-500 group-hover:scale-110"
+                        style={{ borderColor: tint }}
+                      />
+                      <div 
+                        className="absolute top-0 left-0 right-0 h-1.5 transition-all duration-300 group-hover:h-2"
+                        style={{ background: gradients[i % gradients.length] }}
+                      />
+                      <div className="relative pt-4">
+                        <h3 
+                          className="text-xl font-bold mb-2"
+                          style={{ color: palette.dark }}
+                        >
+                          {card.title}
+                        </h3>
+                        <p className="text-sm leading-relaxed" style={{ color: palette.gray }}>
+                          {card.description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  </EditableWrap>
+                );
+              })}
             </div>
           </div>
 
-          {/* Notices Section */}
-          <div id="notices" className="rounded-3xl p-8 sm:p-12 bg-slate-900 text-white shadow-2xl relative overflow-hidden border border-slate-800">
-            <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6 border-b border-slate-800 pb-8">
-              <div>
-                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-400 bg-red-950/70 px-3.5 py-1.5 rounded-full border border-red-800/60 mb-3">
-                  <Bell className="w-3.5 h-3.5 text-red-400" />
-                  <span>Stay Informed</span>
+          {/* Notices Section - Redesigned */}
+          {!editMode && (
+            <div>
+              <div className="flex items-center justify-between gap-6 mb-8">
+                <div>
+                  <span 
+                    className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-3"
+                    style={{
+                      background: "rgba(233, 196, 106, 0.15)",
+                      color: palette.accent2,
+                    }}
+                  >
+                    School Notice Board
+                  </span>
+                  <h2 
+                    className="text-2xl md:text-3xl font-bold"
+                    style={{ color: palette.dark }}
+                  >
+                    {statsData.notices.title}
+                  </h2>
+                  <p className="text-sm" style={{ color: palette.gray }}>
+                    {statsData.notices.description}
+                  </p>
                 </div>
-                <h3 className="text-3xl sm:text-4xl font-black text-white" style={{ fontFamily: "var(--font-display)" }}>
-                  {statsData.notices.title}
-                </h3>
+                <Link
+                  to="/notices"
+                  className="hidden md:inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:gap-3"
+                  style={{
+                    color: palette.white,
+                    background: palette.gradient1,
+                    boxShadow: "0 8px 20px rgba(30, 58, 95, 0.2)",
+                  }}
+                >
+                  View All <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
-              <p className="text-slate-400 text-sm max-w-md">
-                {statsData.notices.description}
-              </p>
-            </div>
 
-            <div className="grid md:grid-cols-3 gap-6 relative z-10">
-              {notices.map((notice) => (
-                <div
-                  key={notice._id || notice.title}
-                  onClick={() => setSelectedNotice(notice)}
-                  className="rounded-2xl p-6 bg-slate-800/90 border border-slate-700/80 hover:border-red-500/60 transition-all cursor-pointer group hover:-translate-y-1"
+              {notices.length === 0 ? (
+                <div 
+                  className="rounded-2xl p-10 text-center"
+                  style={{
+                    background: palette.white,
+                    border: `2px dashed ${palette.lightGray}`,
+                  }}
                 >
-                  <div className="flex items-center justify-between text-xs text-blue-400 font-bold mb-3">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {notice.date}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-800/60 text-[10px] uppercase">
-                      {notice.category}
-                    </span>
-                  </div>
-                  <h4 className="text-lg font-bold text-white mb-2 group-hover:text-red-400 transition-colors line-clamp-2">
-                    {notice.title}
-                  </h4>
-                  <p className="text-slate-400 text-xs leading-relaxed line-clamp-3 mb-4">
-                    {notice.description}
+                  <Calendar className="w-12 h-12 mx-auto mb-3" style={{ color: palette.gray }} />
+                  <h3 className="text-xl font-bold mb-1" style={{ color: palette.dark }}>
+                    No notices available right now
+                  </h3>
+                  <p className="text-sm" style={{ color: palette.gray }}>
+                    New school notices will appear here once added from the admin panel.
                   </p>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-red-400 group-hover:translate-x-1 transition-transform">
-                    <span>Read Full Notice</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+              ) : (
+                <div className="space-y-4">
+                  {notices.map((notice, i) => {
+                    const noticeId = notice.id || notice._id;
+                    const noticeDate = notice.notice_date || notice.date;
+                    const hasPdf = Boolean(notice.pdf_url || notice.pdfUrl);
+                    const colors = [palette.primary, palette.secondary, palette.accent2];
 
-      {/* Selected Notice Modal */}
-      {selectedNotice && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="relative w-full max-w-2xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl text-slate-900 border border-slate-200">
-            <button
-              type="button"
-              onClick={() => setSelectedNotice(null)}
-              className="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 transition-colors"
+                    return (
+                      <motion.div
+                        key={noticeId || notice.title || i}
+                        initial={{ opacity: 0, y: 15 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: false, amount: 0.25 }}
+                        transition={{ duration: 0.4, delay: i * 0.06 }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setSelectedNotice(notice)}
+                          className="group w-full text-left transition-all duration-300 hover:-translate-y-0.5"
+                        >
+                          <div 
+                            className="rounded-2xl p-5 md:p-6 transition-all duration-300 group-hover:shadow-lg"
+                            style={{
+                              background: `linear-gradient(120deg, ${colors[i % colors.length]}12 0%, ${palette.white} 65%)`,
+                              border: `1px solid ${palette.lightGray}`,
+                              borderLeftWidth: "4px",
+                              borderLeftColor: colors[i % colors.length],
+                              boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
+                            }}
+                          >
+                            <div className="flex flex-col md:flex-row md:items-center gap-4">
+                              <div 
+                                className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
+                                style={{
+                                  background: colors[i % colors.length],
+                                  color: palette.white,
+                                }}
+                              >
+                                <Calendar className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                  <span 
+                                    className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                    style={{
+                                      background: "rgba(30, 58, 95, 0.08)",
+                                      color: palette.primary,
+                                    }}
+                                  >
+                                    {notice.category || "Notice"}
+                                  </span>
+                                  {hasPdf && (
+                                    <span 
+                                      className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                      style={{
+                                        background: "rgba(233, 196, 106, 0.2)",
+                                        color: palette.accent2,
+                                      }}
+                                    >
+                                      PDF
+                                    </span>
+                                  )}
+                                </div>
+                                <h3 
+                                  className="text-lg font-bold truncate"
+                                  style={{ color: palette.dark }}
+                                >
+                                  {notice.title || "School Notice"}
+                                </h3>
+                                <p className="text-sm line-clamp-1" style={{ color: palette.gray }}>
+                                  {getNoticeExcerpt(notice)}
+                                </p>
+                              </div>
+                              <div className="flex-shrink-0 text-right">
+                                <div className="text-xs font-semibold" style={{ color: palette.gray }}>
+                                  {formatNoticeDate(noticeDate)}
+                                </div>
+                                <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: palette.primary }} />
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Notice Modal */}
+        {selectedNotice && (
+          <div
+            className="fixed inset-0 z-[200] flex items-center justify-center px-4 py-5"
+            style={{
+              background: "rgba(26,26,46,0.8)",
+              backdropFilter: "blur(12px)",
+            }}
+            onClick={() => setSelectedNotice(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.2 }}
+              className="relative w-full max-w-3xl rounded-2xl overflow-hidden"
+              style={{
+                background: palette.white,
+                boxShadow: "0 40px 100px rgba(0,0,0,0.3)",
+              }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 bg-red-50 px-3 py-1 rounded-full mb-3">
-              <FileText className="w-4 h-4" />
-              <span>Smriti School Notice</span>
-            </div>
-
-            <h3 className="text-2xl font-black text-slate-900 mb-2">
-              {selectedNotice.title}
-            </h3>
-
-            <p className="text-xs font-bold text-slate-400 mb-6">
-              Published: {selectedNotice.date}
-            </p>
-
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 mb-6 text-sm text-slate-700 leading-relaxed">
-              {selectedNotice.description}
-            </div>
-
-            <PdfNoticePreview title={selectedNotice.title} />
-
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setSelectedNotice(null)}
-                className="px-6 py-2.5 rounded-xl font-bold bg-slate-950 text-white hover:bg-blue-600 transition-colors text-sm"
-              >
-                Close Notice
-              </button>
-            </div>
+              <div 
+                className="h-1.5"
+                style={{ background: palette.gradient1 }}
+              />
+              <div className="p-6 md:p-8">
+                <button
+                  type="button"
+                  onClick={() => setSelectedNotice(null)}
+                  className="absolute right-4 top-4 z-20 w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105"
+                  style={{
+                    background: palette.lightGray,
+                    color: palette.dark,
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <h2 
+                  className="text-2xl md:text-3xl font-bold mb-3 pr-8"
+                  style={{ color: palette.dark }}
+                >
+                  {selectedNotice.title || "School Notice"}
+                </h2>
+                <div className="flex items-center gap-3 mb-4">
+                  <span 
+                    className="px-3 py-1 rounded-full text-xs font-semibold"
+                    style={{
+                      background: "rgba(30, 58, 95, 0.08)",
+                      color: palette.primary,
+                    }}
+                  >
+                    {selectedNotice.category || "Notice"}
+                  </span>
+                  <span className="text-xs" style={{ color: palette.gray }}>
+                    {formatNoticeDate(selectedNotice.notice_date || selectedNotice.date)}
+                  </span>
+                </div>
+                <div 
+                  className="rounded-xl p-5"
+                  style={{
+                    background: palette.light,
+                    border: `1px solid ${palette.lightGray}`,
+                  }}
+                >
+                  <p className="text-base leading-relaxed whitespace-pre-line" style={{ color: palette.dark }}>
+                    {selectedNotice.description || selectedNotice.content || "No description added for this notice."}
+                  </p>
+                </div>
+                {(selectedNotice.pdf_url || selectedNotice.pdfUrl) && (
+                  <div className="mt-4">
+                    <PdfNoticePreview
+                      fileUrl={selectedNotice.pdf_url || selectedNotice.pdfUrl}
+                      title={selectedNotice.title || "Notice PDF"}
+                    />
+                  </div>
+                )}
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </section>
     </>
   );
 }
 
+export { Stats };
 export default Stats;

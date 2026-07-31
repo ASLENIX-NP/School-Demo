@@ -1,2 +1,0 @@
-import { Link } from "react-router-dom"; import AdminLayout, { PageCard } from "./AdminLayout"; import { students } from "./data"; import { StudentTable } from "./Dashboard";
-export default function Students(){return <AdminLayout title="Students" subtitle="Manage enrolment and student records."><PageCard><div className="toolbar"><input className="search" placeholder="Search by name or admission no."/><Link className="button" to="/students/add">+ Add student</Link></div><StudentTable rows={students}/></PageCard></AdminLayout>}
