@@ -41,7 +41,7 @@ const palette = {
   gradient3: "linear-gradient(135deg, #2D6A4F 0%, #1E3A5F 100%)",
 };
 
-const API_URL = "https://school-website-backend-ixx2.onrender.com";
+const API_URL = "http://localhost:5000";
 
 export const defaultStatsSectionData = {
   eyebrow: "Our Impact",
@@ -344,20 +344,41 @@ function Stats({ editMode = false, contentOverride = null, onEditTarget = () => 
       return;
     }
     let alive = true;
-    const loadStatsContent = async () => {
+    const loadStatistics = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/site-content/home`, { timeout: 10000 });
-        if (!alive) return;
-        const savedStats = res.data?.data?.content?.statsSection;
-        setStatsData(mergeStatsSectionData(savedStats || defaultStatsSectionData));
-      } catch (error) {
-        console.error("Stats content load error:", error);
-        if (alive) {
-          setStatsData(mergeStatsSectionData(defaultStatsSectionData));
+        const res = await axios.get(`${API_URL}/api/statistics`);
+    
+        if (res.data.success && res.data.data.length > 0) {
+          const stats = res.data.data[0];
+    
+          setStatsData((prev) => ({
+            ...prev,
+            stats: [
+              {
+                ...prev.stats[0],
+                value: stats.students,
+              },
+              {
+                ...prev.stats[1],
+                value: stats.teachers,
+              },
+              {
+                ...prev.stats[2],
+                value: stats.classes,
+              },
+              {
+                ...prev.stats[3],
+                value: stats.achievements,
+              },
+            ],
+          }));
         }
+      } catch (err) {
+        console.log(err);
       }
     };
-    loadStatsContent();
+    
+    loadStatistics();
     return () => { alive = false; };
   }, [contentOverride]);
 

@@ -568,15 +568,19 @@ const styles = {
   heroBackground: {
     position: "absolute",
     inset: 0,
-    background: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
+    background:
+      "linear-gradient(135deg,#1E3A5F 0%,#29597A 35%,#234B69 70%,#16324C 100%)",
     borderRadius: "0 0 60px 60px",
-  },
-  heroOverlay: {
+},
+heroOverlay: {
     position: "absolute",
     inset: 0,
-    background: "radial-gradient(circle at 70% 30%, rgba(37, 99, 235, 0.15), transparent 60%)",
+    background: `
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.08), transparent 35%),
+        radial-gradient(circle at 80% 40%, rgba(255,255,255,.06), transparent 45%)
+    `,
     borderRadius: "0 0 60px 60px",
-  },
+},
   heroContent: {
     position: "relative",
     maxWidth: "1200px",

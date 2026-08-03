@@ -43,7 +43,7 @@ const palette = {
   gradient3: "linear-gradient(135deg, #2D6A4F 0%, #1E3A5F 100%)",
 };
 
-const API_URL = "https://school-website-backend-ixx2.onrender.com";
+const API_URL = "http://localhost:5000";
 
 // ---------------------------------------------------------------------
 // Default content
@@ -403,10 +403,35 @@ export default function About({
     let alive = true;
     const loadAboutContent = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/site-content/about`, { timeout: 10000 });
+        const res = await axios.get(`${API_URL}/api/about`);
         if (!alive) return;
-        const saved = res.data?.data?.content || {};
-        setContent(mergeAboutContent(saved));
+        const about = res.data.data[0];
+
+        setContent({
+          ...defaultAboutContent,
+        
+          storyTitle: about.title,
+          storyParagraphs: [about.description],
+        
+          missionVision: [
+            {
+              id: 1,
+              icon: "target",
+              title: "Our Mission",
+              desc: about.mission,
+              visible: true,
+            },
+            {
+              id: 2,
+              icon: "eye",
+              title: "Our Vision",
+              desc: about.vision,
+              visible: true,
+            },
+          ],
+        
+          storyImageUrl: about.image || "",
+        });
       } catch (error) {
         console.error("About content load error:", error);
         if (alive) setContent(mergeAboutContent(defaultAboutContent));
