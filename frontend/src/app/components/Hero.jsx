@@ -36,13 +36,12 @@ const palette = {
 // Hardcoded St. Mary's style school image
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80";
 
-const API_URL = "https://school-website-backend-ixx2.onrender.com";
+const API_URL = "http://localhost:5000";
 
 export const defaultHeroData = {
   badge: "Wisdom is Divine",
   schoolName: "SMRITI SCHOOL",
-  titleLine1: "Smriti",
-  titleLine2: "School",
+  titleLine1: "Smriti School",
   establishedYear: "ESTABLISHED 2046 BS",
   subtitle: "Basudev Marga, Hetauda-2",
   description:
@@ -132,10 +131,24 @@ function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {
     let alive = true;
     const loadHeroContent = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/site-content/home`, { timeout: 10000 });
+        const res = await axios.get(`${API_URL}/api/hero`);
         if (!alive) return;
-        const savedHero = res.data?.data?.content?.hero;
-        setHeroData(mergeHeroData(savedHero || defaultHeroData));
+        const hero = res.data.data[0];
+
+        setHeroData({
+          ...defaultHeroData,
+        
+          titleLine1: hero.title,
+        
+          subtitle: hero.subtitle,
+          description: hero.description,
+        
+          primaryButtonText: hero.button_text,
+          primaryButtonLink: hero.button_link,
+          
+          image: hero.hero_image || DEFAULT_HERO_IMAGE,
+          images: [hero.hero_image || DEFAULT_HERO_IMAGE],
+        });
       } catch (error) {
         console.error("Hero content load error:", error);
         if (alive) {
@@ -239,27 +252,19 @@ function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {
                 />
               </div>
               
-              <h1 
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05]"
-                style={{
-                  color: palette.white,
-                  fontFamily: "var(--font-display)",
-                  letterSpacing: "-0.02em",
-                  textShadow: "0 2px 20px rgba(0,0,0,0.2)",
-                }}
-              >
-                <span>{heroData.titleLine1 || "Smriti"}</span>
-                <br />
-                <span 
-                  className="bg-clip-text text-transparent"
-                  style={{
-                    background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 40%, ${palette.gold} 100%)`,
-                    WebkitBackgroundClip: "text",
-                  }}
-                >
-                  {heroData.titleLine2 || "School"}
-                </span>
-              </h1>
+              <h1
+  className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05]"
+  style={{
+    background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 40%, ${palette.gold} 100%)`,
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    fontFamily: "var(--font-display)",
+    letterSpacing: "-0.02em",
+    textShadow: "0 2px 20px rgba(0,0,0,0.2)",
+  }}
+>
+  {heroData.titleLine1}
+</h1>
 
               {/* Established Year */}
               <div className="flex items-center gap-3 mt-3">

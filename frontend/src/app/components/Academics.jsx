@@ -23,20 +23,20 @@ import {
   Lightbulb,
 } from "lucide-react";
 
-// ============ LIGHTER, MORE VIBRANT COLOR PALETTE ============
+// ============ DARK THEME COLOR PALETTE ============
 const theme = {
-  primary: "#1A5276", // Lighter navy blue
-  secondary: "#1E8449", // Vibrant green
-  accent1: "#D4AC0D", // Bright gold
-  accent2: "#E67E22", // Warm orange
-  accent3: "#7D3C98", // Purple
-  accent4: "#2E86C1", // Sky blue
+  primary: "#1A5276",
+  secondary: "#1E8449",
+  accent1: "#D4AC0D",
+  accent2: "#E67E22",
+  accent3: "#7D3C98",
+  accent4: "#2E86C1",
   light: "#F8F6F0",
-  dark: "#1C2833",
+  dark: "#0A1628",
   gray: "#5D6D7E",
   lightGray: "#EAE5DE",
   white: "#FFFFFF",
-  gradient1: "linear-gradient(135deg, #1A5276 0%, #1E8449 100%)",
+  gradient1: "linear-gradient(135deg, #0A1628 0%, #1A5276 100%)",
   gradient2: "linear-gradient(135deg, #D4AC0D 0%, #E67E22 100%)",
   gradient3: "linear-gradient(135deg, #7D3C98 0%, #2E86C1 100%)",
   gradient4: "linear-gradient(135deg, #1E8449 0%, #2E86C1 100%)",
@@ -56,10 +56,10 @@ const defaultAcademicsData = {
       "At our institution, we believe education extends beyond textbooks. Our comprehensive academic framework integrates intellectual rigor, creative exploration, ethical grounding, and real-world readiness from early childhood through secondary education.",
   },
   stats: [
-    { value: "4500", suffix: "+", label: "Active Learners", color: theme.primary },
-    { value: "280", suffix: "+", label: "Dedicated Educators", color: theme.secondary },
-    { value: "40", suffix: "+", label: "Years of Impact", color: theme.accent1 },
-    { value: "99", suffix: "%", label: "Excellence Rate", color: theme.accent2 },
+    { value: "4500", suffix: "+", label: "Active Learners", color: theme.accent1 },
+    { value: "280", suffix: "+", label: "Dedicated Educators", color: theme.accent2 },
+    { value: "40", suffix: "+", label: "Years of Impact", color: theme.secondary },
+    { value: "99", suffix: "%", label: "Excellence Rate", color: theme.primary },
   ],
   programs: [
     {
@@ -195,7 +195,6 @@ const AcademicsPage = () => {
   const statsRef = useRef(null);
   const isStatsInView = useInView(statsRef, { once: true, amount: 0.3 });
 
-  // Counter animation
   const Counter = ({ target, suffix, duration = 2000 }) => {
     const [count, setCount] = useState(0);
     const ref = useRef(null);
@@ -230,7 +229,7 @@ const AcademicsPage = () => {
 
   return (
     <div className="academics-page" style={styles.pageContainer}>
-      {/* ===== HERO SECTION - LIGHTER ===== */}
+      {/* ===== HERO SECTION - DARK LIKE GALLERY ===== */}
       <section style={styles.heroSection}>
         <div style={styles.heroBackground}>
           <div style={styles.heroOverlay} />
@@ -244,7 +243,13 @@ const AcademicsPage = () => {
             transition={{ duration: 0.7 }}
             style={styles.heroInner}
           >
-            <span style={styles.heroBadge}>{data.hero.badge}</span>
+            <motion.div
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              style={styles.heroBadge}
+            >
+              {data.hero.badge}
+            </motion.div>
             <h1 style={styles.heroTitle}>
               <span style={styles.heroTitleLight}>{data.hero.title.split(" ").slice(0, 2).join(" ")}</span>
               <br />
@@ -267,7 +272,7 @@ const AcademicsPage = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={isStatsInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              style={styles.statCard}
+              style={{ ...styles.statCard, borderTopColor: stat.color }}
             >
               <div style={{ ...styles.statBar, background: stat.color }} />
               <div style={{ ...styles.statValue, color: stat.color }}>
@@ -355,7 +360,7 @@ const AcademicsPage = () => {
         </div>
       </section>
 
-      {/* ===== ACHIEVEMENTS SECTION - LIGHTER ===== */}
+      {/* ===== ACHIEVEMENTS SECTION ===== */}
       <section style={styles.achievementsSection}>
         <div style={styles.achievementsContainer}>
           <div style={styles.sectionHeader}>
@@ -447,17 +452,17 @@ const styles = {
   heroBackground: {
     position: "absolute",
     inset: 0,
-    background: "linear-gradient(135deg, #1A5276 0%, #1E8449 50%, #2E86C1 100%)",
+    background: "linear-gradient(135deg, #0A1628 0%, #1A5276 50%, #0A1628 100%)",
   },
   heroOverlay: {
     position: "absolute",
     inset: 0,
-    background: "radial-gradient(circle at 30% 50%, rgba(212, 172, 13, 0.2), transparent 60%)",
+    background: "radial-gradient(circle at 30% 50%, rgba(212, 172, 13, 0.15), transparent 60%)",
   },
   heroPattern: {
     position: "absolute",
     inset: 0,
-    backgroundImage: `radial-gradient(circle at 20px 20px, rgba(255,255,255,0.05) 1px, transparent 1px)`,
+    backgroundImage: `radial-gradient(circle at 20px 20px, rgba(255,255,255,0.04) 1px, transparent 1px)`,
     backgroundSize: "40px 40px",
   },
   heroContent: {
@@ -479,9 +484,9 @@ const styles = {
     fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: "0.15em",
-    background: "rgba(255,255,255,0.12)",
-    color: "#FAD7A0",
-    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(212, 172, 13, 0.15)",
+    color: theme.accent1,
+    border: "1px solid rgba(212, 172, 13, 0.3)",
     marginBottom: "24px",
   },
   heroTitle: {
@@ -497,7 +502,7 @@ const styles = {
     opacity: 0.85,
   },
   heroTitleHighlight: {
-    background: "linear-gradient(135deg, #FAD7A0 0%, #F5B041 100%)",
+    background: "linear-gradient(135deg, #D4AC0D 0%, #E67E22 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
   },
@@ -510,7 +515,7 @@ const styles = {
   },
   heroDescription: {
     fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
-    color: "rgba(255,255,255,0.75)",
+    color: "rgba(255,255,255,0.7)",
     lineHeight: 1.8,
     maxWidth: "560px",
     marginBottom: "32px",
@@ -533,6 +538,7 @@ const styles = {
     textAlign: "center",
     background: "#F8F6F0",
     border: "1px solid rgba(0,0,0,0.04)",
+    borderTop: "3px solid",
     transition: "all 0.3s ease",
     cursor: "default",
   },

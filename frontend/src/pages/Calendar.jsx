@@ -1,5 +1,6 @@
+// Calendar.jsx
 import { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CalendarDays,
   ChevronLeft,
@@ -8,6 +9,9 @@ import {
   Pencil,
   Sparkles,
   X,
+  FileText,
+  Bell,
+  Award,
 } from "lucide-react";
 
 const colors = {
@@ -522,7 +526,7 @@ function LegendItem({ type }) {
   const style = calendarTypeStyles[type] || calendarTypeStyles.notice;
 
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-white/70 px-3 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-100">
+    <div className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-600 border border-slate-100">
       <span className="h-2.5 w-2.5 rounded-full" style={{ background: style.color }} />
       {style.labelNp || style.label}
     </div>
@@ -548,22 +552,22 @@ function CalendarCell({ cell, todayKey, selectedDateKey, eventMap, saturdayHolid
         onSelect(cell.adKey);
         if (editMode) onAdminDateClick(cell);
       }}
-      className="relative h-12 rounded-2xl p-1 text-center transition-all hover:-translate-y-0.5 md:h-14"
+      className="relative h-12 rounded-2xl p-1 text-center transition-all hover:-translate-y-0.5 hover:shadow-md md:h-14"
       style={{
         background: isSelected
-          ? colors.dark
+          ? "#1A5276"
           : isSaturdayHoliday || hasHoliday
           ? "rgba(215,25,32,0.08)"
           : topEvents.length > 0
-          ? "rgba(56,189,248,0.08)"
+          ? "rgba(37, 99, 235, 0.06)"
           : "rgba(15,23,42,0.035)",
-        color: isSelected ? "#FFFFFF" : isSaturdayHoliday || hasHoliday ? colors.red : colors.dark,
+        color: isSelected ? "#FFFFFF" : isSaturdayHoliday || hasHoliday ? colors.red : "#0F172A",
         border: isToday
-          ? `2px solid ${colors.green}`
+          ? `2px solid #1E8449`
           : isSelected
-          ? `2px solid ${colors.dark}`
+          ? `2px solid #1A5276`
           : editMode
-          ? "1px dashed rgba(56,189,248,0.35)"
+          ? "1px dashed rgba(37,99,235,0.35)"
           : "1px solid rgba(15,23,42,0.06)",
         cursor: editMode ? "copy" : "pointer",
       }}
@@ -584,7 +588,7 @@ function CalendarCell({ cell, todayKey, selectedDateKey, eventMap, saturdayHolid
             key={event.id}
             className="h-1.5 w-1.5 rounded-full"
             style={{
-              background: isSelected ? "#FFFFFF" : event.type === "holiday" ? colors.red : colors.blue,
+              background: isSelected ? "#FFFFFF" : event.type === "holiday" ? colors.red : "#2563EB",
             }}
           />
         ))}
@@ -598,14 +602,14 @@ function EventPill({ event }) {
 
   return (
     <div
-      className="rounded-2xl px-4 py-3"
+      className="rounded-2xl px-4 py-3 transition-all hover:-translate-y-0.5"
       style={{
         background: style.background,
         color: style.color,
         border: `1px solid ${style.border}`,
       }}
     >
-      <div className="text-xs font-black uppercase tracking-[0.12em] opacity-80">
+      <div className="text-xs font-bold uppercase tracking-[0.12em] opacity-80">
         {style.labelNp || style.label}
       </div>
       <div className="text-base font-black text-slate-950">{event.title}</div>
@@ -744,15 +748,24 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
       <section
         className="min-h-screen pt-24 pb-12 lg:pt-28 relative overflow-hidden"
         style={{
-          background: `
-            radial-gradient(circle at top right, rgba(75,46,131,0.12), transparent 34%),
-            radial-gradient(circle at bottom left, rgba(22,138,58,0.10), transparent 32%),
-            linear-gradient(180deg, #FFF8EE 0%, #F8FAFC 58%, #F1ECFF 100%)
-          `,
+          background: "#F8FAFC",
         }}
       >
-        <div className="absolute top-24 right-10 h-72 w-72 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(75,46,131,0.10), transparent 70%)", filter: "blur(10px)" }} />
-        <div className="absolute bottom-16 left-8 h-72 w-72 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(22,138,58,0.09), transparent 70%)", filter: "blur(10px)" }} />
+        {/* Decorative elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div 
+            className="absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-[0.04]"
+            style={{ background: "#1A5276" }}
+          />
+          <div 
+            className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-[0.04]"
+            style={{ background: "#1E8449" }}
+          />
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.02]"
+            style={{ background: "#D4AC0D" }}
+          />
+        </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <motion.div
@@ -762,7 +775,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
             className={editMode ? "mb-6 relative group rounded-[28px] border border-dashed border-sky-300/70 p-4 -m-4" : "mb-6"}
           >
             <span
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-[0.14em] mb-4"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] mb-4"
               style={{
                 background: "rgba(215,25,32,0.08)",
                 color: colors.red,
@@ -791,23 +804,39 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                 </p>
               </div>
 
+              {/* Stats Card - Matching Stats Page Style */}
               <div
-                className="rounded-[24px] p-4"
+                className="rounded-2xl p-5"
                 style={{
-                  background: "linear-gradient(145deg, rgba(255,255,255,0.92), rgba(255,255,255,0.72))",
-                  border: "1px solid rgba(15,23,42,0.08)",
-                  boxShadow: "0 18px 46px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.9)",
-                  backdropFilter: "blur(18px)",
+                  background: "linear-gradient(160deg, rgba(26,82,118,0.06) 0%, #FFFFFF 60%)",
+                  border: "1px solid rgba(26,82,118,0.12)",
+                  boxShadow: "0 4px 22px rgba(26,82,118,0.06)",
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 rounded-2xl flex items-center justify-center" style={{ background: "rgba(56,189,248,0.12)", color: colors.blue }}>
-                    <CalendarDays className="h-5 w-5" />
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="text-center">
+                    <div className="text-2xl font-black text-slate-950">
+                      {content.events?.length || 0}
+                    </div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+                      Events
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Today</div>
-                    <div className="text-lg font-black text-slate-950">{formatBsFullDate(todayBs)}</div>
-                    <div className="text-xs font-bold text-slate-400">{today.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</div>
+                  <div className="text-center">
+                    <div className="text-2xl font-black text-slate-950">
+                      {content.events?.filter(e => e.type === "holiday").length || 0}
+                    </div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+                      Holidays
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-black text-slate-950">
+                      {notices.length}
+                    </div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+                      Notices
+                    </div>
                   </div>
                 </div>
               </div>
@@ -845,12 +874,11 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.08 }}
-              className="rounded-[28px] overflow-hidden"
+              className="rounded-2xl overflow-hidden"
               style={{
-                background: "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.80))",
-                border: "1px solid rgba(15,23,42,0.08)",
-                boxShadow: "0 24px 70px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.9)",
-                backdropFilter: "blur(18px)",
+                background: "#FFFFFF",
+                border: "1px solid rgba(15,23,42,0.06)",
+                boxShadow: "0 4px 22px rgba(15,23,42,0.04)",
               }}
             >
               <div className="p-4 md:p-5">
@@ -858,8 +886,8 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                   <button
                     type="button"
                     onClick={() => changeMonth(-1)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-2xl font-black transition-all hover:-translate-y-0.5"
-                    style={{ background: "rgba(15,23,42,0.05)", color: colors.dark }}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl font-black transition-all hover:-translate-y-0.5 hover:bg-slate-100"
+                    style={{ background: "rgba(15,23,42,0.04)", color: colors.dark }}
                     aria-label="Previous BS month"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -872,14 +900,14 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                     >
                       {monthName.np} {toNepaliNumber(calendarMonth.year)}
                     </div>
-                    <div className="mt-1 text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+                    <div className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
                       {monthName.en} · {formatAdMonthRange(firstAdDate, lastAdDate)}
                     </div>
                     <button
                       type="button"
                       onClick={goToday}
-                      className="mt-1 rounded-full px-3 py-0.5 text-[11px] font-black uppercase tracking-[0.14em]"
-                      style={{ color: colors.green, background: "rgba(22,138,58,0.08)", border: "1px solid rgba(22,138,58,0.16)" }}
+                      className="mt-1 rounded-full px-3 py-0.5 text-[11px] font-bold uppercase tracking-[0.14em]"
+                      style={{ color: "#1E8449", background: "rgba(30,132,73,0.08)", border: "1px solid rgba(30,132,73,0.16)" }}
                     >
                       Today
                     </button>
@@ -888,15 +916,15 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                   <button
                     type="button"
                     onClick={() => changeMonth(1)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-2xl font-black transition-all hover:-translate-y-0.5"
-                    style={{ background: "rgba(15,23,42,0.05)", color: colors.dark }}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl font-black transition-all hover:-translate-y-0.5 hover:bg-slate-100"
+                    style={{ background: "rgba(15,23,42,0.04)", color: colors.dark }}
                     aria-label="Next BS month"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-black uppercase tracking-[0.08em] text-slate-400">
+                <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">
                   {BS_WEEK_DAYS.map((day, index) => (
                     <div key={day} className="py-1" style={{ color: index === 6 ? colors.red : undefined }}>
                       {day}
@@ -923,6 +951,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                 <div className="mt-4 flex flex-wrap gap-2">
                   <LegendItem type="holiday" />
                   <LegendItem type="event" />
+                  <LegendItem type="workingDay" />
                 </div>
               </div>
             </motion.div>
@@ -935,20 +964,20 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
               className="lg:sticky lg:top-28 space-y-4"
             >
               <div
-                className="rounded-[24px] p-4"
+                className="rounded-2xl p-4"
                 style={{
-                  background: "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.80))",
-                  border: "1px solid rgba(15,23,42,0.08)",
-                  boxShadow: "0 18px 46px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.9)",
+                  background: "#FFFFFF",
+                  border: "1px solid rgba(15,23,42,0.06)",
+                  boxShadow: "0 4px 22px rgba(15,23,42,0.04)",
                 }}
               >
-                <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Selected Date</div>
+                <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Selected Date</div>
                 <div className="mt-2 text-lg font-black text-slate-950">{formatCalendarDate(selectedDateKey)}</div>
 
                 <div className="mt-3 space-y-2">
                   {isSelectedSaturdayHoliday && (
                     <div
-                      className="rounded-2xl px-4 py-3 text-sm font-black"
+                      className="rounded-xl px-4 py-3 text-sm font-bold"
                       style={{
                         background: calendarTypeStyles.holiday.background,
                         color: calendarTypeStyles.holiday.color,
@@ -961,7 +990,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
 
                   {hasWorkingDay && (
                     <div
-                      className="rounded-2xl px-4 py-3 text-sm font-black"
+                      className="rounded-xl px-4 py-3 text-sm font-bold"
                       style={{
                         background: calendarTypeStyles.workingDay.background,
                         color: calendarTypeStyles.workingDay.color,
@@ -979,7 +1008,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                   ))}
 
                   {!isSelectedSaturdayHoliday && !hasWorkingDay && visibleSelectedEvents.length === 0 && (
-                    <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-400">
+                    <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-400">
                       No school event added for this date.
                     </div>
                   )}
@@ -987,14 +1016,14 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
               </div>
 
               <div
-                className="rounded-[24px] p-4"
+                className="rounded-2xl p-4"
                 style={{
-                  background: "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.80))",
-                  border: "1px solid rgba(15,23,42,0.08)",
-                  boxShadow: "0 18px 46px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.9)",
+                  background: "#FFFFFF",
+                  border: "1px solid rgba(15,23,42,0.06)",
+                  boxShadow: "0 4px 22px rgba(15,23,42,0.04)",
                 }}
               >
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-slate-400">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
                   <Clock className="h-4 w-4" />
                   Upcoming Dates
                 </div>
@@ -1012,19 +1041,19 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                             setSelectedDateKey(event.dateKey);
                             setSelectedEvent(event);
                           }}
-                          className="flex w-full gap-3 rounded-2xl bg-slate-50 p-3 text-left transition-all hover:-translate-y-0.5"
+                          className="flex w-full gap-3 rounded-xl bg-slate-50 p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm"
                         >
                           <div className="mt-1 h-3 w-3 shrink-0 rounded-full" style={{ background: style.color }} />
                           <div className="min-w-0">
                             <div className="text-xs font-bold text-slate-400">{formatCalendarDate(event.dateKey)}</div>
-                            <div className="truncate text-sm font-black text-slate-900">{event.title}</div>
+                            <div className="truncate text-sm font-bold text-slate-900">{event.title}</div>
                             <div className="text-xs font-bold" style={{ color: style.color }}>{style.label}</div>
                           </div>
                         </button>
                       );
                     })
                   ) : (
-                    <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-400">
+                    <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-400">
                       No upcoming events added yet.
                     </div>
                   )}
@@ -1049,7 +1078,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
               initial={{ opacity: 0, y: 20, scale: 0.94 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.96 }}
-              className="w-full max-w-lg rounded-[30px] bg-white overflow-hidden"
+              className="w-full max-w-lg rounded-2xl bg-white overflow-hidden"
               style={{ boxShadow: "0 42px 110px rgba(0,0,0,0.32)", border: "1px solid rgba(255,255,255,0.75)" }}
               onClick={(event) => event.stopPropagation()}
             >
@@ -1057,10 +1086,10 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
               <div className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{formatCalendarDate(selectedEvent.dateKey)}</div>
+                    <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{formatCalendarDate(selectedEvent.dateKey)}</div>
                     <h3 className="mt-2 text-2xl font-black text-slate-950">{selectedEvent.title}</h3>
                   </div>
-                  <button type="button" onClick={() => setSelectedEvent(null)} className="h-10 w-10 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                  <button type="button" onClick={() => setSelectedEvent(null)} className="h-10 w-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-all">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
