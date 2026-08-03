@@ -137,11 +137,6 @@ export function Navbar({
   const visibleLinks = navbarContent.links.filter((link) => link.visible);
   const logoSrc = navbarContent.logoUrl || defaultSchoolLogo;
 
-  const quickLinks = ["home", "academics", "notices"]
-    .map((id) => navbarContent.links.find((link) => link.id === id))
-    .filter(Boolean)
-    .filter((link) => link.visible !== false);
-
   return (
     <>
       <motion.header
@@ -310,29 +305,7 @@ export function Navbar({
             </div>
           )}
 
-          <div className="xl:hidden flex items-center gap-1.5 ml-auto mr-2">
-            {quickLinks.map((link) => (
-              <Link
-                key={link.id}
-                to={link.href || "/"}
-                onClick={(e) => {
-                  if (editMode) {
-                    selectEditTarget(e, { type: "link", id: link.id });
-                  } else {
-                    setOpen(false);
-                  }
-                }}
-                className="px-2.5 py-2 rounded-lg text-[11px] font-semibold leading-none transition-all"
-                style={{
-                  color: isActive(link.href) ? palette.navy : "rgba(255,255,255,0.85)",
-                  background: isActive(link.href) ? palette.gold : "rgba(255,255,255,0.06)",
-                  border: `1px solid ${isActive(link.href) ? palette.gold : "rgba(255,255,255,0.12)"}`,
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+
 
           <button
             type="button"

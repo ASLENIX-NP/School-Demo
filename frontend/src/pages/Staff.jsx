@@ -493,7 +493,7 @@ export function Staff({
 
   return (
     <section className="min-h-screen pt-28 pb-24 bg-slate-50 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 relative z-10">
         {/* Header Section - Clean & Reduced Font Size */}
         <EditableWrap
           editMode={editMode}

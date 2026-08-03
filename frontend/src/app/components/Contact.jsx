@@ -225,13 +225,13 @@ export function Contact({ contentOverride = null }) {
 
   return (
     <section className="min-h-screen bg-slate-50 pt-28 pb-24 relative overflow-hidden">
-      <div className="mx-auto max-w-7xl px-6 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 relative z-10">
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center max-w-3xl mx-auto mb-14"
+          className="text-left max-w-3xl mb-14"
         >
           <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#0A1628] text-white shadow-sm mb-4">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -239,7 +239,7 @@ export function Contact({ contentOverride = null }) {
           </span>
 
           <h1 className="text-4xl sm:text-5xl font-extrabold text-[#0A1628] tracking-tight leading-[1.12]">
-            {content.title || "Contact Baljagriti School"}
+            {content.title || "Contact Smriti School"}
           </h1>
 
           <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">

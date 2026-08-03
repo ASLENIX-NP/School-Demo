@@ -447,7 +447,7 @@ function AchievementsSection() {
 
   return (
     <section className="py-16 px-6" style={{ background: palette.light }}>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
         <div className="text-center mb-12">
           <span className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4" style={{ background: "rgba(45,106,79,0.15)", color: palette.secondary }}>
             <Trophy className="w-4 h-4 inline mr-2" />
@@ -753,7 +753,7 @@ function Gallery() {
 
       {/* ===== MAIN GALLERY ===== */}
       <section className="py-16 px-6" style={{ background: palette.light }} id="gallery-grid">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4" style={{ background: "rgba(30,58,95,0.08)", color: palette.primary }}>
               <Camera className="w-4 h-4 inline mr-2" />

@@ -294,7 +294,7 @@ export default function Blogs() {
           }}
         />
       </div>
-      <div className="mx-auto max-w-7xl px-6 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 relative z-10">
         {/* Header / Hero Section matching Image 1 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

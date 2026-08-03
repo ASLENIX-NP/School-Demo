@@ -303,7 +303,7 @@ function EditableWrap({
   editMode,
   target,
   onEditTarget,
-  onDeleteTarget = () => {},
+  onDeleteTarget = () => { },
   icon = Pencil,
   label = "Edit",
   canDelete = false,
@@ -388,9 +388,9 @@ function DecorativeBackdrop() {
 export default function About({
   editMode = false,
   contentOverride = null,
-  onEditTarget = () => {},
-  onDeleteTarget = () => {},
-  onAddTarget = () => {},
+  onEditTarget = () => { },
+  onDeleteTarget = () => { },
+  onAddTarget = () => { },
 }) {
   const [content, setContent] = useState(() => mergeAboutContent(contentOverride || defaultAboutContent));
   const [selectedLeader, setSelectedLeader] = useState(null);
@@ -409,10 +409,10 @@ export default function About({
 
         setContent({
           ...defaultAboutContent,
-        
+
           storyTitle: about.title,
           storyParagraphs: [about.description],
-        
+
           missionVision: [
             {
               id: 1,
@@ -429,7 +429,7 @@ export default function About({
               visible: true,
             },
           ],
-        
+
           storyImageUrl: about.image || "",
         });
       } catch (error) {
@@ -452,7 +452,7 @@ export default function About({
   const journeyColors = [palette.primary, palette.accent2, palette.accent, palette.secondary];
 
   return (
-    <section className="relative overflow-hidden py-16 md:py-24" style={{ background: palette.light }}>
+    <section className="relative overflow-hidden pt-28 pb-16 md:pb-24" style={{ background: palette.light }}>
       <DecorativeBackdrop />
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8">
@@ -463,7 +463,7 @@ export default function About({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto mb-16 md:mb-24"
+            className="text-left max-w-3xl mb-16 md:mb-24"
           >
             <span
               className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
@@ -480,7 +480,7 @@ export default function About({
             <p className="text-lg leading-relaxed" style={{ color: palette.gray }}>
               {content.pageSubtitle}
             </p>
-            <div className="w-16 h-1 rounded-full mx-auto mt-6" style={{ background: palette.gradient2 }} />
+            <div className="w-16 h-1 rounded-full mt-6" style={{ background: palette.gradient2 }} />
           </motion.div>
         </EditableWrap>
 

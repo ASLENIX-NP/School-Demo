@@ -400,7 +400,7 @@ function Stats({ editMode = false, contentOverride = null, onEditTarget = () => 
     <>
       {!editMode && <HomeAnnouncementPopup />}
       
-      <section className="relative overflow-hidden py-16 md:py-24" style={{ background: palette.light }}>
+      <section className="relative overflow-hidden pt-28 pb-16 md:pb-24" style={{ background: palette.light }}>
         {/* Decorative elements */}
         <div className="absolute inset-0 pointer-events-none">
           <div 

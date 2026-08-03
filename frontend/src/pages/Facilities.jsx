@@ -311,7 +311,7 @@ function AddFacilityButton({ editMode, onAddTarget }) {
 // ---------------------------------------------------------------------
 function SectionHeader({ badge, title, highlightedText, description }) {
   return (
-    <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
+    <div className="text-left max-w-3xl mb-12 md:mb-16">
       <span
         className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
         style={{ background: "rgba(30, 58, 95, 0.08)", color: palette.primary }}
@@ -329,7 +329,7 @@ function SectionHeader({ badge, title, highlightedText, description }) {
           {description}
         </p>
       )}
-      <div className="w-16 h-1 rounded-full mx-auto mt-6" style={{ background: palette.gradient2 }} />
+      <div className="w-16 h-1 rounded-full mt-6" style={{ background: palette.gradient2 }} />
     </div>
   );
 }
@@ -471,7 +471,7 @@ export function Facilities({
   };
 
   return (
-    <section className="relative overflow-hidden py-16 md:py-24" style={{ background: palette.light }}>
+    <section className="relative overflow-hidden pt-28 pb-16 md:pb-24" style={{ background: palette.light }}>
       <DecorativeBackdrop />
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8">

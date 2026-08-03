@@ -562,7 +562,7 @@ const styles = {
   // Hero
   heroSection: {
     position: "relative",
-    padding: "60px 24px 40px",
+    padding: "24px 24px 32px",
     zIndex: 1,
   },
   heroBackground: {
@@ -583,7 +583,7 @@ heroOverlay: {
 },
   heroContent: {
     position: "relative",
-    maxWidth: "1200px",
+    maxWidth: "1400px",
     margin: "0 auto",
     zIndex: 2,
   },
@@ -644,7 +644,7 @@ heroOverlay: {
     zIndex: 1,
   },
   statsGrid: {
-    maxWidth: "1200px",
+    maxWidth: "1400px",
     margin: "0 auto",
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -681,7 +681,7 @@ heroOverlay: {
     zIndex: 1,
   },
   filtersContainer: {
-    maxWidth: "1200px",
+    maxWidth: "1400px",
     margin: "0 auto",
     display: "flex",
     flexDirection: "column",
@@ -779,7 +779,7 @@ heroOverlay: {
   },
   featuredCard: {
     position: "relative",
-    maxWidth: "1200px",
+    maxWidth: "1400px",
     margin: "0 auto",
     padding: "32px 40px",
     borderRadius: "20px",
@@ -855,7 +855,7 @@ heroOverlay: {
     zIndex: 1,
   },
   noticesHeader: {
-    maxWidth: "1200px",
+    maxWidth: "1400px",
     margin: "0 auto 24px",
     display: "flex",
     justifyContent: "space-between",

@@ -27,7 +27,7 @@ export function StaffDirectory() {
 
   return (
     <section className="min-h-screen pt-28 pb-24 bg-slate-50 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 relative z-10">
         {/* Page Header */}
         <header className="text-left max-w-3xl mb-8">
           <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#0A1628] text-white shadow-sm mb-4">
