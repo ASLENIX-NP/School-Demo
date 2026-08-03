@@ -4,107 +4,57 @@ import axios from "axios";
 import { motion } from "motion/react";
 import {
   ArrowRight,
-  CalendarDays,
+  ArrowUpRight,
+  Calendar,
+  Clock,
   Image as ImageIcon,
   Search,
   Sparkles,
+  Tag,
 } from "lucide-react";
+import {
+  defaultBlogContent,
+  formatBlogDate,
+  getAuthorInfo,
+  getReadTime,
+  makeBlogSlug,
+  mergeBlogContent,
+  normalizeBlogPost,
+} from "./blogUtils";
+
+export {
+  defaultBlogContent,
+  formatBlogDate,
+  makeBlogSlug,
+  mergeBlogContent,
+  normalizeBlogPost,
+};
 
 const colors = {
+  navy: "#0A1628",
+  primary: "#1E3A5F",
+  secondary: "#2D6A4F",
+  gold: "#C9A84C",
   red: "#D71920",
   green: "#168A3A",
-  purple: "#4B2E83",
-  dark: "#0B1020",
-  cream: "#FFF8EE",
-  gold: "#FACC15",
   cyan: "#38BDF8",
-  blue: "#1877F2",
 };
 
 const API_URL =
   import.meta.env.VITE_API_URL || "https://school-website-backend-ixx2.onrender.com";
 
-export const defaultBlogContent = {
-  pageBadge: "News & Events",
-  pageTitle: "School Blog & Events",
-  pageDescription:
-    "Read school activities, programs, student achievements, competitions, and important event updates.",
-  categories: ["All", "Events", "Academics", "Achievements", "Sports", "Notice"],
-  posts: [],
-};
-
-function normalizeArray(value, fallback = []) {
-  return Array.isArray(value) ? value : fallback;
-}
-
-export function makeBlogSlug(title = "post", id = "") {
-  const base = String(title || "post")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\u0900-\u097F]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "post";
-
-  return id ? `${base}-${id}` : base;
-}
-
-export function normalizeBlogPost(post = {}, index = 0) {
-  const id = post.id || Date.now() + index;
-  const title = post.title || "Untitled Blog Post";
-
-  return {
-    id,
-    title,
-    slug: post.slug || makeBlogSlug(title, id),
-    category: post.category || "Events",
-    date: post.date || post.created_at || new Date().toISOString().slice(0, 10),
-    excerpt: post.excerpt || "",
-    content: post.content || "",
-    imageUrl: post.imageUrl || post.image_url || post.image || "",
-    imageAlt: post.imageAlt || post.image_alt || title,
-    pinned: Boolean(post.pinned),
-    visible: post.visible !== false,
-  };
-}
-
-export function mergeBlogContent(saved = {}) {
-  const savedCategories = normalizeArray(saved.categories, defaultBlogContent.categories);
-  const cleanedCategories = Array.from(
-    new Set(["All", ...savedCategories.filter(Boolean).filter((item) => item !== "All")])
-  );
-
-  return {
-    ...defaultBlogContent,
-    ...(saved || {}),
-    categories: cleanedCategories,
-    posts: normalizeArray(saved.posts, []).map(normalizeBlogPost),
-  };
-}
-
-export function formatBlogDate(value) {
-  if (!value) return "Date not set";
-
-  try {
-    return new Date(value).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return value;
-  }
-}
-
 function getPlainExcerpt(post = {}) {
   const text = String(post.excerpt || post.content || "")
+    .replace(/<[^>]*>/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
-  if (!text) return "Read this school update.";
+  if (!text) return "Read this school update and explore the latest insights.";
   return text.length > 145 ? `${text.slice(0, 145).trim()}...` : text;
 }
 
 function BlogImage({ post, className = "" }) {
-  if (post.imageUrl) {
+  if (post?.imageUrl) {
     return (
       <img
         src={post.imageUrl}
@@ -115,68 +65,161 @@ function BlogImage({ post, className = "" }) {
   }
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-slate-100">
-      <ImageIcon className="h-12 w-12 text-slate-300" />
+    <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-300">
+      <ImageIcon className="h-12 w-12" />
     </div>
   );
 }
 
+function FeaturedPostCard({ post }) {
+  if (!post) return null;
+  const { authorName, initial } = getAuthorInfo(post);
+  const readTime = getReadTime(post.content, post.excerpt);
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="group relative mb-14 overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/40 transition-all duration-300 hover:shadow-2xl"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
+        {/* Left Featured Image */}
+        <div className="relative lg:col-span-6 min-h-[300px] sm:min-h-[380px] lg:min-h-[440px] overflow-hidden bg-slate-100">
+          <div className="absolute top-4 left-4 z-20">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#0A1628]/90 text-white backdrop-blur-md px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider shadow-lg border border-white/10">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              Featured
+            </span>
+          </div>
+
+          <BlogImage post={post} className="h-full w-full object-cover" />
+        </div>
+
+        {/* Right Featured Content */}
+        <div className="lg:col-span-6 p-7 sm:p-10 lg:p-12 flex flex-col justify-between bg-white">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-sky-600 mb-3">
+              <Tag className="w-3.5 h-3.5 text-sky-500" />
+              <span>{post.category}</span>
+            </div>
+
+            <Link to={`/blogs/${post.slug}`}>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0A1628] leading-tight tracking-tight hover:text-blue-600 transition-colors line-clamp-2">
+                {post.title}
+              </h2>
+            </Link>
+
+            <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed line-clamp-3">
+              {getPlainExcerpt(post)}
+            </p>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#1E3A5F] text-white font-bold text-sm flex items-center justify-center shadow-inner">
+                {initial}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800 leading-none">{authorName}</p>
+                <div className="flex items-center gap-3 text-xs text-slate-500 mt-1 font-medium">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    {formatBlogDate(post.date)}
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    {readTime}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              to={`/blogs/${post.slug}`}
+              className="inline-flex items-center gap-2 text-sm font-extrabold text-[#1E3A5F] hover:text-blue-600 transition-all group/btn"
+            >
+              <span>Read Article</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
 function BlogCard({ post, index }) {
+  const { authorName, initial } = getAuthorInfo(post);
+  const readTime = getReadTime(post.content, post.excerpt);
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.45, delay: index * 0.05 }}
-      className="group overflow-hidden rounded-[28px] bg-white shadow-xl transition-all duration-300 hover:-translate-y-1"
-      style={{
-        border: "1px solid rgba(15,23,42,0.08)",
-        boxShadow: "0 18px 44px rgba(15,23,42,0.08)",
-      }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
+      className="group relative rounded-2xl bg-white border border-slate-200/80 shadow-md shadow-slate-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col justify-between"
     >
-      <Link to={`/blogs/${post.slug}`} className="block">
-        <div className="h-56 overflow-hidden bg-slate-100">
+      <Link to={`/blogs/${post.slug}`} className="block flex-1 flex flex-col">
+        {/* Category Overlay Badge on top of Image */}
+        <div className="relative h-52 sm:h-56 overflow-hidden bg-slate-100">
+          <div className="absolute top-3.5 left-3.5 z-10">
+            <span className="rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-slate-800 shadow-sm border border-slate-200/60">
+              {post.category}
+            </span>
+          </div>
+
           <BlogImage post={post} />
         </div>
 
-        <div className="p-6">
-          <div className="mb-3 flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.12em]">
-            <span
-              className="rounded-full px-3 py-1"
-              style={{ background: "rgba(22,138,58,0.08)", color: colors.green }}
-            >
-              {post.category}
-            </span>
-            <span className="text-slate-400">{formatBlogDate(post.date)}</span>
+        {/* Card Content Body */}
+        <div className="p-6 flex-1 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-xs text-slate-400 font-medium mb-2.5">
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                {formatBlogDate(post.date)}
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                {readTime}
+              </span>
+            </div>
+
+            <h3 className="text-lg font-extrabold text-[#0A1628] leading-snug hover:text-blue-600 transition-colors line-clamp-2">
+              {post.title}
+            </h3>
+
+            <p className="mt-3 text-slate-600 text-sm line-clamp-3 leading-relaxed">
+              {getPlainExcerpt(post)}
+            </p>
           </div>
 
-          <h2
-            className="line-clamp-2 text-2xl text-slate-950"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 850,
-              letterSpacing: "-0.035em",
-              lineHeight: 1.08,
-            }}
-          >
-            {post.title}
-          </h2>
+          {/* Footer Metadata */}
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-[#1E3A5F] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                {initial}
+              </div>
+              <span className="text-xs font-semibold text-slate-700 truncate max-w-[130px]">
+                {authorName}
+              </span>
+            </div>
 
-          <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-slate-500">
-            {getPlainExcerpt(post)}
-          </p>
-
-          <div
-            className="mt-5 inline-flex items-center gap-2 text-sm font-black"
-            style={{ color: colors.green }}
-          >
-            Read More <ArrowRight className="h-4 w-4" />
+            <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#1E3A5F] hover:text-blue-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0">
+              Read <ArrowUpRight className="w-3.5 h-3.5" />
+            </span>
           </div>
         </div>
       </Link>
     </motion.article>
   );
 }
+
+const BENCHES_BG_IMAGE = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80";
 
 export default function Blogs() {
   const [content, setContent] = useState(() => mergeBlogContent(defaultBlogContent));
@@ -224,116 +267,139 @@ export default function Blogs() {
       });
   }, [content.posts, category, query]);
 
-  const featuredPosts = visiblePosts.slice(0, 3);
+  const featuredPost = visiblePosts.length > 0 ? visiblePosts[0] : null;
+  const gridPosts = visiblePosts.length > 0 ? visiblePosts.slice(1) : [];
 
   return (
-    <section
-      className="min-h-screen overflow-hidden pt-28 pb-24 relative"
-      style={{
-        background: `
-          radial-gradient(circle at top right, rgba(75,46,131,0.14), transparent 34%),
-          radial-gradient(circle at bottom left, rgba(22,138,58,0.12), transparent 32%),
-          linear-gradient(180deg, #FFF8EE 0%, #F8FAFC 54%, #F1ECFF 100%)
-        `,
-      }}
-    >
+    <section className="min-h-screen relative pt-28 pb-24 overflow-hidden bg-slate-100">
+      {/* Light Classroom Benches Background Image */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <img
+          src={BENCHES_BG_IMAGE}
+          alt="Classroom Benches Background"
+          className="w-full h-full object-cover"
+          style={{
+            filter: "brightness(0.92) contrast(0.92) saturate(0.95)",
+          }}
+        />
+        {/* Light Glassy Gradient Overlay over the Benches image */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(248,250,252,0.88) 50%, rgba(241,245,249,0.92) 100%),
+              radial-gradient(circle at 50% 20%, rgba(201,168,76,0.12) 0%, transparent 60%)
+            `,
+            backdropFilter: "blur(14px)",
+          }}
+        />
+      </div>
       <div className="mx-auto max-w-7xl px-6 relative z-10">
+        {/* Header / Hero Section matching Image 1 */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55 }}
-          className="mb-10 grid gap-8 lg:grid-cols-[1fr_360px] lg:items-end"
+          transition={{ duration: 0.5 }}
+          className="mb-12"
         >
-          <div>
-            <span
-              className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black uppercase tracking-[0.14em]"
-              style={{
-                background: "rgba(215,25,32,0.08)",
-                color: colors.red,
-                border: "1px solid rgba(215,25,32,0.16)",
-              }}
-            >
-              <Sparkles className="h-4 w-4" />
-              {content.pageBadge}
+          {/* Top Badge */}
+          <div className="mb-4">
+            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest bg-sky-50 text-sky-700 border border-sky-200/80 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+              {content.pageBadge || "Knowledge Hub"}
             </span>
-
-            <h1
-              className="text-5xl md:text-6xl text-slate-950"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 900,
-                letterSpacing: "-0.065em",
-                lineHeight: 0.95,
-              }}
-            >
-              {content.pageTitle}
-            </h1>
-
-            <p className="mt-5 max-w-3xl text-base md:text-lg leading-relaxed text-slate-500">
-              {content.pageDescription}
-            </p>
           </div>
 
-          <div
-            className="rounded-[28px] bg-white/80 p-5 shadow-xl"
-            style={{ border: "1px solid rgba(15,23,42,0.08)", backdropFilter: "blur(18px)" }}
-          >
-            <label className="mb-2 block text-xs font-black uppercase tracking-[0.14em] text-slate-400">
-              Search Posts
-            </label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search blog..."
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-11 py-3 text-sm outline-none"
-                />
-              </div>
+          {/* Main Title */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#0A1628] tracking-tight leading-[1.08]">
+            {content.pageTitle || "School Blog & Insights"}
+          </h1>
+
+          {/* Subtitle */}
+          <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-3xl leading-relaxed">
+            {content.pageDescription ||
+              "Explore school activities, academic excellence, student achievements, competitions, and important educational updates."}
+          </p>
+
+          {/* Search Bar & Category Filter Pills */}
+          <div className="mt-8 flex flex-col gap-6">
+            {/* Search Input Box */}
+            <div className="relative max-w-md w-full">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search articles..."
+                className="w-full rounded-xl border border-slate-200/90 bg-white py-3.5 pl-11 pr-10 text-sm text-slate-800 placeholder-slate-400 outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold bg-slate-100 rounded-full w-5 h-5 flex items-center justify-center cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
             </div>
 
-            <label className="mb-2 mt-4 block text-xs font-black uppercase tracking-[0.14em] text-slate-400">
-              Category
-            </label>
-            <select
-              value={category}
-              onChange={(event) => setCategory(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600 outline-none"
-            >
-              {(content.categories || ["All"]).map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+            {/* Category Filter Pills Row */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              {(content.categories || ["All"]).map((cat) => {
+                const isActive = category === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setCategory(cat)}
+                    className={`rounded-full px-5 py-2 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${isActive
+                        ? "bg-[#0A1628] text-white shadow-md shadow-slate-900/10 border border-[#0A1628]"
+                        : "bg-white text-slate-600 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300"
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </motion.div>
 
-        {featuredPosts.length > 0 && (
-          <div className="mb-10 grid gap-6 lg:grid-cols-3">
-            {featuredPosts.map((post, index) => (
+        {/* Featured Post Card (Image 2 design) */}
+        {featuredPost && <FeaturedPostCard post={featuredPost} />}
+
+        {/* Blog Cards Grid (Image 3 design) */}
+        {gridPosts.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {gridPosts.map((post, index) => (
               <BlogCard key={post.id || post.slug} post={post} index={index} />
             ))}
           </div>
         )}
 
-        {visiblePosts.length > featuredPosts.length && (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {visiblePosts.slice(featuredPosts.length).map((post, index) => (
-              <BlogCard key={post.id || post.slug} post={post} index={index + featuredPosts.length} />
-            ))}
-          </div>
-        )}
-
+        {/* Empty State when no posts match */}
         {visiblePosts.length === 0 && (
-          <div className="rounded-[30px] bg-white/85 p-10 text-center shadow-xl border border-slate-100">
-            <CalendarDays className="mx-auto mb-4 h-12 w-12 text-slate-300" />
-            <h2 className="text-2xl font-black text-slate-950">No blog posts available</h2>
-            <p className="mt-2 text-slate-500">School news and events will appear here once added from admin panel.</p>
+          <div className="rounded-3xl bg-white p-12 text-center shadow-lg border border-slate-200/70 max-w-lg mx-auto my-12">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+              <Calendar className="h-7 w-7 text-slate-400" />
+            </div>
+            <h2 className="text-xl font-extrabold text-[#0A1628]">No articles found</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              {query
+                ? `No articles match "${query}". Try searching with different keywords.`
+                : "School news and blog posts will appear here once published."}
+            </p>
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="mt-5 rounded-full bg-[#0A1628] px-6 py-2.5 text-xs font-bold text-white hover:bg-blue-900 transition-colors"
+              >
+                Clear Search
+              </button>
+            )}
           </div>
         )}
       </div>
     </section>
   );
 }
+

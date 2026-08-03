@@ -210,7 +210,7 @@ export default function AdminDashboard() {
             <Shield className="w-5 h-5 text-slate-950" />
           </div>
           <div>
-            <div className="font-black text-slate-950 text-sm">Baljagriti</div>
+            <div className="font-black text-slate-950 text-sm">Smriti</div>
             <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "rgba(15,23,42,0.4)" }}>Admin Panel</div>
           </div>
         </div>
@@ -227,7 +227,7 @@ export default function AdminDashboard() {
           </div>
           <div className="min-w-0">
             <div className="text-slate-950 text-xs font-bold truncate">{adminUser.name || "Administrator"}</div>
-            <div className="text-[10px] truncate" style={{ color: "rgba(15,23,42,0.4)" }}>{adminUser.email || "admin@baljagriti.edu.np"}</div>
+            <div className="text-[10px] truncate" style={{ color: "rgba(15,23,42,0.4)" }}>{adminUser.email || "admin@smritischool.edu.np"}</div>
           </div>
         </div>
       </div>

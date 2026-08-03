@@ -27,7 +27,7 @@ export const defaultAdmissionsContent = {
   title: "Your Journey Starts Here",
   highlightedText: "Starts Here",
   subtitle:
-    "Baljagriti Secondary English Boarding School welcomes students through a clear admission process for Play Group, LKG, and classes up to Class IX.",
+    "Smriti Secondary English Boarding School welcomes students through a clear admission process for Play Group, LKG, and classes up to Class IX.",
   steps: [
     {
       id: 1,

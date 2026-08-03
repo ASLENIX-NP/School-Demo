@@ -21,7 +21,8 @@ const Calendar = lazy(() => import("../../pages/Calendar"));
 const Blogs = lazy(() => import("../../pages/Blogs"));
 const BlogDetail = lazy(() => import("../../pages/BlogDetail"));
 const NoticeDetail = lazy(() => import("../../pages/NoticeDetail"));
-const Staff = lazy(() => import("../../pages/Staff"));
+const StaffDirectory = lazy(() => import("../../pages/StaffDirectory"));
+const TeacherProfile = lazy(() => import("../../pages/TeacherProfile"));
 const Facilities = lazy(() => import("../../pages/Facilities"));
 
 // --- Lazy loaded admin pages ---
@@ -141,7 +142,8 @@ function SchoolApp() {
             <Route path="/blogs" element={<BlogsPage />} />
             <Route path="/blogs/:slug" element={<BlogDetail />} />
             <Route path="/notices/:id" element={<NoticeDetail />} />
-            <Route path="/staff" element={<Staff />} />
+            <Route path="/staff" element={<StaffDirectory />} />
+            <Route path="/staff/:id" element={<TeacherProfile />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/contact" element={<ContactPage />} />

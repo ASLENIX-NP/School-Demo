@@ -27,7 +27,7 @@ export const defaultFacilitiesContent = {
   title: "Learning Beyond Classrooms",
   highlightedText: "Classrooms",
   subtitle:
-    "Baljagriti provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
+    "Smriti Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
   learnMoreText: "Learn More",
   highlightsTitle: "Facility Highlights",
   facilities: [
@@ -87,7 +87,7 @@ export const defaultFacilitiesContent = {
       description:
         "Safe and reliable transportation service covering multiple routes.",
       details:
-        "Baljagriti provides safe transportation with experienced drivers, route management, student safety monitoring, and comfortable buses for daily travel.",
+        "Smriti Boarding School provides safe transportation with experienced drivers, route management, student safety monitoring, and comfortable buses for daily travel.",
       imageUrl: "",
       imageZoom: 1,
       imageOffsetX: 0,

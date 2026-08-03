@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 export const defaultNavbarContent = {
   logoUrl: "",
-  schoolName: "Baljagriti",
+  schoolName: "Smriti",
   schoolSubtitle: "Secondary English School",
   admissionButtonText: "Admission Open",
   admissionButtonLink: "/admissions",
@@ -183,19 +183,16 @@ export function Navbar({
               title={editMode ? "Change logo image" : ""}
             >
               <div
-                className="rounded-xl overflow-hidden bg-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
+                className="rounded-xl bg-[#0A1628] text-amber-400 font-extrabold text-base flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shadow-md"
                 style={{
-                  width: "44px",
-                  height: "44px",
-                  border: `1px solid ${palette.gold}55`,
-                  boxShadow: "0 8px 20px rgba(201,168,76,0.22)",
+                  width: "42px",
+                  height: "42px",
+                  border: `1.5px solid ${palette.gold}`,
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
+                  fontFamily: "var(--font-display)",
                 }}
               >
-                <img
-                  src={logoSrc}
-                  alt={`${navbarContent.schoolName} Logo`}
-                  className="w-full h-full object-contain p-1"
-                />
+                SB
               </div>
 
               {editMode && <HoverEditIcon icon={Camera} label="Change Logo" />}

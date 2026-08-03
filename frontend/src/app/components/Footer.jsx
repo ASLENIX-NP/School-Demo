@@ -28,7 +28,7 @@ const palette = {
 
 export const defaultFooterContent = {
   logoUrl: "",
-  schoolName: "Baljagriti",
+  schoolName: "Smriti",
   schoolSubtitle: "Secondary English Boarding School",
   admissionBadgeText: "Admissions Open 2026",
   showAdmissionBadge: true,
@@ -73,13 +73,13 @@ export const defaultFooterContent = {
     email: "infobjess2046@gmail.com",
   },
 
-  modalTitle: "Contact Baljagriti School",
+  modalTitle: "Contact Smriti School",
   modalHint: "Click any number to copy it.",
   copiedText: "Copied",
   closeButtonText: "Close",
 
   copyrightText:
-    "© 2026 Baljagriti Secondary English Boarding School. All rights reserved.",
+    "© 2026 Smriti Secondary English Boarding School. All rights reserved.",
 };
 
 export function mergeFooterContent(saved = {}) {

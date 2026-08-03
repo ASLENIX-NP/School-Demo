@@ -10,24 +10,21 @@ import {
   Pencil,
   Phone,
   Plus,
-  Star,
   Trash2,
   UserRound,
   Users,
   X,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
-const colors = {
-  red: "#D71920",
-  green: "#168A3A",
-  purple: "#4B2E83",
-  dark: "#0B1020",
-  cyan: "#38BDF8",
-  gold: "#FACC15",
+export const colors = {
+  navy: "#0A1628",
+  primary: "#1E3A5F",
+  slate: "#475569",
+  light: "#F8FAFC",
+  white: "#FFFFFF",
 };
-
-const statColors = [colors.green, colors.purple, colors.red, colors.cyan];
 
 const HARDCODED_STAFF_IMAGE_URLS = [
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
@@ -41,32 +38,29 @@ function isHardcodedStaffImageUrl(value = "") {
 }
 
 export const defaultStaffContent = {
-  badgeText: "Our Faculty Team",
-  title: "Our Staff & Members",
-  highlightedWord: "Members",
+  badgeText: "Faculty & Team",
+  title: "Our Staff Members",
+  highlightedWord: "Staff Members",
   subtitle:
-    "Meet the dedicated educators, mentors, and leaders who inspire excellence, character, and lifelong learning at Baljagriti Secondary English Boarding School.",
+    "Meet the dedicated educators, department heads, and leaders guiding students at Smriti Secondary English Boarding School.",
   stats: [
     {
       id: "teachingStaff",
       value: "50+",
       label: "Teaching Staff",
       icon: "users",
-      color: colors.green,
     },
     {
       id: "expertFaculty",
       value: "240+",
-      label: "Expert Faculty",
+      label: "Faculty Members",
       icon: "graduation",
-      color: colors.purple,
     },
     {
       id: "yearsExcellence",
       value: "35+",
       label: "Years Excellence",
       icon: "award",
-      color: colors.red,
     },
   ],
   staff: [
@@ -78,11 +72,11 @@ export const defaultStaffContent = {
       imageZoom: 1,
       imageOffsetX: 0,
       imageOffsetY: 0,
-      qualification: "M.Ed",
-      phone: "+977-9800000000",
-      email: "",
+      qualification: "M.Ed in Educational Leadership",
+      phone: "057-590144",
+      email: "principal@smritischool.edu.np",
       description:
-        "Mr. Binod Subedi has been leading Baljagriti English Secondary School with vision and dedication for over a decade. His commitment to academic excellence and student welfare has transformed the school into a centre of quality education in the region.",
+        "Mr. Binod Subedi has been leading Smriti Boarding School with vision and commitment for over a decade, driving academic rigor and holistic development.",
       visible: true,
     },
     {
@@ -94,25 +88,70 @@ export const defaultStaffContent = {
       imageOffsetX: 0,
       imageOffsetY: 0,
       qualification: "M.Ed",
-      phone: "+977-9800000000",
-      email: "",
+      phone: "057-590145",
+      email: "viceprincipal@smritischool.edu.np",
       description:
-        "Mr. Amul Shrestha brings years of administrative and academic expertise to Baljagriti. As Vice Principal, he oversees daily operations, faculty coordination, and student discipline, ensuring a productive and inspiring learning environment.",
+        "Oversees daily academic administration, teacher development, and student welfare, maintaining high standards of discipline and achievement.",
       visible: true,
     },
     {
       id: 3,
       name: "Prem Hamal",
-      position: "Science Teacher",
+      position: "Science Dept Head",
       imageUrl: "",
       imageZoom: 1,
       imageOffsetX: 0,
       imageOffsetY: 0,
       qualification: "B.Sc, B.Ed",
-      phone: "+977-9800000000",
-      email: "",
+      phone: "057-590146",
+      email: "prem.science@smritischool.edu.np",
       description:
-        "Mr. Prem Hamal is a passionate science educator who brings curiosity and innovation into the classroom. With expertise in Physics, Chemistry, and Biology, he makes complex concepts accessible and exciting for every student.",
+        "Passionate science educator bringing hands-on practical experiments in Physics, Chemistry, and Biology to secondary school students.",
+      visible: true,
+    },
+    {
+      id: 4,
+      name: "Saraswati Sharma",
+      position: "English Dept Head",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      qualification: "M.A. English, B.Ed",
+      phone: "057-590144",
+      email: "saraswati.english@smritischool.edu.np",
+      description:
+        "Specializes in English literature and communication skills, fostering creative writing and debate programs across all grade levels.",
+      visible: true,
+    },
+    {
+      id: 5,
+      name: "Ramesh Karki",
+      position: "Mathematics Dept Head",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      qualification: "M.Sc Mathematics",
+      phone: "057-590145",
+      email: "ramesh.math@smritischool.edu.np",
+      description:
+        "Dedicated to simplifying mathematics and encouraging logical thinking, problem-solving, and competitive Olympiad prep.",
+      visible: true,
+    },
+    {
+      id: 6,
+      name: "Anita Adhikari",
+      position: "Primary Level Coordinator",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      qualification: "M.Ed in Child Psychology",
+      phone: "057-590146",
+      email: "anita.primary@smritischool.edu.np",
+      description:
+        "Guides primary educators to build a friendly, nurturing, activity-based foundation for young learners.",
       visible: true,
     },
   ],
@@ -122,21 +161,17 @@ function normalizeStats(stats) {
   if (!Array.isArray(stats) || stats.length === 0) {
     return defaultStaffContent.stats;
   }
-
   return stats.map((stat, index) => ({
     ...(defaultStaffContent.stats[index] || {}),
     ...stat,
-    id: stat.id || `stat-${Date.now()}-${index}`,
+    id: stat.id || `stat-${index}`,
     icon: stat.icon || defaultStaffContent.stats[index]?.icon || "users",
-    color: stat.color || statColors[index % statColors.length],
   }));
 }
 
 function clampNumber(value, min, max, fallback) {
   const numberValue = Number(value);
-
   if (!Number.isFinite(numberValue)) return fallback;
-
   return Math.min(max, Math.max(min, numberValue));
 }
 
@@ -144,12 +179,9 @@ function normalizeStaff(staff) {
   if (!Array.isArray(staff) || staff.length === 0) {
     return defaultStaffContent.staff;
   }
-
   return staff.map((member, index) => {
     const savedImageUrl = String(member.imageUrl || "").trim();
-    const cleanImageUrl = isHardcodedStaffImageUrl(savedImageUrl)
-      ? ""
-      : savedImageUrl;
+    const cleanImageUrl = isHardcodedStaffImageUrl(savedImageUrl) ? "" : savedImageUrl;
 
     return {
       ...(defaultStaffContent.staff[index] || {}),
@@ -174,8 +206,8 @@ export function mergeStaffContent(saved = {}) {
   return {
     ...defaultStaffContent,
     ...(saved || {}),
-    stats: normalizeStats(saved.stats),
-    staff: normalizeStaff(saved.staff),
+    stats: normalizeStats(saved?.stats),
+    staff: normalizeStaff(saved?.staff),
   };
 }
 
@@ -183,22 +215,6 @@ function getStatIcon(icon) {
   if (icon === "graduation") return GraduationCap;
   if (icon === "award") return Award;
   return Users;
-}
-
-function HighlightedTitle({ title, highlightedWord }) {
-  if (!highlightedWord || !title || !title.includes(highlightedWord)) {
-    return <>{title}</>;
-  }
-
-  const [before, after] = title.split(highlightedWord);
-
-  return (
-    <>
-      {before}
-      <span className="text-green-700">{highlightedWord}</span>
-      {after}
-    </>
-  );
 }
 
 function getStaffImageStyle(staff = {}) {
@@ -211,7 +227,6 @@ function getStaffImageStyle(staff = {}) {
     objectPosition: "center",
     transform: `translate(${x}%, ${y}%) scale(${zoom})`,
     transformOrigin: "center center",
-    backgroundColor: "#F8FAFC",
   };
 }
 
@@ -224,15 +239,15 @@ function StaffImage({ staff }) {
       <img
         src={src}
         alt={name}
-        className="w-full h-80 object-cover transition-transform duration-300 will-change-transform"
+        className="w-full h-64 object-cover transition-transform duration-300"
         style={getStaffImageStyle(staff)}
       />
     );
   }
 
   return (
-    <div className="w-full h-80 bg-slate-100 flex items-center justify-center">
-      <UserRound className="w-20 h-20 text-slate-300" />
+    <div className="w-full h-64 bg-slate-100 flex items-center justify-center border-b border-slate-200/80">
+      <UserRound className="w-16 h-16 text-slate-300" />
     </div>
   );
 }
@@ -249,7 +264,7 @@ function ActionButtons({
   if (!editMode) return null;
 
   return (
-    <div className="absolute -top-3 -right-3 z-[120] flex items-center gap-2 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
+    <div className="absolute -top-2 -right-2 z-[120] flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
       <button
         type="button"
         onClick={(event) => {
@@ -257,15 +272,10 @@ function ActionButtons({
           event.stopPropagation();
           onEditTarget(target);
         }}
-        className="rounded-full w-10 h-10 flex items-center justify-center shadow-xl"
-        style={{
-          background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-          color: "#020617",
-          border: "1px solid rgba(255,255,255,0.88)",
-        }}
+        className="rounded-full w-8 h-8 flex items-center justify-center bg-[#0A1628] text-white shadow-md hover:bg-blue-900 transition-colors"
         title={label}
       >
-        <Icon className="w-4 h-4" />
+        <Icon className="w-3.5 h-3.5" />
       </button>
 
       {canDelete && (
@@ -276,15 +286,10 @@ function ActionButtons({
             event.stopPropagation();
             onDeleteTarget(target);
           }}
-          className="rounded-full w-10 h-10 flex items-center justify-center shadow-xl"
-          style={{
-            background: "linear-gradient(135deg, #FEE2E2, #FCA5A5)",
-            color: colors.red,
-            border: "1px solid rgba(255,255,255,0.88)",
-          }}
+          className="rounded-full w-8 h-8 flex items-center justify-center bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors"
           title="Delete"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       )}
     </div>
@@ -331,12 +336,7 @@ function AddStaffButton({ editMode, onAddTarget }) {
         event.stopPropagation();
         onAddTarget("staffMember");
       }}
-      className="mt-10 mx-auto flex items-center gap-2 rounded-2xl px-6 py-4 text-sm font-black transition-all hover:-translate-y-1"
-      style={{
-        background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-        color: "#020617",
-        boxShadow: "0 16px 38px rgba(56,189,248,0.24)",
-      }}
+      className="mt-8 mx-auto flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-extrabold bg-[#0A1628] text-white hover:bg-blue-900 shadow-md transition-colors"
     >
       <Plus className="w-4 h-4" />
       Add Staff Member
@@ -349,11 +349,8 @@ function StaffPopup({ staff, onClose }) {
     <AnimatePresence>
       {staff && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-2 md:p-8 overflow-y-auto"
-          style={{
-            background: "rgba(5,8,20,0.75)",
-            backdropFilter: "blur(14px)",
-          }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
+          style={{ background: "rgba(10, 22, 40, 0.75)", backdropFilter: "blur(8px)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -361,213 +358,76 @@ function StaffPopup({ staff, onClose }) {
         >
           <motion.div
             onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.82, y: 50 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.88, y: 30 }}
-            transition={{ type: "spring", stiffness: 110, damping: 15 }}
-            className="relative w-full max-w-[1800px] max-h-[95vh] overflow-y-auto rounded-[42px]"
-            style={{
-              background: "linear-gradient(145deg, #ffffff, #f8fafc)",
-              boxShadow:
-                "0 80px 160px rgba(0,0,0,0.35), 0 30px 60px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.8)",
-            }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative w-full max-w-2xl bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-200"
           >
-            <div
-              className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(22,138,58,0.10) 0%, transparent 70%)",
-                transform: "translate(30%, -30%)",
-              }}
-            />
-            <div
-              className="absolute bottom-0 left-0 w-64 h-64 rounded-full pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(215,25,32,0.08) 0%, transparent 70%)",
-                transform: "translate(-30%, 30%)",
-              }}
-            />
-
-            <motion.button
+            <button
               type="button"
               onClick={onClose}
-              whileHover={{ rotate: 180, scale: 1.15 }}
-              transition={{ duration: 0.35 }}
-              className="absolute top-5 right-5 z-50 w-12 h-12 rounded-full flex items-center justify-center shadow-2xl"
-              style={{ background: colors.red, color: "#fff" }}
+              className="absolute top-4 right-4 z-50 w-9 h-9 rounded-full bg-[#0A1628] text-white flex items-center justify-center hover:bg-slate-800 transition-colors"
             >
-              <X className="w-5 h-5" strokeWidth={3} />
-            </motion.button>
+              <X className="w-4 h-4" />
+            </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-[700px_1fr]">
-              <div className="relative h-[320px] sm:h-[400px] md:h-[900px] overflow-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-12">
+              <div className="sm:col-span-5 relative h-64 sm:h-full bg-slate-100 min-h-[260px]">
                 {staff.imageUrl ? (
                   <img
                     src={staff.imageUrl}
                     alt={staff.name}
-                    className="w-full h-full object-cover transition-transform duration-300 will-change-transform"
+                    className="w-full h-full object-cover"
                     style={getStaffImageStyle(staff)}
                   />
                 ) : (
-                  <div
-                    className="w-full h-full flex items-center justify-center"
-                    style={{
-                      background:
-                        "linear-gradient(145deg, rgba(11,16,32,0.96), rgba(75,46,131,0.9))",
-                    }}
-                  >
-                    <UserRound className="w-32 h-32 text-white/30" />
+                  <div className="w-full h-full flex items-center justify-center">
+                    <UserRound className="w-20 h-20 text-slate-300" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 md:hidden text-center">
-                  <h2 className="text-3xl font-black text-white leading-tight">
-                    {staff.name}
-                  </h2>
-                  <p className="text-green-400 font-bold mt-1">{staff.position}</p>
-                </div>
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-1"
-                  style={{
-                    background: `linear-gradient(90deg, ${colors.red}, ${colors.green})`,
-                  }}
-                />
               </div>
 
-              <div className="p-6 sm:p-8 md:p-16 flex flex-col items-center md:justify-center relative z-10 text-center">
-                <div
-                  className="w-16 h-1 rounded-full mb-6 mx-auto"
-                  style={{
-                    background: `linear-gradient(90deg, ${colors.red}, ${colors.green})`,
-                  }}
-                />
-
-                <span
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4"
-                  style={{
-                    background: "rgba(22,138,58,0.10)",
-                    color: colors.green,
-                    border: "1px solid rgba(22,138,58,0.22)",
-                  }}
-                >
-                  <Star className="w-3.5 h-3.5" fill={colors.green} />
-                  {staff.position}
-                </span>
-
-                <h2
-                  className="hidden md:block text-5xl lg:text-7xl font-black text-slate-950 leading-tight mb-2"
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    letterSpacing: "-0.05em",
-                  }}
-                >
-                  {staff.name}
-                </h2>
-
-                {staff.description && (
-                  <div
-                    className="mt-8 p-8 rounded-3xl w-full"
-                    style={{
-                      background: "rgba(75,46,131,0.05)",
-                      border: "1px solid rgba(75,46,131,0.10)",
-                    }}
-                  >
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <FileText className="w-4 h-4" style={{ color: colors.purple }} />
-                      <p
-                        className="text-xs font-bold uppercase tracking-widest"
-                        style={{ color: colors.purple }}
-                      >
-                        About
-                      </p>
-                    </div>
-                    <p className="text-slate-600 leading-relaxed text-sm md:text-base">
-                      {staff.description}
-                    </p>
-                  </div>
-                )}
-
-                <div
-                  className="w-full h-px my-5"
-                  style={{ background: "rgba(15,23,42,0.08)" }}
-                />
-
-                <div className="space-y-3 w-full">
+              <div className="sm:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
+                <div>
+                  <span className="inline-block px-3 py-1 rounded-md text-xs font-bold bg-slate-100 text-[#0A1628] mb-2">
+                    {staff.position}
+                  </span>
+                  <h2 className="text-2xl font-extrabold text-[#0A1628] mb-1">{staff.name}</h2>
                   {staff.qualification && (
-                    <div
-                      className="flex items-center gap-4 p-4 rounded-2xl"
-                      style={{
-                        background: "rgba(75,46,131,0.06)",
-                        border: "1px solid rgba(75,46,131,0.12)",
-                      }}
-                    >
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: "rgba(75,46,131,0.12)" }}
-                      >
-                        <BookOpen className="w-5 h-5" style={{ color: colors.purple }} />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-0.5">
-                          Qualification
-                        </p>
-                        <p className="font-bold text-slate-800">{staff.qualification}</p>
-                      </div>
-                    </div>
+                    <p className="text-xs font-semibold text-slate-500 mb-4">{staff.qualification}</p>
                   )}
 
+                  {staff.description && (
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
+                      {staff.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2.5 pt-4 border-t border-slate-100">
                   {staff.phone && (
-                    <div
-                      className="flex items-center gap-4 p-4 rounded-2xl"
-                      style={{
-                        background: "rgba(22,138,58,0.06)",
-                        border: "1px solid rgba(22,138,58,0.12)",
-                      }}
+                    <a
+                      href={`tel:${staff.phone}`}
+                      className="flex items-center gap-2.5 text-xs font-bold text-[#0A1628] hover:text-blue-700 transition-colors"
                     >
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: "rgba(22,138,58,0.12)" }}
-                      >
-                        <Phone className="w-5 h-5" style={{ color: colors.green }} />
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                        <Phone className="w-3.5 h-3.5 text-[#0A1628]" />
                       </div>
-                      <div className="text-left">
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-0.5">
-                          Contact
-                        </p>
-                        <p className="font-bold text-slate-800">{staff.phone}</p>
-                      </div>
-                    </div>
+                      <span>{staff.phone}</span>
+                    </a>
                   )}
 
                   {staff.email && (
-                    <div
-                      className="flex items-center gap-4 p-4 rounded-2xl"
-                      style={{
-                        background: "rgba(215,25,32,0.05)",
-                        border: "1px solid rgba(215,25,32,0.10)",
-                      }}
+                    <a
+                      href={`mailto:${staff.email}`}
+                      className="flex items-center gap-2.5 text-xs font-bold text-[#0A1628] hover:text-blue-700 transition-colors break-all"
                     >
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: "rgba(215,25,32,0.10)" }}
-                      >
-                        <Mail className="w-5 h-5" style={{ color: colors.red }} />
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                        <Mail className="w-3.5 h-3.5 text-[#0A1628]" />
                       </div>
-                      <div className="text-left">
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-0.5">
-                          Email
-                        </p>
-                        <p className="font-bold text-slate-800">{staff.email}</p>
-                      </div>
-                    </div>
+                      <span>{staff.email}</span>
+                    </a>
                   )}
-                </div>
-
-                <div className="mt-8 flex items-center justify-center gap-3">
-                  <div className="h-1 w-8 rounded-full" style={{ background: colors.red }} />
-                  <div className="h-1 w-16 rounded-full" style={{ background: colors.green }} />
-                  <div className="h-1 w-4 rounded-full" style={{ background: colors.purple }} />
                 </div>
               </div>
             </div>
@@ -588,39 +448,30 @@ export function Staff({
   const [content, setContent] = useState(() =>
     mergeStaffContent(contentOverride || defaultStaffContent)
   );
-  const [loading] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
 
   useEffect(() => {
     if (contentOverride) {
       setContent(mergeStaffContent(contentOverride));
-      return undefined;
+      return;
     }
 
     let alive = true;
-
     const loadStaffContent = async () => {
       try {
         const res = await axios.get(
           "https://school-website-backend-ixx2.onrender.com/api/site-content/staff",
           { timeout: 8000 }
         );
-
         if (!alive) return;
-
-        const savedContent = res.data?.data?.content || {};
-        setContent(mergeStaffContent(savedContent));
+        setContent(mergeStaffContent(res.data?.data?.content || {}));
       } catch (error) {
         console.error("Staff content load error:", error);
-
-        if (alive) {
-          setContent(mergeStaffContent(defaultStaffContent));
-        }
+        if (alive) setContent(mergeStaffContent(defaultStaffContent));
       }
     };
 
     loadStaffContent();
-
     return () => {
       alive = false;
     };
@@ -628,13 +479,11 @@ export function Staff({
 
   useEffect(() => {
     if (editMode) return;
-
     if (selectedStaff) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -643,21 +492,9 @@ export function Staff({
   const visibleStaff = content.staff.filter((staff) => staff.visible !== false);
 
   return (
-    <section
-      className="min-h-screen pt-32 pb-24 relative overflow-hidden"
-      style={{
-        background: `
-          radial-gradient(circle at top left, rgba(75,46,131,0.12), transparent 34%),
-          radial-gradient(circle at top right, rgba(22,138,58,0.10), transparent 36%),
-          radial-gradient(circle at bottom right, rgba(250,204,21,0.10), transparent 34%),
-          linear-gradient(180deg, #FFF8EE 0%, #F8FAFC 100%)
-        `,
-      }}
-    >
-      <div className="absolute top-24 left-10 w-40 h-40 bg-green-500/10 rounded-full blur-3xl" />
-      <div className="absolute top-72 right-16 w-52 h-52 bg-purple-500/10 rounded-full blur-3xl" />
-
+    <section className="min-h-screen pt-28 pb-24 bg-slate-50 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Header Section - Clean & Reduced Font Size */}
         <EditableWrap
           editMode={editMode}
           target={{ type: "pageHeader" }}
@@ -665,48 +502,29 @@ export function Staff({
           label="Edit staff heading"
         >
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55 }}
-            className="text-center mb-16 rounded-[2rem]"
-            style={{
-              outline: editMode ? "1px dashed rgba(56,189,248,0.55)" : "none",
-              outlineOffset: editMode ? "10px" : "0",
-            }}
+            transition={{ duration: 0.4 }}
+            className="text-center max-w-2xl mx-auto mb-12"
           >
-            <div
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-6 font-semibold"
-              style={{
-                background: "rgba(22,138,58,0.08)",
-                border: "1px solid rgba(22,138,58,0.18)",
-                color: colors.green,
-              }}
-            >
-              <Users size={16} />
-              {content.badgeText}
-            </div>
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-[#0A1628] text-white shadow-sm mb-3">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              {content.badgeText || "Faculty & Team"}
+            </span>
 
-            <h1
-              className="text-5xl md:text-7xl text-slate-950 leading-tight"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 850,
-                letterSpacing: "-0.045em",
-              }}
-            >
-              <HighlightedTitle
-                title={content.title}
-                highlightedWord={content.highlightedWord}
-              />
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0A1628] tracking-tight leading-tight">
+              {content.title || "Our Staff Members"}
             </h1>
 
-            <p className="mt-6 text-lg md:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
-              {content.subtitle}
+            <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed">
+              {content.subtitle ||
+                "Meet the dedicated educators, department heads, and leaders guiding students at Smriti Secondary English Boarding School."}
             </p>
           </motion.div>
         </EditableWrap>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
+        {/* 3 Simple Dual-Tone Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
           {content.stats.map((stat, index) => {
             const Icon = getStatIcon(stat.icon);
             return (
@@ -718,135 +536,115 @@ export function Staff({
                 label="Edit number card"
               >
                 <motion.div
-                  initial={{ opacity: 0, y: 24 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: index * 0.08 }}
-                  className="rounded-3xl p-8 text-center bg-white/90 backdrop-blur-xl"
-                  style={{
-                    border: editMode
-                      ? "2px dashed rgba(56,189,248,0.55)"
-                      : "1px solid rgba(15,23,42,0.08)",
-                    boxShadow:
-                      "0 22px 54px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.85)",
-                  }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  className="rounded-2xl p-6 text-center bg-white border border-slate-200/90 shadow-sm hover:border-slate-300 transition-all flex flex-col items-center justify-center"
                 >
-                  <Icon
-                    className="mx-auto mb-4"
-                    size={42}
-                    style={{ color: stat.color || colors.green }}
-                  />
-                  <h3 className="text-4xl font-black text-slate-950">
+                  <div className="w-10 h-10 rounded-xl bg-[#0A1628] text-white flex items-center justify-center mb-3 shadow-sm">
+                    <Icon className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-[#0A1628]">
                     {stat.value}
                   </h3>
-                  <p className="text-slate-500 mt-1">{stat.label}</p>
+                  <p className="text-xs font-semibold text-slate-500 mt-1">{stat.label}</p>
                 </motion.div>
               </EditableWrap>
             );
           })}
         </div>
 
-        {loading ? (
-          <div className="text-center text-slate-500 font-semibold">
-            Loading staff members...
-          </div>
-        ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {visibleStaff.map((staff, index) => {
-              const realIndex = content.staff.findIndex(
-                (member) => member.id === staff.id
-              );
+        {/* Staff Members 3-Column Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+          {visibleStaff.map((staff, index) => {
+            const realIndex = content.staff.findIndex((m) => m.id === staff.id);
 
-              return (
-                <motion.div
-                  key={staff.id}
-                  onClick={() => {
-                    if (!editMode) setSelectedStaff(staff);
-                  }}
-                  initial={{ opacity: 0, y: 26 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.45, delay: index * 0.05 }}
-                  className="group relative bg-white rounded-[2rem] overflow-hidden transition-all duration-300 hover:-translate-y-2 cursor-pointer"
-                  style={{
-                    border: editMode
-                      ? "2px dashed rgba(56,189,248,0.55)"
-                      : "1px solid rgba(15,23,42,0.08)",
-                    boxShadow:
-                      "0 22px 54px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.85)",
-                  }}
-                >
-                  <ActionButtons
-                    editMode={editMode}
-                    target={{ type: "staffCard", index: realIndex }}
-                    onEditTarget={onEditTarget}
-                    onDeleteTarget={onDeleteTarget}
-                    canDelete
-                    label="Edit staff member"
-                  />
+            return (
+              <motion.div
+                key={staff.id}
+                onClick={() => {
+                  if (!editMode) setSelectedStaff(staff);
+                }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.4, delay: index * 0.04 }}
+                className="group relative bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 cursor-pointer flex flex-col justify-between"
+              >
+                <ActionButtons
+                  editMode={editMode}
+                  target={{ type: "staffCard", index: realIndex }}
+                  onEditTarget={onEditTarget}
+                  onDeleteTarget={onDeleteTarget}
+                  canDelete
+                  label="Edit staff member"
+                />
 
-                  <div className="relative overflow-hidden">
-                    <StaffImage staff={staff} />
+                {/* Photo Frame */}
+                <div className="relative overflow-hidden bg-slate-100">
+                  <StaffImage staff={staff} />
 
+                  {editMode && (
                     <button
                       type="button"
                       onClick={(event) => {
-                        if (!editMode) return;
                         event.preventDefault();
                         event.stopPropagation();
                         onEditTarget({ type: "staffImage", index: realIndex });
                       }}
-                      className={`absolute top-5 left-5 z-20 h-11 w-11 rounded-full items-center justify-center shadow-xl transition-all ${
-                        editMode
-                          ? "flex opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
-                          : "hidden"
-                      }`}
-                      style={{
-                        background: "rgba(255,255,255,0.92)",
-                        color: colors.purple,
-                        border: "1px solid rgba(255,255,255,0.88)",
-                      }}
-                      title="Change staff photo"
+                      className="absolute top-3 left-3 z-20 h-8 w-8 rounded-full bg-[#0A1628] text-white flex items-center justify-center shadow-md hover:bg-blue-900 transition-colors"
+                      title="Change photo"
                     >
-                      <Camera className="w-4 h-4" />
+                      <Camera className="w-3.5 h-3.5" />
                     </button>
+                  )}
+                </div>
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
-                  </div>
+                {/* Card Content Body */}
+                <div className="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="inline-block px-2.5 py-1 rounded-md text-xs font-extrabold bg-slate-100 text-[#0A1628]">
+                        {staff.position}
+                      </span>
+                      {staff.qualification && (
+                        <span className="text-[11px] font-semibold text-slate-500">
+                          {staff.qualification}
+                        </span>
+                      )}
+                    </div>
 
-                  <div className="p-7">
-                    <h3 className="text-2xl font-black text-slate-950">
+                    <h3 className="text-lg font-extrabold text-[#0A1628] group-hover:text-blue-950 transition-colors">
                       {staff.name}
                     </h3>
-                    <p className="text-green-700 font-bold mt-1">
-                      {staff.position}
-                    </p>
 
                     {staff.description && (
-                      <p className="mt-3 text-slate-500 text-sm leading-relaxed line-clamp-2">
+                      <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
                         {staff.description}
                       </p>
                     )}
-
-                    <div className="mt-5 space-y-3">
-                      {staff.qualification && (
-                        <div className="flex items-center gap-3 text-slate-600">
-                          <BookOpen className="w-4 h-4 text-purple-700" />
-                          <span>{staff.qualification}</span>
-                        </div>
-                      )}
-                      {staff.phone && (
-                        <div className="flex items-center gap-3 text-slate-600">
-                          <Phone className="w-4 h-4 text-green-700" />
-                          <span>{staff.phone}</span>
-                        </div>
-                      )}
-                    </div>
                   </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
+
+                  {/* Contact Links Bar */}
+                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#0A1628]">
+                    {staff.phone ? (
+                      <span className="inline-flex items-center gap-1.5 text-slate-700 hover:text-blue-700 transition-colors">
+                        <Phone className="w-3.5 h-3.5 text-[#0A1628]" />
+                        {staff.phone}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 font-normal text-[11px]">Smriti Boarding</span>
+                    )}
+
+                    <span className="text-xs font-bold text-[#0A1628] group-hover:translate-x-0.5 transition-transform">
+                      View Profile ↗
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
 
         <AddStaffButton editMode={editMode} onAddTarget={onAddTarget} />
       </div>
@@ -859,5 +657,3 @@ export function Staff({
 }
 
 export default Staff;
-
-

@@ -76,7 +76,7 @@ const defaultGalleryContent = {
   title: "School in Action",
   highlightedText: "in Action",
   description:
-    "Explore classroom learning, school events, certificates, achievements, and student life at Baljagriti English Secondary School.",
+    "Explore classroom learning, school events, certificates, achievements, and student life at Smriti Secondary English Boarding School.",
 
   categories: DEFAULT_GALLERY_CATEGORIES,
   categoryDescriptions: fallbackCategoryDescriptions,

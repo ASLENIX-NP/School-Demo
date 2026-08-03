@@ -52,12 +52,12 @@ export const defaultAboutContent = {
   pageBadge: "About Us",
   pageTitle: "The Story Behind Every Classroom",
   pageSubtitle:
-    "Baljagriti Secondary English Boarding School has spent 35 years turning a single classroom in Hetauda-2, Makwanpur into a full academic community — from Play Group all the way to Grade 10.",
+    "Smriti Secondary English Boarding School has spent 35 years turning a single classroom in Hetauda-2, Makwanpur into a full academic community — from Play Group all the way to Grade 10.",
 
   storyBadge: "Our Story",
   storyTitle: "Built On Discipline, Grown By Community",
   storyParagraphs: [
-    "Established with a vision to provide quality education in Makwanpur, Baljagriti Secondary English Boarding School has grown into one of Hetauda's most respected academic institutions. What began as a small classroom is now home to thousands of students working toward the same goal: a strong, honest education.",
+    "Established with a vision to provide quality education in Makwanpur, Smriti Secondary English Boarding School has grown into one of Hetauda's most respected academic institutions. What began as a small classroom is now home to thousands of students working toward the same goal: a strong, honest education.",
     "That growth was never just about numbers. Every year, our teachers refine how they teach, our classrooms add what students need, and our results under the NEB SEE examinations reflect the same discipline we ask of our students — shown, not just spoken.",
   ],
   storyImageUrl:
@@ -65,7 +65,7 @@ export const defaultAboutContent = {
   storyImageZoom: 1,
   storyImageOffsetX: 0,
   storyImageOffsetY: 0,
-  storyImageTopTitle: "Baljagriti School",
+  storyImageTopTitle: "Smriti School",
   storyImageTopSubtitle: "Hetauda-2, Makwanpur",
   storyImageBottomTitle: "Quality Education Since 2046 BS",
   storyImageBottomDescription: "Image and caption can be managed from the admin dashboard.",
@@ -109,7 +109,7 @@ export const defaultAboutContent = {
       role: "Principal",
       title: "A Standard We Hold For Every Student",
       message:
-        "Welcome to Baljagriti Secondary English Boarding School. Our goal has never been to make every student the same — it's to give each one the discipline, confidence, and values to become fully capable, on their own terms. Every policy we set and every lesson we plan is built around that goal.",
+        "Welcome to Smriti Secondary English Boarding School. Our goal has never been to make every student the same — it's to give each one the discipline, confidence, and values to become fully capable, on their own terms. Every policy we set and every lesson we plan is built around that goal.",
       image: "",
       imageZoom: 1,
       imageOffsetX: 0,
@@ -156,7 +156,7 @@ export const defaultAboutContent = {
       id: 1,
       year: "2046 BS",
       title: "School Founded",
-      desc: "Baljagriti opens in Hetauda-2, Makwanpur with a single vision: quality English-medium education, close to home.",
+      desc: "Smriti Boarding School opens in Hetauda-2, Makwanpur with a single vision: quality English-medium education, close to home.",
       visible: true,
     },
     {
@@ -475,7 +475,7 @@ export default function About({
               {content.storyImageUrl ? (
                 <img
                   src={content.storyImageUrl}
-                  alt="Baljagriti school campus"
+                  alt="Smriti school campus"
                   draggable={false}
                   className="absolute inset-0"
                   style={getAdjustedImageStyle(content)}

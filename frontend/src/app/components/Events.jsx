@@ -132,7 +132,7 @@ function Events() {
             >
               Life at{" "}
               <span className="italic" style={{ color: colors.purple }}>
-                Baljagriti
+                Smriti
               </span>
             </h2>
           </div>

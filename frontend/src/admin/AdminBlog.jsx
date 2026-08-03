@@ -21,7 +21,7 @@ import {
   makeBlogSlug,
   mergeBlogContent,
   normalizeBlogPost,
-} from "../pages/Blogs";
+} from "../pages/blogUtils";
 
 const colors = {
   red: "#D71920",

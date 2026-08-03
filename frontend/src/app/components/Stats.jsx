@@ -81,7 +81,7 @@ export const defaultStatsSectionData = {
     badge: "Our Story",
     title: "Building Tomorrow's Leaders Today",
     paragraphs: [
-      "Established with a vision to provide quality education in Makawanpur, Baljagriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
+      "Established with a vision to provide quality education in Makawanpur, Smriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
       "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development.",
     ],
     buttonText: "Read Our Story",
@@ -90,7 +90,7 @@ export const defaultStatsSectionData = {
     imageZoom: 1,
     imageOffsetX: 0,
     imageOffsetY: 0,
-    imageTopTitle: "Baljagriti School",
+    imageTopTitle: "Smriti School",
     imageTopSubtitle: "Hetauda-2, Makwanpur",
     imageBottomTitle: "Quality Education Since 2046 BS",
     imageBottomDescription: "This image and text can later come from the admin dashboard.",
@@ -474,7 +474,7 @@ function Stats({ editMode = false, contentOverride = null, onEditTarget = () => 
                   <img
                     key={storyImageUrl}
                     src={storyImageUrl}
-                    alt="Baljagriti school"
+                    alt="Smriti school"
                     draggable={false}
                     className="absolute inset-0"
                     style={getStoryImageCropStyle(statsData.story)}

@@ -932,7 +932,7 @@ await axios.put(
                       onChange={(value) =>
                         updateModalField("schoolName", value)
                       }
-                      placeholder="Baljagriti"
+                      placeholder="Smriti"
                     />
                   )}
 
