@@ -3,24 +3,19 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import ScrollToTop from "./ScrollToTop";
 import ProtectedAdminRoute from "../../admin/ProtectedAdminRoute";
 
-const lazyNamed = (loader, exportName) =>
-  lazy(() =>
-    loader().then((module) => ({
-      default: module[exportName],
-    }))
-  );
+// --- Lazy loaded public components ---
+const Navbar = lazy(() => import("./Navbar"));
+const Hero = lazy(() => import("./Hero"));
+const Stats = lazy(() => import("./Stats"));
+const About = lazy(() => import("./About"));
+const Academics = lazy(() => import("./Academics"));
+const Admissions = lazy(() => import("./Admissions"));
+const Events = lazy(() => import("./Events"));
+const Gallery = lazy(() => import("./Gallery"));
+const Contact = lazy(() => import("./Contact"));
+const Footer = lazy(() => import("./Footer"));
 
-const Navbar = lazyNamed(() => import("./Navbar"), "Navbar");
-const Hero = lazyNamed(() => import("./Hero"), "Hero");
-const Stats = lazyNamed(() => import("./Stats"), "Stats");
-const About = lazyNamed(() => import("./About"), "About");
-const Academics = lazyNamed(() => import("./Academics"), "Academics");
-const Admissions = lazyNamed(() => import("./Admissions"), "Admissions");
-const Events = lazyNamed(() => import("./Events"), "Events");
-const Gallery = lazyNamed(() => import("./Gallery"), "Gallery");
-const Contact = lazyNamed(() => import("./Contact"), "Contact");
-const Footer = lazyNamed(() => import("./Footer"), "Footer");
-
+// --- Lazy loaded public pages ---
 const Notices = lazy(() => import("../../pages/Notices"));
 const Calendar = lazy(() => import("../../pages/Calendar"));
 const Blogs = lazy(() => import("../../pages/Blogs"));
@@ -29,6 +24,7 @@ const NoticeDetail = lazy(() => import("../../pages/NoticeDetail"));
 const Staff = lazy(() => import("../../pages/Staff"));
 const Facilities = lazy(() => import("../../pages/Facilities"));
 
+// --- Lazy loaded admin pages ---
 const AdminAbout = lazy(() => import("../../admin/AdminAbout"));
 const AdminLogin = lazy(() => import("../../admin/AdminLogin"));
 const AdminForgotPassword = lazy(() => import("../../admin/AdminForgotPassword"));

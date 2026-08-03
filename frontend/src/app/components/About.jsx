@@ -1,92 +1,115 @@
+// About.jsx
+// Single-file About page: JSX + inline/Tailwind styling, matching the
+// visual language established by HomePage.jsx / Stats.jsx (same palette,
+// same card system, same decorative background treatment).
+
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { motion } from "motion/react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
+  Award,
   Camera,
-  Image as ImageIcon,
+  Compass,
+  Eye,
+  Heart,
+  ImageIcon,
+  Lightbulb,
   Pencil,
   Plus,
   Quote,
   Sparkles,
+  Target,
   Trash2,
   UserRound,
 } from "lucide-react";
 
-const colors = {
-  red: "#1E3A5F",
-  green: "#2D6A4F",
-  purple: "#C9A84C",
-  softPurple: "#E8D5A3",
+// ---------------------------------------------------------------------
+// Palette — identical to HomePage.jsx / Stats.jsx so the About page reads
+// as the same site, not a different theme.
+// ---------------------------------------------------------------------
+const palette = {
+  primary: "#1E3A5F",
+  secondary: "#2D6A4F",
+  accent: "#E9C46A",
+  accent2: "#F4A261",
+  light: "#F8F9FA",
   dark: "#1A1A2E",
-  cream: "#FFF8EE",
-  lightGreen: "#EAF7EF",
-  lightPurple: "#FBF3DF",
-  gold: "#C9A84C",
-  cyan: "#E8D5A3",
-  orange: "#F4A261",
+  gray: "#6C757D",
+  lightGray: "#E9ECEF",
+  white: "#FFFFFF",
+  gradient1: "linear-gradient(135deg, #1E3A5F 0%, #2D6A4F 100%)",
+  gradient2: "linear-gradient(135deg, #E9C46A 0%, #F4A261 100%)",
+  gradient3: "linear-gradient(135deg, #2D6A4F 0%, #1E3A5F 100%)",
 };
 
+const API_URL = "https://school-website-backend-ixx2.onrender.com";
+
+// ---------------------------------------------------------------------
+// Default content
+// ---------------------------------------------------------------------
 export const defaultAboutContent = {
-  pageTitle: "About Us",
+  pageBadge: "About Us",
+  pageTitle: "The Story Behind Every Classroom",
   pageSubtitle:
-    "Learn about Baljagriti English Secondary School, our values, and our commitment to quality education.",
+    "Baljagriti Secondary English Boarding School has spent 35 years turning a single classroom in Hetauda-2, Makwanpur into a full academic community — from Play Group all the way to Grade 10.",
 
   storyBadge: "Our Story",
-  storyTitle: "Building Tomorrow's Leaders Today",
+  storyTitle: "Built On Discipline, Grown By Community",
   storyParagraphs: [
-    "Baljagriti English Secondary School, located in the heart of Makwanpur, Nepal, has been a beacon of quality education for many years. What began as a small school with a strong vision has grown into a thriving institution serving students from Play Group to Grade 10.",
-    "We take pride in our dedicated team of experienced educators who work tirelessly to ensure every child receives the attention, guidance, and learning environment they need to grow academically and personally.",
+    "Established with a vision to provide quality education in Makwanpur, Baljagriti Secondary English Boarding School has grown into one of Hetauda's most respected academic institutions. What began as a small classroom is now home to thousands of students working toward the same goal: a strong, honest education.",
+    "That growth was never just about numbers. Every year, our teachers refine how they teach, our classrooms add what students need, and our results under the NEB SEE examinations reflect the same discipline we ask of our students — shown, not just spoken.",
   ],
- 
-    
-  storyImageAlt: "School campus",
-  storyImageTitle: "School Campus",
-  storyImageSubtitle: "Image can later be managed from admin dashboard",
+  storyImageUrl:
+    "https://images.unsplash.com/photo-1588072432836-e10032774350?w=1000&h=800&fit=crop&auto=format",
   storyImageZoom: 1,
   storyImageOffsetX: 0,
   storyImageOffsetY: 0,
+  storyImageTopTitle: "Baljagriti School",
+  storyImageTopSubtitle: "Hetauda-2, Makwanpur",
+  storyImageBottomTitle: "Quality Education Since 2046 BS",
+  storyImageBottomDescription: "Image and caption can be managed from the admin dashboard.",
 
-  pillarBadge: "Our Core Values",
-  pillarTitle: "What Makes Us Different",
+  pillarBadge: "What We Value",
+  pillarTitle: "Three Commitments Behind Every Lesson",
+  pillarDescription:
+    "These aren't slogans on a wall — they're the standard every teacher is held to, every day.",
   pillars: [
     {
       id: 1,
       icon: "award",
       label: "Academic Excellence",
-      desc: "Focused classroom learning that helps students build a strong academic foundation from early years to Grade 10.",
-      color: "#1E3A5F",
+      desc: "Structured, focused teaching from Play Group to Grade 10 that consistently produces top NEB SEE results and GPA 4.00 achievers.",
       visible: true,
     },
     {
       id: 2,
       icon: "heart",
       label: "Holistic Development",
-      desc: "A nurturing and child-friendly environment where students grow academically, personally, socially, and morally.",
-      color: "#2D6A4F",
+      desc: "A nurturing, child-first environment where students grow socially, morally, and emotionally — not just academically.",
       visible: true,
     },
     {
       id: 3,
       icon: "lightbulb",
       label: "Creative & Practical Learning",
-      desc: "Extra-curricular activities, competitions, sports, arts, and school programs help students explore their talents.",
-      color: "#C9A84C",
+      desc: "Sports, arts, digital learning, and competitions give students room to discover strengths no exam alone could reveal.",
       visible: true,
     },
   ],
 
-  leadershipBadge: "Leadership Messages",
-  leadershipTitle: "Messages From Leadership",
+  leadershipBadge: "Leadership",
+  leadershipTitle: "Messages From Our Leadership",
   leadershipDescription:
-    "Words from school leadership guiding students toward academic excellence, discipline, values, and lifelong learning.",
+    "The people setting the standard for academic discipline, values, and care across every classroom.",
   messages: [
     {
       id: 1,
       name: "Principal",
       role: "Principal",
-      title: "Principal's Message",
+      title: "A Standard We Hold For Every Student",
       message:
-        "Welcome to Baljagriti English Secondary School. We are committed to nurturing every child into a confident, capable, disciplined, and compassionate individual. Our goal is to provide quality education with strong values, creativity, and academic excellence.",
+        "Welcome to Baljagriti Secondary English Boarding School. Our goal has never been to make every student the same — it's to give each one the discipline, confidence, and values to become fully capable, on their own terms. Every policy we set and every lesson we plan is built around that goal.",
       image: "",
       imageZoom: 1,
       imageOffsetX: 0,
@@ -97,9 +120,9 @@ export const defaultAboutContent = {
       id: 2,
       name: "Vice Principal",
       role: "Vice Principal",
-      title: "Vice Principal's Message",
+      title: "Support Behind Every Result",
       message:
-        "Our team works tirelessly to provide a safe, inspiring, and academically rigorous environment for every student. We believe every child deserves care, guidance, and opportunities to grow academically, socially, and personally.",
+        "Strong SEE results don't happen in exam week — they happen in the months of steady classroom work before it. Our staff track each student's progress closely, so support arrives before a struggle becomes a pattern. That's the work behind our numbers.",
       image: "",
       imageZoom: 1,
       imageOffsetX: 0,
@@ -108,64 +131,70 @@ export const defaultAboutContent = {
     },
   ],
 
+  missionVisionBadge: "What Guides Us",
   missionVision: [
     {
       id: 1,
       icon: "target",
       title: "Our Mission",
-      desc: "To provide a safe, nurturing, and academically rigorous learning environment that empowers students to become confident, creative, and responsible citizens equipped for the challenges of the modern world.",
-      color: "#C9A84C",
+      desc: "To provide a safe, nurturing, and academically rigorous learning environment that equips every student with the confidence, creativity, and responsibility to meet the challenges of a changing world.",
       visible: true,
     },
     {
       id: 2,
       icon: "eye",
       title: "Our Vision",
-      desc: "To be a leading educational institution in Makwanpur, recognized for academic excellence, holistic development, and producing leaders who contribute positively to society and the nation.",
-      color: "#2D6A4F",
+      desc: "To be Makwanpur's leading educational institution — recognized for academic excellence, holistic development, and graduates who lead with integrity wherever they go.",
       visible: true,
     },
   ],
 
-  timelineBadge: "Timeline",
-  journeyTitle: "Our Journey",
+  journeyBadge: "Our Journey",
+  journeyTitle: "35 Years, Year By Year",
   journey: [
     {
       id: 1,
       year: "2046 BS",
       title: "School Founded",
-      desc: "Baljagriti English Secondary School was established in Makwanpur with a vision to provide quality English-medium education.",
+      desc: "Baljagriti opens in Hetauda-2, Makwanpur with a single vision: quality English-medium education, close to home.",
       visible: true,
     },
     {
       id: 2,
-      year: "Secondary Level",
-      title: "Expanded to Grade 10",
-      desc: "The school expanded its academic structure to support students from early learning levels up to Grade 10.",
+      year: "Early Growth",
+      title: "Expanded To Grade 10",
+      desc: "Rising demand pushed the school to extend its academic structure from early learning through Grade 10.",
       visible: true,
     },
     {
       id: 3,
       year: "Academic Growth",
-      title: "Strong SEE Foundation",
-      desc: "Students continued building strong academic results through focused classroom teaching, discipline, and guided learning.",
+      title: "Consistent NEB SEE Results",
+      desc: "Focused classroom teaching and steady discipline began producing some of the region's strongest SEE results.",
       visible: true,
     },
     {
       id: 4,
       year: "Today",
-      title: "Growing Learning Community",
-      desc: "The school community continues to grow with dedicated educators, modern facilities, and a focus on holistic student development.",
+      title: "3,800+ Students Strong",
+      desc: "A growing community of students, 240+ educators, and a shared focus on academic and personal excellence.",
       visible: true,
     },
   ],
+
+  ctaTitle: "Come See What 35 Years Of Discipline Looks Like",
+  ctaDescription:
+    "Visit our campus in Hetauda-2, meet our teachers, and see the classrooms behind our SEE results for yourself.",
+  ctaButtonText: "Plan A Visit",
+  ctaButtonLink: "/contact",
 };
 
+// ---------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------
 function clampNumber(value, min, max, fallback) {
   const numberValue = Number(value);
-
   if (!Number.isFinite(numberValue)) return fallback;
-
   return Math.min(max, Math.max(min, numberValue));
 }
 
@@ -175,8 +204,9 @@ function getAdjustedImageStyle(source = {}) {
   const y = clampNumber(source.imageOffsetY, -60, 60, 0);
   const objectX = Math.min(100, Math.max(0, 50 - x));
   const objectY = Math.min(100, Math.max(0, 50 - y));
-
   return {
+    width: "100%",
+    height: "100%",
     objectFit: "cover",
     objectPosition: `${objectX}% ${objectY}%`,
     transform: `scale(${zoom})`,
@@ -187,7 +217,6 @@ function getAdjustedImageStyle(source = {}) {
 
 function normalizeArray(savedArray, defaultArray) {
   if (!Array.isArray(savedArray)) return defaultArray;
-
   return savedArray.map((item, index) => ({
     ...(defaultArray[index] || {}),
     ...item,
@@ -196,15 +225,14 @@ function normalizeArray(savedArray, defaultArray) {
 }
 
 export function mergeAboutContent(saved = {}) {
-  const messages = normalizeArray(
-    saved.messages,
-    defaultAboutContent.messages
-  ).map((message) => ({
-    ...message,
-    imageZoom: clampNumber(message.imageZoom, 1, 3, 1),
-    imageOffsetX: clampNumber(message.imageOffsetX, -60, 60, 0),
-    imageOffsetY: clampNumber(message.imageOffsetY, -60, 60, 0),
-  }));
+  const messages = normalizeArray(saved.messages, defaultAboutContent.messages).map(
+    (message) => ({
+      ...message,
+      imageZoom: clampNumber(message.imageZoom, 1, 3, 1),
+      imageOffsetX: clampNumber(message.imageOffsetX, -60, 60, 0),
+      imageOffsetY: clampNumber(message.imageOffsetY, -60, 60, 0),
+    })
+  );
 
   return {
     ...defaultAboutContent,
@@ -217,65 +245,57 @@ export function mergeAboutContent(saved = {}) {
     storyImageOffsetY: clampNumber(saved.storyImageOffsetY, -60, 60, 0),
     pillars: normalizeArray(saved.pillars, defaultAboutContent.pillars),
     messages,
-    missionVision: normalizeArray(
-      saved.missionVision,
-      defaultAboutContent.missionVision
-    ),
+    missionVision: normalizeArray(saved.missionVision, defaultAboutContent.missionVision),
     journey: normalizeArray(saved.journey, defaultAboutContent.journey),
   };
 }
 
-function ActionButtons({
-  editMode,
-  target,
-  onEditTarget,
-  onDeleteTarget,
-  icon: Icon = Pencil,
-  label = "Edit",
-  canDelete = false,
-}) {
+const ICONS = {
+  award: Award,
+  heart: Heart,
+  lightbulb: Lightbulb,
+  target: Target,
+  eye: Eye,
+};
+
+// ---------------------------------------------------------------------
+// Shared editing chrome (mirrors the pattern used in Stats.jsx)
+// ---------------------------------------------------------------------
+function EditIconButton({ editMode, target, onEditTarget, icon: Icon = Pencil, label = "Edit" }) {
   if (!editMode) return null;
-
   return (
-    <div className="absolute -top-3 -right-3 z-[120] flex items-center gap-2 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
-      <button
-        type="button"
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onEditTarget(target);
-        }}
-        className="rounded-full w-9 h-9 flex items-center justify-center shadow-xl"
-        style={{
-          background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-          color: "#020617",
-          border: "1px solid rgba(255,255,255,0.85)",
-        }}
-        title={label}
-      >
-        <Icon className="w-4 h-4" />
-      </button>
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onEditTarget(target);
+      }}
+      className="absolute -top-2 -right-2 z-[90] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
+      style={{ background: palette.gradient2, color: palette.dark, border: `2px solid ${palette.white}` }}
+      title={label}
+    >
+      <Icon className="w-3.5 h-3.5" />
+    </button>
+  );
+}
 
-      {canDelete && (
-        <button
-          type="button"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onDeleteTarget(target);
-          }}
-          className="rounded-full w-9 h-9 flex items-center justify-center shadow-xl"
-          style={{
-            background: "linear-gradient(135deg, #FEE2E2, #FCA5A5)",
-            color: colors.red,
-            border: "1px solid rgba(255,255,255,0.85)",
-          }}
-          title="Delete"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      )}
-    </div>
+function DeleteIconButton({ editMode, target, onDeleteTarget, label = "Delete" }) {
+  if (!editMode) return null;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDeleteTarget(target);
+      }}
+      className="absolute -top-2 -right-12 z-[90] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
+      style={{ background: "#FCE4E4", color: "#B3261E", border: `2px solid ${palette.white}` }}
+      title={label}
+    >
+      <Trash2 className="w-3.5 h-3.5" />
+    </button>
   );
 }
 
@@ -291,40 +311,29 @@ function EditableWrap({
   children,
 }) {
   if (!editMode) return children;
-
   return (
     <div className={`relative group ${className}`}>
       {children}
-      <ActionButtons
-        editMode={editMode}
-        target={target}
-        onEditTarget={onEditTarget}
-        onDeleteTarget={onDeleteTarget}
-        icon={icon}
-        label={label}
-        canDelete={canDelete}
-      />
+      <EditIconButton editMode={editMode} target={target} onEditTarget={onEditTarget} icon={icon} label={label} />
+      {canDelete && (
+        <DeleteIconButton editMode={editMode} target={target} onDeleteTarget={onDeleteTarget} label="Delete" />
+      )}
     </div>
   );
 }
 
 function SectionAddButton({ editMode, label, type, onAddTarget }) {
   if (!editMode) return null;
-
   return (
     <button
       type="button"
-      onClick={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
         onAddTarget(type);
       }}
-      className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-black transition-all hover:-translate-y-0.5"
-      style={{
-        background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-        color: "#020617",
-        boxShadow: "0 12px 30px rgba(201,168,76,0.20)",
-      }}
+      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
+      style={{ color: palette.white, background: palette.gradient1, boxShadow: "0 8px 20px rgba(30,58,95,0.22)" }}
     >
       <Plus className="w-4 h-4" />
       {label}
@@ -332,696 +341,215 @@ function SectionAddButton({ editMode, label, type, onAddTarget }) {
   );
 }
 
-function AboutImage({ src, alt, imageData = {} }) {
-  if (src) {
-    return (
-      <img
-        src={src}
-        alt={alt}
-        className="w-full h-full object-cover will-change-transform"
-        style={getAdjustedImageStyle(imageData)}
-      />
-    );
-  }
-
+// ---------------------------------------------------------------------
+// Shared visual building blocks (match Stats.jsx conventions)
+// ---------------------------------------------------------------------
+function SectionHeader({ badge, badgeColor = palette.primary, badgeBg = "rgba(30,58,95,0.08)", title, description }) {
   return (
-    <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-      <ImageIcon className="w-20 h-20 text-slate-300" />
-    </div>
-  );
-}
-
-function LeadershipImagePanel({ person, index, editMode, onEditTarget }) {
-  return (
-    <div
-      className="w-full md:w-[320px] lg:w-[360px] flex-shrink-0 relative"
-      style={{
-        background:
-          "linear-gradient(145deg, rgba(255,248,238,0.96), rgba(250,240,214,0.82))",
-        borderRight: "1px solid rgba(11,16,32,0.08)",
-      }}
-    >
-      <EditableWrap
-        editMode={editMode}
-        target={{ type: "leadershipPhoto", index }}
-        onEditTarget={onEditTarget}
-        icon={Camera}
-        label="Change leadership photo"
-        className="h-full"
+    <div className="text-center max-w-3xl mx-auto mb-12">
+      <span
+        className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
+        style={{ background: badgeBg, color: badgeColor }}
       >
-        <div className="h-full min-h-[280px] md:min-h-[360px] overflow-hidden">
-          {person.image ? (
-            <img
-              src={person.image}
-              alt={person.name}
-              className="w-full h-full object-cover will-change-transform"
-              style={getAdjustedImageStyle(person)}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-slate-100">
-              <UserRound className="w-16 h-16 text-slate-300" />
-            </div>
-          )}
-        </div>
-      </EditableWrap>
+        {badge}
+      </span>
+      <h2
+        className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
+        style={{ color: palette.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.02em", lineHeight: 1.1 }}
+      >
+        {title}
+      </h2>
+      {description && (
+        <p className="text-lg leading-relaxed max-w-2xl mx-auto" style={{ color: palette.gray }}>
+          {description}
+        </p>
+      )}
+      <div className="w-16 h-1 rounded-full mx-auto mt-4" style={{ background: palette.gradient2 }} />
     </div>
   );
 }
 
-function shouldShowReadMore(message = "") {
-  return String(message || "").trim().length > 170;
-}
-
-function getLeadershipMessageUrl(person = {}, index = 0) {
-  const id = encodeURIComponent(String(person.id || index));
-  return `/about?message=${id}`;
-}
-
-function LeadershipSignature({ person, editMode = false }) {
-  const name = String(person?.name || "").trim();
-  const role = String(person?.role || "").trim();
-
-  if (!name && !role && !editMode) return null;
-
+function DecorativeBackdrop() {
   return (
-    <div className="mt-1 text-right">
-      <div className="text-base md:text-lg font-black text-slate-950">
-        - {name || "Name not set"}
-      </div>
-
-      <div className="mt-1 text-xs md:text-sm font-black uppercase tracking-[0.16em] text-slate-400">
-        {role || "Post not set"}
-      </div>
-    </div>
-  );
-}
-
-function LeadershipMessageDetailPage({ person }) {
-  return (
-    <section
-      className="pt-28 pb-24 relative overflow-hidden min-h-screen"
-      style={{
-        background: `
-          radial-gradient(circle at top right, rgba(201,168,76,0.16), transparent 34%),
-          radial-gradient(circle at bottom left, rgba(45,106,79,0.12), transparent 32%),
-          linear-gradient(180deg, #FFF8EE 0%, #FBF3DF 100%)
-        `,
-      }}
-    >
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-5" style={{ background: palette.primary }} />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-5" style={{ background: palette.secondary }} />
       <div
-        className="absolute top-0 right-0 w-[520px] h-[520px] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(201,168,76,0.12), transparent 70%)",
-          filter: "blur(8px)",
-        }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.02]"
+        style={{ background: palette.accent }}
       />
-
-      <div className="max-w-5xl mx-auto px-6 relative z-10">
-        <a
-          href="/about"
-          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black mb-8 transition-all hover:-translate-y-0.5"
-          style={{
-            background: "rgba(255,255,255,0.78)",
-            color: colors.dark,
-            border: "1px solid rgba(11,16,32,0.08)",
-            boxShadow: "0 12px 32px rgba(11,16,32,0.07)",
-          }}
-        >
-          ← Back to About
-        </a>
-
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="rounded-[34px] overflow-hidden"
-          style={{
-            background:
-              "linear-gradient(145deg, rgba(255,255,255,0.97), rgba(255,255,255,0.84))",
-            border: "1px solid rgba(11,16,32,0.08)",
-            boxShadow:
-              "0 28px 80px rgba(11,16,32,0.10), inset 0 1px 0 rgba(255,255,255,0.85)",
-            backdropFilter: "blur(18px)",
-          }}
-        >
-          <div className="relative p-6 md:p-8 lg:p-10">
-            <Quote
-              className="absolute right-8 top-8 w-16 h-16 opacity-10"
-              style={{ color: colors.purple }}
-            />
-
-            <div className="flex flex-col gap-7 md:flex-row md:items-start">
-              <div className="shrink-0">
-                <div
-                  className="h-[220px] w-[220px] overflow-hidden rounded-[28px] md:h-[250px] md:w-[250px]"
-                  style={{
-                    background:
-                      "linear-gradient(145deg, rgba(255,248,238,0.96), rgba(250,240,214,0.82))",
-                    border: "1px solid rgba(11,16,32,0.08)",
-                    boxShadow: "0 18px 42px rgba(11,16,32,0.10)",
-                  }}
-                >
-                  {person.image ? (
-                    <img
-                      src={person.image}
-                      alt={person.name || person.title || "Leadership"}
-                      className="h-full w-full object-cover will-change-transform"
-                      style={getAdjustedImageStyle(person)}
-                    />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-slate-100">
-                      <UserRound className="w-16 h-16 text-slate-300" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="min-w-0 flex-1 pt-1 md:pt-4">
-                {person.role && (
-                  <div
-                    className="inline-flex items-center rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-[0.16em] mb-5"
-                    style={{
-                      background: "rgba(30,58,95,0.08)",
-                      color: colors.red,
-                      border: "1px solid rgba(30,58,95,0.16)",
-                    }}
-                  >
-                    {person.role}
-                  </div>
-                )}
-
-                <h1
-                  className="text-4xl md:text-5xl mb-6"
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 850,
-                    color: colors.dark,
-                    letterSpacing: "-0.045em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  {person.title || "Leadership Message"}
-                </h1>
-
-                <LeadershipSignature person={person} />
-              </div>
-            </div>
-
-            <div
-              className="about-long-text whitespace-pre-line mt-8 rounded-[28px] p-5 text-base leading-[1.9] text-slate-600 md:p-7 md:text-lg"
-              style={{
-                background: "rgba(248,250,252,0.78)",
-                border: "1px solid rgba(15,23,42,0.06)",
-              }}
-            >
-              {person.message}
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
+    </div>
   );
 }
 
-function MessageCard({
-  person,
-  index,
-  editMode,
-  onEditTarget,
-  onDeleteTarget,
-}) {
-  const messageText = String(person.message || "").trim();
-  const isLongMessage = shouldShowReadMore(messageText);
-
-  return (
-    <EditableWrap
-      editMode={editMode}
-      target={{ type: "leadershipMessage", index }}
-      onEditTarget={onEditTarget}
-      onDeleteTarget={onDeleteTarget}
-      canDelete
-      label="Edit leadership message"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 34 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: index * 0.12 }}
-        className="rounded-3xl overflow-hidden flex flex-col md:flex-row"
-        style={{
-          background:
-            "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.78))",
-          border: editMode
-            ? "1px dashed rgba(201,168,76,0.65)"
-            : "1px solid rgba(11,16,32,0.08)",
-          boxShadow:
-            "0 22px 62px rgba(11,16,32,0.08), inset 0 1px 0 rgba(255,255,255,0.85)",
-          backdropFilter: "blur(18px)",
-        }}
-      >
-        <LeadershipImagePanel
-          person={person}
-          index={index}
-          editMode={editMode}
-          onEditTarget={onEditTarget}
-        />
-
-        <div className="relative flex-1 p-8 md:p-10 lg:p-12">
-          <Quote
-            className="absolute right-8 top-8 w-12 h-12 opacity-10"
-            style={{ color: colors.purple }}
-          />
-
-          <h2
-            className="text-3xl md:text-4xl mb-5"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 850,
-              color: colors.dark,
-              letterSpacing: "-0.035em",
-            }}
-          >
-            {person.title || (editMode ? "Message title is empty" : "")}
-          </h2>
-
-          <p
-            className="about-long-text text-base md:text-lg leading-[1.85] text-slate-500 max-w-5xl"
-            style={{
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              maxHeight: "5.55em",
-            }}
-          >
-            {messageText ||
-              (editMode
-                ? "Message text is empty. Click edit to add message."
-                : "")}
-          </p>
-
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              {isLongMessage && !editMode && (
-                <a
-                  href={getLeadershipMessageUrl(person, index)}
-                  className="inline-flex items-center rounded-full px-5 py-2.5 text-sm font-black transition-all hover:-translate-y-0.5"
-                  style={{
-                    background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                    color: colors.dark,
-                    boxShadow: "0 14px 34px rgba(201,168,76,0.22)",
-                  }}
-                >
-                  Read More
-                </a>
-              )}
-            </div>
-
-            <LeadershipSignature person={person} editMode={editMode} />
-          </div>
-        </div>
-      </motion.div>
-    </EditableWrap>
-  );
-}
-
-export function About({
+// ---------------------------------------------------------------------
+// About page
+// ---------------------------------------------------------------------
+export default function About({
   editMode = false,
   contentOverride = null,
   onEditTarget = () => {},
   onDeleteTarget = () => {},
   onAddTarget = () => {},
 }) {
-  const [content, setContent] = useState(() =>
-    mergeAboutContent(contentOverride || defaultAboutContent)
-  );
+  const [content, setContent] = useState(() => mergeAboutContent(contentOverride || defaultAboutContent));
+  const [selectedLeader, setSelectedLeader] = useState(null);
 
   useEffect(() => {
     if (contentOverride) {
       setContent(mergeAboutContent(contentOverride));
       return undefined;
     }
-
     let alive = true;
-
     const loadAboutContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/about",
-          { timeout: 8000 }
-        );
-
+        const res = await axios.get(`${API_URL}/api/site-content/about`, { timeout: 10000 });
         if (!alive) return;
-
-        const savedContent = res.data?.data?.content || {};
-        setContent(mergeAboutContent(savedContent));
+        const saved = res.data?.data?.content || {};
+        setContent(mergeAboutContent(saved));
       } catch (error) {
         console.error("About content load error:", error);
-
-        if (alive) {
-          setContent(mergeAboutContent(defaultAboutContent));
-        }
+        if (alive) setContent(mergeAboutContent(defaultAboutContent));
       }
     };
-
     loadAboutContent();
-
     return () => {
       alive = false;
     };
   }, [contentOverride]);
 
-  const visiblePillars = (content.pillars || []).filter(
-    (item) => item.visible !== false
-  );
-  const visibleMissionVision = (content.missionVision || []).filter(
-    (item) => item.visible !== false
-  );
-  const visibleJourney = (content.journey || []).filter(
-    (item) => item.visible !== false
-  );
-  const visibleMessages = (content.messages || []).filter(
-    (item) => item.visible !== false
-  );
+  const visiblePillars = (content.pillars || []).filter((p) => p.visible !== false);
+  const visibleMessages = (content.messages || []).filter((m) => m.visible !== false);
+  const visibleMissionVision = (content.missionVision || []).filter((mv) => mv.visible !== false);
+  const visibleJourney = (content.journey || []).filter((j) => j.visible !== false);
 
-  const selectedMessageId =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("message")
-      : "";
-
-  const selectedMessage =
-    !editMode && selectedMessageId
-      ? visibleMessages.find(
-          (person, index) =>
-            String(person.id || index) === String(selectedMessageId)
-        )
-      : null;
-
-  if (selectedMessage) {
-    return <LeadershipMessageDetailPage person={selectedMessage} />;
-  }
+  const cardTints = [palette.primary, palette.secondary, palette.accent2];
+  const journeyColors = [palette.primary, palette.accent2, palette.accent, palette.secondary];
 
   return (
-    <section
-      id="about"
-      className="pt-28 pb-28 relative overflow-hidden min-h-screen"
-      style={{
-        background: `
-          radial-gradient(circle at top right, rgba(201,168,76,0.18), transparent 34%),
-          radial-gradient(circle at bottom left, rgba(45,106,79,0.14), transparent 32%),
-          linear-gradient(180deg, #FFF8EE 0%, #FBF3DF 100%)
-        `,
-      }}
-    >
+    <section className="relative overflow-hidden py-16 md:py-24" style={{ background: palette.light }}>
+      <DecorativeBackdrop />
 
-      <style>{`
-        .about-long-text {
-          text-align: justify;
-          text-justify: inter-word;
-          overflow-wrap: break-word;
-          word-break: normal;
-          hyphens: auto;
-        }
-
-        @media (max-width: 640px) {
-          .about-long-text {
-            text-align: left;
-            hyphens: none;
-          }
-        }
-      `}</style>
-
-      <div
-        className="absolute top-0 right-0 w-[520px] h-[520px] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(201,168,76,0.12), transparent 70%)",
-          filter: "blur(8px)",
-        }}
-      />
-
-      <div
-        className="absolute bottom-0 left-0 w-[420px] h-[420px] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(45,106,79,0.11), transparent 70%)",
-          filter: "blur(8px)",
-        }}
-      />
-
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <EditableWrap
-          editMode={editMode}
-          target={{ type: "pageHeader" }}
-          onEditTarget={onEditTarget}
-          label="Edit page heading"
-        >
+      <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8">
+        {/* ================= PAGE HEADER ================= */}
+        <EditableWrap editMode={editMode} target={{ type: "pageHeader" }} onEditTarget={onEditTarget} label="Edit page header">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65 }}
-            className="text-center mb-16 rounded-3xl"
-            style={{
-              outline: editMode
-                ? "1px dashed rgba(201,168,76,0.5)"
-                : "none",
-              outlineOffset: editMode ? "8px" : "0",
-            }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-3xl mx-auto mb-16 md:mb-24"
           >
-            <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-5"
-              style={{
-                background: "rgba(30,58,95,0.07)",
-                color: colors.red,
-                border: "1px solid rgba(30,58,95,0.14)",
-              }}
+            <span
+              className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
+              style={{ background: "rgba(30, 58, 95, 0.08)", color: palette.primary }}
             >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ background: colors.red }}
-              />
-              School Profile
-            </div>
-
+              {content.pageBadge}
+            </span>
             <h1
-              className="text-5xl md:text-6xl mb-4"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 850,
-                color: colors.dark,
-                letterSpacing: "-0.045em",
-              }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-5"
+              style={{ color: palette.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.02em", lineHeight: 1.08 }}
             >
               {content.pageTitle}
             </h1>
-
-            <div
-              className="w-24 h-1.5 rounded-full mx-auto mb-5"
-              style={{
-                background: `linear-gradient(90deg, ${colors.red}, ${colors.gold}, ${colors.green})`,
-              }}
-            />
-
-            <p className="max-w-3xl mx-auto text-base md:text-lg text-slate-500 leading-[1.8]">
+            <p className="text-lg leading-relaxed" style={{ color: palette.gray }}>
               {content.pageSubtitle}
             </p>
+            <div className="w-16 h-1 rounded-full mx-auto mt-6" style={{ background: palette.gradient2 }} />
           </motion.div>
         </EditableWrap>
 
-        <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "storyText" }}
-            onEditTarget={onEditTarget}
-            label="Edit story text"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 35 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="rounded-3xl"
-              style={{
-                outline: editMode
-                  ? "1px dashed rgba(201,168,76,0.5)"
-                  : "none",
-                outlineOffset: editMode ? "8px" : "0",
-              }}
+        {/* ================= OUR STORY ================= */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center mb-16 md:mb-24"
+        >
+          <EditableWrap editMode={editMode} target={{ type: "storyImage" }} onEditTarget={onEditTarget} icon={Camera} label="Change story image">
+            <div
+              className="relative rounded-2xl overflow-hidden min-h-[300px] md:min-h-[420px]"
+              style={{ background: palette.dark, boxShadow: "0 20px 60px rgba(0,0,0,0.12)" }}
             >
+              {content.storyImageUrl ? (
+                <img
+                  src={content.storyImageUrl}
+                  alt="Baljagriti school campus"
+                  draggable={false}
+                  className="absolute inset-0"
+                  style={getAdjustedImageStyle(content)}
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                  <ImageIcon className="w-12 h-12 mb-2" />
+                  <div className="text-xs font-bold uppercase tracking-wider">Add Story Image</div>
+                </div>
+              )}
+              <div
+                className="absolute inset-0"
+                style={{ background: "linear-gradient(to top, rgba(26,26,46,0.65) 0%, rgba(26,26,46,0.1) 50%, rgba(26,26,46,0.3) 100%)" }}
+              />
+              <EditableWrap editMode={editMode} target={{ type: "storyImageText" }} onEditTarget={onEditTarget} label="Edit image caption" className="absolute inset-0">
+                <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start">
+                  <div className="text-white">
+                    <div className="text-lg font-bold">{content.storyImageTopTitle}</div>
+                    <div className="text-white/70 text-sm">{content.storyImageTopSubtitle}</div>
+                  </div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="backdrop-blur-sm rounded-xl p-4" style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                    <div className="text-white text-lg font-bold">{content.storyImageBottomTitle}</div>
+                    <div className="text-white/70 text-sm mt-1">{content.storyImageBottomDescription}</div>
+                  </div>
+                </div>
+              </EditableWrap>
+            </div>
+          </EditableWrap>
+
+          <EditableWrap editMode={editMode} target={{ type: "storyText" }} onEditTarget={onEditTarget} label="Edit story text">
+            <div>
               <span
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-5"
-                style={{
-                  background: "rgba(201,168,76,0.09)",
-                  color: colors.purple,
-                  border: "1px solid rgba(201,168,76,0.18)",
-                }}
+                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
+                style={{ background: "rgba(45, 106, 79, 0.1)", color: palette.secondary }}
               >
                 {content.storyBadge}
               </span>
-
               <h2
-                className="text-4xl md:text-5xl mb-6"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 850,
-                  color: colors.dark,
-                  lineHeight: 1.1,
-                  letterSpacing: "-0.045em",
-                }}
+                className="text-3xl md:text-4xl font-bold mb-4"
+                style={{ color: palette.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}
               >
                 {content.storyTitle}
               </h2>
-
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {(content.storyParagraphs || []).map((text, idx) => (
-                  <p key={idx} className="about-long-text text-base md:text-lg leading-[1.85] text-slate-500">
+                  <p key={idx} className="text-base md:text-lg leading-relaxed" style={{ color: palette.gray }}>
                     {text}
                   </p>
                 ))}
               </div>
-            </motion.div>
+            </div>
           </EditableWrap>
+        </motion.div>
 
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "storyImage" }}
-            onEditTarget={onEditTarget}
-            icon={Camera}
-            label="Change story image"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 35 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1 }}
-              className="relative rounded-3xl overflow-hidden h-[460px]"
-              style={{
-                boxShadow: "0 24px 60px rgba(11,16,32,0.15)",
-                border: editMode
-                  ? "1px dashed rgba(201,168,76,0.7)"
-                  : "none",
-              }}
-            >
-              <AboutImage
-                src={content.storyImageUrl}
-                alt={content.storyImageAlt}
-                imageData={{
-                  imageZoom: content.storyImageZoom,
-                  imageOffsetX: content.storyImageOffsetX,
-                  imageOffsetY: content.storyImageOffsetY,
-                }}
-              />
-
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgba(11,16,32,0.65) 0%, transparent 60%)",
-                }}
-              />
-
-              <EditableWrap
-                editMode={editMode}
-                target={{ type: "storyImageText" }}
-                onEditTarget={onEditTarget}
-                label="Edit image caption"
-                className="absolute bottom-6 left-6 right-6"
-              >
-                <div
-                  className="rounded-2xl p-5"
-                  style={{
-                    background: "rgba(255,255,255,0.15)",
-                    backdropFilter: "blur(18px)",
-                    border: editMode
-                      ? "1px dashed rgba(255,255,255,0.8)"
-                      : "1px solid rgba(255,255,255,0.25)",
-                  }}
-                >
-                  <div
-                    className="w-16 h-1 rounded-full mb-4"
-                    style={{
-                      background: `linear-gradient(90deg, ${colors.gold}, ${colors.cyan})`,
-                    }}
-                  />
-
-                  <div className="text-white font-bold text-xl">
-                    {content.storyImageTitle}
-                  </div>
-
-                  <div className="text-white/70 text-sm">
-                    {content.storyImageSubtitle}
-                  </div>
-                </div>
-              </EditableWrap>
-            </motion.div>
-          </EditableWrap>
-        </div>
-
-        <div className="mb-24">
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "pillarHeader" }}
-            onEditTarget={onEditTarget}
-            label="Edit core values heading"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-8 rounded-3xl"
-              style={{
-                outline: editMode
-                  ? "1px dashed rgba(201,168,76,0.5)"
-                  : "none",
-                outlineOffset: editMode ? "8px" : "0",
-              }}
-            >
-              <span
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
-                style={{
-                  background: "rgba(45,106,79,0.08)",
-                  color: colors.green,
-                  border: "1px solid rgba(45,106,79,0.14)",
-                }}
-              >
-                {content.pillarBadge}
-              </span>
-
-              <h2
-                className="text-4xl md:text-5xl"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 850,
-                  color: colors.dark,
-                  letterSpacing: "-0.045em",
-                }}
-              >
-                {content.pillarTitle}
-              </h2>
-
-              <div
-                className="w-20 h-1 rounded-full mx-auto mt-4"
-                style={{
-                  background: `linear-gradient(90deg, ${colors.red}, ${colors.green}, ${colors.purple})`,
-                }}
-              />
-            </motion.div>
-          </EditableWrap>
+        {/* ================= CORE VALUES / PILLARS ================= */}
+        <div className="mb-16 md:mb-24">
+          <SectionHeader
+            badge={content.pillarBadge}
+            title={content.pillarTitle}
+            description={content.pillarDescription}
+            badgeBg="rgba(233, 196, 106, 0.15)"
+            badgeColor={palette.accent2}
+          />
 
           <div className="flex justify-end mb-6">
-            <SectionAddButton
-              editMode={editMode}
-              label="Add Core Value"
-              type="pillar"
-              onAddTarget={onAddTarget}
-            />
+            <SectionAddButton editMode={editMode} label="Add Value" type="pillar" onAddTarget={onAddTarget} />
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {visiblePillars.map((p, index) => {
-              const cardColor = p.color || colors.green;
-              const realIndex = content.pillars.findIndex(
-                (item) => item.id === p.id
-              );
+            {visiblePillars.map((p, i) => {
+              const realIndex = content.pillars.findIndex((item) => item.id === p.id);
+              const tint = cardTints[i % cardTints.length];
 
               return (
                 <EditableWrap
@@ -1031,45 +559,33 @@ export function About({
                   onEditTarget={onEditTarget}
                   onDeleteTarget={onDeleteTarget}
                   canDelete
-                  label="Edit core value card"
+                  label="Edit value card"
                 >
                   <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="group p-8 rounded-3xl transition-all duration-300 hover:-translate-y-3 cursor-default"
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                    className="group relative overflow-hidden rounded-2xl p-6 md:p-8 h-full transition-all duration-300 hover:-translate-y-2"
                     style={{
-                      background:
-                        "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.82))",
-                      border: editMode
-                        ? "2px dashed rgba(201,168,76,0.55)"
-                        : `2px solid ${cardColor}22`,
-                      boxShadow: "0 16px 42px rgba(11,16,32,0.08)",
-                      backdropFilter: "blur(14px)",
+                      background: `linear-gradient(160deg, ${tint}14 0%, ${palette.white} 55%)`,
+                      border: `1px solid ${tint}2e`,
+                      boxShadow: `0 4px 22px ${tint}1a`,
                     }}
                   >
                     <div
-                      className="text-3xl font-black tracking-widest mb-4 transition-all duration-300 group-hover:scale-110"
-                      style={{ color: cardColor }}
-                    >
-                      {String(index + 1).padStart(2, "0")}
-                    </div>
-
-                    <div
-                      className="w-16 h-1 rounded-full mb-5 transition-all duration-300 group-hover:w-28"
-                      style={{ background: cardColor }}
+                      className="absolute -bottom-12 -right-12 w-40 h-40 rounded-full border-[10px] opacity-[0.07] pointer-events-none transition-transform duration-500 group-hover:scale-110"
+                      style={{ borderColor: tint }}
                     />
+                    <div className="absolute top-0 left-0 right-0 h-1.5 transition-all duration-300 group-hover:h-2" style={{ background: palette.gradient2 }} />
 
-                    <div
-                      className="font-bold text-2xl mb-3"
-                      style={{ color: colors.dark }}
-                    >
-                      {p.label}
-                    </div>
-
-                    <div className="about-long-text text-base text-slate-500 leading-[1.8]">
-                      {p.desc}
+                    <div className="relative pt-4">
+                      <h3 className="text-xl font-bold mb-2" style={{ color: palette.dark }}>
+                        {p.label}
+                      </h3>
+                      <p className="text-sm leading-relaxed" style={{ color: palette.gray }}>
+                        {p.desc}
+                      </p>
                     </div>
                   </motion.div>
                 </EditableWrap>
@@ -1078,329 +594,268 @@ export function About({
           </div>
         </div>
 
-        <div className="mb-24">
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "leadershipHeader" }}
-            onEditTarget={onEditTarget}
-            label="Edit leadership heading"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-8 rounded-3xl"
-              style={{
-                outline: editMode
-                  ? "1px dashed rgba(201,168,76,0.5)"
-                  : "none",
-                outlineOffset: editMode ? "8px" : "0",
-              }}
-            >
-              <span
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-5"
-                style={{
-                  background: "rgba(30,58,95,0.08)",
-                  color: colors.red,
-                  border: "1px solid rgba(30,58,95,0.16)",
-                }}
-              >
-                <Sparkles className="w-4 h-4" />
-                {content.leadershipBadge}
-              </span>
-
-              <h2
-                className="text-4xl md:text-5xl mb-4"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 850,
-                  color: colors.dark,
-                  letterSpacing: "-0.045em",
-                }}
-              >
-                {content.leadershipTitle}
-              </h2>
-
-              <p className="about-long-text max-w-3xl mx-auto text-base md:text-lg leading-[1.8] text-slate-500 text-left md:text-justify">
-                {content.leadershipDescription}
-              </p>
-            </motion.div>
-          </EditableWrap>
+        {/* ================= LEADERSHIP MESSAGES ================= */}
+        <div className="mb-16 md:mb-24">
+          <SectionHeader badge={content.leadershipBadge} title={content.leadershipTitle} description={content.leadershipDescription} />
 
           <div className="flex justify-end mb-6">
-            <SectionAddButton
-              editMode={editMode}
-              label="Add Message"
-              type="message"
-              onAddTarget={onAddTarget}
-            />
+            <SectionAddButton editMode={editMode} label="Add Message" type="message" onAddTarget={onAddTarget} />
           </div>
 
-          <div className="space-y-10">
-            {visibleMessages.map((person, index) => {
-              const realIndex = content.messages.findIndex(
-                (item) => item.id === person.id
-              );
+          <div className="grid md:grid-cols-2 gap-6">
+            {visibleMessages.map((person, i) => {
+              const realIndex = content.messages.findIndex((m) => m.id === person.id);
+              const tint = i % 2 === 0 ? palette.primary : palette.secondary;
 
               return (
-                <MessageCard
-                  key={person.id || index}
-                  person={person}
-                  index={realIndex}
+                <EditableWrap
+                  key={person.id}
                   editMode={editMode}
+                  target={{ type: "leadershipMessage", index: realIndex }}
                   onEditTarget={onEditTarget}
                   onDeleteTarget={onDeleteTarget}
-                />
+                  canDelete
+                  label="Edit leadership message"
+                >
+                  <div
+                    onClick={() => setSelectedLeader(person)}
+                    className="cursor-pointer"
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.25 }}
+                      transition={{ duration: 0.5, delay: i * 0.12 }}
+                      className="relative rounded-2xl p-6 md:p-8 h-full"
+                      style={{
+                        background: palette.white,
+                        border: `1px solid ${palette.lightGray}`,
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                      }}
+                    >
+                      <Quote className="absolute right-6 top-6 w-10 h-10 opacity-10" style={{ color: tint }} />
+
+                      <div className="flex items-center gap-4 mb-5">
+                        <EditableWrap editMode={editMode} target={{ type: "leadershipPhoto", index: realIndex }} onEditTarget={onEditTarget} icon={Camera} label="Change photo">
+                          <div
+                            className="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0"
+                            style={{ background: `linear-gradient(150deg, ${tint}, ${palette.dark})` }}
+                          >
+                            {person.image ? (
+                              <img src={person.image} alt={person.name} style={getAdjustedImageStyle(person)} />
+                            ) : (
+                              <UserRound className="w-7 h-7" style={{ color: palette.white }} />
+                            )}
+                          </div>
+                        </EditableWrap>
+                        <div>
+                          <div className="text-xs font-bold uppercase tracking-wider" style={{ color: tint }}>
+                            {person.role}
+                          </div>
+                          <div className="text-lg font-bold" style={{ color: palette.dark }}>
+                            {person.name}
+                          </div>
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-bold mb-3" style={{ color: palette.dark }}>
+                        {person.title}
+                      </h3>
+                      <p className="text-sm md:text-base leading-relaxed" style={{ color: palette.gray }}>
+                        {person.message.substring(0, 120)}...
+                      </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedLeader(person);
+                        }}
+                        className="mt-5 text-blue-600 font-semibold"
+                      >
+                        Read More
+                      </button>
+                    </motion.div>
+                  </div>
+                </EditableWrap>
               );
             })}
           </div>
         </div>
 
-        <div className="mb-6 flex justify-end">
-          <SectionAddButton
-            editMode={editMode}
-            label="Add Mission / Vision Card"
-            type="missionVision"
-            onAddTarget={onAddTarget}
-          />
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8 mb-24">
-          {visibleMissionVision.map((item, index) => {
-            const realIndex = content.missionVision.findIndex(
-              (mv) => mv.id === item.id
-            );
-            const mvColor = item.color || colors.green;
-            const gradientColors =
-              index === 0
-                ? `linear-gradient(135deg, ${colors.purple}15, ${colors.softPurple}08)`
-                : `linear-gradient(135deg, ${colors.green}15, ${colors.lightGreen}08)`;
-            const borderColors = index === 0 ? colors.purple : colors.green;
-
-            return (
-              <EditableWrap
-                key={item.id}
-                editMode={editMode}
-                target={{ type: "missionVision", index: realIndex }}
-                onEditTarget={onEditTarget}
-                onDeleteTarget={onDeleteTarget}
-                canDelete
-                label="Edit mission or vision card"
-              >
-                <motion.div
-                  initial={{ opacity: 0, y: 35 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.65, delay: index * 0.1 }}
-                  className="group rounded-3xl p-8 transition-all duration-300 hover:-translate-y-2 cursor-default"
-                  style={{
-                    background: gradientColors,
-                    border: editMode
-                      ? "2px dashed rgba(201,168,76,0.55)"
-                      : `2px solid ${borderColors}22`,
-                    boxShadow: "0 18px 48px rgba(11,16,32,0.06)",
-                  }}
-                >
-                  <div
-                    className="text-2xl font-black tracking-widest mb-4 transition-all duration-300 group-hover:scale-110"
-                    style={{ color: mvColor }}
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </div>
-
-                  <div
-                    className="w-20 h-1 rounded-full mb-6 transition-all duration-300 group-hover:w-32"
-                    style={{ background: mvColor }}
-                  />
-
-                  <h3
-                    className="text-3xl mb-4"
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 850,
-                      color: colors.dark,
-                      letterSpacing: "-0.035em",
-                    }}
-                  >
-                    {item.title}
-                  </h3>
-
-                  <p className="about-long-text text-base leading-[1.8] text-slate-600">
-                    {item.desc}
-                  </p>
-                </motion.div>
-              </EditableWrap>
-            );
-          })}
-        </div>
-
-        <div>
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "journeyHeader" }}
-            onEditTarget={onEditTarget}
-            label="Edit journey heading"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.65 }}
-              className="text-center mb-8 rounded-3xl"
-              style={{
-                outline: editMode
-                  ? "1px dashed rgba(201,168,76,0.5)"
-                  : "none",
-                outlineOffset: editMode ? "8px" : "0",
-              }}
-            >
-              <span
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
-                style={{
-                  background: "rgba(30,58,95,0.08)",
-                  color: colors.red,
-                  border: "1px solid rgba(30,58,95,0.14)",
-                }}
-              >
-                {content.timelineBadge}
-              </span>
-
-              <h2
-                className="text-4xl md:text-5xl"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 850,
-                  color: colors.dark,
-                  letterSpacing: "-0.045em",
-                }}
-              >
-                {content.journeyTitle}
-              </h2>
-
-              <div
-                className="w-20 h-1 rounded-full mx-auto mt-4"
-                style={{
-                  background: `linear-gradient(90deg, ${colors.red}, ${colors.orange}, ${colors.gold})`,
-                }}
-              />
-            </motion.div>
-          </EditableWrap>
+        {/* ================= MISSION & VISION ================= */}
+        <div className="mb-16 md:mb-24">
+          <SectionHeader badge={content.missionVisionBadge} title="What Guides Every Decision We Make" badgeBg="rgba(45, 106, 79, 0.1)" badgeColor={palette.secondary} />
 
           <div className="flex justify-end mb-6">
-            <SectionAddButton
-              editMode={editMode}
-              label="Add Journey"
-              type="journey"
-              onAddTarget={onAddTarget}
-            />
+            <SectionAddButton editMode={editMode} label="Add Card" type="missionVision" onAddTarget={onAddTarget} />
           </div>
 
-          <div className="relative max-w-5xl mx-auto">
-            {/* Dashed center rail — only meaningful once the columns split on desktop */}
-            <div
-              className="hidden md:block absolute left-1/2 -translate-x-1/2 top-2 bottom-2 w-px"
-              style={{
-                backgroundImage: `repeating-linear-gradient(180deg, ${colors.gold} 0px, ${colors.gold} 10px, transparent 10px, transparent 20px)`,
-              }}
-            />
+          <div className="grid md:grid-cols-2 gap-6">
+            {visibleMissionVision.map((item, i) => {
+              const realIndex = content.missionVision.findIndex((mv) => mv.id === item.id);
+              const Icon = ICONS[item.icon] || Compass;
+              const gradient = i === 0 ? palette.gradient1 : palette.gradient3;
 
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-x-6 gap-y-6 md:gap-y-10">
-              {visibleJourney.map((item, index) => {
-                const realIndex = content.journey.findIndex(
-                  (j) => j.id === item.id
-                );
-                const journeyColors = [
-                  colors.red,
-                  colors.orange,
-                  colors.gold,
-                  colors.green,
-                ];
-                const journeyColor =
-                  journeyColors[index % journeyColors.length];
-                const isLeft = index % 2 === 0;
-
-                const cardEl = (
-                  <EditableWrap
-                    editMode={editMode}
-                    target={{ type: "journeyItem", index: realIndex }}
-                    onEditTarget={onEditTarget}
-                    onDeleteTarget={onDeleteTarget}
-                    canDelete
-                    label="Edit journey item"
+              return (
+                <EditableWrap
+                  key={item.id}
+                  editMode={editMode}
+                  target={{ type: "missionVision", index: realIndex }}
+                  onEditTarget={onEditTarget}
+                  onDeleteTarget={onDeleteTarget}
+                  canDelete
+                  label="Edit mission or vision card"
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                    className="relative overflow-hidden rounded-2xl p-8 h-full"
+                    style={{ background: gradient, color: palette.white, boxShadow: "0 20px 50px rgba(0,0,0,0.15)" }}
                   >
-                    <motion.div
-                      initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.55, delay: index * 0.08 }}
-                      className="rounded-2xl p-6 md:p-7 transition-all duration-300 hover:-translate-y-1"
-                      style={{
-                        background:
-                          "linear-gradient(145deg, rgba(255,255,255,0.97), rgba(255,255,255,0.82))",
-                        border: editMode
-                          ? "2px dashed rgba(201,168,76,0.55)"
-                          : `1px solid ${journeyColor}25`,
-                        boxShadow: "0 14px 38px rgba(11,16,32,0.06)",
-                      }}
-                    >
-                      <div
-                        className="text-xs font-black tracking-widest uppercase mb-2"
-                        style={{ color: journeyColor }}
-                      >
-                        {item.year}
+                    <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-10" style={{ background: palette.white }} />
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(255,255,255,0.16)" }}>
+                        <Icon className="w-5 h-5" />
                       </div>
-
-                      <h3
-                        className="text-2xl mb-2"
-                        style={{
-                          fontFamily: "var(--font-display)",
-                          fontWeight: 850,
-                          color: colors.dark,
-                          letterSpacing: "-0.025em",
-                        }}
-                      >
-                        {item.title}
-                      </h3>
-
-                      <p className="about-long-text text-base leading-[1.8] text-slate-500">
-                        {item.desc}
-                      </p>
-                    </motion.div>
-                  </EditableWrap>
-                );
-
-                return (
-                  <div key={item.id} className="contents">
-                    <div className={isLeft ? "" : "hidden md:block"}>
-                      {isLeft && cardEl}
+                      <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
+                      <p className="leading-relaxed opacity-90">{item.desc}</p>
                     </div>
-
-                    <div className="flex md:flex-col items-center justify-center gap-2 order-first md:order-none">
-                      <div
-                        className="w-10 h-10 md:w-12 md:h-12 rotate-45 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background: `linear-gradient(135deg, ${journeyColor}, ${colors.dark})`,
-                          boxShadow: `0 10px 26px ${journeyColor}55`,
-                        }}
-                      >
-                        <span className="-rotate-45 text-white text-xs font-black">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className={!isLeft ? "" : "hidden md:block"}>
-                      {!isLeft && cardEl}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  </motion.div>
+                </EditableWrap>
+              );
+            })}
           </div>
         </div>
+
+        {/* ================= OUR JOURNEY ================= */}
+        <div className="mb-16 md:mb-24">
+          <SectionHeader badge={content.journeyBadge} title={content.journeyTitle} badgeBg="rgba(244, 162, 97, 0.15)" badgeColor={palette.accent2} />
+
+          <div className="flex justify-end mb-6">
+            <SectionAddButton editMode={editMode} label="Add Milestone" type="journey" onAddTarget={onAddTarget} />
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {visibleJourney.map((item, i) => {
+              const realIndex = content.journey.findIndex((j) => j.id === item.id);
+              const tint = journeyColors[i % journeyColors.length];
+
+              return (
+                <EditableWrap
+                  key={item.id}
+                  editMode={editMode}
+                  target={{ type: "journeyItem", index: realIndex }}
+                  onEditTarget={onEditTarget}
+                  onDeleteTarget={onDeleteTarget}
+                  canDelete
+                  label="Edit journey milestone"
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 0.45, delay: i * 0.08 }}
+                    className="relative rounded-2xl p-6 h-full"
+                    style={{ background: palette.white, border: `1px solid ${palette.lightGray}`, borderTopWidth: "4px", borderTopColor: tint, boxShadow: "0 2px 10px rgba(0,0,0,0.03)" }}
+                  >
+                    <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: tint }}>
+                      {item.year}
+                    </div>
+                    <h3 className="text-lg font-bold mb-2" style={{ color: palette.dark }}>
+                      {item.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed" style={{ color: palette.gray }}>
+                      {item.desc}
+                    </p>
+                  </motion.div>
+                </EditableWrap>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ================= CTA BAND ================= */}
+        <EditableWrap editMode={editMode} target={{ type: "ctaBand" }} onEditTarget={onEditTarget} label="Edit call to action">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
+            className="relative overflow-hidden rounded-2xl p-10 md:p-14 text-center"
+            style={{ background: palette.gradient1, boxShadow: "0 30px 70px rgba(30,58,95,0.25)" }}
+          >
+            <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full opacity-10" style={{ background: palette.accent }} />
+            <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full opacity-10" style={{ background: palette.white }} />
+
+            <span
+              className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-5"
+              style={{ background: "rgba(255,255,255,0.14)", color: palette.white }}
+            >
+              <Sparkles className="w-4 h-4" />
+              Admissions Open
+            </span>
+            <h2 className="relative text-3xl md:text-4xl font-bold mb-4" style={{ color: palette.white, fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}>
+              {content.ctaTitle}
+            </h2>
+            <p className="relative max-w-xl mx-auto mb-8" style={{ color: "rgba(255,255,255,0.82)" }}>
+              {content.ctaDescription}
+            </p>
+            <Link
+              to={content.ctaButtonLink || "/contact"}
+              onClick={(e) => {
+                if (editMode) {
+                  e.preventDefault();
+                  return;
+                }
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="relative inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
+              style={{ color: palette.dark, background: palette.gradient2, boxShadow: "0 10px 26px rgba(0,0,0,0.18)" }}
+            >
+              {content.ctaButtonText}
+            </Link>
+          </motion.div>
+        </EditableWrap>
       </div>
+
+      {/* ================= LEADERSHIP POPUP ================= */}
+      {selectedLeader && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-8 relative">
+            <button
+              onClick={() => setSelectedLeader(null)}
+              className="absolute top-4 right-4 text-xl"
+            >
+              ✕
+            </button>
+
+            {selectedLeader.image && (
+              <img
+                src={selectedLeader.image}
+                alt={selectedLeader.name}
+                className="w-40 h-40 rounded-xl object-cover mx-auto mb-6"
+              />
+            )}
+
+            <h2 className="text-3xl font-bold text-center">
+              {selectedLeader.name}
+            </h2>
+
+            <p className="text-center text-gray-500 mb-4">
+              {selectedLeader.role}
+            </p>
+
+            <h3 className="text-xl font-semibold mb-4">
+              {selectedLeader.title}
+            </h3>
+
+            <p className="leading-8">
+              {selectedLeader.message}
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
-
-export default About;
