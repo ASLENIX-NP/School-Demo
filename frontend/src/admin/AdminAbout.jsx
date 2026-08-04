@@ -17,8 +17,7 @@ import {
   X,
 } from "lucide-react";
 
-import {
-  About,
+import About, {
   defaultAboutContent,
   mergeAboutContent,
 } from "../app/components/About";

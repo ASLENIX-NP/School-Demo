@@ -1,0 +1,28 @@
+# Root dependencies
+node_modules/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Backend
+backend/node_modules/
+
+# Environment
+.env
+.env.local
+frontend/.env
+backend/.env
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
