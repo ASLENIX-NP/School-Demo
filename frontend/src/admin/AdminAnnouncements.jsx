@@ -22,21 +22,29 @@ import {
 
 const API_URL = "https://school-website-backend-ixx2.onrender.com";
 
-const colors = {
-  red: "#D71920",
-  green: "#168A3A",
-  purple: "#4B2E83",
-  dark: "#0B1020",
-  cyan: "#38BDF8",
-  gold: "#FACC15",
+// ── THEME TO MATCH LIGHT DASHBOARD ──
+const theme = {
+  bg: "#F5F7FB",
+  card: "#FFFFFF",
+  cardHover: "#FFFFFF",
+  border: "#E5E7EB",
+  borderHover: "#CBD5E1",
+  text: "#0F172A",
+  muted: "#64748B",
+  primary: "#2563EB",
+  accent: "#38BDF8",
+  success: "#16A34A",
+  warning: "#F59E0B",
+  danger: "#EF4444",
 };
 
-const lightAdminPanelStyle = {
-  background:
-    "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
-  border: "1px solid rgba(75,46,131,0.12)",
-  boxShadow: "0 18px 44px rgba(15,23,42,0.08)",
-  backdropFilter: "blur(14px)",
+const colors = {
+  red: "#EF4444",
+  green: "#22C55E",
+  purple: "#A78BFA",
+  gold: "#FACC15",
+  cyan: "#22D3EE",
+  dark: "#0B1020",
 };
 
 function getTime(item) {
@@ -84,7 +92,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-bold mb-2 text-slate-700">
+      <label className="block text-sm font-medium mb-2 text-slate-700">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
@@ -98,11 +106,11 @@ function Field({
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full px-4 py-3 rounded-2xl outline-none text-sm transition-all focus:ring-2 focus:ring-red-200"
+          className="w-full px-4 py-3 rounded-xl outline-none text-sm transition-all focus:ring-2 focus:ring-blue-500/50"
           style={{
-            background: "rgba(255,255,255,0.88)",
-            border: "1px solid rgba(75,46,131,0.16)",
-            color: colors.dark,
+            background: "#FFFFFF",
+            border: "1px solid #D1D5DB",
+            color: "#0F172A",
             paddingLeft: Icon ? "44px" : "16px",
           }}
         />
@@ -114,7 +122,7 @@ function Field({
 function TextArea({ label, value, onChange, placeholder = "", rows = 4 }) {
   return (
     <div>
-      <label className="block text-sm font-bold mb-2 text-slate-700">
+      <label className="block text-sm font-medium mb-2 text-slate-700">
         {label}
       </label>
       <textarea
@@ -122,35 +130,32 @@ function TextArea({ label, value, onChange, placeholder = "", rows = 4 }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full px-4 py-3 rounded-2xl outline-none text-sm resize-none transition-all focus:ring-2 focus:ring-red-200"
+        className="w-full px-4 py-3 rounded-xl outline-none text-sm resize-none transition-all focus:ring-2 focus:ring-blue-500/50"
         style={{
-          background: "rgba(255,255,255,0.88)",
-          border: "1px solid rgba(75,46,131,0.16)",
-          color: colors.dark,
+          background: "#FFFFFF",
+          border: "1px solid #D1D5DB",
+          color: "#0F172A",
         }}
       />
     </div>
   );
 }
 
-function EditorCard({ icon: Icon, title, color, children, gradient }) {
+function EditorCard({ icon: Icon, title, color, children }) {
   return (
     <div
-      className="rounded-3xl p-5 sm:p-6 md:p-8 transition-all duration-300 hover:shadow-xl"
+      className="rounded-2xl p-5 sm:p-6 md:p-8 transition-all duration-300 hover:shadow-xl border"
       style={{
-        background:
-          gradient ||
-          "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.78))",
-        border: "1px solid rgba(11,16,32,0.08)",
-        boxShadow:
-          "0 18px 48px rgba(11,16,32,0.075), inset 0 1px 0 rgba(255,255,255,0.85)",
+        background: "#FFFFFF",
+        borderColor: "#E5E7EB",
+        boxShadow: "0 15px 35px rgba(15,23,42,.08)",
       }}
     >
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 rounded-xl" style={{ background: `${color}15` }}>
           <Icon className="w-5 h-5" style={{ color }} />
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
           {title}
         </h2>
       </div>
@@ -169,11 +174,10 @@ function AnnouncementCard({
 
   return (
     <div
-      className="rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border"
       style={{
-        background: "rgba(255,255,255,0.9)",
-        border: "1px solid rgba(75,46,131,0.10)",
-        boxShadow: "0 12px 32px rgba(11,16,32,0.06)",
+        background: "#FFFFFF",
+        borderColor: "#E5E7EB",
         opacity: announcement.visible !== false ? 1 : 0.6,
       }}
     >
@@ -187,13 +191,12 @@ function AnnouncementCard({
               e.target.style.display = "none";
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
           <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-2">
             <span
-              className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold"
+              className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold text-white"
               style={{
-                background: "rgba(215,25,32,0.9)",
-                color: "#fff",
+                background: "rgba(239, 68, 68, 0.85)",
               }}
             >
               <Zap className="w-3 h-3" />
@@ -202,10 +205,9 @@ function AnnouncementCard({
 
             {announcement.show_on_homepage && (
               <span
-                className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold"
+                className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold text-slate-900"
                 style={{
-                  background: "rgba(250,204,21,0.9)",
-                  color: "#0B1020",
+                  background: "rgba(250, 204, 21, 0.9)",
                 }}
               >
                 <Sparkles className="w-3 h-3" />
@@ -216,10 +218,9 @@ function AnnouncementCard({
             {announcement.popup_order !== null &&
               announcement.popup_order !== undefined && (
                 <span
-                  className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold"
+                  className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold text-white"
                   style={{
-                    background: "rgba(15,23,42,0.9)",
-                    color: "#fff",
+                    background: "rgba(15, 23, 42, 0.9)",
                   }}
                 >
                   Order #{announcement.popup_order}
@@ -232,13 +233,13 @@ function AnnouncementCard({
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-slate-950">
+            <h3 className="text-lg font-bold text-slate-900">
               {announcement.title || "Untitled"}
             </h3>
-            <p className="text-sm text-slate-500 mt-1 line-clamp-2">
+            <p className="text-sm text-slate-600 mt-1 line-clamp-2">
               {announcement.description || "No description"}
             </p>
-            <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
+            <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 {announcement.created_at
@@ -254,7 +255,7 @@ function AnnouncementCard({
               onClick={() => onEdit(announcement)}
               className="p-2 rounded-xl transition-all hover:scale-110"
               style={{
-                background: "rgba(75,46,131,0.08)",
+                background: "rgba(167, 139, 250, 0.15)",
                 color: colors.purple,
               }}
               title="Edit"
@@ -269,8 +270,8 @@ function AnnouncementCard({
               style={{
                 background:
                   announcement.visible !== false
-                    ? "rgba(22,138,58,0.08)"
-                    : "rgba(100,116,139,0.1)",
+                    ? "rgba(34, 197, 94, 0.15)"
+                    : "rgba(255,255,255,0.5)",
                 color:
                   announcement.visible !== false ? colors.green : "#64748B",
               }}
@@ -288,7 +289,7 @@ function AnnouncementCard({
               onClick={() => onDelete(announcement)}
               className="p-2 rounded-xl transition-all hover:scale-110"
               style={{
-                background: "rgba(215,25,32,0.08)",
+                background: "rgba(239, 68, 68, 0.15)",
                 color: colors.red,
               }}
               title="Delete"
@@ -308,21 +309,20 @@ function PopupOrderManager({ popupAnnouncements, onMove }) {
       icon={Sparkles}
       title="Homepage Popup Order"
       color={colors.gold}
-      gradient="linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,250,230,0.92))"
     >
       {popupAnnouncements.length === 0 ? (
-        <div className="rounded-2xl p-6 text-center bg-white/70 border border-slate-100">
+        <div className="rounded-2xl p-6 text-center border bg-slate-50" style={{ borderColor: "#E5E7EB" }}>
           <Megaphone className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-          <p className="font-bold text-slate-600">
+          <p className="font-bold text-slate-700">
             No homepage popup announcement.
           </p>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Turn on Active, Visible, and Show on homepage.
           </p>
         </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-sm text-slate-500 leading-relaxed">
+          <p className="text-sm text-slate-600 leading-relaxed">
             First item pops up first. When user closes it, the next popup opens.
             If you never arrange, latest announcement comes first.
           </p>
@@ -330,16 +330,17 @@ function PopupOrderManager({ popupAnnouncements, onMove }) {
           {popupAnnouncements.map((item, index) => (
             <div
               key={item.id}
-              className="rounded-2xl bg-white p-4 border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              className="rounded-2xl p-4 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50"
+              style={{ borderColor: "#E5E7EB" }}
             >
               <div className="min-w-0">
-                <div className="text-xs font-black uppercase tracking-[0.16em] text-yellow-600 mb-1">
+                <div className="text-xs font-bold uppercase tracking-[0.16em] text-yellow-600 mb-1">
                   Popup #{index + 1}
                 </div>
-                <div className="font-black text-slate-950 truncate">
+                <div className="font-bold text-slate-900 truncate">
                   {item.title || "Untitled announcement"}
                 </div>
-                <div className="text-xs text-slate-400 mt-1">
+                <div className="text-xs text-slate-500 mt-1">
                   {item.created_at
                     ? new Date(item.created_at).toLocaleDateString()
                     : "No date"}
@@ -351,11 +352,7 @@ function PopupOrderManager({ popupAnnouncements, onMove }) {
                   type="button"
                   disabled={index === 0}
                   onClick={() => onMove(item.id, "up")}
-                  className="px-4 py-2 rounded-xl text-sm font-black disabled:opacity-40"
-                  style={{
-                    background: "rgba(15,23,42,0.06)",
-                    color: colors.dark,
-                  }}
+                  className="px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-40 text-slate-700 hover:bg-slate-200 transition-colors bg-slate-100"
                 >
                   Up
                 </button>
@@ -363,11 +360,7 @@ function PopupOrderManager({ popupAnnouncements, onMove }) {
                   type="button"
                   disabled={index === popupAnnouncements.length - 1}
                   onClick={() => onMove(item.id, "down")}
-                  className="px-4 py-2 rounded-xl text-sm font-black disabled:opacity-40"
-                  style={{
-                    background: "rgba(15,23,42,0.06)",
-                    color: colors.dark,
-                  }}
+                  className="px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-40 text-slate-700 hover:bg-slate-200 transition-colors bg-slate-100"
                 >
                   Down
                 </button>
@@ -391,53 +384,39 @@ function AnnouncementPreview({ announcements }) {
   );
 
   return (
-    <div
-      className="min-h-full p-5 sm:p-6"
-      style={{
-        background:
-          "radial-gradient(circle at top left, rgba(75,46,131,0.08), transparent 34%), linear-gradient(180deg, #FFF8EE 0%, #F8FAFC 100%)",
-      }}
-    >
+    <div className="min-h-full p-5 sm:p-6">
       <div className="text-center mb-6">
         <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-3"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-3"
           style={{
-            background: "rgba(215,25,32,0.08)",
+            background: "rgba(239, 68, 68, 0.1)",
             color: colors.red,
-            border: "1px solid rgba(215,25,32,0.15)",
+            border: "1px solid rgba(239, 68, 68, 0.15)",
           }}
         >
           <Megaphone className="w-4 h-4" />
           Popup Preview
         </div>
 
-        <h3
-          className="text-2xl text-slate-950 leading-tight"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 850,
-            letterSpacing: "-0.04em",
-          }}
-        >
+        <h3 className="text-2xl text-slate-900 font-bold tracking-tight">
           Homepage Popup Order
         </h3>
 
-        <p className="mt-2 text-slate-500 text-sm">
+        <p className="mt-2 text-slate-600 text-sm">
           User will see these one by one.
         </p>
       </div>
 
       {visible.length === 0 ? (
         <div
-          className="rounded-2xl p-8 text-center"
+          className="rounded-2xl p-8 text-center bg-slate-50"
           style={{
-            background: "rgba(255,255,255,0.7)",
-            border: "1px dashed rgba(15,23,42,0.12)",
+            border: "1px dashed #CBD5E1",
           }}
         >
           <Megaphone className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-          <p className="text-slate-500 font-semibold">No popup selected</p>
-          <p className="text-sm text-slate-400">
+          <p className="text-slate-600 font-medium">No popup selected</p>
+          <p className="text-sm text-slate-500">
             Active + Visible + Show on homepage is required.
           </p>
         </div>
@@ -446,10 +425,9 @@ function AnnouncementPreview({ announcements }) {
           {visible.map((item, index) => (
             <div
               key={item.id}
-              className="bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+              className="rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 shadow-sm border bg-white"
               style={{
-                border: "1px solid rgba(215,25,32,0.08)",
-                boxShadow: "0 12px 32px rgba(215,25,32,0.08)",
+                borderColor: "#E5E7EB",
               }}
             >
               {item.image_url && (
@@ -463,11 +441,11 @@ function AnnouncementPreview({ announcements }) {
                 />
               )}
               <div className="p-4">
-                <div className="text-xs font-black uppercase tracking-[0.16em] text-red-600 mb-1">
+                <div className="text-xs font-bold uppercase tracking-[0.16em] text-red-500 mb-1">
                   Popup #{index + 1}
                 </div>
-                <div className="font-black text-slate-950">{item.title}</div>
-                <p className="text-slate-500 text-sm mt-1 line-clamp-2">
+                <div className="font-bold text-slate-900">{item.title}</div>
+                <p className="text-slate-600 text-sm mt-1 line-clamp-2">
                   {item.description}
                 </p>
               </div>
@@ -479,34 +457,34 @@ function AnnouncementPreview({ announcements }) {
   );
 }
 
-
 function DeleteConfirmModal({ item, deleting, onCancel, onConfirm }) {
   if (!item) return null;
 
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
       <div
-        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+        className="w-full max-w-md rounded-3xl p-6 shadow-2xl border"
         style={{
-          border: "1px solid rgba(215,25,32,0.16)",
-          boxShadow: "0 28px 80px rgba(15,23,42,0.28)",
+          background: "#FFFFFF",
+          borderColor: "#E5E7EB",
+          boxShadow: "0 28px 80px rgba(0,0,0,0.15)",
         }}
       >
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600 border border-red-100">
             <AlertTriangle className="h-6 w-6" />
           </div>
 
           <div className="min-w-0 flex-1">
-            <h3 className="text-xl font-black text-slate-950">
+            <h3 className="text-xl font-bold text-slate-900">
               Delete announcement?
             </h3>
 
-            <p className="mt-2 text-sm leading-relaxed text-slate-500">
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
               This action cannot be undone. This will permanently delete:
             </p>
 
-            <p className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-800">
+            <p className="mt-3 rounded-2xl bg-slate-50 border px-4 py-3 text-sm font-bold text-slate-800" style={{ borderColor: "#E5E7EB" }}>
               {item.title || "Untitled announcement"}
             </p>
           </div>
@@ -517,7 +495,7 @@ function DeleteConfirmModal({ item, deleting, onCancel, onConfirm }) {
             type="button"
             onClick={onCancel}
             disabled={deleting}
-            className="rounded-2xl px-5 py-3 text-sm font-black text-slate-600 transition-all hover:bg-slate-100 disabled:opacity-60"
+            className="rounded-xl px-5 py-3 text-sm font-bold text-slate-600 transition-all hover:bg-slate-100 disabled:opacity-60"
           >
             Cancel
           </button>
@@ -526,10 +504,10 @@ function DeleteConfirmModal({ item, deleting, onCancel, onConfirm }) {
             type="button"
             onClick={onConfirm}
             disabled={deleting}
-            className="rounded-2xl px-5 py-3 text-sm font-black text-white transition-all hover:scale-[1.02] disabled:opacity-60"
+            className="rounded-xl px-5 py-3 text-sm font-bold text-white transition-all hover:scale-[1.02] disabled:opacity-60"
             style={{
-              background: `linear-gradient(135deg, ${colors.red}, #9B1117)`,
-              boxShadow: "0 14px 34px rgba(215,25,32,0.25)",
+              background: `linear-gradient(135deg, #2563EB, #3B82F6)`,
+              boxShadow: "0 8px 24px rgba(37,99,235,0.25)",
             }}
           >
             {deleting ? "Deleting..." : "Yes, Delete"}
@@ -888,9 +866,9 @@ export default function AdminAnnouncements() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ background: "#FFF8EE" }}
+        style={{ background: theme.bg }}
       >
-        <div className="text-slate-600 font-semibold">
+        <div className="text-slate-600 font-medium">
           Loading announcements...
         </div>
       </div>
@@ -899,34 +877,24 @@ export default function AdminAnnouncements() {
 
   return (
     <section
-      className="admin-announcements-editor min-h-screen relative overflow-hidden"
+      className="admin-announcements-editor min-h-screen relative"
       style={{
-        background: `
-          radial-gradient(circle at top right, rgba(56,189,248,0.16), transparent 34%),
-          radial-gradient(circle at bottom left, rgba(250,204,21,0.12), transparent 32%),
-          linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)
-        `,
+        background:
+          "linear-gradient(135deg,#F8FAFC 0%,#EEF4FF 50%,#F5F7FB 100%)",
       }}
     >
-      <div className="absolute top-40 right-20 w-64 h-64 rounded-full bg-red-500/5 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-40 left-20 w-72 h-72 rounded-full bg-purple-500/5 blur-3xl pointer-events-none" />
-
       <header
-        className="relative z-0"
+        className="relative z-0 sticky top-0 border-b"
         style={{
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
-          borderBottom: "1px solid rgba(75,46,131,0.12)",
-          boxShadow: "0 14px 36px rgba(15,23,42,0.08)",
-          backdropFilter: "blur(18px)",
+          background: "#FFFFFF",
+          borderColor: "#E5E7EB",
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => navigate("/admin/dashboard")}
-            className="inline-flex w-fit items-center gap-2 font-black transition-all hover:-translate-x-1"
-            style={{ color: colors.dark }}
+            className="inline-flex w-fit items-center gap-2 font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Dashboard
@@ -934,40 +902,36 @@ export default function AdminAnnouncements() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-8 rounded-2xl p-6 border"
+          style={{
+            background:
+              "linear-gradient(135deg,#FFFFFF,#EFF6FF)",
+            borderColor: "#E5E7EB",
+          }}
         >
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-4">
             <span
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium"
               style={{
-                background: "rgba(215,25,32,0.08)",
+                background: "rgba(239, 68, 68, 0.1)",
                 color: colors.red,
-                border: "1px solid rgba(215,25,32,0.15)",
+                border: "1px solid rgba(239, 68, 68, 0.15)",
               }}
             >
               <Megaphone className="w-4 h-4" />
               Manage Announcements
             </span>
-            <div className="h-px flex-1 bg-gradient-to-r from-red-200 to-transparent" />
           </div>
 
-          <h1
-            className="text-3xl md:text-6xl mb-4"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 850,
-              color: colors.dark,
-              letterSpacing: "-0.045em",
-            }}
-          >
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-3">
             Announcement Manager
           </h1>
 
-          <p className="text-slate-500 max-w-3xl text-base sm:text-lg">
+          <p className="text-slate-600 max-w-3xl text-base">
             Add, edit, and manage homepage popup announcements. Drag-free order
             control is available using Up and Down buttons.
           </p>
@@ -977,12 +941,7 @@ export default function AdminAnnouncements() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 rounded-2xl px-5 py-4 flex items-center gap-3 font-semibold"
-            style={{
-              background: "rgba(22,138,58,0.1)",
-              color: colors.green,
-              border: "1px solid rgba(22,138,58,0.2)",
-            }}
+            className="mb-6 rounded-xl px-5 py-4 flex items-center gap-3 font-medium bg-green-50 text-green-700 border border-green-200"
           >
             <CheckCircle2 className="w-5 h-5" />
             {success}
@@ -993,12 +952,7 @@ export default function AdminAnnouncements() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 rounded-2xl px-5 py-4 font-semibold"
-            style={{
-              background: "rgba(215,25,32,0.1)",
-              color: colors.red,
-              border: "1px solid rgba(215,25,32,0.2)",
-            }}
+            className="mb-6 rounded-xl px-5 py-4 font-medium bg-red-50 text-red-700 border border-red-200"
           >
             {error}
           </motion.div>
@@ -1010,7 +964,6 @@ export default function AdminAnnouncements() {
               icon={editingId ? Edit2 : Plus}
               title={editingId ? "Edit Announcement" : "Add New Announcement"}
               color={colors.red}
-              gradient="linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,245,245,0.92))"
             >
               <form onSubmit={handleSubmit} className="space-y-5">
                 <Field
@@ -1025,14 +978,14 @@ export default function AdminAnnouncements() {
                 />
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-slate-700">
+                  <label className="block text-sm font-medium mb-2 text-slate-700">
                     Image / Banner
                   </label>
                   <div
-                    className="rounded-2xl p-4 transition-all hover:border-purple-300"
+                    className="rounded-2xl p-4 transition-all hover:border-blue-300"
                     style={{
-                      background: "rgba(255,255,255,0.88)",
-                      border: "2px dashed rgba(75,46,131,0.16)",
+                      background: "#F8FAFC",
+                      border: "2px dashed #CBD5E1",
                     }}
                   >
                     {(imagePreview || formData.image_url) &&
@@ -1062,17 +1015,17 @@ export default function AdminAnnouncements() {
                         </div>
                       </div>
                     ) : (
-                      <label className="flex flex-col items-center justify-center gap-2 cursor-pointer py-6 hover:bg-purple-50/50 rounded-xl transition-colors">
+                      <label className="flex flex-col items-center justify-center gap-2 cursor-pointer py-6 hover:bg-slate-100/50 rounded-xl transition-colors">
                         <div
                           className="p-3 rounded-full"
-                          style={{ background: "rgba(75,46,131,0.08)" }}
+                          style={{ background: "rgba(167, 139, 250, 0.1)" }}
                         >
                           <UploadCloud
                             className="w-8 h-8"
                             style={{ color: colors.purple }}
                           />
                         </div>
-                        <span className="text-sm font-bold text-slate-800">
+                        <span className="text-sm font-bold text-slate-700">
                           {uploading ? "Uploading..." : "Click to Upload Image"}
                         </span>
                         <span className="text-xs text-slate-500">
@@ -1108,10 +1061,10 @@ export default function AdminAnnouncements() {
                 />
 
                 <div
-                  className="flex flex-wrap items-center gap-6 p-4 rounded-2xl"
-                  style={{ background: "rgba(15,23,42,0.03)" }}
+                  className="flex flex-wrap items-center gap-6 p-4 rounded-2xl bg-slate-50 border"
+                  style={{ borderColor: "#E5E7EB" }}
                 >
-                  <label className="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.active}
@@ -1126,7 +1079,7 @@ export default function AdminAnnouncements() {
                     Active
                   </label>
 
-                  <label className="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.visible}
@@ -1141,7 +1094,7 @@ export default function AdminAnnouncements() {
                     Visible on website
                   </label>
 
-                  <label className="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.show_on_homepage}
@@ -1162,11 +1115,10 @@ export default function AdminAnnouncements() {
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="px-6 py-3 rounded-2xl font-bold transition-all hover:scale-105"
+                      className="px-6 py-3 rounded-xl font-bold transition-all hover:scale-105 text-slate-600 hover:bg-slate-100"
                       style={{
-                        background: "rgba(100,116,139,0.1)",
-                        color: "#64748B",
-                        border: "1px solid rgba(100,116,139,0.2)",
+                        background: "transparent",
+                        border: "1px solid #E5E7EB",
                       }}
                     >
                       Cancel
@@ -1176,11 +1128,10 @@ export default function AdminAnnouncements() {
                   <button
                     type="submit"
                     disabled={saving || uploading}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all hover:scale-105 disabled:opacity-60 hover:shadow-xl"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:scale-105 disabled:opacity-60 text-white"
                     style={{
-                      color: "#fff",
-                      background: `linear-gradient(135deg, ${colors.red}, #9B1117)`,
-                      boxShadow: "0 14px 34px rgba(215,25,32,0.25)",
+                      background: `linear-gradient(135deg, #2563EB, #3B82F6)`,
+                      boxShadow: "0 8px 24px rgba(37,99,235,0.25)",
                     }}
                   >
                     <Save className="w-4 h-4" />
@@ -1203,16 +1154,15 @@ export default function AdminAnnouncements() {
               icon={Megaphone}
               title="All Announcements"
               color={colors.green}
-              gradient="linear-gradient(145deg, rgba(255,255,255,0.96), rgba(245,255,245,0.92))"
             >
               <div className="space-y-4">
                 {announcements.length === 0 ? (
                   <div className="text-center py-12 text-slate-500">
                     <Megaphone className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-                    <p className="font-semibold text-lg">
+                    <p className="font-semibold text-lg text-slate-700">
                       No announcements added yet
                     </p>
-                    <p className="text-sm">
+                    <p className="text-sm text-slate-500">
                       Add your first announcement using the form.
                     </p>
                   </div>
@@ -1232,23 +1182,25 @@ export default function AdminAnnouncements() {
           </div>
 
           <aside
-            className="xl:sticky xl:top-28 rounded-3xl overflow-hidden"
-            style={lightAdminPanelStyle}
+            className="xl:sticky xl:top-28 rounded-2xl overflow-hidden border"
+            style={{
+              background: "#FFFFFF",
+              borderColor: "#E5E7EB",
+            }}
           >
             <div
-              className="p-5"
+              className="p-5 border-b"
               style={{
-                borderBottom: "1px solid rgba(75,46,131,0.1)",
+                borderColor: "#E5E7EB",
               }}
             >
               <div
-                className="font-black text-lg flex items-center gap-2"
-                style={{ color: colors.dark }}
+                className="font-bold text-lg flex items-center gap-2 text-slate-900"
               >
                 <div
                   className="p-1.5 rounded-lg"
                   style={{
-                    background: "rgba(75,46,131,0.1)",
+                    background: "rgba(167, 139, 250, 0.1)",
                     color: colors.purple,
                   }}
                 >
@@ -1256,15 +1208,12 @@ export default function AdminAnnouncements() {
                 </div>
                 Homepage Preview
               </div>
-              <div className="text-sm text-slate-500">
+              <div className="text-sm text-slate-600">
                 Preview popup sequence order.
               </div>
             </div>
 
-            <div
-              className="bg-white overflow-y-auto"
-              style={{ height: "600px" }}
-            >
+            <div className="overflow-y-auto" style={{ height: "600px" }}>
               <AnnouncementPreview announcements={announcements} />
             </div>
           </aside>

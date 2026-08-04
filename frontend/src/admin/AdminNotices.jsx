@@ -20,34 +20,43 @@ import {
   X,
 } from "lucide-react";
 
-import Notices, {
-  defaultNoticeSettings,
-  formatNoticeDate,
-  normalizeNotice,
-  sortNoticesNewestFirst,
-} from "../pages/Notices";
+// ── FIXED IMPORT: Safely handles both named and default exports ──
+import * as NoticesModule from "../pages/Notices";
 
-const colors = {
-  red: "#D71920",
-  green: "#168A3A",
-  purple: "#4B2E83",
-  dark: "#0B1020",
-  cyan: "#38BDF8",
-  gold: "#FACC15",
+// ── EXTRACT THE EXPORTS FROM YOUR COMPONENT MODULE ──
+const Notices = NoticesModule.default || NoticesModule.Notices;
+const defaultNoticeSettings = NoticesModule.defaultNoticeSettings || {};
+const formatNoticeDate = NoticesModule.formatNoticeDate || ((date) => date || "N/A");
+const normalizeNotice = NoticesModule.normalizeNotice || ((n) => n);
+const sortNoticesNewestFirst = NoticesModule.sortNoticesNewestFirst || ((arr) => arr);
+
+// ── THEME TO MATCH DEEP NAVY DASHBOARD ──
+const theme = {
+  bg: "#0F172A",
+  card: "rgba(255, 255, 255, 0.05)",
+  border: "rgba(255, 255, 255, 0.08)",
+  text: "#F8FAFC",
+  muted: "#94A3B8",
+  primary: "#2563EB",
+  accent: "#06B6D4",
+  success: "#22C55E",
+  warning: "#F59E0B",
+  danger: "#EF4444",
 };
 
-const lightAdminPanelStyle = {
-  background:
-    "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
-  border: "1px solid rgba(75,46,131,0.12)",
-  boxShadow: "0 18px 44px rgba(15,23,42,0.08)",
-  backdropFilter: "blur(14px)",
+const colors = {
+  red: "#EF4444",
+  green: "#22C55E",
+  purple: "#A78BFA",
+  dark: "#0B1020",
+  cyan: "#22D3EE",
+  gold: "#FACC15",
 };
 
 function Field({ label, value, onChange, placeholder = "", type = "text" }) {
   return (
     <div>
-      <label className="block text-sm font-black mb-2 text-slate-700">
+      <label className="block text-sm font-medium mb-2 text-slate-300">
         {label}
       </label>
       <input
@@ -55,11 +64,11 @@ function Field({ label, value, onChange, placeholder = "", type = "text" }) {
         value={value || ""}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-3 rounded-2xl outline-none text-sm"
+        className="w-full px-4 py-3 rounded-xl outline-none text-sm transition-all focus:ring-2"
         style={{
-          background: "rgba(255,255,255,0.92)",
-          border: "1px solid rgba(75,46,131,0.16)",
-          color: colors.dark,
+          background: "rgba(30, 41, 59, 0.8)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          color: "#F8FAFC",
         }}
       />
     </div>
@@ -69,7 +78,7 @@ function Field({ label, value, onChange, placeholder = "", type = "text" }) {
 function TextArea({ label, value, onChange, placeholder = "", rows = 4 }) {
   return (
     <div>
-      <label className="block text-sm font-black mb-2 text-slate-700">
+      <label className="block text-sm font-medium mb-2 text-slate-300">
         {label}
       </label>
       <textarea
@@ -77,11 +86,11 @@ function TextArea({ label, value, onChange, placeholder = "", rows = 4 }) {
         value={value || ""}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-3 rounded-2xl outline-none text-sm resize-none"
+        className="w-full px-4 py-3 rounded-xl outline-none text-sm resize-none transition-all focus:ring-2"
         style={{
-          background: "rgba(255,255,255,0.92)",
-          border: "1px solid rgba(75,46,131,0.16)",
-          color: colors.dark,
+          background: "rgba(30, 41, 59, 0.8)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          color: "#F8FAFC",
         }}
       />
     </div>
@@ -93,20 +102,20 @@ function Toggle({ checked, onChange, label }) {
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className="w-full flex items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left"
+      className="w-full flex items-center justify-between gap-4 rounded-xl px-4 py-3 text-left"
       style={{
         background: checked
-          ? "rgba(22,138,58,0.08)"
-          : "rgba(100,116,139,0.08)",
+          ? "rgba(34, 197, 94, 0.1)"
+          : "rgba(255,255,255,0.05)",
         border: checked
-          ? "1px solid rgba(22,138,58,0.18)"
-          : "1px solid rgba(100,116,139,0.18)",
+          ? "1px solid rgba(34, 197, 94, 0.2)"
+          : "1px solid rgba(255,255,255,0.08)",
       }}
     >
-      <span className="text-sm font-black text-slate-700">{label}</span>
+      <span className="text-sm font-medium text-slate-300">{label}</span>
       <span
         className="relative w-12 h-7 rounded-full transition-all"
-        style={{ background: checked ? colors.green : "#CBD5E1" }}
+        style={{ background: checked ? colors.green : "#334155" }}
       >
         <span
           className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow"
@@ -553,79 +562,42 @@ export default function AdminNotices() {
 
   if (loading) {
     return (
-      <div className="py-16 flex items-center justify-center">
-        <div className="text-slate-600 font-semibold">
-          Loading visual notice editor...
-        </div>
+      <div className="py-16 flex items-center justify-center" style={{ background: theme.bg }}>
+        <div className="text-slate-400 font-medium">Loading visual notice editor...</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <style>
-        {`
-          .admin-notices-preview-frame .bg-slate-950 {
-            background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95)) !important;
-            color: #0F172A !important;
-            border: 1px solid rgba(75,46,131,0.12) !important;
-            box-shadow: 0 18px 44px rgba(15,23,42,0.08) !important;
-          }
-
-          .admin-notices-preview-frame .bg-slate-950 [class*="text-white"] {
-            color: #0F172A !important;
-          }
-
-          .admin-notices-preview-frame .bg-slate-950 [class*="text-white/"] {
-            color: #64748B !important;
-          }
-
-          /* Mobile fix: Only make admin edit buttons visible on mobile */
-          @media (max-width: 767px) {
-            .admin-notices-preview-frame .group button[class*="absolute"],
-            .admin-notices-preview-frame .group [class*="absolute"] button,
-            .admin-notices-preview-frame .group .opacity-0,
-            .admin-notices-preview-frame .group [class*="opacity-0"],
-            .admin-notices-preview-frame .group .md\\:opacity-0,
-            .admin-notices-preview-frame .group [class*="md:opacity-0"],
-            .admin-notices-preview-frame .group [class*="group-hover:opacity"],
-            .admin-notices-preview-frame [class*="group-hover:opacity"] {
-              opacity: 1 !important;
-              visibility: visible !important;
-              pointer-events: auto !important;
-            }
-
-            .admin-notices-preview-frame .group button {
-              min-width: 2rem !important;
-              min-height: 2rem !important;
-            }
-          }
-        `}
-      </style>
+    <div className="space-y-6 min-h-screen" style={{ background: theme.bg }}>
+      
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-[24px] p-4 sm:p-5 md:p-6"
-        style={lightAdminPanelStyle}
+        className="rounded-[24px] p-4 sm:p-5 md:p-6 backdrop-blur-xl border"
+        style={{
+          background: "rgba(255,255,255,0.04)",
+          borderColor: "rgba(255,255,255,0.08)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+        }}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black mb-3 bg-purple-50 text-purple-700 border border-purple-100">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-3 bg-blue-500/10 text-blue-300 border border-blue-500/20">
               <Eye className="w-3.5 h-3.5" />
               Visual Notice Editor
             </div>
 
             <h2
-              className="text-2xl md:text-3xl font-black text-slate-950"
+              className="text-2xl md:text-3xl font-bold text-white tracking-tight"
               style={{
-                fontFamily: "var(--font-display)",
                 letterSpacing: "-0.04em",
               }}
             >
               Hover and Edit Notice Page
             </h2>
 
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-slate-400 mt-1">
               Hover page heading and notice cards. Add Notice is inside the notice board. Only two notices are shown here; use View All for bulk delete.
             </p>
           </div>
@@ -634,10 +606,11 @@ export default function AdminNotices() {
             <button
               type="button"
               onClick={() => openEditor({ type: "newNotice" })}
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
               style={{
-                background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                color: colors.dark,
+                background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
+                color: "#FFFFFF",
+                boxShadow: "0 8px 24px rgba(37,99,235,0.25)",
               }}
             >
               <Plus className="w-4 h-4" />
@@ -647,24 +620,22 @@ export default function AdminNotices() {
             <button
               type="button"
               onClick={() => setShowAllNotices(true)}
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white"
               style={{
-                background: "rgba(255,255,255,0.86)",
-                color: colors.purple,
-                border: "1px solid rgba(75,46,131,0.18)",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
               <ListChecks className="w-4 h-4" />
-              View All Notices ({notices.length})
+              View All ({notices.length})
             </button>
 
             <Link
               to="/admin/dashboard"
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5 text-slate-400 hover:text-white"
               style={{
-                background: "rgba(15,23,42,0.06)",
-                color: "rgba(15,23,42,0.72)",
-                border: "1px solid rgba(15,23,42,0.08)",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
               <ArrowLeft className="w-4 h-4" />
@@ -674,28 +645,27 @@ export default function AdminNotices() {
         </div>
 
         {success && (
-          <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-green-50 text-green-700 border border-green-100">
+          <div className="mb-4 rounded-xl px-4 py-3 flex items-center gap-2 font-medium bg-green-500/10 text-green-400 border border-green-500/20">
             <CheckCircle2 className="w-4 h-4" />
             {success}
           </div>
         )}
 
         {error && (
-          <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-red-50 text-red-700 border border-red-100">
+          <div className="mb-4 rounded-xl px-4 py-3 flex items-center gap-2 font-medium bg-red-500/10 text-red-400 border border-red-500/20">
             <AlertCircle className="w-4 h-4" />
             {error}
           </div>
         )}
 
         <div
-          className="admin-notices-preview-frame rounded-[2rem] overflow-x-auto"
+          className="admin-notices-preview-frame rounded-[2rem] overflow-x-auto border"
           style={{
-            background:
-              "radial-gradient(circle at top left, rgba(56,189,248,0.14), transparent 34%), linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)",
-            border: "1px solid rgba(15,23,42,0.08)",
+            background: "rgba(255,255,255,0.02)",
+            borderColor: "rgba(255,255,255,0.06)",
           }}
         >
-          <div className="admin-notices-preview-frame w-full min-w-0 bg-white">
+          <div className="admin-notices-preview-frame w-full min-w-0">
             <Notices
               editMode
               noticesOverride={notices}
@@ -715,7 +685,7 @@ export default function AdminNotices() {
         {editingTarget && (
           <motion.div
             className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5"
-            style={{ background: "rgba(2,6,23,0.55)", backdropFilter: "blur(12px)" }}
+            style={{ background: "rgba(2,6,23,0.65)", backdropFilter: "blur(12px)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -726,11 +696,11 @@ export default function AdminNotices() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 14, scale: 0.96 }}
               transition={{ type: "spring", stiffness: 130, damping: 16 }}
-              className="w-full max-w-xl rounded-[28px] overflow-hidden max-h-[92vh] overflow-y-auto"
+              className="w-full max-w-xl rounded-[28px] overflow-hidden max-h-[92vh] overflow-y-auto border"
               style={{
-                background: "#FFFFFF",
-                border: "1px solid rgba(255,255,255,0.75)",
-                boxShadow: "0 42px 110px rgba(0,0,0,0.28)",
+                background: "#1E293B",
+                borderColor: "rgba(255,255,255,0.08)",
+                boxShadow: "0 42px 110px rgba(0,0,0,0.5)",
               }}
               onClick={(event) => event.stopPropagation()}
             >
@@ -745,19 +715,18 @@ export default function AdminNotices() {
                     <div
                       className="w-12 h-12 rounded-2xl flex items-center justify-center"
                       style={{
-                        background:
-                          "linear-gradient(135deg, rgba(250,204,21,0.18), rgba(56,189,248,0.18))",
-                        color: colors.dark,
+                        background: "rgba(250,204,21,0.10)",
+                        color: colors.gold,
                       }}
                     >
                       {isNoticeEditor ? <FileText className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
                     </div>
 
                     <div>
-                      <h3 className="text-xl font-black text-slate-950">
+                      <h3 className="text-xl font-bold text-white">
                         {modalTitle}
                       </h3>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-slate-400">
                         Save only this selected notice-page item.
                       </p>
                     </div>
@@ -766,7 +735,8 @@ export default function AdminNotices() {
                   <button
                     type="button"
                     onClick={closeEditor}
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center bg-slate-100 text-slate-600"
+                    className="w-10 h-10 rounded-2xl flex items-center justify-center hover:bg-white/10 transition-colors text-slate-400"
+                    style={{ border: "1px solid rgba(255,255,255,0.06)" }}
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -775,157 +745,62 @@ export default function AdminNotices() {
                 <div className="space-y-5">
                   {editingTarget.type === "pageHeader" && (
                     <>
-                      <Field
-                        label="Page Badge"
-                        value={modalForm.page_badge}
-                        onChange={(value) => updateModalField("page_badge", value)}
-                      />
-                      <Field
-                        label="Page Title"
-                        value={modalForm.page_title}
-                        onChange={(value) => updateModalField("page_title", value)}
-                      />
-                      <TextArea
-                        label="Page Description"
-                        value={modalForm.page_description}
-                        onChange={(value) => updateModalField("page_description", value)}
-                        rows={4}
-                      />
+                      <Field label="Page Badge" value={modalForm.page_badge} onChange={(v) => updateModalField("page_badge", v)} />
+                      <Field label="Page Title" value={modalForm.page_title} onChange={(v) => updateModalField("page_title", v)} />
+                      <TextArea label="Page Description" value={modalForm.page_description} onChange={(v) => updateModalField("page_description", v)} rows={4} />
                     </>
                   )}
 
                   {editingTarget.type === "sidebar" && (
                     <>
-                      <Field
-                        label="Sidebar Title"
-                        value={modalForm.sidebar_title}
-                        onChange={(value) => updateModalField("sidebar_title", value)}
-                      />
-                      <TextArea
-                        label="Sidebar Description"
-                        value={modalForm.sidebar_description}
-                        onChange={(value) => updateModalField("sidebar_description", value)}
-                        rows={4}
-                      />
-                      <Field
-                        label="Button Text"
-                        value={modalForm.sidebar_button_text}
-                        onChange={(value) => updateModalField("sidebar_button_text", value)}
-                      />
-                      <Field
-                        label="Button Link"
-                        value={modalForm.sidebar_button_link}
-                        onChange={(value) => updateModalField("sidebar_button_link", value)}
-                      />
+                      <Field label="Sidebar Title" value={modalForm.sidebar_title} onChange={(v) => updateModalField("sidebar_title", v)} />
+                      <TextArea label="Sidebar Description" value={modalForm.sidebar_description} onChange={(v) => updateModalField("sidebar_description", v)} rows={4} />
+                      <Field label="Button Text" value={modalForm.sidebar_button_text} onChange={(v) => updateModalField("sidebar_button_text", v)} />
+                      <Field label="Button Link" value={modalForm.sidebar_button_link} onChange={(v) => updateModalField("sidebar_button_link", v)} />
                     </>
                   )}
 
                   {isNoticeEditor && (
                     <>
-                      <Field
-                        label="Notice Title"
-                        value={modalForm.title}
-                        onChange={(value) => updateModalField("title", value)}
-                        placeholder="Enter notice title"
-                      />
+                      <Field label="Notice Title" value={modalForm.title} onChange={(v) => updateModalField("title", v)} placeholder="Enter notice title" />
                       <div className="grid md:grid-cols-2 gap-4">
-                        <Field
-                          label="Category"
-                          value={modalForm.category}
-                          onChange={(value) => updateModalField("category", value)}
-                          placeholder="Exam / Holiday / Admission"
-                        />
-                        <Field
-                          label="Notice Date"
-                          type="date"
-                          value={modalForm.notice_date}
-                          onChange={(value) => updateModalField("notice_date", value)}
-                        />
+                        <Field label="Category" value={modalForm.category} onChange={(v) => updateModalField("category", v)} placeholder="Exam / Holiday / Admission" />
+                        <Field label="Notice Date" type="date" value={modalForm.notice_date} onChange={(v) => updateModalField("notice_date", v)} />
                       </div>
-                      <TextArea
-                        label="Description"
-                        value={modalForm.description}
-                        onChange={(value) => updateModalField("description", value)}
-                        rows={5}
-                        placeholder="Write notice details"
-                      />
+                      <TextArea label="Description" value={modalForm.description} onChange={(v) => updateModalField("description", v)} rows={5} placeholder="Write notice details" />
 
-                      <div
-                        className="rounded-3xl p-5"
-                        style={lightAdminPanelStyle}
-                      >
+                      <div className="rounded-2xl p-5 border" style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>
                         <div className="flex items-center gap-4">
-                          <div className="w-24 h-20 rounded-2xl bg-white overflow-hidden flex items-center justify-center">
+                          <div className="w-20 h-16 rounded-xl bg-slate-800/80 border border-slate-700/50 overflow-hidden flex items-center justify-center">
                             {modalForm.pdf_url ? (
-                              <FileText className="w-9 h-9 text-green-600" />
+                              <FileText className="w-8 h-8 text-green-400" />
                             ) : (
-                              <ImageIcon className="w-8 h-8 text-slate-300" />
+                              <ImageIcon className="w-7 h-7 text-slate-500" />
                             )}
                           </div>
-
                           <div>
-                            <div className="font-black text-slate-950">Notice PDF</div>
-                            <div className="text-slate-500 text-sm mt-1 leading-relaxed">
-                              PDF only, maximum 10 MB.
-                            </div>
+                            <div className="font-bold text-white">Notice PDF</div>
+                            <div className="text-slate-400 text-sm mt-1 leading-relaxed">PDF only, maximum 10 MB.</div>
                           </div>
                         </div>
 
-                        <label
-                          className="mt-5 flex items-center justify-center gap-2 rounded-2xl px-4 py-3 font-black cursor-pointer"
-                          style={{
-                            background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                            color: colors.dark,
-                          }}
-                        >
+                        <label className="mt-4 flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold cursor-pointer text-white" style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`, boxShadow: "0 8px 24px rgba(37,99,235,0.25)" }}>
                           <UploadCloud className="w-4 h-4" />
                           {uploading ? "Uploading..." : "Upload PDF"}
-                          <input
-                            type="file"
-                            accept="application/pdf,.pdf"
-                            disabled={uploading}
-                            onChange={(event) => {
-                              uploadPdf(event.target.files?.[0]);
-                              event.target.value = "";
-                            }}
-                            className="hidden"
-                          />
+                          <input type="file" accept="application/pdf,.pdf" disabled={uploading} onChange={(event) => { uploadPdf(event.target.files?.[0]); event.target.value = ""; }} className="hidden" />
                         </label>
                       </div>
 
-                      <Field
-                        label="PDF URL"
-                        value={modalForm.pdf_url}
-                        onChange={(value) => updateModalField("pdf_url", value)}
-                        placeholder="Uploaded PDF URL will appear here"
-                      />
+                      <Field label="PDF URL" value={modalForm.pdf_url} onChange={(v) => updateModalField("pdf_url", v)} placeholder="Uploaded PDF URL will appear here" />
 
                       {modalForm.pdf_url && (
                         <div className="flex flex-wrap gap-2">
-                          <a
-                            href={modalForm.pdf_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 transition"
-                          >
-                            View PDF
-                          </a>
-                          <button
-                            type="button"
-                            onClick={() => updateModalField("pdf_url", "")}
-                            className="px-4 py-2 rounded-xl text-sm font-bold bg-red-50 border border-red-100 transition"
-                            style={{ color: colors.red }}
-                          >
-                            Remove PDF
-                          </button>
+                          <a href={modalForm.pdf_url} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl text-sm font-medium bg-white/10 text-white border border-white/10 hover:bg-white/20 transition">View PDF</a>
+                          <button type="button" onClick={() => updateModalField("pdf_url", "")} className="px-4 py-2 rounded-xl text-sm font-medium border border-red-500/20 text-red-400 bg-red-500/10 transition">Remove PDF</button>
                         </div>
                       )}
 
-                      <Toggle
-                        label="Pin this notice as important"
-                        checked={modalForm.pinned === true}
-                        onChange={(value) => updateModalField("pinned", value)}
-                      />
+                      <Toggle label="Pin this notice as important" checked={modalForm.pinned === true} onChange={(v) => updateModalField("pinned", v)} />
                     </>
                   )}
                 </div>
@@ -936,12 +811,7 @@ export default function AdminNotices() {
                       type="button"
                       onClick={() => setDeleteTarget(editingTarget)}
                       disabled={saving || uploading}
-                      className="sm:w-auto px-5 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2"
-                      style={{
-                        background: "rgba(215,25,32,0.08)",
-                        color: colors.red,
-                        border: "1px solid rgba(215,25,32,0.18)",
-                      }}
+                      className="sm:w-auto px-5 py-3 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2 border border-red-500/20 text-red-400 bg-red-500/10"
                     >
                       <Trash2 className="w-4 h-4" />
                       Delete
@@ -952,12 +822,7 @@ export default function AdminNotices() {
                     type="button"
                     onClick={closeEditor}
                     disabled={saving || uploading}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60"
-                    style={{
-                      background: "rgba(15,23,42,0.06)",
-                      color: "rgba(15,23,42,0.65)",
-                      border: "1px solid rgba(15,23,42,0.08)",
-                    }}
+                    className="flex-1 py-3 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5 disabled:opacity-60 bg-white/5 border border-white/10 text-slate-400 hover:text-white"
                   >
                     Cancel
                   </button>
@@ -966,11 +831,10 @@ export default function AdminNotices() {
                     type="button"
                     onClick={saveSelectedPart}
                     disabled={saving || uploading}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                    className="flex-1 py-3 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2 text-white"
                     style={{
-                      background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                      color: "#020617",
-                      boxShadow: "0 16px 38px rgba(56,189,248,0.24)",
+                      background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
+                      boxShadow: "0 8px 24px rgba(37,99,235,0.25)",
                     }}
                   >
                     <Save className="w-4 h-4" />
@@ -985,7 +849,7 @@ export default function AdminNotices() {
         {deleteTarget && (
           <motion.div
             className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5"
-            style={{ background: "rgba(2,6,23,0.62)", backdropFilter: "blur(14px)" }}
+            style={{ background: "rgba(2,6,23,0.7)", backdropFilter: "blur(14px)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -997,23 +861,24 @@ export default function AdminNotices() {
               initial={{ opacity: 0, y: 20, scale: 0.94 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.96 }}
-              className="w-full max-w-md rounded-[28px] bg-white overflow-hidden"
+              className="w-full max-w-md rounded-[28px] overflow-hidden border"
               style={{
-                boxShadow: "0 42px 110px rgba(0,0,0,0.32)",
-                border: "1px solid rgba(255,255,255,0.75)",
+                background: "#1E293B",
+                borderColor: "rgba(255,255,255,0.08)",
+                boxShadow: "0 42px 110px rgba(0,0,0,0.5)",
               }}
               onClick={(event) => event.stopPropagation()}
             >
               <div className="p-6">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-5">
+                <div className="w-14 h-14 rounded-2xl bg-red-500/10 text-red-400 flex items-center justify-center mb-5 border border-red-500/20">
                   <Trash2 className="w-6 h-6" />
                 </div>
 
-                <h3 className="text-2xl font-black text-slate-950 mb-2">
+                <h3 className="text-2xl font-bold text-white mb-2">
                   Are you sure?
                 </h3>
 
-                <p className="text-sm text-slate-500 leading-relaxed mb-6">
+                <p className="text-sm text-slate-400 leading-relaxed mb-6">
                   This will permanently delete {getDeleteLabel(deleteTarget)}.
                 </p>
 
@@ -1022,12 +887,7 @@ export default function AdminNotices() {
                     type="button"
                     disabled={saving}
                     onClick={() => setDeleteTarget(null)}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black disabled:opacity-60"
-                    style={{
-                      background: "rgba(15,23,42,0.06)",
-                      color: "rgba(15,23,42,0.68)",
-                      border: "1px solid rgba(15,23,42,0.08)",
-                    }}
+                    className="flex-1 py-3 rounded-xl text-sm font-bold disabled:opacity-60 bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-colors"
                   >
                     Cancel
                   </button>
@@ -1036,11 +896,10 @@ export default function AdminNotices() {
                     type="button"
                     disabled={saving}
                     onClick={() => deleteTargetItem(deleteTarget)}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                    className="flex-1 py-3 rounded-xl text-sm font-bold disabled:opacity-60 inline-flex items-center justify-center gap-2 text-white"
                     style={{
-                      background: `linear-gradient(135deg, ${colors.red}, #991B1B)`,
-                      color: "#FFFFFF",
-                      boxShadow: "0 16px 38px rgba(215,25,32,0.24)",
+                      background: `linear-gradient(135deg, ${theme.danger}, #991B1B)`,
+                      boxShadow: "0 8px 24px rgba(239,68,68,0.25)",
                     }}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -1055,7 +914,7 @@ export default function AdminNotices() {
         {showAllNotices && (
           <motion.div
             className="fixed inset-0 z-[9998] flex items-center justify-center p-3 sm:p-5"
-            style={{ background: "rgba(2,6,23,0.72)", backdropFilter: "blur(14px)" }}
+            style={{ background: "rgba(2,6,23,0.7)", backdropFilter: "blur(14px)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -1065,31 +924,23 @@ export default function AdminNotices() {
               initial={{ opacity: 0, y: 20, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.96 }}
-              className="w-full max-w-5xl rounded-[30px] overflow-hidden"
+              className="w-full max-w-5xl rounded-[30px] overflow-hidden border"
               style={{
-                background:
-                  "linear-gradient(145deg, rgba(255,255,255,0.98), rgba(248,250,252,0.94))",
-                border: "1px solid rgba(255,255,255,0.18)",
-                boxShadow: "0 30px 90px rgba(0,0,0,0.35)",
+                background: "#1E293B",
+                borderColor: "rgba(255,255,255,0.08)",
+                boxShadow: "0 30px 90px rgba(0,0,0,0.5)",
               }}
               onClick={(event) => event.stopPropagation()}
             >
               <div
-                className="p-5 flex items-center justify-between gap-4"
-                style={{
-                  ...lightAdminPanelStyle,
-                  borderLeft: "0",
-                  borderRight: "0",
-                  borderTop: "0",
-                  borderRadius: "0",
-                  boxShadow: "0 12px 30px rgba(15,23,42,0.08)",
-                }}
+                className="p-5 flex items-center justify-between gap-4 border-b"
+                style={{ borderColor: "rgba(255,255,255,0.08)" }}
               >
                 <div>
-                  <div className="text-xl font-black" style={{ color: colors.dark }}>
+                  <div className="text-xl font-bold text-white">
                     All Notices
                   </div>
-                  <div className="text-sm text-slate-500">
+                  <div className="text-sm text-slate-400">
                     Select one, many, or all notices to delete. Click edit to update any notice.
                   </div>
                 </div>
@@ -1097,10 +948,8 @@ export default function AdminNotices() {
                 <button
                   type="button"
                   onClick={() => setShowAllNotices(false)}
-                  className="p-3 rounded-2xl bg-slate-100 text-slate-600"
-                  style={{
-                    border: "1px solid rgba(15,23,42,0.08)",
-                  }}
+                  className="p-3 rounded-2xl hover:bg-white/10 transition-colors text-slate-400"
+                  style={{ border: "1px solid rgba(255,255,255,0.06)" }}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1111,11 +960,10 @@ export default function AdminNotices() {
                   <button
                     type="button"
                     onClick={toggleSelectAll}
-                    className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black"
+                    className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-slate-300 hover:text-white"
                     style={{
-                      background: "rgba(75,46,131,0.08)",
-                      color: colors.purple,
-                      border: "1px solid rgba(75,46,131,0.18)",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.08)",
                     }}
                   >
                     {allSelected ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
@@ -1126,12 +974,7 @@ export default function AdminNotices() {
                     type="button"
                     onClick={() => setDeleteTarget({ type: "bulkNotice", count: selectedNoticeIds.length })}
                     disabled={saving || selectedNoticeIds.length === 0}
-                    className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black disabled:opacity-50"
-                    style={{
-                      background: "rgba(215,25,32,0.1)",
-                      color: colors.red,
-                      border: "1px solid rgba(215,25,32,0.2)",
-                    }}
+                    className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-bold disabled:opacity-50 border border-red-500/20 text-red-400 bg-red-500/10"
                   >
                     <Trash2 className="w-5 h-5" />
                     Delete Selected ({selectedNoticeIds.length})
@@ -1140,9 +983,9 @@ export default function AdminNotices() {
 
                 <div className="max-h-[62vh] overflow-y-auto pr-1 space-y-3">
                   {notices.length === 0 ? (
-                    <div className="rounded-3xl p-10 text-center border border-slate-200">
-                      <FileText className="w-12 h-12 mx-auto text-slate-300 mb-3" />
-                      <div className="font-black text-slate-900">No notices available</div>
+                    <div className="rounded-2xl p-10 text-center border" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                      <FileText className="w-12 h-12 mx-auto text-slate-500 mb-3" />
+                      <div className="font-bold text-white">No notices available</div>
                     </div>
                   ) : (
                     notices.map((notice, index) => {
@@ -1151,21 +994,21 @@ export default function AdminNotices() {
                       return (
                         <div
                           key={notice.id}
-                          className="w-full rounded-3xl p-4 flex items-start gap-4 transition-all hover:-translate-y-0.5"
+                          className="w-full rounded-2xl p-4 flex items-start gap-4 transition-all hover:-translate-y-0.5 border"
                           style={{
                             background: checked
-                              ? "rgba(75,46,131,0.09)"
-                              : "rgba(255,255,255,0.84)",
+                              ? "rgba(167, 139, 250, 0.08)"
+                              : "rgba(255,255,255,0.03)",
                             border: checked
-                              ? "1px solid rgba(75,46,131,0.28)"
-                              : "1px solid rgba(15,23,42,0.08)",
+                              ? "1px solid rgba(167, 139, 250, 0.3)"
+                              : "rgba(255,255,255,0.06)",
                           }}
                         >
                           <button
                             type="button"
                             onClick={() => toggleSelectedNotice(notice.id)}
                             className="mt-1"
-                            style={{ color: checked ? colors.purple : "#94A3B8" }}
+                            style={{ color: checked ? colors.purple : "#475569" }}
                           >
                             {checked ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
                           </button>
@@ -1175,16 +1018,16 @@ export default function AdminNotices() {
                             onClick={() => openEditor({ type: "notice", id: notice.id, index })}
                             className="min-w-0 flex-1 text-left"
                           >
-                            <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-400 mb-1">
+                            <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500 mb-1">
                               Notice {index + 1}
                             </div>
-                            <div className="font-black text-slate-950 truncate">
+                            <div className="font-bold text-white truncate">
                               {notice.title || "Untitled notice"}
                             </div>
-                            <div className="text-sm text-slate-500">
+                            <div className="text-sm text-slate-400">
                               {notice.category || "No category"} · {formatNoticeDate(notice.notice_date)}
                             </div>
-                            <p className="text-sm text-slate-500 mt-2 line-clamp-2">
+                            <p className="text-sm text-slate-400 mt-2 line-clamp-2">
                               {notice.description || "No description"}
                             </p>
                           </button>
@@ -1192,12 +1035,7 @@ export default function AdminNotices() {
                           <button
                             type="button"
                             onClick={() => openEditor({ type: "notice", id: notice.id, index })}
-                            className="p-3 rounded-xl"
-                            style={{
-                              background: "rgba(75,46,131,0.08)",
-                              color: colors.purple,
-                              border: "1px solid rgba(75,46,131,0.18)",
-                            }}
+                            className="p-3 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
@@ -1206,12 +1044,7 @@ export default function AdminNotices() {
                             type="button"
                             onClick={() => setDeleteTarget({ type: "notice", id: notice.id, index })}
                             disabled={saving}
-                            className="p-3 rounded-xl disabled:opacity-50"
-                            style={{
-                              background: "rgba(215,25,32,0.09)",
-                              color: colors.red,
-                              border: "1px solid rgba(215,25,32,0.18)",
-                            }}
+                            className="p-3 rounded-xl disabled:opacity-50 bg-red-500/10 text-red-400 border border-red-500/20"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
