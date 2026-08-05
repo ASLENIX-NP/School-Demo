@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { supabase } from "../lib/supabase";
@@ -430,8 +430,8 @@ export default function AdminMessages() {
   useEffect(() => {
     const loadMessagesContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/messages",
+        const res = await api.get(
+          "/api/site-content/messages",
           { timeout: 8000 }
         );
 
@@ -593,8 +593,8 @@ export default function AdminMessages() {
     setSaving(true);
 
     try {
-      await axios.put(
-        "https://school-website-backend-ixx2.onrender.com/api/site-content/messages",
+      await api.put(
+        "/api/site-content/messages",
         {
           content: form,
         },

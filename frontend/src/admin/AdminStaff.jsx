@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { motion, AnimatePresence } from "motion/react";
 import {
   AlertCircle,
@@ -644,8 +644,8 @@ export default function AdminStaff() {
 
     const loadStaffContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/staff",
+        const res = await api.get(
+          "/api/site-content/staff",
           { timeout: 20000 }
         );
 
@@ -736,8 +736,8 @@ export default function AdminStaff() {
       return false;
     }
 
-    await axios.put(
-      "https://school-website-backend-ixx2.onrender.com/api/site-content/staff",
+    await api.put(
+      "/api/site-content/staff",
       { content: nextForm },
       { headers: authHeaders }
     );
@@ -778,7 +778,7 @@ export default function AdminStaff() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await axios.post("https://school-website-backend-ixx2.onrender.com/api/upload", formData, {
+      const res = await api.post("/api/upload", formData, {
         headers: {
           ...authHeaders,
           "Content-Type": "multipart/form-data",

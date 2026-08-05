@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { Link } from "react-router-dom";
 import {
     Check,
@@ -243,8 +243,8 @@ export function Footer({
 
     const loadFooterContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/footer",
+        const res = await api.get(
+          "/api/site-content/footer",
           {
             timeout: 12000,
           }

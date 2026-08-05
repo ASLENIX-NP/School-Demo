@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 import {
   ArrowLeft,
   User,
@@ -53,14 +54,14 @@ export default function AdminSettings() {
   
   const fetchSettings = async () => {
     try {
-      const res = await fetch("https://school-website-backend-ixx2.onrender.com/api/admin-settings");
+      const res = await fetch(`${API_URL}/api/admin-settings`);
       const result = await res.json();
 
       if (result.data) {
         setSettings((prev) => ({ ...prev, ...result.data }));
       }
       const loginRes = await fetch(
-        "https://school-website-backend-ixx2.onrender.com/api/admin-settings/login-activity"
+        `${API_URL}/api/admin-settings/login-activity`
       );
       
       const loginData = await loginRes.json();
@@ -118,7 +119,7 @@ export default function AdminSettings() {
       console.log("SENDING REQUEST...");
   
       const res = await fetch(
-        "https://school-website-backend-ixx2.onrender.com/api/admin-settings/upload-photo",
+        `${API_URL}/api/admin-settings/upload-photo`,
         {
           method: "POST",
           body: formData,
@@ -153,7 +154,7 @@ export default function AdminSettings() {
     try {
       setSaving(true);
 
-      const res = await fetch("https://school-website-backend-ixx2.onrender.com/api/admin-settings", {
+      const res = await fetch(`${API_URL}/api/admin-settings`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -187,7 +188,7 @@ export default function AdminSettings() {
   const handleUpdateEmail = async () => {
     try {
       const res = await fetch(
-        "https://school-website-backend-ixx2.onrender.com/api/admin-settings/email",
+        `${API_URL}/api/admin-settings/email`,
         {
           method: "PUT",
           headers: {
@@ -234,7 +235,7 @@ export default function AdminSettings() {
   
     try {
       const res = await fetch(
-        "https://school-website-backend-ixx2.onrender.com/api/admin-settings/change-password",
+        `${API_URL}/api/admin-settings/change-password`,
         {
           method: "PUT",
           headers: {

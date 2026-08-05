@@ -32,9 +32,7 @@ const colors = {
   orange: "#F97316",
 };
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const lightAdminPanelStyle = {
   background:

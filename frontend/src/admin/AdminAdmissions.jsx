@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -340,7 +340,7 @@ export default function AdminAdmissions() {
     let alive = true;
     const loadAdmissionsContent = async () => {
       try {
-        const res = await axios.get("https://school-website-backend-ixx2.onrender.com/api/site-content/admissions", { timeout: 20000 });
+        const res = await api.get("/api/site-content/admissions", { timeout: 20000 });
         if (!alive) return;
         const savedContent = res.data?.data?.content || {};
         setForm(mergeAdmissionsContent(savedContent));
@@ -373,7 +373,7 @@ export default function AdminAdmissions() {
       setModalError(validationError);
       return false;
     }
-    await axios.put("https://school-website-backend-ixx2.onrender.com/api/site-content/admissions", { content: cleanedForm }, { headers: authHeaders, timeout: 30000 });
+    await api.put("/api/site-content/admissions", { content: cleanedForm }, { headers: authHeaders, timeout: 30000 });
     setForm(cleanedForm);
     setSuccess(message || "Admissions page content saved successfully.");
     return true;
@@ -468,7 +468,7 @@ export default function AdminAdmissions() {
       const cleanedForm = mergeAdmissionsContent({
         ...form, steps: (form.steps || []).map((step, index) => ({ ...step, id: step.id ?? `admission-step-${index + 1}`, step: cleanText(step.step), title: cleanText(step.title), desc: cleanText(step.desc), color: cleanText(step.color) || stepColorOptions[index % stepColorOptions.length] || colors.green, visible: true })), grades: (form.grades || []).map((item) => cleanText(item)).filter(Boolean)
       });
-      await axios.put("https://school-website-backend-ixx2.onrender.com/api/site-content/admissions", { content: cleanedForm }, { headers: authHeaders, timeout: 30000 });
+      await api.put("/api/site-content/admissions", { content: cleanedForm }, { headers: authHeaders, timeout: 30000 });
       setForm(cleanedForm);
       setSuccess("Admissions page content saved successfully.");
       window.scrollTo({ top: 0, behavior: "smooth" });

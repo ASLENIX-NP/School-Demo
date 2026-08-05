@@ -1,4 +1,5 @@
 import { useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -136,7 +137,7 @@ export default function AdminAddNotice() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("https://school-website-backend-ixx2.onrender.com/api/upload", {
+      const response = await fetch(`${API_URL}/api/upload`, {
         method: "POST",
         headers: getAuthHeaders(false),
         body: formData,
@@ -171,7 +172,7 @@ export default function AdminAddNotice() {
     setSaving(true);
 
     try {
-      const response = await fetch("https://school-website-backend-ixx2.onrender.com/api/notices", {
+      const response = await fetch(`${API_URL}/api/notices`, {
         method: "POST",
         headers: getAuthHeaders(true),
         body: JSON.stringify({

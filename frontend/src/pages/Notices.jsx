@@ -23,7 +23,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-const API_URL = "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 const REQUEST_TIMEOUT_MS = 12000;
 
 // ============ COLOR PALETTE ============

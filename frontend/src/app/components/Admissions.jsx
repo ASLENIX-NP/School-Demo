@@ -1,6 +1,6 @@
 // AdmissionsPage.jsx
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import {
@@ -261,8 +261,8 @@ export default function AdmissionsPage({
     if (contentOverride) return;
     const loadAdmissionsContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/admissions",
+        const res = await api.get(
+          "/api/site-content/admissions",
           { timeout: 12000 }
         );
         const savedContent = res.data?.data?.content || {};
@@ -289,8 +289,8 @@ export default function AdmissionsPage({
       : `Admission inquiry for ${grade}.`;
 
     try {
-      await axios.post(
-        "https://school-website-backend-ixx2.onrender.com/api/contact",
+      await api.post(
+        "/api/contact",
         {
           source: "admission",
           name: data.name,

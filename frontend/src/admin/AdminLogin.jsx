@@ -2,13 +2,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  School, 
-  BookOpen, 
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  School,
+  BookOpen,
   CheckCircle,
   ArrowRight
 } from "lucide-react";
@@ -42,7 +42,7 @@ const AnimatedBackground = () => {
   return (
     <div className="fixed inset-0 overflow-hidden -z-10">
       {/* Rich Layered Background Gradients */}
-      <div 
+      <div
         className="absolute inset-0"
         style={{
           background: `
@@ -51,9 +51,9 @@ const AnimatedBackground = () => {
             radial-gradient(circle at 50% 80%, rgba(34,197,94,0.15), transparent 40%),
             linear-gradient(135deg, #071224, #101D3A, #153B8A)
           `
-        }} 
+        }}
       />
-      
+
       {/* Subtle Grid Pattern */}
       <div
         className="absolute inset-0 opacity-10"
@@ -70,7 +70,7 @@ const AnimatedBackground = () => {
       <div className="absolute top-20 left-24 w-72 h-72 rounded-full bg-cyan-500/20 blur-[120px] animate-pulse" />
       <div className="absolute bottom-24 right-20 w-96 h-96 rounded-full bg-blue-600/20 blur-[160px] animate-pulse" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 rounded-full bg-purple-500/20 blur-[100px] animate-pulse" />
-      
+
       {/* Animated Floating Particles */}
       {particles.map((particle) => (
         <motion.div
@@ -120,8 +120,15 @@ const LoginPage = () => {
     // Demo credentials
     if (email === "admin@school.com" && password === "admin123") {
       localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("user", JSON.stringify({ email, role: "admin" }));
-      navigate("/admin/dashboard");
+      localStorage.setItem("adminToken", "demo-token");
+      localStorage.setItem(
+        "adminUser",
+        JSON.stringify({
+          email,
+          name: "Administrator",
+          role: "admin",
+        })
+      ); navigate("/admin/dashboard");
     } else {
       setError("Invalid email or password. Please try again.");
     }
@@ -165,7 +172,7 @@ const LoginPage = () => {
           <h1 className="text-4xl md:text-5xl font-bold mb-3 leading-tight">
             School Management System
           </h1>
-          
+
           <p className="text-xl leading-9 text-white/80 max-w-lg mb-6">
             Modern, secure, and centralized administration platform for managing
             students, teachers, admissions, notices, galleries, and school information.
@@ -198,9 +205,9 @@ const LoginPage = () => {
             {/* Logo & Title */}
             <div className="text-center mb-8">
               <div className="flex justify-center mb-4">
-                <div 
+                <div
                   className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                  style={{ 
+                  style={{
                     background: "linear-gradient(135deg, #2563EB, #38BDF8)",
                     boxShadow: "0 8px 30px rgba(37, 99, 235, 0.3)",
                   }}
@@ -209,7 +216,7 @@ const LoginPage = () => {
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-white">Welcome Back</h2>
-              
+
               <p
                 className="mt-2 text-sm font-medium tracking-wide"
                 style={{
@@ -229,7 +236,7 @@ const LoginPage = () => {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="mb-4 p-3 rounded-xl text-sm"
-                  style={{ 
+                  style={{
                     background: "rgba(239, 68, 68, 0.15)",
                     color: "#EF4444",
                     border: "1px solid rgba(239, 68, 68, 0.2)",
@@ -247,7 +254,7 @@ const LoginPage = () => {
                 <label className="block text-sm font-medium text-white/70 mb-2">
                   Email Address
                 </label>
-                <div 
+                <div
                   className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-within:ring-2"
                   style={{
                     background: colors.glass,
@@ -271,7 +278,7 @@ const LoginPage = () => {
                 <label className="block text-sm font-medium text-white/70 mb-2">
                   Password
                 </label>
-                <div 
+                <div
                   className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-within:ring-2"
                   style={{
                     background: colors.glass,
@@ -300,7 +307,7 @@ const LoginPage = () => {
               {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer group">
-                  <div 
+                  <div
                     className="w-4 h-4 rounded flex items-center justify-center transition-all duration-200"
                     style={{
                       background: rememberMe ? colors.primary : colors.glass,
@@ -354,7 +361,7 @@ const LoginPage = () => {
                     </>
                   )}
                 </span>
-                <div 
+                <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   style={{
                     background: "linear-gradient(135deg, #1D4ED8, #38BDF8)",

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function AdminLoginActivity() {
   const [logs, setLogs] = useState([]);
 
@@ -12,7 +14,7 @@ export default function AdminLoginActivity() {
   const fetchLogs = async () => {
     try {
       const res = await fetch(
-        "https://school-website-backend-ixx2.onrender.com/api/admin-settings/login-activity"
+        `${API_URL}/api/admin-settings/login-activity`
       );
 
       const data = await res.json();

@@ -1,0 +1,6 @@
+{
+  "show_notices_ticker": true,
+  "ticker_speed": 15,
+  "auto_popup": true,
+  "max_notices_display": 5
+}

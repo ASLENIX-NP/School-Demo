@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -214,7 +214,7 @@ async function uploadGalleryImage(file) {
 
   const token = localStorage.getItem("adminToken");
 
-  const res = await axios.post("https://school-website-backend-ixx2.onrender.com/api/upload", formData, {
+  const res = await api.post("/api/upload", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -393,8 +393,8 @@ export default function AdminGalleryImages() {
 
     const loadGalleryContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/gallery",
+        const res = await api.get(
+          "/api/site-content/gallery",
           {
             timeout: 8000,
           }
@@ -921,8 +921,8 @@ export default function AdminGalleryImages() {
         images: cleanedImages,
       };
 
-      await axios.put(
-        "https://school-website-backend-ixx2.onrender.com/api/site-content/gallery",
+      await api.put(
+        "/api/site-content/gallery",
         { content: cleanedForm },
         {
           headers: {

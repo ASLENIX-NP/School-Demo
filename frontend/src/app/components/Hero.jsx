@@ -1,6 +1,6 @@
 // Hero.jsx
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -36,7 +36,7 @@ const palette = {
 // Hardcoded St. Mary's style school image
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80";
 
-const API_URL = "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const defaultHeroData = {
   badge: "Wisdom is Divine",

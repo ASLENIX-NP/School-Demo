@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "title": "Welcome to New Academic Session 2026",
+    "description": "Classes for the new academic year 2026/2083 will commence from Baisakh 5. All students are requested to be present in full uniform.",
+    "image_url": "",
+    "active": true,
+    "visible": true,
+    "show_on_homepage": true,
+    "popup_order": 1,
+    "created_at": "2026-08-05T08:28:04.706Z"
+  },
+  {
+    "id": 2,
+    "title": "Annual Sports Meet Registration Open",
+    "description": "Registration for track and field events, basketball, and football tournaments is now open at the physical education department.",
+    "image_url": "",
+    "active": true,
+    "visible": true,
+    "show_on_homepage": true,
+    "popup_order": 2,
+    "created_at": "2026-08-05T08:28:04.706Z"
+  }
+]

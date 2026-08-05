@@ -116,7 +116,7 @@ export default function AdminAdmissions() {
     const loadContent = async () => {
       try {
         const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/admissions",
+          "https://localhost:5000/admissions",
           { timeout: 12000 }
         );
         const savedContent = res.data?.data?.content || {};
@@ -183,7 +183,7 @@ export default function AdminAdmissions() {
     try {
       const cleanContent = mergeAdmissionsContent(nextForm);
       await axios.put(
-        "https://school-website-backend-ixx2.onrender.com/api/site-content/admissions",
+        "https://localhost:5000/admissions",
         { content: cleanContent },
         { headers: authHeaders }
       );
@@ -228,8 +228,8 @@ export default function AdminAdmissions() {
           features: editingTarget.isNew
             ? [...nextForm.features, nextItem]
             : nextForm.features.map((item, index) =>
-                index === editingTarget.index ? { ...item, ...nextItem } : item
-              ),
+              index === editingTarget.index ? { ...item, ...nextItem } : item
+            ),
         };
       } else if (editingTarget.type === "step") {
         const nextItem = {
@@ -244,8 +244,8 @@ export default function AdminAdmissions() {
           steps: editingTarget.isNew
             ? [...nextForm.steps, nextItem]
             : nextForm.steps.map((item, index) =>
-                index === editingTarget.index ? { ...item, ...nextItem } : item
-              ),
+              index === editingTarget.index ? { ...item, ...nextItem } : item
+            ),
         };
       }
 
@@ -316,7 +316,7 @@ export default function AdminAdmissions() {
 
   return (
     <div className="space-y-6 min-h-screen" style={{ background: theme.bg }}>
-      
+
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}

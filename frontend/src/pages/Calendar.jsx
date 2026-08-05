@@ -26,7 +26,7 @@ const colors = {
   orange: "#F97316",
 };
 
-const API_URL = import.meta.env.VITE_API_URL || "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 const REQUEST_TIMEOUT_MS = 12000;
 
 async function fetchJsonWithTimeout(url, options = {}) {
@@ -746,24 +746,24 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
   return (
     <>
       <section
-        className="min-h-screen pt-24 pb-12 lg:pt-28 relative overflow-hidden"
+        className="min-h-screen pt-24 pb-16 lg:pt-28 relative overflow-hidden"
         style={{
-          background: "#F8FAFC",
+          background: "linear-gradient(135deg, #EBF1F6 0%, #E2E8F0 50%, #EDF2F7 100%)",
         }}
       >
-        {/* Decorative elements */}
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Glassmorphic Ambient Glowing Orbs */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div 
-            className="absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-[0.04]"
-            style={{ background: "#1A5276" }}
+            className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full blur-3xl opacity-20"
+            style={{ background: "#1E3A5F" }}
           />
           <div 
-            className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-[0.04]"
-            style={{ background: "#1E8449" }}
+            className="absolute top-1/3 -right-32 w-[600px] h-[600px] rounded-full blur-3xl opacity-20"
+            style={{ background: "#2D6A4F" }}
           />
           <div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.02]"
-            style={{ background: "#D4AC0D" }}
+            className="absolute -bottom-32 left-1/3 w-[600px] h-[600px] rounded-full blur-3xl opacity-15"
+            style={{ background: "#4B2E83" }}
           />
         </div>
 
@@ -777,12 +777,12 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
             <span
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] mb-4"
               style={{
-                background: "rgba(215,25,32,0.08)",
-                color: colors.red,
-                border: "1px solid rgba(215,25,32,0.16)",
+                background: "rgba(30,58,95,0.09)",
+                color: "#1E3A5F",
+                border: "1px solid rgba(30,58,95,0.18)",
               }}
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-[#1E3A5F]" />
               {content.page_badge}
             </span>
 
@@ -799,18 +799,20 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                   {content.page_title}
                 </h1>
 
-                <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-500">
+                <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600">
                   {content.page_description}
                 </p>
               </div>
 
-              {/* Stats Card - Matching Stats Page Style */}
+              {/* Stats Card - Glassmorphism */}
               <div
-                className="rounded-2xl p-5"
+                className="rounded-2xl p-5 backdrop-blur-xl"
                 style={{
-                  background: "linear-gradient(160deg, rgba(26,82,118,0.06) 0%, #FFFFFF 60%)",
-                  border: "1px solid rgba(26,82,118,0.12)",
-                  boxShadow: "0 4px 22px rgba(26,82,118,0.06)",
+                  background: "rgba(255, 255, 255, 0.65)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  border: "1px solid rgba(255, 255, 255, 0.8)",
+                  boxShadow: "0 8px 32px rgba(15, 23, 42, 0.05)",
                 }}
               >
                 <div className="grid grid-cols-3 gap-3">
@@ -818,7 +820,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                     <div className="text-2xl font-black text-slate-950">
                       {content.events?.length || 0}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-1">
                       Events
                     </div>
                   </div>
@@ -826,7 +828,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                     <div className="text-2xl font-black text-slate-950">
                       {content.events?.filter(e => e.type === "holiday").length || 0}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-1">
                       Holidays
                     </div>
                   </div>
@@ -834,7 +836,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                     <div className="text-2xl font-black text-slate-950">
                       {notices.length}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-1">
                       Notices
                     </div>
                   </div>
@@ -864,7 +866,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
           </motion.div>
 
           {editMode && (
-            <div className="mb-4 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm font-bold text-sky-700">
+            <div className="mb-4 rounded-2xl border border-sky-200 bg-sky-50/80 backdrop-blur-md px-4 py-3 text-sm font-bold text-sky-800 shadow-xs">
               Admin tip: click any calendar date to add a holiday, school event, or working day for that BS date.
             </div>
           )}
@@ -874,11 +876,13 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.08 }}
-              className="rounded-2xl overflow-hidden"
+              className="rounded-2xl overflow-hidden backdrop-blur-xl"
               style={{
-                background: "#FFFFFF",
-                border: "1px solid rgba(15,23,42,0.06)",
-                boxShadow: "0 4px 22px rgba(15,23,42,0.04)",
+                background: "rgba(255, 255, 255, 0.65)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "1px solid rgba(255, 255, 255, 0.8)",
+                boxShadow: "0 8px 32px rgba(15, 23, 42, 0.06)",
               }}
             >
               <div className="p-4 md:p-5">
@@ -886,8 +890,8 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                   <button
                     type="button"
                     onClick={() => changeMonth(-1)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl font-black transition-all hover:-translate-y-0.5 hover:bg-slate-100"
-                    style={{ background: "rgba(15,23,42,0.04)", color: colors.dark }}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl font-black transition-all hover:-translate-y-0.5 hover:bg-white/80"
+                    style={{ background: "rgba(15,23,42,0.05)", color: colors.dark }}
                     aria-label="Previous BS month"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -900,14 +904,14 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                     >
                       {monthName.np} {toNepaliNumber(calendarMonth.year)}
                     </div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                    <div className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
                       {monthName.en} · {formatAdMonthRange(firstAdDate, lastAdDate)}
                     </div>
                     <button
                       type="button"
                       onClick={goToday}
                       className="mt-1 rounded-full px-3 py-0.5 text-[11px] font-bold uppercase tracking-[0.14em]"
-                      style={{ color: "#1E8449", background: "rgba(30,132,73,0.08)", border: "1px solid rgba(30,132,73,0.16)" }}
+                      style={{ color: "#1E8449", background: "rgba(30,132,73,0.1)", border: "1px solid rgba(30,132,73,0.2)" }}
                     >
                       Today
                     </button>
@@ -916,15 +920,15 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                   <button
                     type="button"
                     onClick={() => changeMonth(1)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl font-black transition-all hover:-translate-y-0.5 hover:bg-slate-100"
-                    style={{ background: "rgba(15,23,42,0.04)", color: colors.dark }}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl font-black transition-all hover:-translate-y-0.5 hover:bg-white/80"
+                    style={{ background: "rgba(15,23,42,0.05)", color: colors.dark }}
                     aria-label="Next BS month"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
                   {BS_WEEK_DAYS.map((day, index) => (
                     <div key={day} className="py-1" style={{ color: index === 6 ? colors.red : undefined }}>
                       {day}
@@ -964,14 +968,16 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
               className="lg:sticky lg:top-28 space-y-4"
             >
               <div
-                className="rounded-2xl p-4"
+                className="rounded-2xl p-4 backdrop-blur-xl"
                 style={{
-                  background: "#FFFFFF",
-                  border: "1px solid rgba(15,23,42,0.06)",
-                  boxShadow: "0 4px 22px rgba(15,23,42,0.04)",
+                  background: "rgba(255, 255, 255, 0.65)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  border: "1px solid rgba(255, 255, 255, 0.8)",
+                  boxShadow: "0 8px 32px rgba(15, 23, 42, 0.06)",
                 }}
               >
-                <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Selected Date</div>
+                <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Selected Date</div>
                 <div className="mt-2 text-lg font-black text-slate-950">{formatCalendarDate(selectedDateKey)}</div>
 
                 <div className="mt-3 space-y-2">
@@ -1008,7 +1014,7 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
                   ))}
 
                   {!isSelectedSaturdayHoliday && !hasWorkingDay && visibleSelectedEvents.length === 0 && (
-                    <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-400">
+                    <div className="rounded-xl bg-white/40 border border-white/60 px-4 py-3 text-sm font-semibold text-slate-400">
                       No school event added for this date.
                     </div>
                   )}
@@ -1016,14 +1022,16 @@ export function Calendar({ contentOverride = null, noticesOverride = null, editM
               </div>
 
               <div
-                className="rounded-2xl p-4"
+                className="rounded-2xl p-4 backdrop-blur-xl"
                 style={{
-                  background: "#FFFFFF",
-                  border: "1px solid rgba(15,23,42,0.06)",
-                  boxShadow: "0 4px 22px rgba(15,23,42,0.04)",
+                  background: "rgba(255, 255, 255, 0.65)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  border: "1px solid rgba(255, 255, 255, 0.8)",
+                  boxShadow: "0 8px 32px rgba(15, 23, 42, 0.06)",
                 }}
               >
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
                   <Clock className="h-4 w-4" />
                   Upcoming Dates
                 </div>

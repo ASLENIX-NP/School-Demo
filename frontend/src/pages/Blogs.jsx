@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../lib/api";
 import { motion } from "motion/react";
 import {
   ArrowRight,
@@ -40,8 +40,7 @@ const colors = {
   cyan: "#38BDF8",
 };
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function getPlainExcerpt(post = {}) {
   const text = String(post.excerpt || post.content || "")

@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PdfNoticePreview from "../app/components/PdfNoticePreview";
 
-const API_URL = "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 const REQUEST_TIMEOUT_MS = 12000;
 
 async function fetchJsonWithTimeout(url, options = {}) {

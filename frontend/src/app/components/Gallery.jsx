@@ -1,6 +1,6 @@
 // Gallery.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Camera,
@@ -40,7 +40,7 @@ const palette = {
   gradient3: "linear-gradient(135deg, #2D6A4F 0%, #1E3A5F 100%)",
 };
 
-const API_URL = "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const DEFAULT_GALLERY_CATEGORIES = ["Classroom", "Events", "Certificate"];
 

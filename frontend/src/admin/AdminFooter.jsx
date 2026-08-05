@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -257,7 +257,7 @@ export default function AdminFooter() {
   useEffect(() => {
     const loadFooterContent = async () => {
       try {
-        const res = await axios.get("https://school-website-backend-ixx2.onrender.com/api/site-content/footer");
+        const res = await api.get("/api/site-content/footer");
         const savedContent = res.data?.data?.content || {};
         setForm(mergeFooterContent(savedContent));
       } catch (err) {
@@ -509,7 +509,7 @@ export default function AdminFooter() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await axios.post("https://school-website-backend-ixx2.onrender.com/api/upload", formData, {
+      const res = await api.post("/api/upload", formData, {
         headers: {
           ...authHeaders,
           "Content-Type": "multipart/form-data",
@@ -789,8 +789,8 @@ export default function AdminFooter() {
 
       const cleanForm = buildCleanFooterContent(nextForm);
 
-      await axios.put(
-        "https://school-website-backend-ixx2.onrender.com/api/site-content/footer",
+      await api.put(
+        "/api/site-content/footer",
         { content: cleanForm },
         { headers: authHeaders }
       );

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -1122,8 +1122,8 @@ export default function AdminGallery() {
 
     const loadGalleryContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/gallery",
+        const res = await api.get(
+          "/api/site-content/gallery",
           { timeout: 20000 }
         );
 
@@ -1326,8 +1326,8 @@ export default function AdminGallery() {
     setError("");
 
     try {
-      await axios.put(
-        "https://school-website-backend-ixx2.onrender.com/api/site-content/gallery",
+      await api.put(
+        "/api/site-content/gallery",
         { content: cleanedForm },
         {
           headers: { Authorization: `Bearer ${token}` },

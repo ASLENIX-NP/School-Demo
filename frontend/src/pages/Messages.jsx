@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { motion } from "motion/react";
 import { UserRound, Quote, Sparkles } from "lucide-react";
 
@@ -155,8 +155,8 @@ export default function Messages() {
   useEffect(() => {
     const loadMessagesContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/messages"
+        const res = await api.get(
+          "/api/site-content/messages"
         );
 
         const savedContent = res.data?.data?.content || {};

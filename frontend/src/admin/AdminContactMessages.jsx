@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -402,8 +402,8 @@ export default function AdminContactMessages() {
     setError("");
 
     try {
-      const res = await axios.get(
-        "https://school-website-backend-ixx2.onrender.com/api/contact-messages",
+      const res = await api.get(
+        "/api/contact-messages",
         { timeout: 12000 }
       );
       setMessages(Array.isArray(res.data?.data) ? res.data.data : []);
@@ -463,8 +463,8 @@ export default function AdminContactMessages() {
     try {
       const nextReadStatus = !message.is_read;
 
-      await axios.patch(
-        `https://school-website-backend-ixx2.onrender.com/api/contact-messages/${message.id}/read`,
+      await api.patch(
+        `/api/contact-messages/${message.id}/read`,
         {
           is_read: nextReadStatus,
         },
@@ -501,8 +501,8 @@ export default function AdminContactMessages() {
     setError("");
 
     try {
-      await axios.delete(
-        `https://school-website-backend-ixx2.onrender.com/api/contact-messages/${deleteTarget.id}`,
+      await api.delete(
+        `/api/contact-messages/${deleteTarget.id}`,
         { timeout: 12000 }
       );
 

@@ -1,6 +1,6 @@
 import defaultSchoolLogo from "../../assets/school-logo.jpeg";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Camera, Menu, Pencil, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -90,8 +90,8 @@ export function Navbar({
 
     const loadNavbarContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/navbar"
+        const res = await api.get(
+          "/api/site-content/navbar"
         );
 
         const savedContent = res.data?.data?.content || {};

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import api from "../lib/api";
 import axios from "axios";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -33,8 +34,7 @@ const colors = {
   orange: "#F97316",
 };
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const panelStyle = {
   background:

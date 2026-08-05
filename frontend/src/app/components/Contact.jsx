@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { motion } from "motion/react";
 import {
   MapPin,
@@ -26,8 +26,7 @@ export const colors = {
   cyan: "#38BDF8",
 };
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const defaultContactContent = {
   badgeText: "Get In Touch",
@@ -224,7 +223,23 @@ export function Contact({ contentOverride = null }) {
     "https://maps.google.com/maps?q=Bal+Jagriti+Boarding+School+Hetauda+Nepal&t=&z=16&ie=UTF8&iwloc=&output=embed";
 
   return (
-    <section className="min-h-screen bg-slate-50 pt-28 pb-24 relative overflow-hidden">
+    <section className="min-h-screen pt-28 pb-24 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #EBF1F6 0%, #E2E8F0 50%, #EDF2F7 100%)" }}>
+      {/* Glassmorphic Ambient Glowing Orbs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div 
+          className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full blur-3xl opacity-20"
+          style={{ background: "#1E3A5F" }}
+        />
+        <div 
+          className="absolute top-1/3 -right-32 w-[600px] h-[600px] rounded-full blur-3xl opacity-20"
+          style={{ background: "#2D6A4F" }}
+        />
+        <div 
+          className="absolute -bottom-32 left-1/3 w-[600px] h-[600px] rounded-full blur-3xl opacity-15"
+          style={{ background: "#4B2E83" }}
+        />
+      </div>
+
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 relative z-10">
         {/* Header Section */}
         <motion.div
@@ -233,12 +248,11 @@ export function Contact({ contentOverride = null }) {
           transition={{ duration: 0.5 }}
           className="text-left max-w-3xl mb-14"
         >
-          <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#0A1628] text-white shadow-sm mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span className="inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#1E3A5F]/10 text-[#1E3A5F] border border-[#1E3A5F]/20 shadow-xs mb-4">
             {content.badgeText || "Get In Touch"}
           </span>
 
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-[#0A1628] tracking-tight leading-[1.12]">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-[#1E3A5F] tracking-tight leading-[1.12]">
             {content.title || "Contact Smriti School"}
           </h1>
 
@@ -254,13 +268,20 @@ export function Contact({ contentOverride = null }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.05 }}
-            className="rounded-2xl bg-white border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-slate-300 transition-all group"
+            className="rounded-2xl p-6 flex flex-col justify-between transition-all group backdrop-blur-xl hover:-translate-y-1 hover:shadow-lg"
+            style={{
+              background: "rgba(255, 255, 255, 0.65)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+              boxShadow: "0 8px 32px rgba(15, 23, 42, 0.05)",
+            }}
           >
             <div>
-              <div className="w-12 h-12 rounded-xl bg-[#0A1628] text-white flex items-center justify-center mb-4 shadow-sm group-hover:scale-105 transition-transform">
-                <MapPin className="w-6 h-6 text-amber-400" />
+              <div className="w-12 h-12 rounded-xl bg-blue-50/90 border border-blue-100 text-[#1E3A5F] flex items-center justify-center mb-4 shadow-xs group-hover:scale-105 transition-transform">
+                <MapPin className="w-6 h-6 text-[#1E3A5F]" />
               </div>
-              <h3 className="text-base font-extrabold text-[#0A1628] mb-1">School Location</h3>
+              <h3 className="text-base font-extrabold text-[#1E3A5F] mb-1">School Location</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
                 Basudev Marga, Hetauda-2, Makawanpur, Nepal
               </p>
@@ -269,7 +290,7 @@ export function Contact({ contentOverride = null }) {
               href={normalizeExternalUrl(content.mapCard?.mapUrl)}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-[#1E3A5F] hover:text-blue-600 transition-colors"
+              className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-[#1E3A5F] hover:text-[#2D6A4F] transition-colors"
             >
               <span>View Map</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -280,20 +301,27 @@ export function Contact({ contentOverride = null }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="rounded-2xl bg-white border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-slate-300 transition-all group"
+            className="rounded-2xl p-6 flex flex-col justify-between transition-all group backdrop-blur-xl hover:-translate-y-1 hover:shadow-lg"
+            style={{
+              background: "rgba(255, 255, 255, 0.65)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+              boxShadow: "0 8px 32px rgba(15, 23, 42, 0.05)",
+            }}
           >
             <div>
-              <div className="w-12 h-12 rounded-xl bg-[#0A1628] text-white flex items-center justify-center mb-4 shadow-sm group-hover:scale-105 transition-transform">
-                <Phone className="w-6 h-6 text-amber-400" />
+              <div className="w-12 h-12 rounded-xl bg-emerald-50/90 border border-emerald-100 text-[#2D6A4F] flex items-center justify-center mb-4 shadow-xs group-hover:scale-105 transition-transform">
+                <Phone className="w-6 h-6 text-[#2D6A4F]" />
               </div>
-              <h3 className="text-base font-extrabold text-[#0A1628] mb-1">Call Us Directly</h3>
+              <h3 className="text-base font-extrabold text-[#1E3A5F] mb-1">Call Us Directly</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
                 057-590144, 057-590145, 057-590146
               </p>
             </div>
             <a
               href="tel:057590144"
-              className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-[#1E3A5F] hover:text-blue-600 transition-colors"
+              className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-[#2D6A4F] hover:text-[#1E3A5F] transition-colors"
             >
               <span>Call Reception</span>
               <Phone className="w-3.5 h-3.5" />
@@ -304,20 +332,27 @@ export function Contact({ contentOverride = null }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.15 }}
-            className="rounded-2xl bg-white border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-slate-300 transition-all group"
+            className="rounded-2xl p-6 flex flex-col justify-between transition-all group backdrop-blur-xl hover:-translate-y-1 hover:shadow-lg"
+            style={{
+              background: "rgba(255, 255, 255, 0.65)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+              boxShadow: "0 8px 32px rgba(15, 23, 42, 0.05)",
+            }}
           >
             <div>
-              <div className="w-12 h-12 rounded-xl bg-[#0A1628] text-white flex items-center justify-center mb-4 shadow-sm group-hover:scale-105 transition-transform">
-                <Mail className="w-6 h-6 text-amber-400" />
+              <div className="w-12 h-12 rounded-xl bg-indigo-50/90 border border-indigo-100 text-indigo-700 flex items-center justify-center mb-4 shadow-xs group-hover:scale-105 transition-transform">
+                <Mail className="w-6 h-6 text-indigo-700" />
               </div>
-              <h3 className="text-base font-extrabold text-[#0A1628] mb-1">Email Inquiries</h3>
+              <h3 className="text-base font-extrabold text-[#1E3A5F] mb-1">Email Inquiries</h3>
               <p className="text-sm text-slate-600 leading-relaxed break-all">
                 infobjess2046@gmail.com
               </p>
             </div>
             <a
               href="mailto:infobjess2046@gmail.com"
-              className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-[#1E3A5F] hover:text-blue-600 transition-colors"
+              className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 hover:text-[#1E3A5F] transition-colors"
             >
               <span>Send Email</span>
               <Mail className="w-3.5 h-3.5" />
@@ -328,19 +363,26 @@ export function Contact({ contentOverride = null }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
-            className="rounded-2xl bg-white border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-slate-300 transition-all group"
+            className="rounded-2xl p-6 flex flex-col justify-between transition-all group backdrop-blur-xl hover:-translate-y-1 hover:shadow-lg"
+            style={{
+              background: "rgba(255, 255, 255, 0.65)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+              boxShadow: "0 8px 32px rgba(15, 23, 42, 0.05)",
+            }}
           >
             <div>
-              <div className="w-12 h-12 rounded-xl bg-[#0A1628] text-white flex items-center justify-center mb-4 shadow-sm group-hover:scale-105 transition-transform">
-                <Clock className="w-6 h-6 text-amber-400" />
+              <div className="w-12 h-12 rounded-xl bg-sky-50/90 border border-sky-100 text-[#1E3A5F] flex items-center justify-center mb-4 shadow-xs group-hover:scale-105 transition-transform">
+                <Clock className="w-6 h-6 text-[#1E3A5F]" />
               </div>
-              <h3 className="text-base font-extrabold text-[#0A1628] mb-1">Office Hours</h3>
+              <h3 className="text-base font-extrabold text-[#1E3A5F] mb-1">Office Hours</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
                 Sun - Fri: 9:00 AM - 4:00 PM
               </p>
               <p className="text-xs text-slate-400 mt-1">Saturday: Closed</p>
             </div>
-            <span className="mt-5 text-xs font-bold text-slate-500">School Office Days</span>
+            <span className="mt-5 text-xs font-bold text-[#1E3A5F]">School Office Days</span>
           </motion.div>
         </div>
 
@@ -351,27 +393,34 @@ export function Contact({ contentOverride = null }) {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="lg:col-span-7 rounded-2xl bg-white border border-slate-200/90 p-8 sm:p-10 shadow-sm"
+            className="lg:col-span-7 rounded-2xl p-8 sm:p-10 shadow-sm backdrop-blur-xl"
+            style={{
+              background: "rgba(255, 255, 255, 0.68)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.85)",
+              boxShadow: "0 8px 32px rgba(15, 23, 42, 0.06)",
+            }}
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-[#0A1628] text-white flex items-center justify-center font-bold">
-                <MessageSquare className="w-5 h-5 text-amber-400" />
+              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-[#1E3A5F] flex items-center justify-center font-bold">
+                <MessageSquare className="w-5 h-5 text-[#1E3A5F]" />
               </div>
               <div>
-                <h2 className="text-2xl font-extrabold text-[#0A1628]">Send Us a Message</h2>
+                <h2 className="text-2xl font-extrabold text-[#1E3A5F]">Send Us a Message</h2>
                 <p className="text-xs text-slate-500">Fill out the form below and we will respond promptly.</p>
               </div>
             </div>
 
             {status.success && (
-              <div className="mb-6 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800 text-sm font-semibold flex items-center gap-3">
+              <div className="mb-6 rounded-xl bg-emerald-50/90 border border-emerald-200 p-4 text-emerald-800 text-sm font-semibold flex items-center gap-3 shadow-xs">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                 <span>Thank you! Your message has been sent successfully. We will get back to you soon.</span>
               </div>
             )}
 
             {status.error && (
-              <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-red-700 text-sm font-semibold flex items-center gap-3">
+              <div className="mb-6 rounded-xl bg-red-50/90 border border-red-200 p-4 text-red-700 text-sm font-semibold flex items-center gap-3 shadow-xs">
                 <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
                 <span>{status.error}</span>
               </div>
@@ -390,7 +439,7 @@ export function Contact({ contentOverride = null }) {
                     onChange={handleChange}
                     placeholder="e.g. Ram Shrestha"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:border-[#0A1628] focus:ring-2 focus:ring-[#0A1628]/10 transition-all"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-md px-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/15 transition-all shadow-xs"
                   />
                 </div>
 
@@ -405,7 +454,7 @@ export function Contact({ contentOverride = null }) {
                     onChange={handleChange}
                     placeholder="ram@example.com"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:border-[#0A1628] focus:ring-2 focus:ring-[#0A1628]/10 transition-all"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-md px-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/15 transition-all shadow-xs"
                   />
                 </div>
               </div>
@@ -421,7 +470,7 @@ export function Contact({ contentOverride = null }) {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="98XXXXXXXX"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:border-[#0A1628] focus:ring-2 focus:ring-[#0A1628]/10 transition-all"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-md px-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/15 transition-all shadow-xs"
                   />
                 </div>
 
@@ -433,7 +482,7 @@ export function Contact({ contentOverride = null }) {
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#0A1628] focus:ring-2 focus:ring-[#0A1628]/10 transition-all cursor-pointer"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-md px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/15 transition-all cursor-pointer shadow-xs"
                   >
                     <option value="Admissions Inquiry">Admissions Inquiry</option>
                     <option value="Academic Programs">Academic Programs</option>
@@ -455,14 +504,14 @@ export function Contact({ contentOverride = null }) {
                   onChange={handleChange}
                   placeholder="Write your message or inquiry here..."
                   required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-4 text-sm text-slate-900 outline-none focus:bg-white focus:border-[#0A1628] focus:ring-2 focus:ring-[#0A1628]/10 transition-all resize-none"
+                  className="w-full rounded-xl border border-slate-200/80 bg-white/70 backdrop-blur-md p-4 text-sm text-slate-900 outline-none focus:bg-white focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/15 transition-all resize-none shadow-xs"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={status.loading}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#0A1628] hover:bg-[#1E3A5F] px-8 py-3.5 text-sm font-bold text-white transition-all duration-200 shadow-md cursor-pointer disabled:opacity-60"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#2D6A4F] px-8 py-3.5 text-sm font-bold text-white transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer disabled:opacity-60"
               >
                 <span>{status.loading ? "Sending Message..." : "Send Message"}</span>
                 <Send className="w-4 h-4" />
@@ -478,17 +527,26 @@ export function Contact({ contentOverride = null }) {
             className="lg:col-span-5 flex flex-col gap-6"
           >
             {/* Map Container */}
-            <div className="rounded-2xl bg-white border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between overflow-hidden">
+            <div
+              className="rounded-2xl p-6 flex flex-col justify-between overflow-hidden backdrop-blur-xl"
+              style={{
+                background: "rgba(255, 255, 255, 0.68)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "1px solid rgba(255, 255, 255, 0.85)",
+                boxShadow: "0 8px 32px rgba(15, 23, 42, 0.06)",
+              }}
+            >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2.5">
-                  <Building className="w-5 h-5 text-[#0A1628]" />
-                  <h3 className="text-lg font-extrabold text-[#0A1628]">School Campus Map</h3>
+                  <Building className="w-5 h-5 text-[#1E3A5F]" />
+                  <h3 className="text-lg font-extrabold text-[#1E3A5F]">School Campus Map</h3>
                 </div>
                 <a
                   href={normalizeExternalUrl(content.mapCard?.mapUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-bold text-[#1E3A5F] hover:text-blue-600 transition-colors"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#1E3A5F] hover:text-[#2D6A4F] transition-colors"
                 >
                   <span>Open Maps</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -512,14 +570,14 @@ export function Contact({ contentOverride = null }) {
 
               <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-extrabold text-[#0A1628]">Smriti Secondary English Boarding School</p>
+                  <p className="text-xs font-extrabold text-[#1E3A5F]">Smriti Secondary English Boarding School</p>
                   <p className="text-xs text-slate-500 mt-0.5">Basudev Marga, Hetauda-2, Makawanpur, Nepal</p>
                 </div>
                 <a
                   href={normalizeExternalUrl(content.mapCard?.mapUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-lg bg-[#0A1628] hover:bg-[#1E3A5F] text-white text-xs font-bold transition-colors shrink-0"
+                  className="px-4 py-2 rounded-lg bg-[#1E3A5F] hover:bg-[#2D6A4F] text-white text-xs font-bold transition-colors shrink-0"
                 >
                   Directions ↗
                 </a>

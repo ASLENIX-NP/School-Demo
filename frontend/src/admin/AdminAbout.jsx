@@ -1,6 +1,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { motion, AnimatePresence } from "motion/react";
 import {
   AlertCircle,
@@ -654,7 +654,7 @@ export default function AdminAbout() {
   useEffect(() => {
     const loadAboutContent = async () => {
       try {
-        const res = await axios.get("https://school-website-backend-ixx2.onrender.com/api/site-content/about", {
+        const res = await api.get("/api/site-content/about", {
           timeout: 12000,
         });
         const savedContent = res.data?.data?.content || {};
@@ -863,7 +863,7 @@ export default function AdminAbout() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await axios.post("https://school-website-backend-ixx2.onrender.com/api/upload", formData, {
+      const res = await api.post("/api/upload", formData, {
         headers: {
           ...authHeaders,
           "Content-Type": "multipart/form-data",
@@ -904,8 +904,8 @@ export default function AdminAbout() {
       return false;
     }
 
-    await axios.put(
-      "https://school-website-backend-ixx2.onrender.com/api/site-content/about",
+    await api.put(
+      "/api/site-content/about",
       {
         content: nextForm,
       },

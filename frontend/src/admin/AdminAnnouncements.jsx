@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import {
@@ -20,7 +20,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-const API_URL = "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 // ── THEME TO MATCH LIGHT DASHBOARD ──
 const theme = {

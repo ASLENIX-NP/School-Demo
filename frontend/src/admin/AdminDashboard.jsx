@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../lib/api";
 import { motion, AnimatePresence } from "motion/react";
 import {
   LayoutDashboard, Home, Info, GraduationCap,
@@ -124,10 +124,10 @@ export default function AdminDashboard() {
 
       try {
         const [msgRes, noticeRes, annRes, staffRes] = await Promise.allSettled([
-          axios.get("https://school-website-backend-ixx2.onrender.com/api/contact-messages", requestOptions),
-          axios.get("https://school-website-backend-ixx2.onrender.com/api/notices", requestOptions),
-          axios.get("https://school-website-backend-ixx2.onrender.com/api/announcements", requestOptions),
-          axios.get("https://school-website-backend-ixx2.onrender.com/api/site-content/staff", requestOptions),
+          api.get("/api/contact-messages", requestOptions),
+          api.get("/api/notices", requestOptions),
+          api.get("/api/announcements", requestOptions),
+          api.get("/api/site-content/staff", requestOptions),
         ]);
 
         if (!alive) return;
@@ -171,8 +171,8 @@ export default function AdminDashboard() {
 
     try {
       if (token) {
-        await axios.post(
-          "https://school-website-backend-ixx2.onrender.com/api/admin/auth/logout",
+        await api.post(
+          "/api/admin/auth/logout",
           {},
           {
             headers: {

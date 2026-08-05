@@ -1,6 +1,6 @@
 import defaultSchoolLogo from "../assets/school-logo.jpeg";
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { motion, AnimatePresence } from "motion/react";
 import {
   AlertCircle,
@@ -136,8 +136,8 @@ function getAuthHeaders() {
 
     const loadNavbarContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/navbar",
+        const res = await api.get(
+          "/api/site-content/navbar",
           { timeout: 20000 }
         );
 
@@ -258,7 +258,7 @@ if (!authHeaders) {
   return;
 }
 
-const res = await axios.post("https://school-website-backend-ixx2.onrender.com/api/upload", formData, {
+const res = await api.post("/api/upload", formData, {
   headers: {
     ...authHeaders,
     "Content-Type": "multipart/form-data",
@@ -348,8 +348,8 @@ if (!authHeaders) {
   return;
 }
 
-await axios.put(
-  "https://school-website-backend-ixx2.onrender.com/api/site-content/navbar",
+await api.put(
+  "/api/site-content/navbar",
   {
     content: cleanContent,
   },

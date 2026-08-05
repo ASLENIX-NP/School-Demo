@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import {
   Award,
   BookOpen,
@@ -459,8 +459,8 @@ export function Staff({
     let alive = true;
     const loadStaffContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/staff",
+        const res = await api.get(
+          "/api/site-content/staff",
           { timeout: 8000 }
         );
         if (!alive) return;

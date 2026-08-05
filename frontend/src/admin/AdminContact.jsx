@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -289,8 +289,8 @@ export default function AdminContact() {
 
     const loadContactContent = async () => {
       try {
-        const res = await axios.get(
-          "https://school-website-backend-ixx2.onrender.com/api/site-content/contact",
+        const res = await api.get(
+          "/api/site-content/contact",
           { timeout: 20000 }
         );
 
@@ -422,8 +422,8 @@ export default function AdminContact() {
         return null;
       }
 
-      await axios.put(
-        "https://school-website-backend-ixx2.onrender.com/api/site-content/contact",
+      await api.put(
+        "/api/site-content/contact",
         { content: cleanContent },
         {
           headers: authHeaders,

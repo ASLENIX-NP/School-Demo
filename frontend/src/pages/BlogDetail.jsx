@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../lib/api";
 import { motion } from "motion/react";
 import {
   ArrowLeft,
@@ -22,8 +22,7 @@ import {
 
 const BENCHES_BG_IMAGE = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function BlogImage({ post, className = "" }) {
   if (post?.imageUrl) {

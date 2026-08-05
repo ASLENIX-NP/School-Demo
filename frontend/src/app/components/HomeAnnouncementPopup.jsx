@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { X, Megaphone } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
-const API_URL = "https://school-website-backend-ixx2.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function getImageUrl(item) {
   return item?.image_url || item?.imageUrl || item?.image || "";
