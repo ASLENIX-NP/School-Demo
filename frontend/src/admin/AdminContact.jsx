@@ -24,8 +24,8 @@ import {
   Inbox,
 } from "lucide-react";
 
-import {
-  Contact,
+// ✅ FIX: Import the default export instead of named export
+import Contact, {
   defaultContactContent,
   mergeContactContent,
   normalizeExternalUrl,
@@ -629,7 +629,7 @@ export default function AdminContact() {
             background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95)) !important;
             color: #0F172A !important;
             border: 1px solid rgba(75,46,131,0.12) !important;
-            box-shadow: 0 18px 44px rgba(15,23,42,0.08) !important;
+            boxShadow: 0 18px 44px rgba(15,23,42,0.08) !important;
           }
 
           .admin-contact-preview-frame .bg-slate-950 [class*="text-white"] {
@@ -762,16 +762,16 @@ export default function AdminContact() {
       </style>
 
       <header
-  className="relative z-0"
-  style={{
-    background:
-      "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
-    borderBottom: "1px solid rgba(75,46,131,0.12)",
-    boxShadow: "0 14px 36px rgba(15,23,42,0.08)",
-    backdropFilter: "blur(18px)",
-  }}
->
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        className="relative z-0"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
+          borderBottom: "1px solid rgba(75,46,131,0.12)",
+          boxShadow: "0 14px 36px rgba(15,23,42,0.08)",
+          backdropFilter: "blur(18px)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <button
             type="button"
             onClick={() => navigate("/admin/dashboard")}
@@ -1212,5 +1212,3 @@ export default function AdminContact() {
     </section>
   );
 }
-
-

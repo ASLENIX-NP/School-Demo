@@ -376,9 +376,10 @@ export default function Stats({ editMode = false }) {
                   </div>
                   <h2 className="text-3xl md:text-4xl font-bold text-slate-800">Latest Updates</h2>
                 </div>
+                {/* UPDATED: "View All" Button with Lighter Color */}
                 <Link 
                   to="/notices"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-900 text-white font-bold hover:shadow-lg hover:scale-105 transition-all active:scale-95 shadow-md"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:shadow-lg hover:scale-105 transition-all active:scale-95 shadow-md"
                 >
                   View All <ArrowRight className="w-4 h-4" />
                 </Link>

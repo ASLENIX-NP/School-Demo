@@ -262,11 +262,11 @@ const LoginPage = () => {
                   }}
                 >
                   <Mail size={18} className="text-white/40" />
+                  {/* ✅ FIX: Removed the placeholder="admin@school.com" so the email is no longer shown */}
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@school.com"
                     className="w-full bg-transparent outline-none text-white placeholder-white/30 text-sm"
                     required
                   />

@@ -7,7 +7,7 @@ import {
   Bell, Images, Users, Phone, Footprints, LogOut, ArrowRight,
   Settings, School, Newspaper, Inbox, Mail, Menu, X, FileText,
   Megaphone, Clock, Star, ChevronRight, Zap, Globe, Shield,
-  Navigation, MessageSquare, BarChart3,
+  Navigation, MessageSquare, BarChart3, Sparkles,
 } from "lucide-react";
 
 // ── IMPORT ALL YOUR EXISTING ADMIN PAGES ──
@@ -27,26 +27,27 @@ import AdminContact from "./AdminContact";
 import AdminFooter from "./AdminFooter";
 import AdminSettings from "./AdminSettings";
 
-// ============ DEEP NAVY GLASS THEME ============
+// ============ "FROSTED AMBER" UNIQUE THEME ============
 const theme = {
-  bg: "#0F172A",              // Deep Navy Background
-  card: "rgba(255, 255, 255, 0.06)",  // Glass Card
-  cardHover: "rgba(255, 255, 255, 0.10)",
-  border: "rgba(255, 255, 255, 0.08)",
-  borderSoft: "rgba(255, 255, 255, 0.04)",
-  text: "#F8FAFC",
+  bg: "#0B0E14",            // Very dark, deep gray (Unique from standard blue/black)
+  sidebarBg: "rgba(18, 22, 32, 0.85)",
+  card: "rgba(255, 255, 255, 0.04)", // Ultra glassy
+  cardHover: "rgba(255, 255, 255, 0.08)",
+  border: "rgba(255, 255, 255, 0.06)",
+  borderSoft: "rgba(255, 255, 255, 0.02)",
+  text: "#F1F5F9",
   muted: "#94A3B8",
-  primary: "#2563EB",
-  accent: "#06B6D4",
+  primary: "#F59E0B",       // Vibrant Amber/Gold (Unique primary color)
+  accent: "#F97316",        // Deep Orange
   success: "#22C55E",
   warning: "#F59E0B",
   danger: "#EF4444",
 };
 
-// ── Icon Colors (Adjusted slightly for dark mode) ──
+// ── Icon Colors ──
 const colors = {
   green: "#22C55E", purple: "#A78BFA", red: "#F87171", dark: "#0B1020",
-  cyan: "#22D3EE", gold: "#FACC15", orange: "#FB923C", pink: "#F472B6",
+  cyan: "#22D3EE", gold: "#F59E0B", orange: "#FB923C", pink: "#F472B6",
   blue: "#60A5FA", indigo: "#818CF8",
 };
 
@@ -197,7 +198,7 @@ export default function AdminDashboard() {
   const announcementCount = announcements.length;
   const pinnedCount = notices.filter((n) => n.pinned).length;
 
-  // Stats updated with Navy Glass hover effects
+  // Stats updated with unique neon hover effects
   const stats = [
     { icon: FileText,  label: "Total Notices",  value: noticeCount,       sub: `${pinnedCount} pinned`,  color: colors.red,    trend: "+5%" },
     { icon: Megaphone, label: "Announcements",  value: announcementCount, sub: `${announcements.filter(a => a.active !== false).length} active`, color: colors.orange, trend: "+3%" },
@@ -212,34 +213,34 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-3 mb-5">
           <div
             className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #2563EB, #06B6D4)", boxShadow: "0 6px 18px rgba(37,99,235,0.3)" }}
+            style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)", boxShadow: "0 6px 18px rgba(245,158,11,0.25)" }}
           >
-            <Shield className="w-5 h-5 text-white" />
+            <Shield className="w-5 h-5 text-slate-950" />
           </div>
           <div>
             <div className="font-bold text-white text-sm tracking-tight">Baljagriti</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-300/60">Admin Panel</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-400/60">Admin Panel</div>
           </div>
         </div>
 
         <div
           className="px-3 py-2.5 rounded-xl flex items-center gap-2.5"
-          style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${theme.border}` }}
+          style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${theme.border}` }}
         >
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #06B6D4, #2563EB)" }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-slate-950"
+            style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)" }}
           >
             {(adminUser.email || "A")[0].toUpperCase()}
           </div>
           <div className="min-w-0">
-            <div className="text-white/90 text-xs font-semibold truncate">{adminUser.name || "Administrator"}</div>
-            <div className="text-[10px] truncate text-slate-400">{adminUser.email || "admin@baljagriti.edu.np"}</div>
+            <div className="text-white/80 text-xs font-semibold truncate">{adminUser.name || "Administrator"}</div>
+            <div className="text-[10px] truncate text-slate-500">{adminUser.email || "admin@baljagriti.edu.np"}</div>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
+      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1.5">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeEditor === item.editorKey || (item.editorKey === null && activeEditor === null);
@@ -251,24 +252,34 @@ export default function AdminDashboard() {
                 setSidebarOpen(false);
                 setActiveEditor(item.editorKey);
               }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative"
-              style={{
-                background: isActive ? "rgba(37, 99, 235, 0.15)" : "transparent",
-                color: isActive ? "#FFFFFF" : "#94A3B8",
-                boxShadow: isActive ? "0 0 20px rgba(37, 99, 235, 0.05)" : "none",
-              }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#FFFFFF"; } }}
-              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#94A3B8"; } }}
+              className="w-full relative group"
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              <span className="text-sm font-medium truncate">{item.title}</span>
+              <div
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-left ${
+                  isActive ? "bg-white/10" : "bg-transparent"
+                }`}
+                style={{
+                  color: isActive ? "#FFFFFF" : "#64748B",
+                  border: isActive ? `1px solid ${theme.border}` : "1px solid transparent",
+                  transform: isActive ? "translateY(-2px)" : "translateY(0)",
+                  boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
+                }}
+                onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#FFFFFF"; } }}
+                onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748B"; } }}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                <span className="text-sm font-medium truncate">{item.title}</span>
+              </div>
               
-              {/* Animated Active Indicator */}
+              {/* Glowing Amber Underline Indicator */}
               {isActive && (
                 <motion.div 
                   layoutId="sidebarActiveIndicator"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full"
-                  style={{ background: theme.primary, boxShadow: `0 0 12px ${theme.primary}` }}
+                  className="absolute left-3 right-3 -bottom-1 h-0.5 rounded-full"
+                  style={{ 
+                    background: "linear-gradient(90deg, #F59E0B, #F97316)",
+                    boxShadow: "0 0 12px #F59E0B"
+                  }}
                 />
               )}
             </button>
@@ -280,9 +291,13 @@ export default function AdminDashboard() {
         <div className="h-px mb-3" style={{ background: theme.border }} />
         <button
           onClick={() => setShowLogoutConfirm(true)}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
-          style={{ background: "rgba(239, 68, 68, 0.1)", color: "#F87171", border: "1px solid rgba(239, 68, 68, 0.1)" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)"; }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group"
+          style={{ 
+            background: "rgba(239, 68, 68, 0.1)", 
+            color: "#F87171", 
+            border: "1px solid rgba(239, 68, 68, 0.1)" 
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)"; }}
           onMouseLeave={e => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.1)"; }}
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
@@ -300,7 +315,7 @@ export default function AdminDashboard() {
         {sidebarOpen && (
           <motion.div
             className="fixed inset-0 z-30 lg:hidden"
-            style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
+            style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setSidebarOpen(false)}
           />
@@ -311,17 +326,17 @@ export default function AdminDashboard() {
       <motion.aside
         animate={{ x: sidebarOpen ? 0 : -280 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="fixed inset-y-0 left-0 z-40 w-[260px] flex flex-col lg:hidden backdrop-blur-xl border-r"
-        style={{ background: "rgba(15, 23, 42, 0.90)", borderColor: theme.border }}
+        className="fixed inset-y-0 left-0 z-40 w-[260px] flex flex-col lg:hidden backdrop-blur-xl border-r shadow-2xl"
+        style={{ background: theme.sidebarBg, borderColor: theme.border }}
       >
         <SidebarContent />
       </motion.aside>
 
       {/* ── Desktop sidebar ── */}
       <aside
-        className="hidden lg:flex flex-col w-[240px] flex-shrink-0 backdrop-blur-xl border-r"
+        className="hidden lg:flex flex-col w-[240px] flex-shrink-0 backdrop-blur-xl border-r shadow-xl"
         style={{
-          background: "rgba(15, 23, 42, 0.85)",
+          background: theme.sidebarBg,
           borderColor: theme.border,
           minHeight: "100vh",
           position: "sticky",
@@ -336,12 +351,13 @@ export default function AdminDashboard() {
       {/* ── Main content ── */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
 
-        {/* Topbar - Glass Gradient */}
+        {/* Topbar - Frosted with Amber Bottom Border */}
         <header
-          className="flex-shrink-0 sticky top-0 z-30 px-4 sm:px-6 md:px-8 backdrop-blur-xl"
+          className="flex-shrink-0 sticky top-0 z-30 px-4 sm:px-6 md:px-8 backdrop-blur-xl border-b"
           style={{ 
-            background: "rgba(15, 23, 42, 0.75)", 
-            borderBottom: `2px solid ${theme.primary}`,
+            background: "rgba(11, 14, 20, 0.75)", 
+            borderColor: theme.border,
+            borderBottom: `1px solid ${theme.primary}40`,
             boxShadow: "0 4px 30px rgba(0,0,0,0.3)"
           }}
         >
@@ -419,20 +435,20 @@ export default function AdminDashboard() {
                   transition={{ duration: 0.5 }}
                   className="relative overflow-hidden rounded-2xl p-6 border"
                   style={{
-                    background: "linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(6, 182, 212, 0.05))",
-                    borderColor: theme.border,
+                    background: "linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(249, 115, 22, 0.05))",
+                    borderColor: "rgba(245, 158, 11, 0.2)",
                     backdropFilter: "blur(10px)",
                     boxShadow: "0 10px 40px rgba(0,0,0,0.2)"
                   }}
                 >
-                  <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-blue-500/20 blur-[80px] animate-pulse pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full bg-cyan-500/20 blur-[60px] animate-pulse delay-700 pointer-events-none" />
+                  <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-amber-500/15 blur-[80px] animate-pulse pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full bg-orange-500/15 blur-[60px] animate-pulse delay-700 pointer-events-none" />
 
                   <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-2xl animate-pulse">👋</span>
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-blue-300/60">Admin Dashboard</span>
+                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-amber-400/60">Admin Dashboard</span>
                       </div>
                       <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight tracking-tight mb-1">
                         Good Morning, {adminUser.name || "Admin"}!
@@ -443,8 +459,8 @@ export default function AdminDashboard() {
                     <div className="flex flex-wrap gap-2 flex-shrink-0">
                       <button
                         onClick={() => setActiveEditor("notices")}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-white"
-                        style={{ background: "linear-gradient(135deg, #2563EB, #06B6D4)", boxShadow: "0 4px 15px rgba(37,99,235,0.3)" }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-950"
+                        style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)", boxShadow: "0 4px 15px rgba(245,158,11,0.3)" }}
                       >
                         <Bell className="w-4 h-4" /> Add Notice
                       </button>
@@ -459,7 +475,7 @@ export default function AdminDashboard() {
                   </div>
                 </motion.div>
 
-                {/* Stats - Glass Hover Cards */}
+                {/* Stats - Neon Glow Hover Cards */}
                 <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
                   {stats.map((stat, i) => {
                     const Icon = stat.icon;
@@ -477,7 +493,7 @@ export default function AdminDashboard() {
                           boxShadow: "0 4px 20px rgba(0,0,0,0.1)" 
                         }}
                       >
-                        <div className="absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none" style={{ background: stat.color }} />
+                        <div className="absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl opacity-20 group-hover:opacity-60 transition-opacity pointer-events-none" style={{ background: stat.color }} />
                         <div className="flex items-start justify-between mb-2">
                           <div className="p-2 rounded-xl" style={{ background: `${stat.color}20` }}>
                             <Icon className="w-4 h-4" style={{ color: stat.color }} />
@@ -494,7 +510,7 @@ export default function AdminDashboard() {
                   })}
                 </div>
 
-                {/* ── Recent Messages (Glass Full Width) ── */}
+                {/* ── Recent Messages (Frosted Glass Full Width) ── */}
                 <div className="rounded-xl overflow-hidden border" style={{ background: "rgba(255,255,255,0.03)", borderColor: theme.border, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
                   <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: theme.border }}>
                     <div className="flex items-center gap-3">

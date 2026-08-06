@@ -16,11 +16,101 @@ import {
 } from "lucide-react";
 
 import { Hero, defaultHeroData, mergeHeroData } from "../app/components/Hero";
-import {
-  Stats,
-  defaultStatsSectionData,
-  mergeStatsSectionData,
-} from "../app/components/Stats";
+
+// ✅ FIX 1: Default Import for Stats
+import Stats from "../app/components/Stats";
+
+// ✅ FIX 2: Since 'Stats.jsx' doesn't export named variables, we define them here manually.
+// This makes sure the rest of your code referencing them doesn't crash.
+export const defaultStatsSectionData = {
+  eyebrow: "Our Impact",
+  title: "Creating Futures, One Student at a Time",
+  description: "Real numbers that reflect our commitment to excellence and holistic education in the Makwanpur region.",
+  stats: [
+    { value: "3800", suffix: "+", label: "Students Enrolled", note: "Across school programs", color: "#1E3A5F" },
+    { value: "240", suffix: "+", label: "Expert Teachers", note: "Academic support team", color: "#2D6A4F" },
+    { value: "35", suffix: " yrs", label: "Years of Excellence", note: "Serving Makwanpur", color: "#E9C46A" },
+    { value: "98", suffix: "%", label: "Success Rate", note: "Academic performance", color: "#F4A261" }
+  ],
+  story: {
+    badge: "Our Story",
+    title: "Building Tomorrow's Leaders Today",
+    imageTopTitle: "Our Campus",
+    imageTopSubtitle: "Hetauda-2",
+    paragraphs: [
+      "Established with a vision to provide quality education in Makawanpur, Smriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
+      "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
+    ],
+    image: "https://images.unsplash.com/photo-1588072432836-e10032774350?w=1000&h=800&fit=crop&auto=format",
+    buttonText: "Read Our Story"
+  },
+  excellence: {
+    title: "Academic Focus",
+    description: "Our students consistently achieve outstanding results in the SEE examinations.",
+    cards: [
+      { title: "Best SEE Results", description: "Achieving top results in the Secondary Education Examination." },
+      { title: "GPA 4.00 Achievers", description: "Our brightest students attain a perfect GPA of 4.00." },
+      { title: "Holistic Development", description: "Fostering creativity, leadership, and sportsmanship." }
+    ]
+  },
+  notices: {
+    title: "Latest Notices",
+    description: "Stay informed with the latest announcements."
+  }
+};
+
+export function mergeStatsSectionData(saved = {}) {
+  const savedStats = saved || {};
+  return {
+    ...defaultStatsSectionData,
+    ...savedStats,
+    stats: Array.isArray(savedStats.stats) && savedStats.stats.length > 0
+      ? defaultStatsSectionData.stats.map((item, index) => ({
+          ...item,
+          ...(savedStats.stats[index] || {}),
+          color: item.color,
+        }))
+      : defaultStatsSectionData.stats,
+    story: {
+      ...defaultStatsSectionData.story,
+      ...(savedStats.story || {}),
+      paragraphs: Array.isArray(savedStats.story?.paragraphs) && savedStats.story.paragraphs.length > 0
+        ? [savedStats.story.paragraphs[0] || "", savedStats.story.paragraphs[1] || ""]
+        : defaultStatsSectionData.story.paragraphs,
+      imageZoom: clampStoryImageZoom(savedStats.story?.imageZoom),
+      imageOffsetX: clampStoryImageOffset(savedStats.story?.imageOffsetX),
+      imageOffsetY: clampStoryImageOffset(savedStats.story?.imageOffsetY),
+    },
+    excellence: {
+      ...defaultStatsSectionData.excellence,
+      ...(savedStats.excellence || {}),
+      cards: Array.isArray(savedStats.excellence?.cards) && savedStats.excellence.cards.length > 0
+        ? defaultStatsSectionData.excellence.cards.map((item, index) => ({
+            ...item,
+            ...(savedStats.excellence.cards[index] || {}),
+          }))
+        : defaultStatsSectionData.excellence.cards,
+    },
+    notices: {
+      ...defaultStatsSectionData.notices,
+      ...(savedStats.notices || {}),
+    },
+  };
+}
+
+// Small helper functions needed for the merge above
+function clampStoryImageOffset(value) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) return 0;
+  return Math.min(60, Math.max(-60, numberValue));
+}
+
+function clampStoryImageZoom(value) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) return 1;
+  return Math.min(3, Math.max(1, numberValue));
+}
+// End of Fix 2
 
 const colors = {
   red: "#D71920",
@@ -1447,6 +1537,7 @@ export default function AdminHome() {
               contentOverride={form.hero}
               onEditTarget={openEditor}
             />
+            {/* ✅ FIXED: The Stats component will render correctly now */}
             <Stats
               editMode
               contentOverride={form.statsSection}
