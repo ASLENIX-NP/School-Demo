@@ -7,7 +7,7 @@ import {
   Bell, Images, Users, Phone, Footprints, LogOut, ArrowRight,
   Settings, School, Newspaper, Inbox, Mail, Menu, X, FileText,
   Megaphone, Clock, Star, ChevronRight, Zap, Globe, Shield,
-  Navigation, MessageSquare, BarChart3, Sparkles,
+  Navigation, MessageSquare, BarChart3, Sparkles, PlusCircle,
 } from "lucide-react";
 
 // ── IMPORT ALL YOUR EXISTING ADMIN PAGES ──
@@ -29,15 +29,15 @@ import AdminSettings from "./AdminSettings";
 
 // ============ "FROSTED AMBER" UNIQUE THEME ============
 const theme = {
-  bg: "#0B0E14",            // Very dark, deep gray (Unique from standard blue/black)
-  sidebarBg: "rgba(18, 22, 32, 0.85)",
-  card: "rgba(255, 255, 255, 0.04)", // Ultra glassy
+  bg: "#0B0E14",            // Deep Premium Gray
+  sidebarBg: "rgba(18, 22, 32, 0.95)",
+  card: "rgba(255, 255, 255, 0.04)", 
   cardHover: "rgba(255, 255, 255, 0.08)",
-  border: "rgba(255, 255, 255, 0.06)",
+  border: "rgba(255, 255, 255, 0.08)",
   borderSoft: "rgba(255, 255, 255, 0.02)",
   text: "#F1F5F9",
   muted: "#94A3B8",
-  primary: "#F59E0B",       // Vibrant Amber/Gold (Unique primary color)
+  primary: "#F59E0B",       // Vibrant Amber/Gold
   accent: "#F97316",        // Deep Orange
   success: "#22C55E",
   warning: "#F59E0B",
@@ -103,6 +103,14 @@ function getCurrentTime() {
   return new Date().toLocaleString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 }
 
+// ✨ NEW: Dynamic Greeting based on Time
+function getTimeBasedGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return { text: "Good Morning", emoji: "🌅" };
+  if (hour < 18) return { text: "Good Afternoon", emoji: "☀️" };
+  return { text: "Good Evening", emoji: "🌙" };
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -116,6 +124,7 @@ export default function AdminDashboard() {
   const [activeEditor, setActiveEditor] = useState(null);
 
   const adminUser = JSON.parse(localStorage.getItem("adminUser") || "{}");
+  const greeting = getTimeBasedGreeting();
 
   useEffect(() => {
     let alive = true;
@@ -198,7 +207,7 @@ export default function AdminDashboard() {
   const announcementCount = announcements.length;
   const pinnedCount = notices.filter((n) => n.pinned).length;
 
-  // Stats updated with unique neon hover effects
+  // Stats update
   const stats = [
     { icon: FileText,  label: "Total Notices",  value: noticeCount,       sub: `${pinnedCount} pinned`,  color: colors.red,    trend: "+5%" },
     { icon: Megaphone, label: "Announcements",  value: announcementCount, sub: `${announcements.filter(a => a.active !== false).length} active`, color: colors.orange, trend: "+3%" },
@@ -351,7 +360,7 @@ export default function AdminDashboard() {
       {/* ── Main content ── */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
 
-        {/* Topbar - Frosted with Amber Bottom Border */}
+        {/* Topbar */}
         <header
           className="flex-shrink-0 sticky top-0 z-30 px-4 sm:px-6 md:px-8 backdrop-blur-xl border-b"
           style={{ 
@@ -362,7 +371,6 @@ export default function AdminDashboard() {
           }}
         >
           <div className="h-16 flex items-center justify-between gap-4">
-            {/* Left section - Menu + Title */}
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -382,9 +390,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Right section - Badges + Buttons */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Live Badge */}
               <div
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
                 style={{ background: "rgba(34, 197, 94, 0.12)", border: "1px solid rgba(34, 197, 94, 0.2)" }}
@@ -392,30 +398,8 @@ export default function AdminDashboard() {
                 <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-green-500" />
                 <span className="text-[10px] font-bold text-green-400 tracking-wide">Live</span>
               </div>
-
-              {/* View Site */}
-              <a
-                href="/"
-                target="_blank"
-                rel="noreferrer"
-                className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white"
-                style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}
-              >
-                <Globe className="w-4 h-4" />
-                View Site
-              </a>
-
-              {/* Close Editor */}
-              {activeEditor && (
-                <button
-                  onClick={() => setActiveEditor(null)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white"
-                  style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}
-                >
-                  <X className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Close</span>
-                </button>
-              )}
+              <a href="/" target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}><Globe className="w-4 h-4" /> View Site</a>
+              {activeEditor && <button onClick={() => setActiveEditor(null)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}><X className="w-3.5 h-3.5" /><span className="hidden sm:inline">Close</span></button>}
             </div>
           </div>
         </header>
@@ -425,89 +409,102 @@ export default function AdminDashboard() {
           <div className="px-4 sm:px-6 md:px-8 py-6 max-w-full">
 
             {!activeEditor ? (
-              // ── Dashboard View ──
               <div className="space-y-6">
                 
-                {/* Welcome Banner - Glowing Glass */}
+                {/* ✨ WELCOME BANNER WITH ANIMATED AURORA ✨ */}
                 <motion.div
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="relative overflow-hidden rounded-2xl p-6 border"
+                  transition={{ duration: 0.6 }}
+                  className="relative overflow-hidden rounded-2xl p-8 border"
                   style={{
-                    background: "linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(249, 115, 22, 0.05))",
-                    borderColor: "rgba(245, 158, 11, 0.2)",
-                    backdropFilter: "blur(10px)",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.2)"
+                    background: "linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(249, 115, 22, 0.05), rgba(20, 24, 36, 0.9))",
+                    borderColor: "rgba(245, 158, 11, 0.15)",
+                    backdropFilter: "blur(12px)",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
                   }}
                 >
-                  <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-amber-500/15 blur-[80px] animate-pulse pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full bg-orange-500/15 blur-[60px] animate-pulse delay-700 pointer-events-none" />
+                  {/* Animated Glowing Aurora Background */}
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <motion.div 
+                      animate={{ x: [0, 40, 0], y: [0, -20, 0], scale: [1, 1.05, 1] }}
+                      transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-amber-500/20 blur-[80px]" 
+                    />
+                    <motion.div 
+                      animate={{ x: [0, -30, 0], y: [0, 30, 0] }}
+                      transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                      className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-orange-500/20 blur-[80px]" 
+                    />
+                  </div>
 
-                  <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
+                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-2xl animate-pulse">👋</span>
+                        <span className="text-2xl">{greeting.emoji}</span>
                         <span className="text-xs font-bold uppercase tracking-[0.14em] text-amber-400/60">Admin Dashboard</span>
                       </div>
-                      <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight tracking-tight mb-1">
-                        Good Morning, {adminUser.name || "Admin"}!
+                      {/* ✨ Dynamic Greeting based on Time ✨ */}
+                      <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight tracking-tight">
+                        {greeting.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">{adminUser.name || "Admin"}!</span>
                       </h2>
-                      <p className="text-sm text-slate-400">Manage your school website — notices, staff, gallery, and more.</p>
+                      <p className="text-base text-slate-400 max-w-xl">Manage your school website — notices, staff, gallery, and more.</p>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 flex-shrink-0">
-                      <button
-                        onClick={() => setActiveEditor("notices")}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-950"
-                        style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)", boxShadow: "0 4px 15px rgba(245,158,11,0.3)" }}
-                      >
-                        <Bell className="w-4 h-4" /> Add Notice
+                    <div className="flex flex-wrap gap-3">
+                      <button onClick={() => setActiveEditor("notices")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-950 shadow-md" style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)" }}>
+                        <PlusCircle className="w-4 h-4" /> Add Notice
                       </button>
-                      <button
-                        onClick={() => setActiveEditor("announcements")}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-300 hover:text-white"
-                        style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}
-                      >
+                      <button onClick={() => setActiveEditor("announcements")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}>
                         <Megaphone className="w-4 h-4" /> Add Announcement
                       </button>
                     </div>
                   </div>
                 </motion.div>
 
-                {/* Stats - Neon Glow Hover Cards */}
-                <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+                {/* ✨ 3D STATS CARDS WITH PERSPECTIVE TILT ✨ */}
+                <div className="grid grid-cols-2 xl:grid-cols-4 gap-6">
                   {stats.map((stat, i) => {
                     const Icon = stat.icon;
                     return (
                       <motion.div
                         key={stat.label}
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: i * 0.08 }}
-                        whileHover={{ y: -6, scale: 1.02 }}
-                        className="relative overflow-hidden rounded-xl p-4 border transition-all duration-300"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                        whileHover={{ y: -8, scale: 1.02 }}
+                        className="relative p-6 border rounded-xl transition-all duration-300 group"
                         style={{ 
-                          background: "rgba(255,255,255,0.04)", 
+                          background: "linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))", 
                           borderColor: theme.border,
-                          boxShadow: "0 4px 20px rgba(0,0,0,0.1)" 
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+                          transform: "perspective(800px)"
                         }}
                       >
-                        <div className="absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl opacity-20 group-hover:opacity-60 transition-opacity pointer-events-none" style={{ background: stat.color }} />
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="p-2 rounded-xl" style={{ background: `${stat.color}20` }}>
-                            <Icon className="w-4 h-4" style={{ color: stat.color }} />
+                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl opacity-0 group-hover:opacity-50 transition-all duration-500 pointer-events-none" style={{ background: stat.color }} />
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="p-2.5 rounded-xl bg-white/5 border border-white/5" style={{ background: `${stat.color}20` }}>
+                            <Icon className="w-5 h-5" style={{ color: stat.color }} />
                           </div>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${stat.color}15`, color: stat.color }}>
                             {stat.trend}
                           </span>
                         </div>
-                        <div className="text-2xl font-bold text-white mb-0.5 tracking-tight">{stat.value}</div>
+                        <div className="text-3xl font-bold text-white mb-1 tracking-tight">{stat.value}</div>
                         <div className="text-xs font-medium text-slate-400">{stat.label}</div>
-                        <div className="text-[10px] mt-0.5 text-slate-500">{stat.sub}</div>
+                        <div className="text-[10px] mt-1 text-slate-500">{stat.sub}</div>
                       </motion.div>
                     );
                   })}
+                </div>
+
+                {/* ✨ QUICK ACTION TASK BAR ✨ */}
+                <div className="flex flex-wrap gap-3 py-2 border-b border-white/5 pb-6">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider pr-4 self-center">Quick Actions:</span>
+                  <button onClick={() => setActiveEditor("notices")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Manage Notices</button>
+                  <button onClick={() => setActiveEditor("staff")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Manage Staff</button>
+                  <button onClick={() => setActiveEditor("gallery")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Update Gallery</button>
+                  <button onClick={() => setActiveEditor("settings")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">⚙ Settings</button>
                 </div>
 
                 {/* ── Recent Messages (Frosted Glass Full Width) ── */}
@@ -522,10 +519,7 @@ export default function AdminDashboard() {
                         <p className="text-xs text-slate-400">Latest inquiries from visitors</p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => navigate("/admin/contact-messages")}
-                      className="flex items-center gap-1 text-xs font-medium transition-colors text-slate-400 hover:text-white"
-                    >
+                    <button onClick={() => navigate("/admin/contact-messages")} className="flex items-center gap-1 text-xs font-medium transition-colors text-slate-400 hover:text-white">
                       View All <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -540,30 +534,13 @@ export default function AdminDashboard() {
                       </div>
                     ) : (
                       latestMessages.map((message) => (
-                        <div
-                          key={message.id}
-                          className="rounded-xl p-4 transition-all duration-200 cursor-pointer"
-                          style={{
-                            background: message.is_read ? "rgba(255,255,255,0.02)" : "rgba(167, 139, 250, 0.06)",
-                            border: message.is_read ? `1px solid ${theme.border}` : "1px solid rgba(167, 139, 250, 0.2)",
-                          }}
-                          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
-                          onMouseLeave={e => e.currentTarget.style.background = message.is_read ? "rgba(255,255,255,0.02)" : "rgba(167, 139, 250, 0.06)"}
-                        >
+                        <div key={message.id} className="rounded-xl p-4 transition-all duration-200 cursor-pointer" style={{ background: message.is_read ? "rgba(255,255,255,0.02)" : "rgba(167, 139, 250, 0.06)", border: message.is_read ? `1px solid ${theme.border}` : "1px solid rgba(167, 139, 250, 0.2)" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"} onMouseLeave={e => e.currentTarget.style.background = message.is_read ? "rgba(255,255,255,0.02)" : "rgba(167, 139, 250, 0.06)"}>
                           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-1">
                             <div className="flex items-center gap-2 min-w-0">
                               {!message.is_read && <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-green-400" />}
                               <span className="font-bold text-white text-sm truncate max-w-[150px]">{message.name || "Unknown Sender"}</span>
                             </div>
-                            <span
-                              className="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0 self-start sm:self-auto"
-                              style={{
-                                background: message.source === "admission" ? "rgba(167, 139, 250, 0.15)" : "rgba(248, 113, 113, 0.12)",
-                                color: message.source === "admission" ? colors.purple : colors.red,
-                              }}
-                            >
-                              {getSourceLabel(message.source)}
-                            </span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0 self-start sm:self-auto" style={{ background: message.source === "admission" ? "rgba(167, 139, 250, 0.15)" : "rgba(248, 113, 113, 0.12)", color: message.source === "admission" ? colors.purple : colors.red, }}>{getSourceLabel(message.source)}</span>
                           </div>
                           <p className="text-sm leading-relaxed line-clamp-2 text-slate-400">{message.message || "No message text."}</p>
                           <p className="text-xs mt-1.5 text-slate-500">{formatDate(message.created_at)}</p>
@@ -574,7 +551,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ) : (
-              // ── Editor View ──
               <div className="overflow-x-auto rounded-xl border p-6" style={{ background: "rgba(255,255,255,0.03)", borderColor: theme.border }}>
                 {activeEditor === "navbar" && <AdminNavbar />}
                 {activeEditor === "home" && <AdminHome />}
@@ -601,48 +577,16 @@ export default function AdminDashboard() {
       {/* ── Logout Confirm ── */}
       <AnimatePresence>
         {showLogoutConfirm && (
-          <motion.div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)" }}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setShowLogoutConfirm(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.95, y: 10, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 150, damping: 18 }}
-              className="w-full max-w-sm overflow-hidden rounded-2xl border"
-              style={{ background: "#1E293B", borderColor: theme.border, boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }}
-              onClick={e => e.stopPropagation()}
-            >
+          <motion.div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowLogoutConfirm(false)}>
+            <motion.div initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: "spring", stiffness: 150, damping: 18 }} className="w-full max-w-sm overflow-hidden rounded-2xl border" style={{ background: "#1E293B", borderColor: theme.border, boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
               <div className="h-1" style={{ background: `linear-gradient(90deg, ${theme.danger}, ${theme.warning})` }} />
               <div className="p-6 text-center">
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                  style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
-                >
-                  <LogOut className="w-5 h-5" style={{ color: theme.danger }} />
-                </div>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)" }}><LogOut className="w-5 h-5" style={{ color: theme.danger }} /></div>
                 <h3 className="text-lg font-bold text-white mb-2">Log out?</h3>
-                <p className="text-sm mb-6 text-slate-400">
-                  You'll need to sign in again to access the admin panel.
-                </p>
+                <p className="text-sm mb-6 text-slate-400">You'll need to sign in again to access the admin panel.</p>
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowLogoutConfirm(false)}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white"
-                    style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={logout}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5 text-white"
-                    style={{ background: "linear-gradient(135deg, #EF4444, #DC2626)", boxShadow: "0 4px 15px rgba(239, 68, 68, 0.2)" }}
-                  >
-                    Yes, Logout
-                  </button>
+                  <button onClick={() => setShowLogoutConfirm(false)} className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}>Cancel</button>
+                  <button onClick={logout} className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5 text-white" style={{ background: "linear-gradient(135deg, #EF4444, #DC2626)", boxShadow: "0 4px 15px rgba(239, 68, 68, 0.2)" }}>Yes, Logout</button>
                 </div>
               </div>
             </motion.div>
