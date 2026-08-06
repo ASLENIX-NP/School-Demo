@@ -1,0 +1,112 @@
+{
+  "isOpen": true,
+  "academicSession": "2027–2028",
+  "startDate": "2027-01-01",
+  "endDate": "2027-04-30",
+  "heroBadgeText": "Admissions Open for 2027–2028",
+  "heroTitle": "Empowering Next Generation Leaders",
+  "heroDescription": "Join our vibrant learning community. We offer holistic education, state-of-the-art facilities, and an environment where every student excels.",
+  "countdownEnabled": true,
+  "applyButtonText": "Apply Now for Admission",
+  "prospectusUrl": "",
+  "feeStructureUrl": "",
+  "contactPhone": "+977 1-4567890 / +977 9851012345",
+  "contactEmail": "admissions@smritischool.edu.np",
+  "contactHours": "Sun - Fri: 8:00 AM - 4:00 PM",
+  "contactAddress": "Kathmandu, Nepal",
+  "eligibilityCriteria": [
+    {
+      "grade": "Play Group & Nursery",
+      "age": "2.5 - 3.5 years",
+      "requirements": "Child birth certificate, medical immunization record."
+    },
+    {
+      "grade": "LKG & UKG",
+      "age": "4.0 - 5.0 years",
+      "requirements": "Basic interaction, previous school report card if attended."
+    },
+    {
+      "grade": "Grade 1 - 5 (Primary)",
+      "age": "6.0+ years",
+      "requirements": "Passed previous grade, Transfer Certificate (TC), marksheets."
+    },
+    {
+      "grade": "Grade 6 - 9 (Secondary)",
+      "age": "11.0+ years",
+      "requirements": "Passed entrance test, character certificate, grade report card."
+    }
+  ],
+  "requiredDocuments": [
+    {
+      "name": "Birth Certificate",
+      "desc": "Official copy issued by local municipality",
+      "mandatory": true
+    },
+    {
+      "name": "Transfer Certificate (TC)",
+      "desc": "Original TC from previous school",
+      "mandatory": true
+    },
+    {
+      "name": "Previous Grade Marksheet",
+      "desc": "Copy of last annual examination progress report",
+      "mandatory": true
+    },
+    {
+      "name": "Passport Size Photographs",
+      "desc": "4 recent color photographs of student & 2 of parents",
+      "mandatory": true
+    },
+    {
+      "name": "Parent Citizenship / ID Proof",
+      "desc": "Copy of Citizenship or Passport",
+      "mandatory": true
+    },
+    {
+      "name": "Character Certificate",
+      "desc": "For Grade 6 and above",
+      "mandatory": false
+    }
+  ],
+  "faqs": [
+    {
+      "question": "What is the admission procedure?",
+      "answer": "Fill out the online inquiry form or visit our campus. After submission, our admissions team will schedule an assessment and parent interaction session."
+    },
+    {
+      "question": "Is school transportation available?",
+      "answer": "Yes, we operate safe and modern bus services covering major routes across the city."
+    },
+    {
+      "question": "Are hostel / residential facilities provided?",
+      "answer": "Yes, we have separate well-equipped hostel facilities for boys and girls with 24/7 care and academic supervision."
+    },
+    {
+      "question": "What are the school hours?",
+      "answer": "Regular school hours are from 9:00 AM to 3:30 PM, Sunday through Friday."
+    }
+  ],
+  "importantDatesEnabled": true,
+  "importantDates": [
+    {
+      "title": "Admissions Open",
+      "date": "2027-01-01",
+      "desc": "Online inquiry submission portal opens."
+    },
+    {
+      "title": "Application Deadline",
+      "date": "2027-04-30",
+      "desc": "Last date to submit inquiry & register."
+    },
+    {
+      "title": "Entrance Assessment",
+      "date": "Scheduled upon Inquiry",
+      "desc": "Interactive student evaluation sessions."
+    },
+    {
+      "title": "Academic Session Starts",
+      "date": "May 2027",
+      "desc": "Official orientation and session commencement."
+    }
+  ]
+}

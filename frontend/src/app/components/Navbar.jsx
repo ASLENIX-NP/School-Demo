@@ -285,19 +285,14 @@ export function Navbar({
                     selectEditTarget(e, { type: "admission" });
                   }
                 }}
-                className={
-                  editMode
-                    ? "group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
-                    : "group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
-                }
-                title={editMode ? "Edit admission button" : ""}
+                className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
                 style={{
                   color: palette.navy,
                   background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 100%)`,
                   boxShadow: "0 10px 26px rgba(201,168,76,0.32)",
                 }}
               >
-                {navbarContent.admissionButtonText}
+                {navbarContent.admissionButtonText || "Admission Open"}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
 
                 {editMode && <HoverEditIcon icon={Pencil} label="Edit Button" />}
@@ -376,16 +371,17 @@ export function Navbar({
                       selectEditTarget(e, { type: "admission" });
                     } else {
                       setOpen(false);
+                      window.dispatchEvent(new CustomEvent("open-admission-inquiry"));
                     }
                   }}
-                  className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-center"
+                  className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-sm font-bold text-center transition-all hover:scale-105 hover:-translate-y-0.5 active:scale-95"
                   style={{
                     color: palette.navy,
                     background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 100%)`,
-                    boxShadow: "0 10px 24px rgba(201,168,76,0.28)",
+                    boxShadow: "0 10px 24px rgba(201,168,76,0.35)",
                   }}
                 >
-                  {navbarContent.admissionButtonText}
+                  {navbarContent.admissionButtonText || "Admission Open"}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               )}

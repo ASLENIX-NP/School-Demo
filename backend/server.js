@@ -17,6 +17,7 @@ import contactRoutes from "./routes/contactRoutes.js";
 import siteContentRoutes from "./routes/siteContentRoutes.js";
 import adminSettingsRoutes from "./routes/adminSettingsRoutes.js";
 import adminAuthRoutes from "./routes/adminAuthRoutes.js";
+import admissionRoutes from "./routes/admissionRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 
@@ -47,6 +48,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/site-content", siteContentRoutes);
 app.use("/api/admin-settings", adminSettingsRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
+app.use("/api/admissions", admissionRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/health", healthRoutes);
 

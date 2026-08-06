@@ -1,602 +1,1016 @@
-// AdmissionsPage.jsx
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import api from "../../lib/api";
-import { motion, useInView, AnimatePresence } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Pencil,
-  Plus,
-  Trash2,
-  ArrowRight,
-  CheckCircle,
+  Sparkles,
+  Calendar,
   Clock,
   FileText,
-  UserCheck,
-  Calendar,
-  Mail,
+  Download,
   Phone,
+  Mail,
   MapPin,
+  CheckCircle2,
+  ChevronDown,
+  ArrowRight,
+  ShieldCheck,
+  Award,
+  Users,
+  BookOpen,
   GraduationCap,
-  Sparkles,
+  Bus,
+  Home,
+  Check,
+  AlertCircle,
+  HelpCircle,
+  School,
+  Send,
+  Lock,
+  X
 } from "lucide-react";
 
-// ============ UNIQUE COLOR PALETTE ============
-const theme = {
-  primary: "#0A1628",
-  secondary: "#1A5276",
-  accent1: "#D4AC0D",
-  accent2: "#E67E22",
-  accent3: "#1E8449",
-  accent4: "#7D3C98",
-  light: "#F8F6F0",
-  dark: "#0A1628",
-  gray: "#5D6D7E",
-  lightGray: "#EAE5DE",
-  white: "#FFFFFF",
-  gradient1: "linear-gradient(135deg, #0A1628 0%, #1A5276 100%)",
-  gradient2: "linear-gradient(135deg, #D4AC0D 0%, #E67E22 100%)",
-  gradient3: "linear-gradient(135deg, #1E8449 0%, #2E86C1 100%)",
-  gradient4: "linear-gradient(135deg, #7D3C98 0%, #2E86C1 100%)",
-};
-
-// ============ CONTENT ============
-const defaultAdmissionsContent = {
-  heroBadge: "Begin Your Journey",
-  heroTitle: "Your Future Starts Here",
-  heroHighlight: "Starts Here",
-  heroSubtitle:
-    "Smriti Secondary English Boarding School welcomes students through a clear, transparent admission process designed to help every child thrive.",
+export const defaultSettings = {
+  isOpen: true,
+  academicSession: "2027–2028",
+  startDate: "2027-01-01",
+  endDate: "2027-04-30",
+  heroBadgeText: "Admissions Open for 2027–2028",
+  heroTitle: "Empowering Next Generation Leaders",
   heroDescription:
-    "From Play Group to Class IX, we guide families through every step — from inquiry to enrollment — with care, clarity, and a commitment to your child's success.",
-
-  steps: [
-    {
-      id: 1,
-      step: "01",
-      title: "Explore & Inquire",
-      desc: "Discover our programs and get your questions answered. Contact our admission office or fill out an inquiry form to begin.",
-      color: theme.accent1,
-      icon: "search",
-      visible: true,
-    },
-    {
-      id: 2,
-      step: "02",
-      title: "Application & Assessment",
-      desc: "Complete the application form and schedule a written assessment. We evaluate readiness and potential, not just test scores.",
-      color: theme.accent2,
-      icon: "clipboard",
-      visible: true,
-    },
-    {
-      id: 3,
-      step: "03",
-      title: "Parent Interview",
-      desc: "Meet with our admission team to discuss your child's needs, aspirations, and how we can support their unique journey.",
-      color: theme.accent3,
-      icon: "users",
-      visible: true,
-    },
-    {
-      id: 4,
-      step: "04",
-      title: "Enrollment & Welcome",
-      desc: "Complete the enrollment process, submit required documents, and join the Smriti School community.",
-      color: theme.accent4,
-      icon: "check",
-      visible: true,
-    },
+    "Join our vibrant learning community. We offer holistic education, state-of-the-art facilities, and an environment where every child excels.",
+  countdownEnabled: false,
+  applyButtonText: "Apply Now for Admission",
+  prospectusUrl: "",
+  feeStructureUrl: "",
+  contactPhone: "+977 1-4567890 / +977 9851012345",
+  contactEmail: "admissions@smritischool.edu.np",
+  contactHours: "Sun - Fri: 8:00 AM - 4:00 PM",
+  contactAddress: "Kathmandu, Nepal",
+  eligibilityCriteria: [
+    { grade: "Play Group & Nursery", age: "2.5 - 3.5 years", requirements: "Child birth certificate, medical immunization record." },
+    { grade: "LKG & UKG", age: "4.0 - 5.0 years", requirements: "Basic interaction, previous school report card if attended." },
+    { grade: "Grade 1 - 5 (Primary)", age: "6.0+ years", requirements: "Passed previous grade, Transfer Certificate (TC), marksheets." },
+    { grade: "Grade 6 - 9 (Secondary)", age: "11.0+ years", requirements: "Passed entrance test, character certificate, grade report card." }
   ],
-
-  stats: [
-    { value: "98%", label: "Parent Satisfaction", color: theme.accent1 },
-    { value: "15+", label: "Years of Excellence", color: theme.accent2 },
-    { value: "1000+", label: "Students Enrolled", color: theme.accent3 },
-    { value: "40+", label: "Dedicated Faculty", color: theme.accent4 },
+  requiredDocuments: [
+    { name: "Birth Certificate", desc: "Official copy issued by local municipality", mandatory: true },
+    { name: "Transfer Certificate (TC)", desc: "Original TC from previous school", mandatory: true },
+    { name: "Previous Grade Marksheet", desc: "Copy of last annual examination progress report", mandatory: true },
+    { name: "Passport Size Photographs", desc: "4 recent color photographs of student & 2 of parents", mandatory: true },
+    { name: "Parent Citizenship / ID Proof", desc: "Copy of Citizenship or Passport", mandatory: true },
+    { name: "Character Certificate", desc: "For Grade 6 and above", mandatory: false }
   ],
-
-  formTitle: "Start Your Admission Journey",
-  formDescription:
-    "Complete the form below and our admission team will reach out within 24 hours to guide you through the next steps.",
-  nameLabel: "Full Name",
-  namePlaceholder: "Enter student or parent name",
-  emailLabel: "Email Address",
-  emailPlaceholder: "you@example.com",
-  phoneLabel: "Phone Number",
-  phonePlaceholder: "+977 98XXXXXXXX",
-  gradeLabel: "Applying for Grade",
-  gradePlaceholder: "Select grade",
-  messageLabel: "Additional Notes",
-  messagePlaceholder: "Any specific questions or requirements...",
-  grades: [
-    "Play Group",
-    "LKG",
-    "UKG",
-    "Grade 1",
-    "Grade 2",
-    "Grade 3",
-    "Grade 4",
-    "Grade 5",
-    "Grade 6",
-    "Grade 7",
-    "Grade 8",
-    "Grade 9",
+  importantDatesEnabled: true,
+  importantDates: [
+    { title: "Admissions Open", date: "2027-01-01", desc: "Online inquiry submission portal opens." },
+    { title: "Application Deadline", date: "2027-04-30", desc: "Last date to submit inquiry & register." },
+    { title: "Entrance Assessment", date: "Scheduled upon Inquiry", desc: "Interactive student evaluation sessions." },
+    { title: "Academic Session Starts", date: "May 2027", desc: "Official orientation and session commencement." }
   ],
-  submitButtonText: "Submit Inquiry",
-  submittingText: "Submitting...",
-  successTitle: "Application Received! 🎉",
-  successMessage:
-    "Thank you for choosing Smriti School. Our admission team will contact you within 24 hours with next steps.",
+  faqs: [
+    { question: "What is the admission procedure?", answer: "Fill out the online inquiry form or visit our campus. After submission, our admissions team will schedule an assessment and parent interaction session." },
+    { question: "Is school transportation available?", answer: "Yes, we operate safe and modern bus services covering major routes across the city." },
+    { question: "Are hostel / residential facilities provided?", answer: "Yes, we have separate well-equipped hostel facilities for boys and girls with 24/7 care and academic supervision." },
+    { question: "What are the school hours?", answer: "Regular school hours are from 9:00 AM to 3:30 PM, Sunday through Friday." }
+  ]
 };
 
-// ============ MERGE FUNCTION ============
+export const defaultAdmissionsContent = defaultSettings;
+export const defaultContent = defaultSettings;
 export function mergeAdmissionsContent(saved = {}) {
-  const hasSavedSteps = Array.isArray(saved.steps);
-  const hasSavedGrades = Array.isArray(saved.grades);
-
-  return {
-    ...defaultAdmissionsContent,
-    ...saved,
-    steps: hasSavedSteps
-      ? saved.steps.map((step, index) => ({
-          ...step,
-          id: step.id ?? `admission-step-${index + 1}`,
-          step: step.step ?? String(index + 1).padStart(2, "0"),
-          title: step.title ?? "",
-          desc: step.desc ?? "",
-          color: step.color || [theme.accent1, theme.accent2, theme.accent3, theme.accent4][index % 4],
-          visible: true,
-        }))
-      : defaultAdmissionsContent.steps,
-    grades: hasSavedGrades
-      ? saved.grades.map((grade) => String(grade ?? ""))
-      : defaultAdmissionsContent.grades,
-  };
+  return { ...defaultSettings, ...saved };
 }
 
-// ============ HELPERS ============
-function normalizePhone(phone = "") {
-  return String(phone).replace(/[^\d+]/g, "").trim();
-}
+const whyUs = [
+  { icon: Award, title: "Academic Excellence", desc: "Rigorous curriculum focused on conceptual clarity, critical thinking, and STEAM education." },
+  { icon: Users, title: "Expert Educators", desc: "Passionate teachers dedicated to mentoring, inspiring, and bringing out the best in every child." },
+  { icon: School, title: "World-Class Infrastructure", desc: "Smart classrooms, science & robotics labs, digital library, and comprehensive sports facilities." },
+  { icon: ShieldCheck, title: "Safe & Nurturing Environment", desc: "CCTV-monitored campus, strict safety protocols, and caring staff ensuring student well-being." }
+];
 
-function isValidPhone(phone = "") {
-  const cleaned = normalizePhone(phone).replace(/\D/g, "");
-  return cleaned.length >= 10 && cleaned.length <= 15;
-}
+const timelineSteps = [
+  { number: "01", title: "Submit Inquiry", desc: "Fill out our online inquiry form with student & parent details." },
+  { number: "02", title: "Campus Interaction", desc: "Visit our campus to meet counselors and explore our learning environment." },
+  { number: "03", title: "Assessment", desc: "Child participates in an age-appropriate assessment and friendly interaction." },
+  { number: "04", title: "Verification", desc: "Submit required academic documents and birth record for verification." },
+  { number: "05", title: "Final Enrollment", desc: "Receive confirmation, complete fee payment, and welcome to Smriti School!" }
+];
 
-function HighlightedTitle({ title, highlightedText }) {
-  if (!highlightedText || !title.includes(highlightedText)) return <>{title}</>;
-  const [before, after] = title.split(highlightedText);
-  return (
-    <>
-      {before}
-      <span style={{ color: theme.accent1 }}>{highlightedText}</span>
-      {after}
-    </>
-  );
-}
+const facilitiesList = [
+  { title: "Smart Classrooms", desc: "Interactive digital displays & multimedia learning.", icon: BookOpen },
+  { title: "Science & Computer Labs", desc: "Advanced hands-on practical learning environments.", icon: School },
+  { title: "School Transport", desc: "Safe GPS-tracked buses across major city routes.", icon: Bus },
+  { title: "Student Hostel", desc: "Comfortable residential boarding with round-the-clock security.", icon: Home }
+];
 
-// ============ COUNTER COMPONENT ============
-const Counter = ({ target, suffix, duration = 2000 }) => {
-  const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
+export default function AdmissionsPage({ previewData = null }) {
+  const [settings, setSettings] = useState(previewData || defaultSettings);
+  const [loading, setLoading] = useState(!previewData);
+  const [openFaq, setOpenFaq] = useState(null);
 
-  useEffect(() => {
-    if (!isInView) return;
-    let start = 0;
-    const end = parseInt(target) || 0;
-    const increment = end / (duration / 16);
+  // Popup Form Modal State
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
 
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 16);
+  // Form State
+  const [formData, setFormData] = useState({
+    studentName: "",
+    dob: "",
+    gender: "Male",
+    applyingClass: "Grade 1",
+    academicSession: "",
+    prevSchoolName: "",
+    currentGrade: "",
+    prevSchoolAddress: "",
+    parentName: "",
+    relationship: "Father",
+    mobile: "",
+    altContact: "",
+    email: "",
+    province: "Bagmati Province",
+    district: "Kathmandu",
+    city: "",
+    ward: "",
+    fullAddress: "",
+    transportRequired: false,
+    hostelRequired: false,
+    referralSource: "Website",
+    message: ""
+  });
 
-    return () => clearInterval(timer);
-  }, [isInView, target, duration]);
-
-  return (
-    <span ref={ref}>
-      {count}
-      {suffix}
-    </span>
-  );
-};
-
-// ============ ADMIN BUTTONS ============
-function AdminEditButton({ label, icon: Icon = Pencil, onClick, tone = "gold" }) {
-  const palette = {
-    gold: { background: theme.accent1, color: theme.dark },
-    green: { background: theme.accent3, color: theme.white },
-    red: { background: "#DC2626", color: theme.white },
-    dark: { background: theme.dark, color: theme.white },
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick?.(); }}
-      className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black shadow-2xl transition-all hover:-translate-y-0.5 hover:scale-105"
-      style={palette[tone] || palette.gold}
-    >
-      <Icon className="h-4 w-4" />
-      {label}
-    </button>
-  );
-}
-
-// ============ MAIN COMPONENT ============
-export default function AdmissionsPage({
-  editMode = false,
-  contentOverride = null,
-  onEditHero = () => {},
-  onEditStep = () => {},
-  onAddStep = () => {},
-  onDeleteStep = () => {},
-  onEditForm = () => {},
-} = {}) {
-  const [loadedContent, setLoadedContent] = useState(
-    mergeAdmissionsContent(contentOverride || defaultAdmissionsContent)
-  );
-  const [submitMessage, setSubmitMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(null);
   const [submitError, setSubmitError] = useState("");
-  const [submitted, setSubmitted] = useState(false);
 
-  const content = contentOverride ? mergeAdmissionsContent(contentOverride) : loadedContent;
-
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting, errors },
-    reset,
-  } = useForm();
+  const { isOpen } = settings;
 
   useEffect(() => {
-    if (contentOverride) return;
-    const loadAdmissionsContent = async () => {
+    if (previewData) {
+      setSettings(previewData);
+      setLoading(false);
+      return;
+    }
+
+    const fetchSettings = async () => {
       try {
-        const res = await api.get(
-          "/api/site-content/admissions",
-          { timeout: 12000 }
-        );
-        const savedContent = res.data?.data?.content || {};
-        setLoadedContent(mergeAdmissionsContent(savedContent));
-      } catch (error) {
-        console.error("Admissions content load error:", error);
-        setLoadedContent(defaultAdmissionsContent);
+        const res = await api.get("/api/admissions/settings");
+        if (res.data?.data) {
+          setSettings(res.data.data);
+          if (res.data.data.academicSession) {
+            setFormData((prev) => ({ ...prev, academicSession: res.data.data.academicSession }));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load admission settings:", err);
+      } finally {
+        setLoading(false);
       }
     };
-    loadAdmissionsContent();
-  }, [contentOverride]);
+    fetchSettings();
+  }, [previewData]);
 
-  const onSubmit = async (data) => {
-    if (editMode) return;
-    setSubmitMessage("");
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setSubmitError("");
-    setSubmitted(false);
-
-    const cleanPhone = normalizePhone(data.phone);
-    const grade = data.grade || "";
-    const extraMessage = String(data.message || "").trim();
-    const finalMessage = extraMessage
-      ? `Admission inquiry for ${grade}.\n\nMessage: ${extraMessage}`
-      : `Admission inquiry for ${grade}.`;
+    setSubmitSuccess(null);
+    setSubmitting(true);
 
     try {
-      await api.post(
-        "/api/contact",
-        {
-          source: "admission",
-          name: data.name,
-          email: data.email,
-          phone: cleanPhone,
-          subject: `Admission Inquiry - ${grade}`,
-          message: finalMessage,
-        },
-        { timeout: 15000 }
-      );
-      setSubmitMessage(content.successMessage);
-      setSubmitted(true);
-      reset();
-    } catch (error) {
-      console.error("Admission inquiry submit error:", error);
-      setSubmitError(
-        error.response?.data?.message ||
-          "Inquiry could not be submitted. Please contact the school office directly."
-      );
+      const res = await api.post("/api/admissions/inquiry", formData);
+      if (res.data?.success) {
+        setSubmitSuccess(res.data.message || "Your inquiry has been submitted successfully!");
+        setFormData({
+          studentName: "",
+          dob: "",
+          gender: "Male",
+          applyingClass: "Grade 1",
+          academicSession: settings.academicSession || "2027–2028",
+          prevSchoolName: "",
+          currentGrade: "",
+          prevSchoolAddress: "",
+          parentName: "",
+          relationship: "Father",
+          mobile: "",
+          altContact: "",
+          email: "",
+          province: "Bagmati Province",
+          district: "Kathmandu",
+          city: "",
+          ward: "",
+          fullAddress: "",
+          transportRequired: false,
+          hostelRequired: false,
+          referralSource: "Website",
+          message: ""
+        });
+      } else {
+        setSubmitError(res.data?.message || "Failed to submit inquiry.");
+      }
+    } catch (err) {
+      setSubmitError(err.response?.data?.message || "An error occurred while submitting inquiry.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const visibleSteps = content.steps || [];
-
-  // Get step icon
-  const getStepIcon = (iconName) => {
-    const icons = {
-      search: <FileText size={24} />,
-      clipboard: <FileText size={24} />,
-      users: <UserCheck size={24} />,
-      check: <CheckCircle size={24} />,
-    };
-    return icons[iconName] || <Clock size={24} />;
+  const scrollToSection = (id) => {
+    const elem = document.getElementById(id);
+    if (elem) {
+      elem.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
-  return (
-    <section
-      className="min-h-screen pt-32 pb-28 relative overflow-hidden"
-      style={{ background: theme.light }}
-    >
-      {/* Decorative elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-[0.04]" style={{ background: theme.secondary }} />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-[0.04]" style={{ background: theme.accent3 }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.02]" style={{ background: theme.accent1 }} />
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white text-slate-900">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm font-semibold tracking-wide text-blue-950">Loading Admission Portal...</p>
+        </div>
       </div>
+    );
+  }
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        {/* ===== HERO SECTION - DARK THEME ===== */}
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65 }}
-          className="relative rounded-3xl p-12 md:p-16 mb-16 overflow-hidden"
-          style={{ background: theme.gradient1 }}
-        >
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-20 right-20 w-64 h-64 rounded-full" style={{ background: theme.accent1, filter: "blur(80px)" }} />
-            <div className="absolute bottom-20 left-20 w-64 h-64 rounded-full" style={{ background: theme.accent3, filter: "blur(80px)" }} />
-          </div>
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950 relative">
+      {/* ================= 1. HERO BANNER (70% White, 20% Blue, 10% Yellow) ================= */}
+      <section className="relative min-h-[80vh] flex items-center justify-center pt-32 pb-20 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-blue-50/70 via-white to-slate-50 border-b border-blue-100">
+        {/* Soft Background Gradients */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-amber-400/10 rounded-full blur-[140px] pointer-events-none"></div>
 
-          <div className="relative z-10 max-w-3xl">
+        <div className="relative max-w-6xl mx-auto text-center z-10">
+          {/* Status Badge & Session */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
             <span
-              className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold mb-5"
-              style={{ background: "rgba(212,172,13,0.15)", color: theme.accent1, border: "1px solid rgba(212,172,13,0.3)" }}
+              className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm border ${
+                isOpen
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-300 shadow-emerald-500/5"
+                  : "bg-rose-50 text-rose-700 border-rose-300 shadow-rose-500/5"
+              }`}
             >
-              <Sparkles className="w-4 h-4 inline mr-2" />
-              {content.heroBadge}
+              <span className={`w-2 h-2 rounded-full ${isOpen ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`}></span>
+              {isOpen ? settings.heroBadgeText || "Admissions Open" : "Admissions Closed"}
             </span>
 
-            <h1
-              className="text-5xl md:text-6xl font-bold leading-tight"
-              style={{ color: theme.white, fontFamily: "var(--font-display)", letterSpacing: "-0.03em" }}
-            >
-              <HighlightedTitle title={content.heroTitle} highlightedText={content.heroHighlight} />
-            </h1>
-
-            <p className="text-lg mt-4" style={{ color: "rgba(255,255,255,0.85)" }}>
-              {content.heroSubtitle}
-            </p>
-
-            <p className="text-base mt-2" style={{ color: "rgba(255,255,255,0.6)" }}>
-              {content.heroDescription}
-            </p>
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-900/5 text-blue-950 border border-blue-900/15">
+              <Calendar className="w-3.5 h-3.5 text-amber-500" />
+              Session {settings.academicSession}
+            </span>
           </div>
-        </motion.div>
 
-        {/* ===== STATS SECTION ===== */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-          {content.stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
-              className="rounded-2xl p-6 text-center bg-white border"
-              style={{ borderColor: `${stat.color}20`, boxShadow: "0 4px 22px rgba(0,0,0,0.04)" }}
-            >
-              <div
-                className="text-3xl md:text-4xl font-bold mb-1"
-                style={{ color: stat.color }}
+          {/* Hero Title */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-blue-950 tracking-tight leading-[1.15] mb-6">
+            {settings.heroTitle}
+          </h1>
+
+          {/* Description */}
+          <p className="max-w-3xl mx-auto text-base sm:text-xl text-slate-600 font-normal leading-relaxed mb-10">
+            {settings.heroDescription}
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {isOpen ? (
+              <button
+                onClick={() => setIsFormModalOpen(true)}
+                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-xl text-slate-950 font-extrabold text-base bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 shadow-xl shadow-amber-400/25 hover:shadow-amber-400/40 hover:-translate-y-1 transition-all duration-300 active:translate-y-0 cursor-pointer border border-amber-300"
               >
-                <Counter target={stat.value} suffix="" />
+                <Sparkles className="w-5 h-5 text-slate-950 group-hover:rotate-12 transition-transform" />
+                {settings.applyButtonText || "Apply Now for Admission"}
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            ) : (
+              <div className="px-6 py-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold flex items-center gap-2">
+                <Lock className="w-4 h-4" /> Application Form Currently Locked
               </div>
-              <div className="text-sm font-medium" style={{ color: theme.gray }}>{stat.label}</div>
-            </motion.div>
-          ))}
+            )}
+
+            {settings.prospectusUrl && (
+              <a
+                href={settings.prospectusUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-4 rounded-xl text-blue-950 font-bold text-sm bg-white border border-blue-900/15 hover:bg-blue-50 hover:border-blue-300 hover:-translate-y-0.5 transition-all shadow-sm"
+              >
+                <Download className="w-4 h-4 text-amber-500" />
+                Download Prospectus
+              </a>
+            )}
+
+            <button
+              onClick={() => scrollToSection("contact-admissions")}
+              className="inline-flex items-center gap-2 px-6 py-4 rounded-xl text-blue-950 font-bold text-sm bg-white border border-blue-900/15 hover:bg-blue-50 hover:border-blue-300 hover:-translate-y-0.5 transition-all shadow-sm"
+            >
+              <Phone className="w-4 h-4 text-amber-500" />
+              Contact Admissions
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= CLOSED NOTICE BANNER (WHEN CLOSED) ================= */}
+      {!isOpen && (
+        <section className="py-12 bg-rose-50 border-y border-rose-200 px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto border border-rose-300">
+              <Lock className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Admissions Are Currently Closed</h2>
+            <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Applications for this academic session have officially ended. The next admission cycle will be announced soon.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+              <button
+                onClick={() => scrollToSection("contact-admissions")}
+                className="px-6 py-3 rounded-xl bg-amber-400 text-slate-950 font-bold text-sm hover:bg-amber-300 transition-colors shadow-md"
+              >
+                Contact Admissions Office
+              </button>
+              {settings.prospectusUrl && (
+                <a
+                  href={settings.prospectusUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-xl bg-white text-blue-950 border border-slate-300 font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm"
+                >
+                  Download Prospectus
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ================= 2. WHY CHOOSE OUR SCHOOL ================= */}
+      <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+          <span className="text-xs uppercase tracking-widest text-amber-600 font-extrabold bg-amber-100 px-3.5 py-1 rounded-full border border-amber-200">
+            Why Smriti School
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
+            Building a Foundation for Excellence
+          </h2>
+          <p className="text-slate-600 text-base">
+            We offer a comprehensive educational journey designed to foster academic rigor, leadership, and moral values.
+          </p>
         </div>
 
-        {/* ===== STEPS SECTION ===== */}
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <span
-              className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
-              style={{ background: "rgba(26,82,118,0.08)", color: theme.secondary }}
-            >
-              <Calendar className="w-4 h-4 inline mr-2" />
-              Admission Process
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {whyUs.map((item, idx) => {
+            const IconComponent = item.icon;
+            return (
+              <div
+                key={idx}
+                className="p-8 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 group"
+              >
+                <div className="w-14 h-14 rounded-xl bg-blue-950 text-amber-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-amber-400 group-hover:text-slate-950 transition-all shadow-md">
+                  <IconComponent className="w-7 h-7" />
+                </div>
+                <h3 className="text-xl font-bold text-blue-950 mb-2">{item.title}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ================= 3. ADMISSION PROCESS TIMELINE ================= */}
+      <section className="py-24 px-4 sm:px-6 bg-slate-100/70 border-y border-slate-200/80">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <span className="text-xs uppercase tracking-widest text-blue-900 font-extrabold bg-blue-50 px-3.5 py-1 rounded-full border border-blue-200">
+              Step-By-Step Workflow
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold" style={{ color: theme.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}>
-              Your Journey <span style={{ color: theme.accent1 }}>in 4 Steps</span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
+              Simple 5-Step Admission Process
             </h2>
-            <div className="w-16 h-1 rounded-full mx-auto mt-4" style={{ background: theme.gradient2 }} />
+            <p className="text-slate-600 text-base">
+              A transparent, supportive, and hassle-free path to joining our school community.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {visibleSteps.map((step, index) => {
-              const stepColor = step.color || theme.accent1;
-              return (
-                <motion.div
-                  key={step.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.08 }}
-                  className="relative group"
-                >
-                  {index < visibleSteps.length - 1 && (
-                    <div className="hidden lg:block absolute top-16 left-full w-8 h-0.5" style={{ background: `${stepColor}30` }} />
-                  )}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 relative">
+            {timelineSteps.map((step, idx) => (
+              <div
+                key={idx}
+                className="relative p-6 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-amber-400 hover:shadow-lg transition-all group"
+              >
+                <span className="text-4xl font-black text-amber-500/30 group-hover:text-amber-500 transition-colors block mb-3">
+                  {step.number}
+                </span>
+                <h3 className="text-lg font-bold text-blue-950 mb-2">{step.title}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                  <div
-                    className="p-6 rounded-2xl h-full transition-all duration-300 hover:-translate-y-2"
-                    style={{
-                      background: theme.white,
-                      border: `1px solid ${stepColor}20`,
-                      boxShadow: "0 4px 22px rgba(0,0,0,0.04)",
-                    }}
-                  >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold flex-shrink-0"
-                        style={{ background: `${stepColor}15`, color: stepColor }}
-                      >
-                        {step.step}
-                      </div>
-                      <div
-                        className="flex-1 h-0.5 rounded-full"
-                        style={{ background: `linear-gradient(90deg, ${stepColor}, ${stepColor}20)` }}
-                      />
-                    </div>
+      {/* ================= 4. ELIGIBILITY CRITERIA ================= */}
+      <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+          <span className="text-xs uppercase tracking-widest text-amber-600 font-extrabold bg-amber-100 px-3.5 py-1 rounded-full border border-amber-200">
+            Requirements
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
+            Eligibility Criteria
+          </h2>
+          <p className="text-slate-600 text-base">
+            Please ensure candidate meets age limits and academic prerequisites prior to applying.
+          </p>
+        </div>
 
-                    <h3 className="text-lg font-bold mb-2" style={{ color: theme.dark }}>{step.title}</h3>
-                    <p className="text-sm leading-relaxed" style={{ color: theme.gray }}>{step.desc}</p>
+        <div className="grid md:grid-cols-2 gap-6">
+          {(settings.eligibilityCriteria || defaultSettings.eligibilityCriteria).map((item, idx) => (
+            <div
+              key={idx}
+              className="p-8 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all flex gap-5"
+            >
+              <div className="w-12 h-12 rounded-xl bg-blue-900/10 text-blue-900 flex items-center justify-center shrink-0">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-xl font-bold text-blue-950">{item.grade}</h3>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                    Age: {item.age}
+                  </span>
+                </div>
+                <p className="text-sm text-slate-600 leading-relaxed">{item.requirements}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ================= 5. REQUIRED DOCUMENTS ================= */}
+      <section className="py-24 px-4 sm:px-6 bg-blue-950/5 border-y border-blue-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <span className="text-xs uppercase tracking-widest text-blue-900 font-extrabold bg-blue-100 px-3.5 py-1 rounded-full border border-blue-200">
+              Checklist
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
+              Required Documents
+            </h2>
+            <p className="text-slate-600 text-base">
+              Documents to be presented during the final verification stage.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(settings.requiredDocuments || defaultSettings.requiredDocuments).map((doc, idx) => (
+              <div
+                key={idx}
+                className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-300 transition-all flex items-start gap-4"
+              >
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-1">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-blue-950">{doc.name}</h3>
+                    {doc.mandatory && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700 uppercase">
+                        Mandatory
+                      </span>
+                    )}
                   </div>
-                </motion.div>
+                  <p className="text-xs text-slate-600 leading-relaxed">{doc.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= 6. IMPORTANT DATES (DYNAMIC & ADMIN-CONTROLLABLE) ================= */}
+      {settings.importantDatesEnabled !== false && Array.isArray(settings.importantDates) && settings.importantDates.length > 0 && (
+        <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <span className="text-xs uppercase tracking-widest text-amber-600 font-extrabold bg-amber-100 px-3.5 py-1 rounded-full border border-amber-200">
+              Schedule
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
+              Important Dates & Deadlines
+            </h2>
+            <p className="text-slate-600 text-base">
+              Keep track of key milestones for academic session {settings.academicSession}.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {settings.importantDates.map((item, idx) => (
+              <div key={idx} className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm text-center space-y-3 hover:border-amber-400 hover:shadow-md transition-all">
+                <Calendar className="w-8 h-8 text-amber-500 mx-auto" />
+                <h3 className="text-lg font-bold text-blue-950">{item.title}</h3>
+                <p className="text-amber-600 font-bold text-sm">{item.date}</p>
+                <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ================= 7. FEE STRUCTURE (20% Royal Blue Card, 10% Yellow CTA) ================= */}
+      <section className="py-24 px-4 sm:px-6 bg-slate-100/70 border-y border-slate-200">
+        <div className="max-w-5xl mx-auto text-center space-y-8 p-10 sm:p-16 rounded-3xl bg-gradient-to-br from-blue-950 via-slate-900 to-blue-900 text-white shadow-2xl border border-blue-900">
+          <div className="w-16 h-16 rounded-2xl bg-amber-400/15 text-amber-400 flex items-center justify-center mx-auto border border-amber-400/30 shadow-md">
+            <FileText className="w-8 h-8" />
+          </div>
+          <div className="space-y-3">
+            <span className="text-xs uppercase tracking-widest text-amber-400 font-bold">Transparent Pricing</span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Fee Structure & Scholarship Policy</h2>
+            <p className="text-slate-300 max-w-2xl mx-auto text-base">
+              We provide transparent fee schedules with no hidden charges. Merit scholarships and need-based financial aid options are available for eligible candidates.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {settings.feeStructureUrl ? (
+              <a
+                href={settings.feeStructureUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 font-extrabold text-base hover:bg-amber-300 shadow-xl shadow-amber-400/20 transition-all border border-amber-300"
+              >
+                <Download className="w-5 h-5" /> Download Fee Structure PDF
+              </a>
+            ) : (
+              <button
+                onClick={() => scrollToSection("contact-admissions")}
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-amber-400 text-slate-950 font-extrabold text-base hover:bg-amber-300 transition-all shadow-lg"
+              >
+                <Phone className="w-5 h-5" /> Request Fee Breakdown via Office
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= 8. SCHOOL FACILITIES ================= */}
+      <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+          <span className="text-xs uppercase tracking-widest text-blue-900 font-extrabold bg-blue-100 px-3.5 py-1 rounded-full border border-blue-200">
+            Campus Infrastructure
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
+            Facilities for Comprehensive Growth
+          </h2>
+          <p className="text-slate-600 text-base">
+            Equipped with modern amenities to ensure safety, comfort, and interactive learning.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {facilitiesList.map((fac, idx) => {
+            const IconComp = fac.icon;
+            return (
+              <div key={idx} className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3 hover:border-blue-300 transition-all">
+                <div className="w-12 h-12 rounded-xl bg-blue-900/10 text-blue-900 flex items-center justify-center">
+                  <IconComp className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-blue-950">{fac.title}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">{fac.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ================= 9. FREQUENTLY ASKED QUESTIONS ================= */}
+      <section className="py-24 px-4 sm:px-6 bg-slate-100/60 border-y border-slate-200">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <span className="text-xs uppercase tracking-widest text-amber-600 font-extrabold bg-amber-100 px-3.5 py-1 rounded-full border border-amber-200">
+              Parent Assistance
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-slate-600 text-base">
+              Got questions regarding admissions? We have answers.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {(settings.faqs || defaultSettings.faqs).map((faq, idx) => {
+              const isOpenItem = openFaq === idx;
+              return (
+                <div
+                  key={idx}
+                  className="rounded-2xl bg-white border border-slate-200/80 shadow-sm overflow-hidden transition-all"
+                >
+                  <button
+                    onClick={() => setOpenFaq(isOpenItem ? null : idx)}
+                    className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-lg text-blue-950 hover:text-amber-600 transition-colors"
+                  >
+                    <span className="flex items-center gap-3">
+                      <HelpCircle className="w-5 h-5 text-amber-500 shrink-0" />
+                      {faq.question}
+                    </span>
+                    <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isOpenItem ? "rotate-180" : ""}`} />
+                  </button>
+                  {isOpenItem && (
+                    <div className="px-6 pb-6 pt-2 text-slate-600 text-sm leading-relaxed border-t border-slate-100">
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
         </div>
+      </section>
 
-        {/* ===== FORM SECTION ===== */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto"
-        >
-          <div className="rounded-3xl p-8 md:p-10 bg-white border" style={{ borderColor: theme.lightGray, boxShadow: "0 4px 30px rgba(0,0,0,0.04)" }}>
-            <div className="text-center mb-8">
-              <span
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
-                style={{ background: "rgba(212,172,13,0.12)", color: theme.accent1 }}
-              >
-                <GraduationCap className="w-4 h-4 inline mr-2" />
-                Get Started
-              </span>
-              <h3 className="text-2xl md:text-3xl font-bold" style={{ color: theme.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}>
-                {content.formTitle}
-              </h3>
-              <p className="text-sm mt-2" style={{ color: theme.gray }}>{content.formDescription}</p>
-            </div>
+      {/* ================= 10. CONTACT ADMISSIONS ================= */}
+      <section id="contact-admissions" className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+          <span className="text-xs uppercase tracking-widest text-blue-900 font-extrabold bg-blue-100 px-3.5 py-1 rounded-full border border-blue-200">
+            Direct Assistance
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
+            Contact Admission Office
+          </h2>
+          <p className="text-slate-600 text-base">
+            Have questions? Reach out directly to our friendly admission counselors.
+          </p>
+        </div>
 
-            {submitted ? (
-              <div className="py-8 text-center">
-                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: `${theme.accent3}15` }}>
-                  <CheckCircle size={40} style={{ color: theme.accent3 }} />
-                </div>
-                <h4 className="text-xl font-bold mb-2" style={{ color: theme.dark }}>{content.successTitle}</h4>
-                <p className="text-sm" style={{ color: theme.gray }}>{submitMessage || content.successMessage}</p>
-                <button
-                  type="button"
-                  onClick={() => { setSubmitted(false); setSubmitMessage(""); setSubmitError(""); }}
-                  className="mt-6 px-6 py-3 rounded-xl font-bold text-white transition-all hover:-translate-y-0.5"
-                  style={{ background: theme.gradient2 }}
-                >
-                  Send Another Inquiry
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={(e) => { if (editMode) { e.preventDefault(); return; } handleSubmit(onSubmit)(e); }} className="space-y-5">
-                {submitError && (
-                  <div className="p-4 rounded-xl text-sm font-semibold" style={{ background: "rgba(220,38,38,0.08)", color: "#DC2626", border: "1px solid rgba(220,38,38,0.15)" }}>
-                    {submitError}
-                  </div>
-                )}
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold mb-2" style={{ color: theme.dark }}>{content.nameLabel}</label>
-                    <input
-                      {...register("name", { required: editMode ? false : "Name is required." })}
-                      disabled={editMode}
-                      placeholder={content.namePlaceholder}
-                      className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all bg-white border focus:ring-4 disabled:opacity-75"
-                      style={{ borderColor: theme.lightGray, color: theme.dark }}
-                    />
-                    {errors.name?.message && <p className="text-xs font-semibold mt-1" style={{ color: "#DC2626" }}>{errors.name.message}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold mb-2" style={{ color: theme.dark }}>{content.emailLabel}</label>
-                    <input
-                      {...register("email", { required: editMode ? false : "Email is required." })}
-                      disabled={editMode}
-                      type="email"
-                      placeholder={content.emailPlaceholder}
-                      className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all bg-white border focus:ring-4 disabled:opacity-75"
-                      style={{ borderColor: theme.lightGray, color: theme.dark }}
-                    />
-                    {errors.email?.message && <p className="text-xs font-semibold mt-1" style={{ color: "#DC2626" }}>{errors.email.message}</p>}
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold mb-2" style={{ color: theme.dark }}>{content.phoneLabel}</label>
-                    <input
-                      {...register("phone", {
-                        required: editMode ? false : "Phone number is required.",
-                        validate: (value) => editMode || isValidPhone(value) || "Please enter a valid phone number.",
-                      })}
-                      disabled={editMode}
-                      type="tel"
-                      placeholder={content.phonePlaceholder}
-                      className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all bg-white border focus:ring-4 disabled:opacity-75"
-                      style={{ borderColor: theme.lightGray, color: theme.dark }}
-                    />
-                    {errors.phone?.message && <p className="text-xs font-semibold mt-1" style={{ color: "#DC2626" }}>{errors.phone.message}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold mb-2" style={{ color: theme.dark }}>{content.gradeLabel}</label>
-                    <select
-                      {...register("grade", { required: editMode ? false : "Please select grade." })}
-                      disabled={editMode}
-                      className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all bg-white border focus:ring-4 disabled:opacity-75"
-                      style={{ borderColor: theme.lightGray, color: theme.dark }}
-                    >
-                      <option value="">{content.gradePlaceholder}</option>
-                      {(content.grades || []).map((grade) => (
-                        <option key={grade} value={grade}>{grade}</option>
-                      ))}
-                    </select>
-                    {errors.grade?.message && <p className="text-xs font-semibold mt-1" style={{ color: "#DC2626" }}>{errors.grade.message}</p>}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: theme.dark }}>{content.messageLabel}</label>
-                  <textarea
-                    {...register("message")}
-                    disabled={editMode}
-                    rows={4}
-                    placeholder={content.messagePlaceholder}
-                    className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all bg-white border focus:ring-4 disabled:opacity-75 resize-none"
-                    style={{ borderColor: theme.lightGray, color: theme.dark }}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting || editMode}
-                  className="w-full py-4 rounded-xl font-bold text-white mt-2 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  style={{ background: theme.gradient2, boxShadow: "0 8px 30px rgba(212,172,13,0.3)" }}
-                >
-                  {isSubmitting ? content.submittingText : content.submitButtonText}
-                  <ArrowRight size={18} />
-                </button>
-              </form>
-            )}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-3">
+            <Phone className="w-8 h-8 text-blue-900" />
+            <h3 className="text-lg font-bold text-blue-950">Phone Support</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">{settings.contactPhone}</p>
           </div>
+
+          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-3">
+            <Mail className="w-8 h-8 text-blue-900" />
+            <h3 className="text-lg font-bold text-blue-950">Email Address</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">{settings.contactEmail}</p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-3">
+            <Clock className="w-8 h-8 text-blue-900" />
+            <h3 className="text-lg font-bold text-blue-950">Office Hours</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">{settings.contactHours}</p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-3">
+            <MapPin className="w-8 h-8 text-blue-900" />
+            <h3 className="text-lg font-bold text-blue-950">Campus Location</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">{settings.contactAddress}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= 11. FINAL CALL TO ACTION BANNER (20% Royal Blue, 10% Yellow Button) ================= */}
+      <section className="py-20 px-4 sm:px-6 bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 text-white border-t border-blue-900">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
+            Give Your Child the Gift of World-Class Education
+          </h2>
+          <p className="text-slate-300 text-base max-w-2xl mx-auto">
+            Take the first step towards a bright academic future with Smriti Secondary English Boarding School.
+          </p>
+
+          {isOpen ? (
+            <button
+              onClick={() => setIsFormModalOpen(true)}
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 font-extrabold text-base hover:bg-amber-300 transition-all shadow-xl shadow-amber-400/20 hover:scale-105 active:scale-95 cursor-pointer border border-amber-300"
+            >
+              Start Admission Inquiry Now <ArrowRight className="w-5 h-5" />
+            </button>
+          ) : (
+            <button
+              onClick={() => scrollToSection("contact-admissions")}
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-white/10 text-white font-extrabold text-base hover:bg-white/20 transition-all border border-white/20"
+            >
+              Contact Us for Future Cycles <Phone className="w-5 h-5 text-amber-400" />
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* ================= FLOATING APPLY NOW ACTION BUTTON (BOTTOM RIGHT) ================= */}
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="fixed bottom-6 right-6 z-40"
+        >
+          <button
+            onClick={() => setIsFormModalOpen(true)}
+            className="group flex items-center gap-3 px-6 py-3.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 font-extrabold text-sm shadow-2xl shadow-amber-400/40 hover:scale-105 hover:-translate-y-1 transition-all duration-300 border-2 border-yellow-300 cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-slate-950 animate-pulse" />
+            <span>Apply Now</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
         </motion.div>
-      </div>
-    </section>
+      )}
+
+      {/* ================= POPUP FORM MODAL (LIGHT THEME) ================= */}
+      <AnimatePresence>
+        {isFormModalOpen && (
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-md overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-8 my-8 max-h-[90vh] overflow-y-auto text-slate-900"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setIsFormModalOpen(false)}
+                className="absolute top-6 right-6 p-2.5 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="text-center space-y-2 pr-8">
+                <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-700 border border-amber-200">
+                  <Send className="w-3.5 h-3.5" /> Admission Inquiry Portal
+                </span>
+                <h2 className="text-2xl sm:text-4xl font-extrabold text-blue-950">Student Admission Inquiry</h2>
+                <p className="text-slate-600 text-xs sm:text-sm max-w-lg mx-auto">
+                  Please provide the required student and parent details. Our admission team will contact you promptly.
+                </p>
+              </div>
+
+              {submitSuccess ? (
+                <div className="p-8 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 space-y-4 text-center">
+                  <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-300">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900">Inquiry Submitted Successfully!</h3>
+                  <p className="text-sm text-slate-600 max-w-md mx-auto">{submitSuccess}</p>
+                  <div className="pt-4 flex justify-center gap-4">
+                    <button
+                      onClick={() => setSubmitSuccess(null)}
+                      className="px-5 py-2.5 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs hover:bg-emerald-200 transition-colors"
+                    >
+                      Submit Another Inquiry
+                    </button>
+                    <button
+                      onClick={() => setIsFormModalOpen(false)}
+                      className="px-5 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-extrabold text-xs hover:bg-amber-300 transition-colors shadow-md"
+                    >
+                      Close Window
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  {submitError && (
+                    <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-3 text-sm font-medium">
+                      <AlertCircle className="w-5 h-5 shrink-0" /> {submitError}
+                    </div>
+                  )}
+
+                  {/* SECTION 1: STUDENT INFO */}
+                  <div className="space-y-4">
+                    <h3 className="text-base font-bold text-blue-950 border-b border-slate-200 pb-2 flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5 text-amber-500" /> 1. Student Details
+                    </h3>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Student Full Name *</label>
+                        <input
+                          type="text"
+                          name="studentName"
+                          required
+                          value={formData.studentName}
+                          onChange={handleChange}
+                          placeholder="e.g. Aarav Sharma"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Date of Birth</label>
+                        <input
+                          type="date"
+                          name="dob"
+                          value={formData.dob}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Gender</label>
+                        <select
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Applying for Class *</label>
+                        <select
+                          name="applyingClass"
+                          required
+                          value={formData.applyingClass}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        >
+                          {["Play Group", "Nursery", "LKG", "UKG", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9"].map(
+                            (cls) => (
+                              <option key={cls} value={cls}>{cls}</option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Academic Session</label>
+                        <input
+                          type="text"
+                          name="academicSession"
+                          value={formData.academicSession}
+                          onChange={handleChange}
+                          placeholder="2027–2028"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Previous School Name</label>
+                        <input
+                          type="text"
+                          name="prevSchoolName"
+                          value={formData.prevSchoolName}
+                          onChange={handleChange}
+                          placeholder="If applicable"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 2: PARENT INFO */}
+                  <div className="space-y-4">
+                    <h3 className="text-base font-bold text-blue-950 border-b border-slate-200 pb-2 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-amber-500" /> 2. Parent / Guardian Details
+                    </h3>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Parent Full Name *</label>
+                        <input
+                          type="text"
+                          name="parentName"
+                          required
+                          value={formData.parentName}
+                          onChange={handleChange}
+                          placeholder="e.g. Ramesh Sharma"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Relationship</label>
+                        <select
+                          name="relationship"
+                          value={formData.relationship}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        >
+                          <option value="Father">Father</option>
+                          <option value="Mother">Mother</option>
+                          <option value="Guardian">Guardian</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number *</label>
+                        <input
+                          type="tel"
+                          name="mobile"
+                          required
+                          value={formData.mobile}
+                          onChange={handleChange}
+                          placeholder="+977 98XXXXXXXX"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Email Address *</label>
+                        <input
+                          type="email"
+                          name="email"
+                          required
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="parent@example.com"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 3: ADDRESS */}
+                  <div className="space-y-4">
+                    <h3 className="text-base font-bold text-blue-950 border-b border-slate-200 pb-2 flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-amber-500" /> 3. Address Details
+                    </h3>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">District</label>
+                        <input
+                          type="text"
+                          name="district"
+                          value={formData.district}
+                          onChange={handleChange}
+                          placeholder="Kathmandu"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Full Street Address *</label>
+                        <input
+                          type="text"
+                          name="fullAddress"
+                          required
+                          value={formData.fullAddress}
+                          onChange={handleChange}
+                          placeholder="Tole / House Number / Landmark"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 4: FACILITIES */}
+                  <div className="space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <label className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="transportRequired"
+                          checked={formData.transportRequired}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-amber-500 rounded accent-amber-500"
+                        />
+                        <span className="text-xs font-bold text-slate-800">School Bus Transport Required</span>
+                      </label>
+
+                      <label className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="hostelRequired"
+                          checked={formData.hostelRequired}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-amber-500 rounded accent-amber-500"
+                        />
+                        <span className="text-xs font-bold text-slate-800">Hostel Facility Required</span>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Additional Questions or Notes</label>
+                      <textarea
+                        name="message"
+                        rows={2}
+                        value={formData.message}
+                        onChange={handleChange}
+                        placeholder="Write any specific query or message..."
+                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:border-amber-500 focus:bg-white outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setIsFormModalOpen(false)}
+                      className="px-6 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="px-8 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 font-extrabold text-xs shadow-lg hover:shadow-amber-400/30 transition-all disabled:opacity-50 flex items-center gap-2 border border-amber-300 cursor-pointer"
+                    >
+                      {submitting ? "Submitting Inquiry..." : "Submit Admission Inquiry"}
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </form>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
