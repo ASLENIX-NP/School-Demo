@@ -218,7 +218,7 @@ function BlogCard({ post, index }) {
   );
 }
 
-const BENCHES_BG_IMAGE = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80";
+const BENCHES_BG_IMAGE = "http://localhost:5000/api/blogs"
 
 export default function Blogs() {
   const [content, setContent] = useState(() => mergeBlogContent(defaultBlogContent));
@@ -230,12 +230,13 @@ export default function Blogs() {
 
     const loadBlogs = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/site-content/blogs`, {
-          timeout: 12000,
-        });
-
+        const res = await api.get("/api/site-content/blogs");
         if (!alive) return;
         setContent(mergeBlogContent(res.data?.data?.content || {}));
+
+        console.log("API Response:", res.data);
+        console.log("Posts:", res.data?.data?.content?.posts);
+
       } catch (error) {
         console.error("Blog content load error:", error);
         if (alive) setContent(mergeBlogContent(defaultBlogContent));
@@ -274,7 +275,7 @@ export default function Blogs() {
       {/* Light Classroom Benches Background Image */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <img
-          src={BENCHES_BG_IMAGE}
+          src={content.heroBackgroundImage}
           alt="Classroom Benches Background"
           className="w-full h-full object-cover"
           style={{
@@ -351,8 +352,8 @@ export default function Blogs() {
                     key={cat}
                     onClick={() => setCategory(cat)}
                     className={`rounded-full px-5 py-2 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${isActive
-                        ? "bg-[#0A1628] text-white shadow-md shadow-slate-900/10 border border-[#0A1628]"
-                        : "bg-white text-slate-600 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300"
+                      ? "bg-[#0A1628] text-white shadow-md shadow-slate-900/10 border border-[#0A1628]"
+                      : "bg-white text-slate-600 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300"
                       }`}
                   >
                     {cat}

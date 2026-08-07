@@ -2,6 +2,7 @@
 // Features individual Staff Containers that open a dedicated Popup on click.
 // Page Header is now left-aligned, containerized, and wrapped in a colorful glass gradient card.
 // FIXED: Mission & Vision emojis are now fully visible without getting cut off.
+// ALL HEADERS NOW EDITABLE FROM BACKEND
 
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
@@ -38,22 +39,21 @@ import {
 // Palette
 // ──────────────────────────────────────────────
 const palette = {
-  primary: "#2563EB",      // Modern Royal Blue
-  secondary: "#0F172A",    // Deep Navy
-  accent: "#38BDF8",       // Bright Cyan
-  accent2: "#F59E0B",      // Amber/Gold
-  light: "#F1F5F9",        // Light Slate Background
-  dark: "#0F172A",         // Deep Navy Text
-  gray: "#64748B",         // Slate Gray
-  lightGray: "#E2E8F0",    // Light Slate Border
+  primary: "#2563EB",
+  secondary: "#0F172A",
+  accent: "#38BDF8",
+  accent2: "#F59E0B",
+  light: "#F1F5F9",
+  dark: "#0F172A",
+  gray: "#64748B",
+  lightGray: "#E2E8F0",
   white: "#FFFFFF",
-  gradient1: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)", // Deep Blue to Purple
+  gradient1: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)",
   gradient2: "linear-gradient(135deg, #F59E0B 0%, #F97316 100%)",
   gradient3: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
 };
 
-const API_URL = "https://school-website-backend-ixx2.onrender.com";
-
+const API_URL = "http://localhost:5000";
 // ──────────────────────────────────────────────
 // Default content
 // ──────────────────────────────────────────────
@@ -126,7 +126,7 @@ export const defaultAboutContent = {
       title: "Creating Opportunities for Every Child",
       message:
         "Our mission is to provide a safe, nurturing, and academically rigorous environment where every child discovers their unique potential. We are committed to not just teaching lessons, but inspiring a generation of thinkers, leaders, and dreamers.",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&auto=format", 
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&auto=format",
       imageZoom: 1,
       imageOffsetX: 0,
       imageOffsetY: 0,
@@ -139,7 +139,7 @@ export const defaultAboutContent = {
       title: "A Commitment to Excellence",
       message:
         "Behind every great school is a dedicated team. Our educators are our greatest asset, working tirelessly to ensure that no child is left behind. Through innovation, compassion, and unwavering dedication, we are making a real difference in the community.",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&auto=format", 
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&auto=format",
       imageZoom: 1,
       imageOffsetX: 0,
       imageOffsetY: 0,
@@ -401,7 +401,7 @@ function EditableWrap({
   editMode,
   target,
   onEditTarget,
-  onDeleteTarget = () => {},
+  onDeleteTarget = () => { },
   icon = Pencil,
   label = "Edit",
   canDelete = false,
@@ -513,9 +513,9 @@ function StaffPopup({ isOpen, onClose, staff }) {
             <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
               <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200">
                 {staff.image ? (
-                  <img 
-                    src={staff.image} 
-                    alt={staff.name} 
+                  <img
+                    src={staff.image}
+                    alt={staff.name}
                     className="w-full h-full object-cover"
                     style={getAdjustedImageStyle(staff)}
                   />
@@ -526,7 +526,7 @@ function StaffPopup({ isOpen, onClose, staff }) {
                 )}
               </div>
             </div>
-            
+
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-2 rounded-full bg-white/20 text-white hover:bg-white/40 transition-colors backdrop-blur-sm"
@@ -543,7 +543,7 @@ function StaffPopup({ isOpen, onClose, staff }) {
                 {staff.role}
               </span>
             </div>
-            
+
             <div className="text-left bg-slate-50 p-6 rounded-xl border border-slate-100 mb-6">
               <h4 className="font-bold text-slate-800 text-base mb-2">{staff.title}</h4>
               <p className="text-slate-600 text-sm leading-relaxed">
@@ -551,8 +551,8 @@ function StaffPopup({ isOpen, onClose, staff }) {
               </p>
             </div>
 
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
               className="w-full py-3 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors border border-slate-200"
             >
               Close Message
@@ -570,9 +570,9 @@ function StaffPopup({ isOpen, onClose, staff }) {
 export default function About({
   editMode = false,
   contentOverride = null,
-  onEditTarget = () => {},
-  onDeleteTarget = () => {},
-  onAddTarget = () => {},
+  onEditTarget = () => { },
+  onDeleteTarget = () => { },
+  onAddTarget = () => { },
 }) {
   const [content, setContent] = useState(() => mergeAboutContent(contentOverride || defaultAboutContent));
   const [selectedStaff, setSelectedStaff] = useState(null);
@@ -588,6 +588,9 @@ export default function About({
         const res = await axios.get(`${API_URL}/api/site-content/about`, { timeout: 10000 });
         if (!alive) return;
         const saved = res.data?.data?.content || {};
+
+        console.log("API DATA:", saved);
+
         setContent(mergeAboutContent(saved));
       } catch (error) {
         console.error("About content load error:", error);
@@ -610,7 +613,7 @@ export default function About({
       <DecorativeBackdrop />
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8">
-        
+
         {/* ─────────── PAGE HEADER (COLORFUL CONTAINER) ─────────── */}
         <EditableWrap editMode={editMode} target={{ type: "pageHeader" }} onEditTarget={onEditTarget} label="Edit page header">
           <motion.div
@@ -746,13 +749,16 @@ export default function About({
 
         {/* ─────────── CORE VALUES / PILLARS ─────────── */}
         <div className="mb-16 md:mb-24">
-          <SectionHeader
-            badge={content.pillarBadge}
-            title={content.pillarTitle}
-            description={content.pillarDescription}
-            badgeBg="rgba(245, 158, 11, 0.15)"
-            badgeColor={palette.accent2}
-          />
+          {/* PILLAR HEADER - NOW EDITABLE */}
+          <EditableWrap editMode={editMode} target={{ type: "pillarHeader" }} onEditTarget={onEditTarget} label="Edit pillar header">
+            <SectionHeader
+              badge={content.pillarBadge}
+              title={content.pillarTitle}
+              description={content.pillarDescription}
+              badgeBg="rgba(245, 158, 11, 0.15)"
+              badgeColor={palette.accent2}
+            />
+          </EditableWrap>
 
           <div className="flex justify-end mb-6">
             <SectionAddButton editMode={editMode} label="Add Value" type="pillar" onAddTarget={onAddTarget} />
@@ -782,7 +788,7 @@ export default function About({
                     <TiltCard
                       max={6}
                       className="rounded-2xl p-6 md:p-8 h-full backdrop-blur-md border"
-                      style={{ 
+                      style={{
                         background: "linear-gradient(145deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1))",
                         borderColor: "rgba(255,255,255,0.6)",
                         boxShadow: "0 10px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.8)"
@@ -817,11 +823,16 @@ export default function About({
 
         {/* ─────────── STAFF CONTAINERS ─────────── */}
         <div className="mb-16 md:mb-24">
-          <SectionHeader 
-            badge={content.leadershipBadge} 
-            title="Words From Our Staff" 
-            description="Hear directly from the dedicated educators and leaders who make our school a home for learning." 
-          />
+          {/* LEADERSHIP HEADER - NOW EDITABLE */}
+          <EditableWrap editMode={editMode} target={{ type: "leadershipHeader" }} onEditTarget={onEditTarget} label="Edit leadership header">
+            <SectionHeader
+              badge={content.leadershipBadge}
+              title={content.leadershipTitle}
+              description={content.leadershipDescription}
+              badgeBg="rgba(37, 99, 235, 0.08)"
+              badgeColor={palette.primary}
+            />
+          </EditableWrap>
 
           <div className="flex justify-end mb-6">
             <SectionAddButton editMode={editMode} label="Add Staff" type="message" onAddTarget={onAddTarget} />
@@ -854,7 +865,7 @@ export default function About({
                       <TiltCard
                         max={4}
                         className="rounded-2xl p-6 backdrop-blur-md border transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-                        style={{ 
+                        style={{
                           background: "linear-gradient(145deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))",
                           borderColor: "rgba(255,255,255,0.6)",
                           boxShadow: "0 10px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.8)"
@@ -865,9 +876,9 @@ export default function About({
                           <div className="flex-shrink-0">
                             <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-sm bg-gray-200 transition-transform group-hover:scale-105">
                               {person.image ? (
-                                <img 
-                                  src={person.image} 
-                                  alt={person.name} 
+                                <img
+                                  src={person.image}
+                                  alt={person.name}
                                   className="w-full h-full object-cover"
                                   style={getAdjustedImageStyle(person)}
                                 />
@@ -888,7 +899,7 @@ export default function About({
                               </span>
                             </div>
                             <p className="text-sm text-slate-500 mt-1">{person.title}</p>
-                            
+
                             <div className="mt-3 flex items-center gap-2 text-sm font-medium text-blue-600 group-hover:text-blue-700 transition-colors">
                               <Mail className="w-4 h-4" />
                               <span>Read Message</span>
@@ -907,7 +918,10 @@ export default function About({
 
         {/* ─────────── MISSION & VISION (EXPANDED & FIXED) ─────────── */}
         <div className="mb-16 md:mb-24 max-w-5xl mx-auto">
-          <SectionHeader badge={content.missionVisionBadge} title="What Guides Every Decision We Make" badgeBg="rgba(56, 189, 248, 0.1)" badgeColor={palette.accent} />
+          {/* MISSION/VISION BADGE - NOW EDITABLE */}
+          <EditableWrap editMode={editMode} target={{ type: "missionVisionBadge" }} onEditTarget={onEditTarget} label="Edit mission/vision badge">
+            <SectionHeader badge={content.missionVisionBadge} title="What Guides Every Decision We Make" badgeBg="rgba(56, 189, 248, 0.1)" badgeColor={palette.accent} />
+          </EditableWrap>
 
           <div className="flex justify-end mb-6">
             <SectionAddButton editMode={editMode} label="Add Card" type="missionVision" onAddTarget={onAddTarget} />
@@ -938,7 +952,7 @@ export default function About({
                       max={6}
                       glare={false}
                       className="relative rounded-2xl p-8 md:p-10 h-full backdrop-blur-md border relative pt-10"
-                      style={{ 
+                      style={{
                         background: "linear-gradient(145deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))",
                         borderColor: "rgba(255,255,255,0.6)",
                         boxShadow: "0 10px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.8)"
@@ -969,7 +983,10 @@ export default function About({
 
         {/* ─────────── OUR JOURNEY (VIBRANT & COLORFUL) ─────────── */}
         <div className="mb-16 md:mb-24">
-          <SectionHeader badge={content.journeyBadge} title={content.journeyTitle} badgeBg="rgba(244, 162, 97, 0.15)" badgeColor={palette.accent2} />
+          {/* JOURNEY BADGE - NOW EDITABLE */}
+          <EditableWrap editMode={editMode} target={{ type: "journeyBadge" }} onEditTarget={onEditTarget} label="Edit journey badge">
+            <SectionHeader badge={content.journeyBadge} title={content.journeyTitle} badgeBg="rgba(244, 162, 97, 0.15)" badgeColor={palette.accent2} />
+          </EditableWrap>
 
           <div className="flex justify-end mb-6">
             <SectionAddButton editMode={editMode} label="Add Milestone" type="journey" onAddTarget={onAddTarget} />
@@ -1013,9 +1030,9 @@ export default function About({
                     >
                       <div
                         className="relative z-10 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white md:absolute md:left-1/2 md:-translate-x-1/2 transition-all hover:scale-110 hover:shadow-xl"
-                        style={{ 
-                          background: nodeColor.bg, 
-                          boxShadow: `0 0 0 5px ${palette.light}, 0 0 0 6px ${nodeColor.bg}40, 0 8px 18px ${nodeColor.bg}55` 
+                        style={{
+                          background: nodeColor.bg,
+                          boxShadow: `0 0 0 5px ${palette.light}, 0 0 0 6px ${nodeColor.bg}40, 0 8px 18px ${nodeColor.bg}55`
                         }}
                       >
                         {i + 1}
@@ -1025,11 +1042,11 @@ export default function About({
                         <TiltCard
                           max={4}
                           className="rounded-2xl p-5 md:p-6 backdrop-blur-md border transition-all hover:shadow-lg"
-                          style={{ 
+                          style={{
                             background: "linear-gradient(145deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))",
                             borderColor: "rgba(255,255,255,0.6)",
                             boxShadow: "0 10px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
-                            borderLeft: `4px solid ${nodeColor.bg}` 
+                            borderLeft: `4px solid ${nodeColor.bg}`
                           }}
                         >
                           <div className="text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: nodeColor.bg }}>
@@ -1086,9 +1103,9 @@ export default function About({
       </div>
 
       {/* ─────────── STAFF POPUP OVERLAY ─────────── */}
-      <StaffPopup 
-        isOpen={selectedStaff !== null} 
-        onClose={() => setSelectedStaff(null)} 
+      <StaffPopup
+        isOpen={selectedStaff !== null}
+        onClose={() => setSelectedStaff(null)}
         staff={selectedStaff}
       />
     </section>

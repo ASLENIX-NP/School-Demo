@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import api from "../lib/api";
 import { motion, AnimatePresence } from "motion/react";
@@ -627,7 +626,6 @@ function AboutImageAdjustPage({
   );
 }
 
-
 function getDeleteName(target) {
   if (!target) return "this item";
 
@@ -676,14 +674,17 @@ export default function AdminAbout() {
     setImageAdjustOpen(false);
     setEditingTarget(target);
 
+    // Page Header
     if (target.type === "pageHeader") {
       setModalForm({
+        pageBadge: form.pageBadge || "",
         pageTitle: form.pageTitle || "",
         pageSubtitle: form.pageSubtitle || "",
       });
       return;
     }
 
+    // Story Text
     if (target.type === "storyText") {
       setModalForm({
         storyBadge: form.storyBadge || "",
@@ -694,6 +695,7 @@ export default function AdminAbout() {
       return;
     }
 
+    // Story Image
     if (target.type === "storyImage") {
       setModalForm({
         storyImageUrl: form.storyImageUrl || "",
@@ -705,6 +707,7 @@ export default function AdminAbout() {
       return;
     }
 
+    // Story Image Text
     if (target.type === "storyImageText") {
       setModalForm({
         storyImageTitle: form.storyImageTitle || "",
@@ -713,14 +716,17 @@ export default function AdminAbout() {
       return;
     }
 
+    // Pillar Header
     if (target.type === "pillarHeader") {
       setModalForm({
         pillarBadge: form.pillarBadge || "",
         pillarTitle: form.pillarTitle || "",
+        pillarDescription: form.pillarDescription || "",
       });
       return;
     }
 
+    // Pillar Card
     if (target.type === "pillarCard") {
       const item = form.pillars?.[target.index];
 
@@ -733,6 +739,7 @@ export default function AdminAbout() {
       return;
     }
 
+    // Leadership Header
     if (target.type === "leadershipHeader") {
       setModalForm({
         leadershipBadge: form.leadershipBadge || "",
@@ -742,6 +749,7 @@ export default function AdminAbout() {
       return;
     }
 
+    // Leadership Message
     if (target.type === "leadershipMessage") {
       const item = form.messages?.[target.index];
 
@@ -759,6 +767,7 @@ export default function AdminAbout() {
       return;
     }
 
+    // Leadership Photo
     if (target.type === "leadershipPhoto") {
       const item = form.messages?.[target.index];
 
@@ -771,6 +780,15 @@ export default function AdminAbout() {
       return;
     }
 
+    // Mission/Vision Badge
+    if (target.type === "missionVisionBadge") {
+      setModalForm({
+        missionVisionBadge: form.missionVisionBadge || "",
+      });
+      return;
+    }
+
+    // Mission/Vision Card
     if (target.type === "missionVision") {
       const item = form.missionVision?.[target.index];
 
@@ -783,14 +801,16 @@ export default function AdminAbout() {
       return;
     }
 
-    if (target.type === "journeyHeader") {
+    // Journey Badge
+    if (target.type === "journeyBadge") {
       setModalForm({
-        timelineBadge: form.timelineBadge || "",
+        journeyBadge: form.journeyBadge || "",
         journeyTitle: form.journeyTitle || "",
       });
       return;
     }
 
+    // Journey Item
     if (target.type === "journeyItem") {
       const item = form.journey?.[target.index];
 
@@ -800,6 +820,18 @@ export default function AdminAbout() {
         desc: item?.desc || "",
         visible: item?.visible !== false,
       });
+      return;
+    }
+
+    // CTA Band
+    if (target.type === "ctaBand") {
+      setModalForm({
+        ctaTitle: form.ctaTitle || "",
+        ctaDescription: form.ctaDescription || "",
+        ctaButtonText: form.ctaButtonText || "",
+        ctaButtonLink: form.ctaButtonLink || "/contact",
+      });
+      return;
     }
   };
 
@@ -929,14 +961,17 @@ export default function AdminAbout() {
     try {
       let nextForm = mergeAboutContent(form);
 
+      // Page Header
       if (editingTarget.type === "pageHeader") {
         nextForm = {
           ...nextForm,
+          pageBadge: modalForm.pageBadge || "",
           pageTitle: modalForm.pageTitle || "",
           pageSubtitle: modalForm.pageSubtitle || "",
         };
       }
 
+      // Story Text
       if (editingTarget.type === "storyText") {
         nextForm = {
           ...nextForm,
@@ -949,6 +984,7 @@ export default function AdminAbout() {
         };
       }
 
+      // Story Image
       if (editingTarget.type === "storyImage") {
         nextForm = {
           ...nextForm,
@@ -960,6 +996,7 @@ export default function AdminAbout() {
         };
       }
 
+      // Story Image Text
       if (editingTarget.type === "storyImageText") {
         nextForm = {
           ...nextForm,
@@ -968,31 +1005,35 @@ export default function AdminAbout() {
         };
       }
 
+      // Pillar Header
       if (editingTarget.type === "pillarHeader") {
         nextForm = {
           ...nextForm,
           pillarBadge: modalForm.pillarBadge || "",
           pillarTitle: modalForm.pillarTitle || "",
+          pillarDescription: modalForm.pillarDescription || "",
         };
       }
 
+      // Pillar Card
       if (editingTarget.type === "pillarCard") {
         nextForm = {
           ...nextForm,
           pillars: nextForm.pillars.map((item, index) =>
             index === editingTarget.index
               ? {
-                  ...item,
-                  label: modalForm.label || "",
-                  desc: modalForm.desc || "",
-                  color: modalForm.color || colors.green,
-                  visible: modalForm.visible !== false,
-                }
+                ...item,
+                label: modalForm.label || "",
+                desc: modalForm.desc || "",
+                color: modalForm.color || colors.green,
+                visible: modalForm.visible !== false,
+              }
               : item
           ),
         };
       }
 
+      // Leadership Header
       if (editingTarget.type === "leadershipHeader") {
         nextForm = {
           ...nextForm,
@@ -1002,84 +1043,108 @@ export default function AdminAbout() {
         };
       }
 
+      // Leadership Message
       if (editingTarget.type === "leadershipMessage") {
         nextForm = {
           ...nextForm,
           messages: nextForm.messages.map((item, index) =>
             index === editingTarget.index
               ? {
-                  ...item,
-                  name: modalForm.name || "",
-                  role: modalForm.role || "",
-                  title: modalForm.title || "",
-                  message: modalForm.message || "",
-                  image: modalForm.image || "",
-                  imageZoom: clampImageZoom(modalForm.imageZoom),
-                  imageOffsetX: clampImageOffset(modalForm.imageOffsetX),
-                  imageOffsetY: clampImageOffset(modalForm.imageOffsetY),
-                  visible: modalForm.visible !== false,
-                }
+                ...item,
+                name: modalForm.name || "",
+                role: modalForm.role || "",
+                title: modalForm.title || "",
+                message: modalForm.message || "",
+                image: modalForm.image || "",
+                imageZoom: clampImageZoom(modalForm.imageZoom),
+                imageOffsetX: clampImageOffset(modalForm.imageOffsetX),
+                imageOffsetY: clampImageOffset(modalForm.imageOffsetY),
+                visible: modalForm.visible !== false,
+              }
               : item
           ),
         };
       }
 
+      // Leadership Photo
       if (editingTarget.type === "leadershipPhoto") {
         nextForm = {
           ...nextForm,
           messages: nextForm.messages.map((item, index) =>
             index === editingTarget.index
               ? {
-                  ...item,
-                  image: modalForm.image || "",
-                  imageZoom: clampImageZoom(modalForm.imageZoom),
-                  imageOffsetX: clampImageOffset(modalForm.imageOffsetX),
-                  imageOffsetY: clampImageOffset(modalForm.imageOffsetY),
-                }
+                ...item,
+                image: modalForm.image || "",
+                imageZoom: clampImageZoom(modalForm.imageZoom),
+                imageOffsetX: clampImageOffset(modalForm.imageOffsetX),
+                imageOffsetY: clampImageOffset(modalForm.imageOffsetY),
+              }
               : item
           ),
         };
       }
 
+      // Mission/Vision Badge
+      if (editingTarget.type === "missionVisionBadge") {
+        nextForm = {
+          ...nextForm,
+          missionVisionBadge: modalForm.missionVisionBadge || "",
+        };
+      }
+
+      // Mission/Vision Card
       if (editingTarget.type === "missionVision") {
         nextForm = {
           ...nextForm,
           missionVision: nextForm.missionVision.map((item, index) =>
             index === editingTarget.index
               ? {
-                  ...item,
-                  title: modalForm.title || "",
-                  desc: modalForm.desc || "",
-                  color: modalForm.color || colors.purple,
-                  visible: modalForm.visible !== false,
-                }
+                ...item,
+                title: modalForm.title || "",
+                desc: modalForm.desc || "",
+                color: modalForm.color || colors.purple,
+                visible: modalForm.visible !== false,
+              }
               : item
           ),
         };
       }
 
-      if (editingTarget.type === "journeyHeader") {
+      // Journey Badge
+      if (editingTarget.type === "journeyBadge") {
         nextForm = {
           ...nextForm,
-          timelineBadge: modalForm.timelineBadge || "",
+          journeyBadge: modalForm.journeyBadge || "",
           journeyTitle: modalForm.journeyTitle || "",
         };
       }
 
+      // Journey Item
       if (editingTarget.type === "journeyItem") {
         nextForm = {
           ...nextForm,
           journey: nextForm.journey.map((item, index) =>
             index === editingTarget.index
               ? {
-                  ...item,
-                  year: modalForm.year || "",
-                  title: modalForm.title || "",
-                  desc: modalForm.desc || "",
-                  visible: modalForm.visible !== false,
-                }
+                ...item,
+                year: modalForm.year || "",
+                title: modalForm.title || "",
+                desc: modalForm.desc || "",
+                visible: modalForm.visible !== false,
+              }
               : item
           ),
+        };
+      }
+
+      // CTA Band
+      if (editingTarget.type === "ctaBand") {
+        nextForm = {
+          ...nextForm,
+          ctaTitle: modalForm.ctaTitle || "",
+          ctaDescription: modalForm.ctaDescription || "",
+          ctaButtonText: modalForm.ctaButtonText || "",
+          ctaButtonLink: modalForm.ctaButtonLink || "/contact",
         };
       }
 
@@ -1275,9 +1340,11 @@ export default function AdminAbout() {
       leadershipHeader: "Edit Leadership Heading",
       leadershipMessage: "Edit Leadership Message",
       leadershipPhoto: "Change Leadership Photo",
+      missionVisionBadge: "Edit Mission/Vision Badge",
       missionVision: "Edit Mission / Vision Card",
-      journeyHeader: "Edit Journey Heading",
+      journeyBadge: "Edit Journey Badge",
       journeyItem: "Edit Journey Item",
+      ctaBand: "Edit Call to Action",
     };
 
     return titles[editingTarget.type] || "Edit About Page";
@@ -1323,9 +1390,9 @@ export default function AdminAbout() {
       "leadershipMessage",
     ].includes(editingTarget.type);
   }, [editingTarget]);
+
   return (
     <div className="space-y-6">
-
       <style>
         {`
           @media (max-width: 767px) {
@@ -1408,7 +1475,7 @@ export default function AdminAbout() {
             </h2>
 
             <p className="text-sm text-slate-500 mt-1">
-              Hover content to edit. Core values, messages, mission cards, and journey items also show a delete icon with confirmation.
+              Hover content to edit. Core values, messages, mission cards, journey items, and CTA are all editable.
             </p>
           </div>
         </div>
@@ -1613,25 +1680,29 @@ export default function AdminAbout() {
                     </>
                   )}
 
+                  {/* Page Header */}
                   {editingTarget.type === "pageHeader" && (
                     <>
+                      <Field
+                        label="Page Badge"
+                        value={modalForm.pageBadge}
+                        onChange={(value) => updateModalField("pageBadge", value)}
+                      />
                       <Field
                         label="Page Title"
                         value={modalForm.pageTitle}
                         onChange={(value) => updateModalField("pageTitle", value)}
                       />
-
                       <Field
                         label="Page Subtitle"
                         value={modalForm.pageSubtitle}
-                        onChange={(value) =>
-                          updateModalField("pageSubtitle", value)
-                        }
+                        onChange={(value) => updateModalField("pageSubtitle", value)}
                         textarea
                       />
                     </>
                   )}
 
+                  {/* Story Text */}
                   {editingTarget.type === "storyText" && (
                     <>
                       <Field
@@ -1639,20 +1710,17 @@ export default function AdminAbout() {
                         value={modalForm.storyBadge}
                         onChange={(value) => updateModalField("storyBadge", value)}
                       />
-
                       <Field
                         label="Story Title"
                         value={modalForm.storyTitle}
                         onChange={(value) => updateModalField("storyTitle", value)}
                       />
-
                       <Field
                         label="Paragraph 1"
                         value={modalForm.paragraph1}
                         onChange={(value) => updateModalField("paragraph1", value)}
                         textarea
                       />
-
                       <Field
                         label="Paragraph 2"
                         value={modalForm.paragraph2}
@@ -1662,26 +1730,23 @@ export default function AdminAbout() {
                     </>
                   )}
 
+                  {/* Story Image Text */}
                   {editingTarget.type === "storyImageText" && (
                     <>
                       <Field
                         label="Image Caption Title"
                         value={modalForm.storyImageTitle}
-                        onChange={(value) =>
-                          updateModalField("storyImageTitle", value)
-                        }
+                        onChange={(value) => updateModalField("storyImageTitle", value)}
                       />
-
                       <Field
                         label="Image Caption Subtitle"
                         value={modalForm.storyImageSubtitle}
-                        onChange={(value) =>
-                          updateModalField("storyImageSubtitle", value)
-                        }
+                        onChange={(value) => updateModalField("storyImageSubtitle", value)}
                       />
                     </>
                   )}
 
+                  {/* Pillar Header */}
                   {editingTarget.type === "pillarHeader" && (
                     <>
                       <Field
@@ -1689,15 +1754,21 @@ export default function AdminAbout() {
                         value={modalForm.pillarBadge}
                         onChange={(value) => updateModalField("pillarBadge", value)}
                       />
-
                       <Field
                         label="Core Values Title"
                         value={modalForm.pillarTitle}
                         onChange={(value) => updateModalField("pillarTitle", value)}
                       />
+                      <Field
+                        label="Core Values Description"
+                        value={modalForm.pillarDescription}
+                        onChange={(value) => updateModalField("pillarDescription", value)}
+                        textarea
+                      />
                     </>
                   )}
 
+                  {/* Pillar Card */}
                   {editingTarget.type === "pillarCard" && (
                     <>
                       <Field
@@ -1705,21 +1776,18 @@ export default function AdminAbout() {
                         value={modalForm.label}
                         onChange={(value) => updateModalField("label", value)}
                       />
-
                       <Field
                         label="Description"
                         value={modalForm.desc}
                         onChange={(value) => updateModalField("desc", value)}
                         textarea
                       />
-
                       <Field
                         label="Accent Color"
                         value={modalForm.color}
                         onChange={(value) => updateModalField("color", value)}
                         type="color"
                       />
-
                       <Toggle
                         label="Show this card on website"
                         checked={modalForm.visible !== false}
@@ -1728,35 +1796,29 @@ export default function AdminAbout() {
                     </>
                   )}
 
+                  {/* Leadership Header */}
                   {editingTarget.type === "leadershipHeader" && (
                     <>
                       <Field
                         label="Leadership Badge"
                         value={modalForm.leadershipBadge}
-                        onChange={(value) =>
-                          updateModalField("leadershipBadge", value)
-                        }
+                        onChange={(value) => updateModalField("leadershipBadge", value)}
                       />
-
                       <Field
                         label="Leadership Title"
                         value={modalForm.leadershipTitle}
-                        onChange={(value) =>
-                          updateModalField("leadershipTitle", value)
-                        }
+                        onChange={(value) => updateModalField("leadershipTitle", value)}
                       />
-
                       <Field
                         label="Leadership Description"
                         value={modalForm.leadershipDescription}
-                        onChange={(value) =>
-                          updateModalField("leadershipDescription", value)
-                        }
+                        onChange={(value) => updateModalField("leadershipDescription", value)}
                         textarea
                       />
                     </>
                   )}
 
+                  {/* Leadership Message */}
                   {editingTarget.type === "leadershipMessage" && (
                     <>
                       <Field
@@ -1765,31 +1827,26 @@ export default function AdminAbout() {
                         onChange={(value) => updateModalField("name", value)}
                         placeholder="Example: Principal name"
                       />
-
                       <Field
                         label="Post / Designation"
                         value={modalForm.role}
                         onChange={(value) => updateModalField("role", value)}
                         placeholder="Example: Principal"
                       />
-
                       <div className="rounded-2xl bg-sky-50 px-4 py-3 text-xs font-semibold leading-relaxed text-sky-700 border border-sky-100">
                         Name and post will appear on the lower-right side of the message card and on the full message page.
                       </div>
-
                       <Field
                         label="Message Title"
                         value={modalForm.title}
                         onChange={(value) => updateModalField("title", value)}
                       />
-
                       <Field
                         label="Message"
                         value={modalForm.message}
                         onChange={(value) => updateModalField("message", value)}
                         textarea
                       />
-
                       <Toggle
                         label="Show this message on website"
                         checked={modalForm.visible !== false}
@@ -1798,6 +1855,16 @@ export default function AdminAbout() {
                     </>
                   )}
 
+                  {/* Mission/Vision Badge */}
+                  {editingTarget.type === "missionVisionBadge" && (
+                    <Field
+                      label="Mission/Vision Badge"
+                      value={modalForm.missionVisionBadge}
+                      onChange={(value) => updateModalField("missionVisionBadge", value)}
+                    />
+                  )}
+
+                  {/* Mission/Vision Card */}
                   {editingTarget.type === "missionVision" && (
                     <>
                       <Field
@@ -1805,21 +1872,18 @@ export default function AdminAbout() {
                         value={modalForm.title}
                         onChange={(value) => updateModalField("title", value)}
                       />
-
                       <Field
                         label="Description"
                         value={modalForm.desc}
                         onChange={(value) => updateModalField("desc", value)}
                         textarea
                       />
-
                       <Field
                         label="Accent Color"
                         value={modalForm.color}
                         onChange={(value) => updateModalField("color", value)}
                         type="color"
                       />
-
                       <Toggle
                         label="Show this card on website"
                         checked={modalForm.visible !== false}
@@ -1828,26 +1892,23 @@ export default function AdminAbout() {
                     </>
                   )}
 
-                  {editingTarget.type === "journeyHeader" && (
+                  {/* Journey Badge */}
+                  {editingTarget.type === "journeyBadge" && (
                     <>
                       <Field
-                        label="Timeline Badge"
-                        value={modalForm.timelineBadge}
-                        onChange={(value) =>
-                          updateModalField("timelineBadge", value)
-                        }
+                        label="Journey Badge"
+                        value={modalForm.journeyBadge}
+                        onChange={(value) => updateModalField("journeyBadge", value)}
                       />
-
                       <Field
                         label="Journey Title"
                         value={modalForm.journeyTitle}
-                        onChange={(value) =>
-                          updateModalField("journeyTitle", value)
-                        }
+                        onChange={(value) => updateModalField("journeyTitle", value)}
                       />
                     </>
                   )}
 
+                  {/* Journey Item */}
                   {editingTarget.type === "journeyItem" && (
                     <>
                       <Field
@@ -1855,24 +1916,49 @@ export default function AdminAbout() {
                         value={modalForm.year}
                         onChange={(value) => updateModalField("year", value)}
                       />
-
                       <Field
                         label="Title"
                         value={modalForm.title}
                         onChange={(value) => updateModalField("title", value)}
                       />
-
                       <Field
                         label="Description"
                         value={modalForm.desc}
                         onChange={(value) => updateModalField("desc", value)}
                         textarea
                       />
-
                       <Toggle
                         label="Show this timeline item on website"
                         checked={modalForm.visible !== false}
                         onChange={(value) => updateModalField("visible", value)}
+                      />
+                    </>
+                  )}
+
+                  {/* CTA Band */}
+                  {editingTarget.type === "ctaBand" && (
+                    <>
+                      <Field
+                        label="CTA Title"
+                        value={modalForm.ctaTitle}
+                        onChange={(value) => updateModalField("ctaTitle", value)}
+                      />
+                      <Field
+                        label="CTA Description"
+                        value={modalForm.ctaDescription}
+                        onChange={(value) => updateModalField("ctaDescription", value)}
+                        textarea
+                      />
+                      <Field
+                        label="Button Text"
+                        value={modalForm.ctaButtonText}
+                        onChange={(value) => updateModalField("ctaButtonText", value)}
+                      />
+                      <Field
+                        label="Button Link"
+                        value={modalForm.ctaButtonLink}
+                        onChange={(value) => updateModalField("ctaButtonLink", value)}
+                        placeholder="/contact"
                       />
                     </>
                   )}
@@ -2019,5 +2105,3 @@ export default function AdminAbout() {
     </div>
   );
 }
-
-

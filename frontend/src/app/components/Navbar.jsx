@@ -73,7 +73,7 @@ function HoverEditIcon({ icon: Icon = Pencil, label = "Edit" }) {
 export function Navbar({
   editMode = false,
   contentOverride = null,
-  onEditTarget = () => {},
+  onEditTarget = () => { },
 }) {
   const [navbarContent, setNavbarContent] = useState(
     mergeNavbarContent(contentOverride || defaultNavbarContent)
@@ -178,16 +178,18 @@ export function Navbar({
               title={editMode ? "Change logo image" : ""}
             >
               <div
-                className="rounded-xl bg-[#0A1628] text-amber-400 font-extrabold text-base flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shadow-md"
+                className="rounded-xl overflow-hidden bg-white"
                 style={{
                   width: "42px",
                   height: "42px",
                   border: `1.5px solid ${palette.gold}`,
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
-                  fontFamily: "var(--font-display)",
                 }}
               >
-                SB
+                <img
+                  src={logoSrc}
+                  alt="School Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
 
               {editMode && <HoverEditIcon icon={Camera} label="Change Logo" />}
@@ -265,9 +267,8 @@ export function Navbar({
                 >
                   {link.label}
                   <span
-                    className={`absolute left-3.5 right-3.5 -bottom-0.5 h-[2px] origin-left transition-transform duration-300 ${
-                      active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                    }`}
+                    className={`absolute left-3.5 right-3.5 -bottom-0.5 h-[2px] origin-left transition-transform duration-300 ${active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                      }`}
                     style={{ background: palette.gold }}
                   />
                   {editMode && <HoverEditIcon icon={Pencil} label="Edit Link" />}

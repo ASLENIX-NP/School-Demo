@@ -111,25 +111,25 @@ export default function AdminNavbar() {
   const [error, setError] = useState("");
 
   function getAdminToken() {
-  return (
-    localStorage.getItem("adminToken") ||
-    localStorage.getItem("token") ||
-    localStorage.getItem("admin_token") ||
-    ""
-  );
-}
-
-function getAuthHeaders() {
-  const token = getAdminToken();
-
-  if (!token) {
-    return null;
+    return (
+      localStorage.getItem("adminToken") ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("admin_token") ||
+      ""
+    );
   }
 
-  return {
-    Authorization: `Bearer ${token}`,
-  };
-}
+  function getAuthHeaders() {
+    const token = getAdminToken();
+
+    if (!token) {
+      return null;
+    }
+
+    return {
+      Authorization: `Bearer ${token}`,
+    };
+  }
 
   useEffect(() => {
     let alive = true;
@@ -253,17 +253,17 @@ function getAuthHeaders() {
 
       const authHeaders = getAuthHeaders();
 
-if (!authHeaders) {
-  setError("Admin login expired. Please logout and login again.");
-  return;
-}
+      if (!authHeaders) {
+        setError("Admin login expired. Please logout and login again.");
+        return;
+      }
 
-const res = await api.post("/api/upload", formData, {
-  headers: {
-    ...authHeaders,
-    "Content-Type": "multipart/form-data",
-  },
-});
+      const res = await api.post("/api/upload", formData, {
+        headers: {
+          ...authHeaders,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       const uploadedUrl = getUploadUrl(res.data);
 
@@ -328,11 +328,11 @@ const res = await api.post("/api/upload", formData, {
           links: nextForm.links.map((link) =>
             link.id === editingTarget.id
               ? {
-                  ...link,
-                  label: modalForm.label || "",
-                  href: modalForm.href || "/",
-                  visible: modalForm.visible !== false,
-                }
+                ...link,
+                label: modalForm.label || "",
+                href: modalForm.href || "/",
+                visible: modalForm.visible !== false,
+              }
               : link
           ),
         };
@@ -342,21 +342,22 @@ const res = await api.post("/api/upload", formData, {
 
       const authHeaders = getAuthHeaders();
 
-if (!authHeaders) {
-  setError("Admin login expired. Please logout and login again.");
-  setSaving(false);
-  return;
-}
-
-await api.put(
-  "/api/site-content/navbar",
-  {
-    content: cleanContent,
-  },
-  {
-    headers: authHeaders,
-  }
-);
+      if (!authHeaders) {
+        setError("Admin login expired. Please logout and login again.");
+        setSaving(false);
+        return;
+      }
+      console.log("cleanContent.logoUrl:", cleanContent.logoUrl);
+      console.log("cleanContent:", cleanContent);
+      await api.put(
+        "/api/site-content/navbar",
+        {
+          content: cleanContent,
+        },
+        {
+          headers: authHeaders,
+        }
+      );
 
       setForm(cleanContent);
       setEditingTarget(null);
@@ -365,10 +366,10 @@ await api.put(
     } catch (err) {
       console.error("Save selected navbar item error:", err);
       if (err.response?.status === 401) {
-  setError("Admin login expired or token is invalid. Please logout and login again.");
-} else {
-  setError(err.response?.data?.message || "Could not save selected item.");
-}
+        setError("Admin login expired or token is invalid. Please logout and login again.");
+      } else {
+        setError(err.response?.data?.message || "Could not save selected item.");
+      }
     } finally {
       setSaving(false);
     }
@@ -729,18 +730,18 @@ await api.put(
         )}
 
         <div
-  className="admin-navbar-preview-frame rounded-[2rem] p-3 sm:p-4 md:p-6 overflow-hidden"
-  style={{
-    background:
-      "radial-gradient(circle at top left, rgba(56,189,248,0.14), transparent 34%), linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)",
-    border: "1px solid rgba(15,23,42,0.08)",
-    minHeight: "170px",
-  }}
->
-  <div className="w-full min-w-0">
-    <Navbar editMode contentOverride={form} onEditTarget={openEditor} />
-  </div>
-</div>
+          className="admin-navbar-preview-frame rounded-[2rem] p-3 sm:p-4 md:p-6 overflow-hidden"
+          style={{
+            background:
+              "radial-gradient(circle at top left, rgba(56,189,248,0.14), transparent 34%), linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)",
+            border: "1px solid rgba(15,23,42,0.08)",
+            minHeight: "170px",
+          }}
+        >
+          <div className="w-full min-w-0">
+            <Navbar editMode contentOverride={form} onEditTarget={openEditor} />
+          </div>
+        </div>
       </motion.div>
 
       <div className="grid md:grid-cols-3 gap-4">
