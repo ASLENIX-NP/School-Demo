@@ -7,18 +7,17 @@
       "establishedYear": "ESTABLISHED 2046 BS",
       "subtitle": "Basudev Marga, Hetauda-2",
       "description": "Smriti School blends academic discipline, digital learning, creativity, sports, and values for students from Play Group to Grade 10.",
-      "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80",
+      "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099978884_images_1UYiY_juR.jpeg",
       "images": [
-        "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80",
-        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786080914167_Screenshot_2026-08-07_at_10.28.19___AM_mNSunPcm0.png"
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099978884_images_1UYiY_juR.jpeg",
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099995606_images_RtIsg5c3F.jpeg",
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099997161_images__1__To7ygfTRi.jpeg"
       ],
       "imageAdjustments": {},
       "primaryButtonText": "Start Admission",
       "primaryButtonLink": "/admissions",
       "secondaryButtonText": "Explore Facilities",
-      "secondaryButtonLink": "/facilities",
-      "titleLine2": "",
-      "titleLine3": ""
+      "secondaryButtonLink": "/facilities"
     },
     "statsSection": {
       "eyebrow": "Our Impact",
@@ -30,36 +29,28 @@
           "suffix": "+",
           "label": "Students Enrolled",
           "note": "Across school programs",
-          "color": "#1E3A5F",
-          "id": 1,
-          "visible": true
+          "color": "#1E3A5F"
         },
         {
           "value": "240",
           "suffix": "+",
           "label": "Expert Teachers",
           "note": "Academic support team",
-          "color": "#2D6A4F",
-          "id": 2,
-          "visible": true
+          "color": "#2D6A4F"
         },
         {
           "value": "35",
           "suffix": " yrs",
           "label": "Years of Excellence",
           "note": "Serving Makwanpur",
-          "color": "#E9C46A",
-          "id": 3,
-          "visible": true
+          "color": "#E9C46A"
         },
         {
           "value": "98",
           "suffix": "%",
           "label": "Success Rate",
           "note": "Academic performance",
-          "color": "#F4A261",
-          "id": 4,
-          "visible": true
+          "color": "#F4A261"
         }
       ],
       "story": {
@@ -71,13 +62,11 @@
           "Established with a vision to provide quality education in Makawanpur, Smriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
           "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
         ],
-        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786086331644_Screenshot_2026-08-07_at_10.28.19___AM_BDV3d55qV.png",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786100017954_images_vwqcFhKbY.jpeg",
         "buttonText": "Read Our Story",
-        "imageBottomTitle": "Quality Education Since 2046 BS",
-        "imageBottomDescription": "A legacy of academic excellence.",
         "imageZoom": 1,
-        "imageOffsetX": -5.564259496228448,
-        "imageOffsetY": 3.0246043159423253
+        "imageOffsetX": 0,
+        "imageOffsetY": 0
       },
       "excellence": {
         "title": "Academic Focus",
@@ -104,7 +93,7 @@
     }
   },
   "navbar": {
-    "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786083534935_Screenshot_2026-07-10_234100_5YakIo7k0.png",
+    "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099529841_unnamed__p9IBiYmi.png",
     "schoolName": "Smriti",
     "schoolSubtitle": "Secondary English School",
     "admissionButtonText": "Admission Open",

@@ -181,26 +181,30 @@ export default function Stats({ editMode = false, contentOverride = null, onEdit
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [error, setError] = useState(null);
 
-  // Use contentOverride if provided, otherwise use default data
-  const data = contentOverride || defaultStatsData;
+  // FIXED: Use local state to store API data instead of a static variable
+  const [data, setData] = useState(defaultStatsData);
 
   useEffect(() => {
     let alive = true;
     
-    // If contentOverride is provided, we don't need to load from API
+    // If contentOverride is provided, use it directly
     if (contentOverride) {
+      setData(contentOverride);
       setLoading(false);
     } else {
-      // Only load from API if no contentOverride (view mode)
+      // Load from API if no contentOverride (view mode)
       const loadStatsContent = async () => {
         try {
           const res = await api.get("/api/site-content/home");
           if (!alive) return;
-          // The data would be set here if we were using local state
-          // But we're using contentOverride from parent or default
+          
+          // FIXED: Actually use the fetched data and update the state
+          if (res.data && res.data.data && res.data.data.content && res.data.data.content.statsSection) {
+            setData(res.data.data.content.statsSection);
+          }
         } catch (err) {
           console.error("Load stats content error:", err);
-          // Don't set error here, use default data instead
+          // Keep default data on error
         } finally {
           if (alive) setLoading(false);
         }
