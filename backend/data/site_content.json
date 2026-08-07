@@ -1,1 +1,335 @@
-{}
+{
+  "home": {
+    "hero": {
+      "badge": "Wisdom is Divine",
+      "schoolName": "SMRITI SCHOOL",
+      "titleLine1": "Smriti School",
+      "establishedYear": "ESTABLISHED 2046 BS",
+      "subtitle": "Basudev Marga, Hetauda-2",
+      "description": "Smriti School blends academic discipline, digital learning, creativity, sports, and values for students from Play Group to Grade 10.",
+      "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80",
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786080914167_Screenshot_2026-08-07_at_10.28.19___AM_mNSunPcm0.png"
+      ],
+      "imageAdjustments": {},
+      "primaryButtonText": "Start Admission",
+      "primaryButtonLink": "/admissions",
+      "secondaryButtonText": "Explore Facilities",
+      "secondaryButtonLink": "/facilities",
+      "titleLine2": "",
+      "titleLine3": ""
+    },
+    "statsSection": {
+      "eyebrow": "Our Impact",
+      "title": "Creating Futures, One Student at a Time",
+      "description": "Real numbers that reflect our commitment to excellence and holistic education in the Makwanpur region.",
+      "stats": [
+        {
+          "value": "3800",
+          "suffix": "+",
+          "label": "Students Enrolled",
+          "note": "Across school programs",
+          "color": "#1E3A5F",
+          "id": 1,
+          "visible": true
+        },
+        {
+          "value": "240",
+          "suffix": "+",
+          "label": "Expert Teachers",
+          "note": "Academic support team",
+          "color": "#2D6A4F",
+          "id": 2,
+          "visible": true
+        },
+        {
+          "value": "35",
+          "suffix": " yrs",
+          "label": "Years of Excellence",
+          "note": "Serving Makwanpur",
+          "color": "#E9C46A",
+          "id": 3,
+          "visible": true
+        },
+        {
+          "value": "98",
+          "suffix": "%",
+          "label": "Success Rate",
+          "note": "Academic performance",
+          "color": "#F4A261",
+          "id": 4,
+          "visible": true
+        }
+      ],
+      "story": {
+        "badge": "Our Story",
+        "title": "Building Tomorrow's Leaders Today",
+        "imageTopTitle": "Our Campus",
+        "imageTopSubtitle": "Hetauda-2",
+        "paragraphs": [
+          "Established with a vision to provide quality education in Makawanpur, Smriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
+          "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
+        ],
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786086331644_Screenshot_2026-08-07_at_10.28.19___AM_BDV3d55qV.png",
+        "buttonText": "Read Our Story",
+        "imageBottomTitle": "Quality Education Since 2046 BS",
+        "imageBottomDescription": "A legacy of academic excellence.",
+        "imageZoom": 1,
+        "imageOffsetX": -5.564259496228448,
+        "imageOffsetY": 3.0246043159423253
+      },
+      "excellence": {
+        "title": "Academic Focus",
+        "description": "Our students consistently achieve outstanding results in the SEE examinations.",
+        "cards": [
+          {
+            "title": "Best SEE Results",
+            "description": "Achieving top results in the Secondary Education Examination."
+          },
+          {
+            "title": "GPA 4.00 Achievers",
+            "description": "Our brightest students attain a perfect GPA of 4.00."
+          },
+          {
+            "title": "Holistic Development",
+            "description": "Fostering creativity, leadership, and sportsmanship."
+          }
+        ]
+      },
+      "notices": {
+        "title": "Latest Notices",
+        "description": "Stay informed with the latest announcements."
+      }
+    }
+  },
+  "navbar": {
+    "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786081424298_Screenshot_2026-08-06_at_1.12.34___PM_hyxuGaxzU.png",
+    "schoolName": "Smriti",
+    "schoolSubtitle": "Secondary English School",
+    "admissionButtonText": "Admission Open",
+    "admissionButtonLink": "/admissions",
+    "showAdmissionButton": true,
+    "links": [
+      {
+        "id": "home",
+        "label": "Home",
+        "href": "/",
+        "visible": true
+      },
+      {
+        "id": "about",
+        "label": "About",
+        "href": "/about",
+        "visible": true
+      },
+      {
+        "id": "academics",
+        "label": "Academics",
+        "href": "/academics",
+        "visible": true
+      },
+      {
+        "id": "notices",
+        "label": "Notices",
+        "href": "/notices",
+        "visible": true
+      },
+      {
+        "id": "calendar",
+        "label": "Calendar",
+        "href": "/calendar",
+        "visible": true
+      },
+      {
+        "id": "blogs",
+        "label": "Blog",
+        "href": "/blogs",
+        "visible": true
+      },
+      {
+        "id": "facilities",
+        "label": "Facilities",
+        "href": "/facilities",
+        "visible": true
+      },
+      {
+        "id": "staff",
+        "label": "Staff",
+        "href": "/staff",
+        "visible": true
+      },
+      {
+        "id": "gallery",
+        "label": "Gallery",
+        "href": "/gallery",
+        "visible": true
+      },
+      {
+        "id": "contact",
+        "label": "Contact",
+        "href": "/contact",
+        "visible": true
+      }
+    ]
+  },
+  "about": {
+    "pageBadge": "About Our School",
+    "pageTitle": "Building a Brighter Future, All Student at a Time ",
+    "pageSubtitle": "Rooted in tradition, driven by innovation. We are a community dedicated to nurturing confident, compassionate, and capable learners ready for tomorrow's world.",
+    "stats": [
+      {
+        "id": 1,
+        "icon": "users",
+        "value": 2500,
+        "suffix": "+",
+        "label": "Students Enrolled"
+      },
+      {
+        "id": 2,
+        "icon": "trophy",
+        "value": 98.5,
+        "suffix": "%",
+        "decimals": 1,
+        "label": "Board Success Rate"
+      },
+      {
+        "id": 3,
+        "icon": "graduation",
+        "value": 15,
+        "suffix": " yrs",
+        "label": "Excellence in Education"
+      },
+      {
+        "id": 4,
+        "icon": "heart",
+        "value": 180,
+        "suffix": "+",
+        "label": "Dedicated Faculty"
+      }
+    ],
+    "storyBadge": "Our Story",
+    "storyTitle": "Where Passion Meets Purpose with Our Excellent Guidance",
+    "storyParagraphs": [
+      "Founded with a vision to redefine local education, our school has quickly become a cornerstone of academic excellence in our community. We believe that education is not just about textbooks, but about building character, resilience, and a lifelong love for learning.",
+      "Our approach is simple yet profound: provide world-class facilities, encourage creative thinking, and foster an environment where every student feels seen, heard, and empowered to reach their full potential. We prepare students not just for exams, but for life."
+    ],
+    "storyImageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786083628004_Screenshot_2026-07-08_110852_uzp9xjRar.png",
+    "storyImageZoom": 1,
+    "storyImageOffsetX": 0,
+    "storyImageOffsetY": 0,
+    "storyImageTopTitle": "Our Main Campus",
+    "storyImageTopSubtitle": "A Hub of Innovation & Learning",
+    "storyBadgeYear": "Est. 2010 AD",
+    "pillarBadge": "Our Core Values",
+    "pillarTitle": "The Principles That Guide Our Community",
+    "pillarDescription": "More than just words on a wall, these values shape our culture, our teaching, and our relationships every single day.",
+    "pillars": [
+      {
+        "id": 1,
+        "icon": "trophy",
+        "label": "Academic Excellence",
+        "desc": "We challenge our students to strive for greatness through a rigorous, engaging, and supportive curriculum.",
+        "visible": true
+      },
+      {
+        "id": 2,
+        "icon": "heart",
+        "label": "Character & Integrity",
+        "desc": "We believe that true education is built on a foundation of honesty, respect, and empathy for others........................................................",
+        "visible": true,
+        "color": "#168A3A"
+      },
+      {
+        "id": 3,
+        "icon": "globe",
+        "label": "Global Readiness",
+        "desc": "Equipping students with the critical thinking skills and cultural awareness needed to thrive in an interconnected world.",
+        "visible": true
+      }
+    ],
+    "leadershipBadge": "Our Leadership",
+    "leadershipTitle": "Words From Our Staff",
+    "leadershipDescription": "Hear directly from the dedicated educators and leaders who make our school a home for learning.",
+    "messages": [
+      {
+        "id": 1,
+        "name": "Mr. Ram Sharma",
+        "role": "Principal",
+        "title": "Creating Opportunities for Every Child",
+        "message": "Our mission is to provide a safe, nurturing, and academically rigorous environment where every child discovers their unique potential. We are committed to not just teaching lessons, but inspiring a generation of thinkers, leaders, and dreamers.",
+        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&auto=format",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true
+      },
+      {
+        "id": 2,
+        "name": "Mrs. Sita Poudel",
+        "role": "Vice Principal",
+        "title": "A Commitment to Excellence",
+        "message": "Behind every great school is a dedicated team. Our educators are our greatest asset, working tirelessly to ensure that no child is left behind. Through innovation, compassion, and unwavering dedication, we are making a real difference in the community.",
+        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&auto=format",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true
+      }
+    ],
+    "missionVisionBadge": "Our Focus",
+    "missionVision": [
+      {
+        "id": 1,
+        "icon": "target",
+        "title": "Our Mission",
+        "desc": "To cultivate a love for learning in every student by providing a challenging, inclusive, and innovative educational environment that promotes academic achievement and personal growth.",
+        "visible": true
+      },
+      {
+        "id": 2,
+        "icon": "compass",
+        "title": "Our Vision",
+        "desc": "To be recognized as a beacon of educational excellence, producing well-rounded, compassionate, and future-ready graduates who lead with confidence and integrity.",
+        "visible": true
+      }
+    ],
+    "journeyBadge": "Our Journey",
+    "journeyTitle": "A Timeline of Growth",
+    "journey": [
+      {
+        "id": 1,
+        "year": "2010 AD",
+        "title": "School Founded",
+        "desc": "Our school opens with a vision to deliver modern, high-quality education to the local community.",
+        "visible": true
+      },
+      {
+        "id": 2,
+        "year": "2015 AD",
+        "title": "Expanded To Secondary",
+        "desc": "Rising demand pushed the school to extend its academic structure, offering education up to Grade 10.",
+        "visible": true
+      },
+      {
+        "id": 3,
+        "year": "2018 AD",
+        "title": "Academic Achievements",
+        "desc": "Focused classroom teaching and dedicated staff began producing some of the region's strongest exam results.",
+        "visible": true
+      },
+      {
+        "id": 4,
+        "year": "Today",
+        "title": "A Growing Community",
+        "desc": "A vibrant community of over 2,500 students, 180+ educators, and a shared focus on holistic excellence.",
+        "visible": true
+      }
+    ],
+    "ctaTitle": "Ready to Join Our Community?",
+    "ctaDescription": "Experience our campus, meet our dedicated faculty, and see firsthand how we nurture the leaders of tomorrow.",
+    "ctaButtonText": "Schedule a Visit",
+    "ctaButtonLink": "/contact",
+    "storyImageAlt": ""
+  }
+}

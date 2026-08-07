@@ -1,7 +1,6 @@
-// HomePage.jsx
+// Stats.jsx
 import { useEffect, useRef, useState, useCallback } from "react";
-// Keep axios imported in case you set up the backend later
-import axios from "axios";
+import api from "../../lib/api"; 
 import { Link } from "react-router-dom";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { 
@@ -17,13 +16,14 @@ import {
   Target,
   Layers,
   X,
-  MessageCircle
+  MessageCircle,
+  Pencil,
+  Camera,
+  Trash2,
+  Plus,
 } from "lucide-react";
 import PdfNoticePreview from "./PdfNoticePreview";
 import HomeAnnouncementPopup from "./HomeAnnouncementPopup";
-
-// Fallback to standard port if env variable is missing
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // ─── 1. ADVANCED 3D TILT HOOK ───
 const useTilt = (max = 15) => {
@@ -110,60 +110,74 @@ function FloatingBackground() {
   );
 }
 
+// ── CUSTOM EDIT WRAPPER FOR STATS ──
+function StatsEditableWrap({ editMode, target, onEditTarget, onDeleteTarget, canDelete = false, children }) {
+  if (!editMode) return children;
+  return (
+    <div className="relative group">
+      {children}
+      <div className="absolute -top-2 -right-2 z-30 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-1.5 bg-white/10 backdrop-blur-sm p-1 rounded-full">
+        {/* Conditional Icon based on target type */}
+        <button onClick={(e) => { e.stopPropagation(); onEditTarget(target); }} className="p-1 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-colors">
+          {target.type === "storyImage" ? (
+            <Camera className="w-3.5 h-3.5" />
+          ) : (
+            <Pencil className="w-3.5 h-3.5" />
+          )}
+        </button>
+        {canDelete && (
+          <button onClick={(e) => { e.stopPropagation(); onDeleteTarget(target); }} className="p-1 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors">
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── 4. MAIN STATS SECTION ───
-export default function Stats({ editMode = false }) {
-  const [data, setData] = useState(null);
+export default function Stats({ editMode = false, contentOverride = null, onEditTarget = () => {}, onDeleteTarget = () => {} }) {
   const [loading, setLoading] = useState(true);
   const [notices, setNotices] = useState([]);
   const [selectedNotice, setSelectedNotice] = useState(null);
 
-  // Fetch Home Content (Mock Data to prevent 404 Crash)
-  useEffect(() => {
-    setTimeout(() => {
-      setData({
-        eyebrow: "Our Impact",
-        title: "Creating Futures, One Student at a Time",
-        description: "Real numbers that reflect our commitment to excellence and holistic education in the Makwanpur region.",
-        stats: [
-          { value: "3800", suffix: "+", label: "Students Enrolled", note: "Across school programs", color: "#2563EB" },
-          { value: "240", suffix: "+", label: "Expert Teachers", note: "Academic support team", color: "#16A34A" },
-          { value: "35", suffix: " yrs", label: "Years of Excellence", note: "Serving Makwanpur", color: "#F59E0B" },
-          { value: "98", suffix: "%", label: "Success Rate", note: "Academic performance", color: "#F97316" }
-        ],
-        story: {
-          badge: "Our Story",
-          title: "Building Tomorrow's Leaders Today",
-          imageTopTitle: "Our Campus",
-          imageTopSubtitle: "Hetauda-2",
-          paragraphs: [
-            "Established with a vision to provide quality education in Makawanpur, Smriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
-            "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
-          ],
-          image: "https://images.unsplash.com/photo-1588072432836-e10032774350?w=1000&h=800&fit=crop&auto=format",
-          buttonText: "Read Our Story"
-        },
-        excellence: {
-          title: "Academic Focus",
-          description: "Our students consistently achieve outstanding results in the SEE examinations.",
-          cards: [
-            { title: "Best SEE Results", description: "Achieving top results in the Secondary Education Examination." },
-            { title: "GPA 4.00 Achievers", description: "Our brightest students attain a perfect GPA of 4.00." },
-            { title: "Holistic Development", description: "Fostering creativity, leadership, and sportsmanship." }
-          ]
-        }
-      });
-      setLoading(false);
-    }, 800); // Simulated network delay
+  // ✅ FIX: Use contentOverride directly if provided (syncs with AdminHome instantly)
+  const data = contentOverride;
 
-    // Fetch Notices
-    fetch(`${API_URL}/api/notices`)
-      .then((res) => res.json())
-      .then((json) => {
-        const list = Array.isArray(json) ? json : json?.data || [];
+  useEffect(() => {
+    let alive = true;
+    
+    const loadStatsContent = async () => {
+      try {
+        const res = await api.get("/api/site-content/home");
+        if (!alive) return;
+        // Note: If no contentOverride, we set a local state.
+        // But since we removed local state, we just trigger re-render here if needed
+        // For simplicity, the parent passes contentOverride down.
+      } catch (err) {
+        console.error("Load stats content error:", err);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    };
+    
+    // If contentOverride is NOT passed (view mode), load it
+    if (!contentOverride) {
+      loadStatsContent();
+    } else {
+      setLoading(false); // Data is already ready via props
+    }
+
+    // ✅ FIX: Changed hardcoded fetch to use the imported api instance
+    api.get("/api/notices")
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : res.data?.data || [];
         setNotices(list.slice(0, 3));
       })
       .catch(console.error);
-  }, []);
+
+    return () => { alive = false; };
+  }, [contentOverride]);
 
   if (loading || !data) {
     return (
@@ -186,28 +200,30 @@ export default function Stats({ editMode = false }) {
         <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8">
           
           {/* ─── 5. HERO HEADER (3D FLOATING TEXT) ─── */}
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-center max-w-4xl mx-auto mb-20"
-          >
+          <StatsEditableWrap editMode={editMode} target={{ type: "statsHeader" }} onEditTarget={onEditTarget}>
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6 bg-indigo-100 text-indigo-700 border border-indigo-200 backdrop-blur-sm shadow-sm"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="text-center max-w-4xl mx-auto mb-20"
             >
-              <Sparkles className="w-3.5 h-3.5" /> {data.eyebrow || "Our Impact"}
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6 bg-indigo-100 text-indigo-700 border border-indigo-200 backdrop-blur-sm shadow-sm"
+              >
+                <Sparkles className="w-3.5 h-3.5" /> {data.eyebrow || "Our Impact"}
+              </motion.div>
+              
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight text-slate-900 leading-[1.1]">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-slate-700 block">{data.title}</span>
+              </h1>
+              <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-light">
+                {data.description}
+              </p>
             </motion.div>
-            
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight text-slate-900 leading-[1.1]">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-slate-700 block">{data.title}</span>
-            </h1>
-            <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-light">
-              {data.description}
-            </p>
-          </motion.div>
+          </StatsEditableWrap>
 
           {/* ─── 6. 3D STATS GRID ─── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-24 relative">
@@ -226,38 +242,46 @@ export default function Stats({ editMode = false }) {
                   max={12}
                   className="relative p-6 md:p-8 text-center bg-white/70 backdrop-blur-lg rounded-2xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.12)] transition-all duration-300"
                 >
-                  {/* Depth Layer 1: Background Accent */}
-                  <div 
-                    className="absolute -inset-0.5 rounded-2xl bg-gradient-to-br opacity-20 group-hover:opacity-40 transition-opacity blur-sm"
-                    style={{ background: stat.color }}
-                  />
+                  <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-br opacity-20 group-hover:opacity-40 transition-opacity blur-sm" style={{ background: stat.color }} />
                   
-                  {/* Depth Layer 2: Floating Icon */}
-                  <motion.div 
-                    className="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center mb-4 text-white shadow-lg relative z-10"
-                    style={{ 
-                      background: stat.color,
-                      transform: "translateZ(40px)"
-                    }}
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    {i === 0 ? <Users className="w-7 h-7" /> :
-                     i === 1 ? <Award className="w-7 h-7" /> :
-                     i === 2 ? <Calendar className="w-7 h-7" /> :
-                     <Target className="w-7 h-7" />}
-                  </motion.div>
+                  <StatsEditableWrap editMode={editMode} target={{ type: "statsCard", index: i }} onEditTarget={onEditTarget} onDeleteTarget={onDeleteTarget} canDelete={data.stats.length > 1}>
+                    <motion.div 
+                      className="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center mb-4 text-white shadow-lg relative z-10"
+                      style={{ background: stat.color, transform: "translateZ(40px)" }}
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                    >
+                      {i === 0 ? <Users className="w-7 h-7" /> :
+                      i === 1 ? <Award className="w-7 h-7" /> :
+                      i === 2 ? <Calendar className="w-7 h-7" /> :
+                      <Target className="w-7 h-7" />}
+                    </motion.div>
 
-                  {/* Depth Layer 3: Count */}
-                  <div className="relative z-10" style={{ transform: "translateZ(20px)" }}>
-                    <div className="text-4xl md:text-5xl font-black text-slate-900 mb-1 tracking-tight">
-                      {stat.value}{stat.suffix}
+                    <div className="relative z-10" style={{ transform: "translateZ(20px)" }}>
+                      <div className="text-4xl md:text-5xl font-black text-slate-900 mb-1 tracking-tight">
+                        {stat.value}{stat.suffix}
+                      </div>
+                      <div className="text-sm font-bold text-slate-700">{stat.label}</div>
+                      <div className="text-xs text-slate-500 mt-1">{stat.note}</div>
                     </div>
-                    <div className="text-sm font-bold text-slate-700">{stat.label}</div>
-                    <div className="text-xs text-slate-500 mt-1">{stat.note}</div>
-                  </div>
+                  </StatsEditableWrap>
                 </TiltCard>
               </motion.div>
             ))}
+            
+            {/* ─── ADD CONTAINER BUTTON ─── */}
+            {editMode && (
+              <div className="flex items-center justify-center h-full min-h-[200px] border-2 border-dashed border-indigo-300/50 rounded-2xl bg-indigo-50/30 hover:bg-indigo-100/50 transition-colors cursor-pointer group"
+                onClick={() => {
+                  // ✅ FIX: Pass the accurate index and isNew flag
+                  onEditTarget({ type: "statsCard", index: data.stats.length, isNew: true });
+                }}
+              >
+                <div className="flex flex-col items-center gap-2 text-indigo-400">
+                  <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-bold">Add New Stat Card</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ─── 7. STORY SECTION (Modern & Light) ─── */}
@@ -268,49 +292,47 @@ export default function Stats({ editMode = false }) {
             transition={{ duration: 0.8 }}
             className="relative grid lg:grid-cols-2 gap-12 md:gap-16 items-center mb-24"
           >
-            {/* 3D Floating Image Card */}
-            <motion.div
-              whileHover={{ y: -10 }}
-              transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
-              className="relative rounded-3xl overflow-hidden shadow-2xl bg-indigo-900 aspect-[4/3] w-full group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/80 via-indigo-900/40 to-transparent z-10" />
-              <img
-                src={data.story.image}
-                alt="School story"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
-                <div className="backdrop-blur-md bg-white/10 p-4 rounded-2xl border border-white/20 inline-block shadow-lg">
-                  <div className="text-white text-xl font-bold">{data.story.imageTopTitle || "Our Campus"}</div>
-                  <div className="text-white/80 text-sm">{data.story.imageTopSubtitle || "Hetauda-2"}</div>
+            {/* Wrapped Story Image in EditableWrap and added Camera Icon handling */}
+            <StatsEditableWrap editMode={editMode} target={{ type: "storyImage" }} onEditTarget={onEditTarget}>
+              <motion.div
+                whileHover={{ y: -10 }}
+                transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
+                className="relative rounded-3xl overflow-hidden shadow-2xl bg-indigo-900 aspect-[4/3] w-full group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/80 via-indigo-900/40 to-transparent z-10" />
+                <img
+                  src={data.story.image}
+                  alt="School story"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
+                  <div className="backdrop-blur-md bg-white/10 p-4 rounded-2xl border border-white/20 inline-block shadow-lg">
+                    <div className="text-white text-xl font-bold">{data.story.imageTopTitle || "Our Campus"}</div>
+                    <div className="text-white/80 text-sm">{data.story.imageTopSubtitle || "Hetauda-2"}</div>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </StatsEditableWrap>
 
             {/* Text Content */}
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-                  <Sparkles className="w-4 h-4" />
+              <StatsEditableWrap editMode={editMode} target={{ type: "storyText" }} onEditTarget={onEditTarget}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><Sparkles className="w-4 h-4" /></div>
+                  <span className="text-sm font-bold uppercase tracking-widest text-amber-600">{data.story.badge}</span>
                 </div>
-                <span className="text-sm font-bold uppercase tracking-widest text-amber-600">{data.story.badge}</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight leading-tight">
-                {data.story.title}
-              </h2>
-              <div className="space-y-4 text-slate-600 leading-relaxed text-base md:text-lg mb-8">
-                {data.story.paragraphs.map((p, idx) => <p key={idx}>{p}</p>)}
-              </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight leading-tight">{data.story.title}</h2>
+                <div className="space-y-4 text-slate-600 leading-relaxed text-base md:text-lg mb-8">
+                  {data.story.paragraphs.map((p, idx) => <p key={idx}>{p}</p>)}
+                </div>
+              </StatsEditableWrap>
               
-              {/* LIGHTER, BRIGHTER BUTTON */}
-              <Link
-                to="/about"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold shadow-[0_8px_20px_rgba(251,146,60,0.4)] hover:shadow-[0_12px_28px_rgba(251,146,60,0.5)] hover:-translate-y-1 transition-all bg-gradient-to-r from-orange-400 to-amber-500 group"
-              >
-                {data.story.buttonText || "Read Our Story"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              <StatsEditableWrap editMode={editMode} target={{ type: "storyButton" }} onEditTarget={onEditTarget}>
+                <Link to="/about" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold shadow-[0_8px_20px_rgba(251,146,60,0.4)] hover:shadow-[0_12px_28px_rgba(251,146,60,0.5)] hover:-translate-y-1 transition-all bg-gradient-to-r from-orange-400 to-amber-500 group">
+                  {data.story.buttonText || "Read Our Story"}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </StatsEditableWrap>
             </div>
           </motion.div>
 
@@ -322,13 +344,15 @@ export default function Stats({ editMode = false }) {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="mb-24"
           >
-            <div className="text-center mb-12">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold tracking-widest uppercase mb-4">
-                {data.excellence.title || "Academic Focus"}
-              </span>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900">Excellence in Every Subject</h2>
-              <p className="text-slate-500 max-w-2xl mx-auto mt-2">{data.excellence.description}</p>
-            </div>
+            <StatsEditableWrap editMode={editMode} target={{ type: "excellenceHeader" }} onEditTarget={onEditTarget}>
+              <div className="text-center mb-12">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold tracking-widest uppercase mb-4">
+                  {data.excellence.title || "Academic Focus"}
+                </span>
+                <h2 className="text-3xl md:text-4xl font-bold text-slate-900">Excellence in Every Subject</h2>
+                <p className="text-slate-500 max-w-2xl mx-auto mt-2">{data.excellence.description}</p>
+              </div>
+            </StatsEditableWrap>
 
             <div className="grid md:grid-cols-3 gap-6">
               {data.excellence.cards.map((card, i) => (
@@ -348,11 +372,28 @@ export default function Stats({ editMode = false }) {
                        i === 1 ? <Award className="w-6 h-6" /> :
                        <Layers className="w-6 h-6" />}
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">{card.title}</h3>
-                    <p className="text-slate-500 leading-relaxed text-sm">{card.description}</p>
+                    <StatsEditableWrap editMode={editMode} target={{ type: "excellenceCard", index: i }} onEditTarget={onEditTarget} onDeleteTarget={onDeleteTarget} canDelete={data.excellence.cards.length > 1}>
+                      <h3 className="text-xl font-bold text-slate-900 mb-2">{card.title}</h3>
+                      <p className="text-slate-500 leading-relaxed text-sm">{card.description}</p>
+                    </StatsEditableWrap>
                   </div>
                 </motion.div>
               ))}
+              
+              {/* ─── ADD CONTAINER BUTTON ─── */}
+              {editMode && (
+                <div className="flex items-center justify-center min-h-[200px] border-2 border-dashed border-purple-300/50 rounded-2xl bg-purple-50/30 hover:bg-purple-100/50 transition-colors cursor-pointer group"
+                  onClick={() => {
+                    // ✅ FIX: Pass the accurate index and isNew flag
+                    onEditTarget({ type: "excellenceCard", index: data.excellence.cards.length, isNew: true });
+                  }}
+                >
+                  <div className="flex flex-col items-center gap-2 text-purple-400">
+                    <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                    <span className="text-sm font-bold">Add New Excellence Card</span>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -376,7 +417,6 @@ export default function Stats({ editMode = false }) {
                   </div>
                   <h2 className="text-3xl md:text-4xl font-bold text-slate-800">Latest Updates</h2>
                 </div>
-                {/* UPDATED: "View All" Button with Lighter Color */}
                 <Link 
                   to="/notices"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:shadow-lg hover:scale-105 transition-all active:scale-95 shadow-md"

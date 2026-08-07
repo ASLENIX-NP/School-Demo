@@ -1,7 +1,7 @@
 // Hero.jsx
 import { useEffect, useState } from "react";
 import api from "../../lib/api";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -35,8 +35,6 @@ const palette = {
 
 // Hardcoded St. Mary's style school image
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80";
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 export const defaultHeroData = {
   badge: "Wisdom is Divine",
@@ -123,6 +121,9 @@ function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {
     mergeHeroData(contentOverride || defaultHeroData)
   );
 
+  // ── SLIDESHOW LOGIC ──
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   useEffect(() => {
     if (contentOverride) {
       setHeroData(mergeHeroData(contentOverride));
@@ -131,24 +132,10 @@ function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {
     let alive = true;
     const loadHeroContent = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/hero`);
+        const res = await api.get("/api/site-content/home");
         if (!alive) return;
-        const hero = res.data.data[0];
-
-        setHeroData({
-          ...defaultHeroData,
-        
-          titleLine1: hero.title,
-        
-          subtitle: hero.subtitle,
-          description: hero.description,
-        
-          primaryButtonText: hero.button_text,
-          primaryButtonLink: hero.button_link,
-          
-          image: hero.hero_image || DEFAULT_HERO_IMAGE,
-          images: [hero.hero_image || DEFAULT_HERO_IMAGE],
-        });
+        const hero = res.data.data.content.hero;
+        setHeroData(mergeHeroData(hero));
       } catch (error) {
         console.error("Hero content load error:", error);
         if (alive) {
@@ -160,7 +147,22 @@ function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {
     return () => { alive = false; };
   }, [contentOverride]);
 
-  const heroImage = heroData.images?.[0] || DEFAULT_HERO_IMAGE;
+  // Auto-rotate images every 3 seconds
+  useEffect(() => {
+    if (!heroData?.images || heroData.images.length < 2) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        (prevIndex + 1) % heroData.images.length
+      );
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [heroData?.images]);
+
+  // Fallback to single image if array is empty
+  const heroImages = heroData.images?.length > 0 ? heroData.images : [DEFAULT_HERO_IMAGE];
+  const currentImage = heroImages[currentImageIndex % heroImages.length] || DEFAULT_HERO_IMAGE;
 
   return (
     <section 
@@ -170,16 +172,23 @@ function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {
         background: palette.navy,
       }}
     >
-      {/* Background Image - Lighter and more visible */}
+      {/* Background Image Slideshow - Lighter and more visible */}
       <div className="absolute inset-0 z-0">
-        <img
-          src={heroImage}
-          alt="Smriti School Campus"
-          className="w-full h-full object-cover"
-          style={{
-            filter: "brightness(0.55) saturate(1.1) contrast(1)",
-          }}
-        />
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={currentImage}
+            src={currentImage}
+            alt="Smriti School Campus"
+            className="absolute inset-0 w-full h-full object-cover"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            style={{
+              filter: "brightness(0.55) saturate(1.1) contrast(1)",
+            }}
+          />
+        </AnimatePresence>
         
         {/* Lighter Gradient Overlay */}
         <div 
@@ -253,18 +262,18 @@ function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {
               </div>
               
               <h1
-  className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05]"
-  style={{
-    background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 40%, ${palette.gold} 100%)`,
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    fontFamily: "var(--font-display)",
-    letterSpacing: "-0.02em",
-    textShadow: "0 2px 20px rgba(0,0,0,0.2)",
-  }}
->
-  {heroData.titleLine1}
-</h1>
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05]"
+                style={{
+                  background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 40%, ${palette.gold} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  fontFamily: "var(--font-display)",
+                  letterSpacing: "-0.02em",
+                  textShadow: "0 2px 20px rgba(0,0,0,0.2)",
+                }}
+              >
+                {heroData.titleLine1}
+              </h1>
 
               {/* Established Year */}
               <div className="flex items-center gap-3 mt-3">
