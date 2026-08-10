@@ -43,7 +43,7 @@ const palette = {
 
 export const defaultFooterContent = {
   logoUrl: "",
-  schoolName: "Smriti",
+  schoolName: "Red Rose",
   schoolSubtitle: "Secondary English Boarding School",
   admissionBadgeText: "Admissions Open 2026",
   showAdmissionBadge: true,
@@ -60,21 +60,21 @@ export const defaultFooterContent = {
     {
       id: 1,
       type: "facebook",
-      href: "https://www.facebook.com/baljagritiesschool",
+      href: "https://www.facebook.com/Red Roseesschool",
       label: "Facebook",
       visible: true,
     },
     {
       id: 2,
       type: "website",
-      href: "https://baljagriti.edu.np/",
+      href: "https://Red Rose.edu.np/",
       label: "Website",
       visible: true,
     },
     {
       id: 3,
       type: "youtube",
-      href: "https://www.youtube.com/@BaljagritiEngSecondarySchool",
+      href: "https://www.youtube.com/@Red RoseEngSecondarySchool",
       label: "YouTube",
       visible: true,
     },
@@ -83,18 +83,18 @@ export const defaultFooterContent = {
   contact: {
     address: "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
     mapUrl:
-      "https://www.google.com/maps/search/?api=1&query=Baljagriti+English+Secondary+School+Hetauda",
+      "https://www.google.com/maps/search/?api=1&query=Red Rose+English+Secondary+School+Hetauda",
     phones: ["057-590144", "057-590145", "057-590146"],
     email: "infobjess2046@gmail.com",
   },
 
-  modalTitle: "Contact Smriti School",
+  modalTitle: "Contact Red Rose School",
   modalHint: "Click any number to copy it.",
   copiedText: "Copied",
   closeButtonText: "Close",
 
   copyrightText:
-    "© 2026 Smriti Secondary English Boarding School. All rights reserved.",
+    "© 2026 Red Rose Secondary English Boarding School. All rights reserved.",
 };
 
 export function mergeFooterContent(saved = {}) {

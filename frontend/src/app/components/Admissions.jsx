@@ -53,7 +53,7 @@ export const defaultSettings = {
   closedTitle: "Admissions Are Currently Closed",
   closedDescription: "Applications for this academic session have officially ended. The next admission cycle will be announced soon.",
   closedButtonText: "Contact Admissions Office",
-  whyUsBadge: "Why Smriti School",
+  whyUsBadge: "Why Red Rose School",
   whyUsTitle: "Building a Foundation for Excellence",
   whyUsDescription: "We offer a comprehensive educational journey designed to foster academic rigor, leadership, and moral values.",
   whyUs: [
@@ -114,7 +114,7 @@ export const defaultSettings = {
       id: "step-5",
       number: "05",
       title: "Final Enrollment",
-      desc: "Receive confirmation, complete fee payment, and welcome to Smriti School!"
+      desc: "Receive confirmation, complete fee payment, and welcome to Red Rose School!"
     }
   ],
   eligibilityBadge: "Requirements",
@@ -278,11 +278,11 @@ export const defaultSettings = {
   contactTitle: "Contact Admission Office",
   contactDescription: "Have questions? Reach out directly to our friendly admission counselors.",
   contactPhone: "+977 1-4567890 / +977 9851012345",
-  contactEmail: "admissions@smritischool.edu.np",
+  contactEmail: "admissions@redroseschool.edu.np",
   contactHours: "Sun - Fri: 8:00 AM - 4:00 PM",
   contactAddress: "Kathmandu, Nepal",
   ctaTitle: "Give Your Child the Gift of World-Class Education",
-  ctaDescription: "Take the first step towards a bright academic future with Smriti Secondary English Boarding School.",
+  ctaDescription: "Take the first step towards a bright academic future with Red Rose Secondary English Boarding School.",
   ctaButtonText: "Start Admission Inquiry Now",
   ctaClosedButtonText: "Contact Us for Future Cycles"
 };
@@ -596,7 +596,7 @@ export default function AdmissionsPage({ previewData = null }) {
         <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <span className="text-xs uppercase tracking-widest text-amber-600 font-extrabold bg-amber-100 px-3.5 py-1 rounded-full border border-amber-200">
-              {settings.whyUsBadge || "Why Smriti School"}
+              {settings.whyUsBadge || "Why Red Rose School"}
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
               {settings.whyUsTitle || "Building a Foundation for Excellence"}
@@ -927,13 +927,13 @@ export default function AdmissionsPage({ previewData = null }) {
       </section>
 
       {/* ================= 11. FINAL CALL TO ACTION BANNER ================= */}
-      <section className="py-20 px-4 sm:px-6 bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 text-white border-t border-blue-900">
+      <section className="py-20 px-4 sm:px-6 bg-gradient-to-br from-amber-50/80 via-white to-blue-50/80 text-slate-900 border-t border-slate-200">
         <div className="max-w-4xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950">
             {settings.ctaTitle || "Give Your Child the Gift of World-Class Education"}
           </h2>
-          <p className="text-slate-300 text-base max-w-2xl mx-auto">
-            {settings.ctaDescription || "Take the first step towards a bright academic future with Smriti Secondary English Boarding School."}
+          <p className="text-slate-600 text-base max-w-2xl mx-auto">
+            {settings.ctaDescription || "Take the first step towards a bright academic future with Red Rose Secondary English Boarding School."}
           </p>
 
           {isOpen ? (
@@ -946,7 +946,7 @@ export default function AdmissionsPage({ previewData = null }) {
           ) : (
             <button
               onClick={() => scrollToSection("contact-admissions")}
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-white/10 text-white font-extrabold text-base hover:bg-white/20 transition-all border border-white/20"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-blue-950 text-white font-extrabold text-base hover:bg-blue-900 transition-all shadow-md"
             >
               {settings.ctaClosedButtonText || "Contact Us for Future Cycles"} <Phone className="w-5 h-5 text-amber-400" />
             </button>

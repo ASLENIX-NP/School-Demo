@@ -42,7 +42,7 @@ const defaultMessagesContent = {
       role: "Principal",
       title: "Principal’s Message",
       message:
-        "Welcome to Smriti Secondary English Boarding School. We are committed to nurturing every child into a confident, capable, disciplined, and compassionate individual. Our goal is to provide quality education with strong values, creativity, and academic excellence.",
+        "Welcome to Red Rose Secondary English Boarding School. We are committed to nurturing every child into a confident, capable, disciplined, and compassionate individual. Our goal is to provide quality education with strong values, creativity, and academic excellence.",
       image: "",
     },
     {

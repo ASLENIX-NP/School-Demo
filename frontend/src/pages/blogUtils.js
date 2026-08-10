@@ -8,7 +8,7 @@ export const defaultBlogPosts = [
     excerpt:
       "Our annual school sports meet brought together students, teachers, and parents for an unforgettable day of track and field competitions, inter-house matches, and sportsmanship awards.",
     content:
-      "Smriti Secondary English School hosted its grand Annual Sports Day with unmatched enthusiasm and high-level athletic performance. Students across all grade levels competed in sprint races, relay competitions, long jump, chess, and football tournament finals. The Blue House claimed the overall championship trophy after an intense series of matches.",
+      "Red Rose Secondary English School hosted its grand Annual Sports Day with unmatched enthusiasm and high-level athletic performance. Students across all grade levels competed in sprint races, relay competitions, long jump, chess, and football tournament finals. The Blue House claimed the overall championship trophy after an intense series of matches.",
     imageUrl: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=1200",
     imageAlt: "Annual Sports Day",
     pinned: true,
@@ -25,7 +25,7 @@ export const defaultBlogPosts = [
     excerpt:
       "Our Grade 9 and 10 STEM innovation team secured the top prize at the National Inter-School Science Fair for their autonomous solar-powered water purification model.",
     content:
-      "We are thrilled to announce that our young innovators from Smriti Secondary English School achieved 1st place in the National Inter-School STEM Championship. Their project presented a cost-effective, IoT-monitored water filtration system designed for rural communities.",
+      "We are thrilled to announce that our young innovators from Red Rose Secondary English School achieved 1st place in the National Inter-School STEM Championship. Their project presented a cost-effective, IoT-monitored water filtration system designed for rural communities.",
     imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=800",
     imageAlt: "Robotics Competition",
     pinned: false,
@@ -35,7 +35,7 @@ export const defaultBlogPosts = [
   },
   {
     id: "post-3",
-    title: "Smriti Academic Excellence & Honor Roll Ceremony Announced",
+    title: "Red Rose Academic Excellence & Honor Roll Ceremony Announced",
     slug: "academic-excellence-awards-2026",
     category: "Academics",
     date: "2026-07-02",
@@ -59,7 +59,7 @@ export const defaultBlogPosts = [
     excerpt:
       "A vibrant showcase of traditional music, drama performances, and student art galleries celebrating national heritage and creative expression.",
     content:
-      "The annual Smriti Cultural Extravaganza transformed our school campus into a colorful hub of music, theatrical plays, folk dance, and fine art displays created by students from Grade 1 to Grade 10.",
+      "The annual Red Rose Cultural Extravaganza transformed our school campus into a colorful hub of music, theatrical plays, folk dance, and fine art displays created by students from Grade 1 to Grade 10.",
     imageUrl: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800",
     imageAlt: "Cultural Festival",
     pinned: false,
@@ -125,7 +125,7 @@ export function normalizeBlogPost(post = {}, index = 0) {
     imageAlt: post.imageAlt || post.image_alt || title,
     pinned: Boolean(post.pinned),
     visible: post.visible !== false,
-    author: post.author || post.authorName || "Smriti Team",
+    author: post.author || post.authorName || "Red Rose Team",
     authorRole: post.authorRole || "School Administration",
   };
 }
@@ -170,7 +170,7 @@ export function getReadTime(content = "", excerpt = "") {
 }
 
 export function getAuthorInfo(post = {}) {
-  const authorName = post.author || post.authorName || "Smriti Team";
+  const authorName = post.author || post.authorName || "Red Rose Team";
   const authorRole = post.authorRole || "School Admin";
   const initial = (authorName.trim()[0] || "S").toUpperCase();
   return { authorName, authorRole, initial };

@@ -38,12 +38,12 @@ const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1580582932707-520a
 
 export const defaultHeroData = {
   badge: "Wisdom is Divine",
-  schoolName: "SMRITI SCHOOL",
-  titleLine1: "Smriti School",
+  schoolName: "RED ROSE SCHOOL",
+  titleLine1: "Red Rose School",
   establishedYear: "ESTABLISHED 2046 BS",
   subtitle: "Basudev Marga, Hetauda-2",
   description:
-    "Smriti School blends academic discipline, digital learning, creativity, sports, and values for students from Play Group to Grade 10.",
+    "Red Rose School blends academic discipline, digital learning, creativity, sports, and values for students from Play Group to Grade 10.",
   image: DEFAULT_HERO_IMAGE,
   images: [DEFAULT_HERO_IMAGE],
   imageAdjustments: {},
@@ -178,7 +178,7 @@ function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {
           <motion.img
             key={currentImage}
             src={currentImage}
-            alt="Smriti School Campus"
+            alt="Red Rose School Campus"
             className="absolute inset-0 w-full h-full object-cover"
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -253,7 +253,7 @@ function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {
                   className="text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase"
                   style={{ color: palette.gold }}
                 >
-                  {heroData.schoolName || "SMRITI SCHOOL"}
+                  {heroData.schoolName || "RED ROSE SCHOOL"}
                 </span>
                 <div 
                   className="flex-1 h-0.5"

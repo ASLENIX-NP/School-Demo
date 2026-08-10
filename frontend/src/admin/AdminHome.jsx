@@ -35,7 +35,7 @@ export const defaultStatsSectionData = {
     imageTopTitle: "Our Campus",
     imageTopSubtitle: "Hetauda-2",
     paragraphs: [
-      "Established with a vision to provide quality education in Makawanpur, Smriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
+      "Established with a vision to provide quality education in Makawanpur, Red Rose Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
       "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
     ],
     image: "https://images.unsplash.com/photo-1588072432836-e10032774350?w=1000&h=800&fit=crop&auto=format",

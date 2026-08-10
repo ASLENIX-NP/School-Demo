@@ -26,7 +26,7 @@ const defaultSettings = {
   closedTitle: "Admissions Are Currently Closed",
   closedDescription: "Applications for this academic session have officially ended. The next admission cycle will be announced soon.",
   closedButtonText: "Contact Admissions Office",
-  whyUsBadge: "Why Smriti School",
+  whyUsBadge: "Why Red Rose School",
   whyUsTitle: "Building a Foundation for Excellence",
   whyUsDescription: "We offer a comprehensive educational journey designed to foster academic rigor, leadership, and moral values.",
   whyUs: [
@@ -87,7 +87,7 @@ const defaultSettings = {
       id: "step-5",
       number: "05",
       title: "Final Enrollment",
-      desc: "Receive confirmation, complete fee payment, and welcome to Smriti School!"
+      desc: "Receive confirmation, complete fee payment, and welcome to Red Rose School!"
     }
   ],
   eligibilityBadge: "Requirements",
@@ -251,11 +251,11 @@ const defaultSettings = {
   contactTitle: "Contact Admission Office",
   contactDescription: "Have questions? Reach out directly to our friendly admission counselors.",
   contactPhone: "+977 1-4567890 / +977 9851012345",
-  contactEmail: "admissions@smritischool.edu.np",
+  contactEmail: "admissions@redroseschool.edu.np",
   contactHours: "Sun - Fri: 8:00 AM - 4:00 PM",
   contactAddress: "Kathmandu, Nepal",
   ctaTitle: "Give Your Child the Gift of World-Class Education",
-  ctaDescription: "Take the first step towards a bright academic future with Smriti Secondary English Boarding School.",
+  ctaDescription: "Take the first step towards a bright academic future with Red Rose Secondary English Boarding School.",
   ctaButtonText: "Start Admission Inquiry Now",
   ctaClosedButtonText: "Contact Us for Future Cycles"
 };

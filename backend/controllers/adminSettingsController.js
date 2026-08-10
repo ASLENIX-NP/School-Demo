@@ -4,7 +4,7 @@ import { getFallbackData, setFallbackData } from "../utils/storageHelper.js";
 const DEFAULT_ADMIN_SETTINGS = {
   id: 1,
   school_name: "Bal Jagriti Secondary English Boarding School",
-  school_email: "admin@baljagriti.edu.np",
+  school_email: "admin@Red Rose.edu.np",
   phone: "+977 9800000000",
   address: "Itahari, Sunsari, Nepal",
   logo: "",

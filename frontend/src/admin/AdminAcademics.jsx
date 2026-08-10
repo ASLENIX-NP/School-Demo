@@ -86,15 +86,14 @@ function getLevelIcon(levelId) {
 function Field({ label, value, onChange, placeholder = "", textarea = false, type = "text", rows = 4 }) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-2 text-slate-300">{label}</label>
+      <label className="block text-sm font-bold mb-1.5 text-slate-700">{label}</label>
       {textarea ? (
         <textarea
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={rows}
-          className="w-full px-4 py-3 rounded-xl outline-none text-sm resize-none transition-all focus:ring-2"
-          style={{ background: "rgba(30, 41, 59, 0.8)", border: "1px solid rgba(255,255,255,0.08)", color: "#F8FAFC" }}
+          className="w-full px-4 py-2.5 rounded-xl outline-none text-sm resize-none transition-all border border-slate-300 bg-slate-50 text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
         />
       ) : (
         <input
@@ -102,8 +101,7 @@ function Field({ label, value, onChange, placeholder = "", textarea = false, typ
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full px-4 py-3 rounded-xl outline-none text-sm transition-all focus:ring-2"
-          style={{ background: "rgba(30, 41, 59, 0.8)", border: "1px solid rgba(255,255,255,0.08)", color: "#F8FAFC" }}
+          className="w-full px-4 py-2.5 rounded-xl outline-none text-sm transition-all border border-slate-300 bg-slate-50 text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
         />
       )}
     </div>
@@ -113,16 +111,16 @@ function Field({ label, value, onChange, placeholder = "", textarea = false, typ
 function ModalShell({ title, onClose, children, onSave, saving, saveLabel = "Save" }) {
   if (!onSave) return null;
   return (
-    <motion.div className="fixed inset-0 z-[9999] flex items-center justify-center p-5" style={{ background: "rgba(2,6,23,0.7)", backdropFilter: "blur(14px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
-      <motion.div initial={{ opacity: 0, y: 24, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 14, scale: 0.96 }} className="w-full max-w-2xl rounded-[30px] overflow-hidden max-h-[85vh] flex flex-col" style={{ background: "#1E293B", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 42px 110px rgba(0,0,0,0.5)" }} onClick={(e) => e.stopPropagation()}>
-        <div className="p-6 border-b border-white/10 flex justify-between shrink-0">
-          <h3 className="text-xl font-bold text-white">{title}</h3>
-          <button onClick={onClose} disabled={saving} className="text-white/60 hover:text-white"><X className="w-5 h-5" /></button>
+    <motion.div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-5" style={{ background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(8px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
+      <motion.div initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 14, scale: 0.96 }} className="w-full max-w-2xl rounded-2xl overflow-hidden max-h-[85vh] flex flex-col bg-white border border-slate-200 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="p-5 border-b border-slate-100 flex justify-between items-center shrink-0">
+          <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+          <button onClick={onClose} disabled={saving} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"><X className="w-5 h-5" /></button>
         </div>
-        <div className="p-6 overflow-y-auto">{children}</div>
-        <div className="p-6 border-t border-white/10 flex gap-3 shrink-0">
-          <button onClick={onClose} disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold bg-white/5 text-white/70 hover:text-white disabled:opacity-60">Cancel</button>
-          <button onClick={onSave} disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold bg-blue-600 text-white disabled:opacity-60 flex justify-center gap-2 items-center">
+        <div className="p-6 overflow-y-auto space-y-4">{children}</div>
+        <div className="p-5 border-t border-slate-100 bg-slate-50 flex gap-3 shrink-0">
+          <button onClick={onClose} disabled={saving} className="flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-60">Cancel</button>
+          <button onClick={onSave} disabled={saving} className="flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 flex justify-center gap-2 items-center shadow-md">
             <Save className="w-4 h-4" /> {saving ? "Saving..." : saveLabel}
           </button>
         </div>
@@ -281,19 +279,19 @@ function AcademicsPage({
   return (
     <div className="min-h-screen bg-[#F8F6F0] overflow-x-hidden">
       {/* Hero */}
-      <section className="relative pt-[80px] min-h-[85vh] flex items-center overflow-hidden" style={{ background: "linear-gradient(135deg, #0A1628 0%, #1A5276 50%, #0A1628 100%)" }}>
+      <section className="relative pt-[80px] min-h-[85vh] flex items-center overflow-hidden border-b border-slate-200" style={{ background: "linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 50%, #EFF6FF 100%)" }}>
         <div className="relative w-full max-w-[1200px] mx-auto px-6 z-10">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-[700px]">
             <EditableWrap editMode={adminEditMode} target={{ type: "hero" }} onEditTarget={onEditTarget}>
-              <div className="inline-block px-5 py-1.5 rounded-full text-sm font-bold uppercase tracking-widest bg-[rgba(212,172,13,0.15)] text-[#D4AC0D] border border-[rgba(212,172,13,0.3)] mb-6">
+              <div className="inline-block px-5 py-1.5 rounded-full text-sm font-bold uppercase tracking-widest bg-[rgba(212,172,13,0.12)] text-[#B7950B] border border-[rgba(212,172,13,0.3)] mb-6">
                 {data.hero.badge}
               </div>
-              <h1 className="text-[clamp(2.8rem,6vw,4.5rem)] font-extrabold leading-[1.05] text-white mb-5">
-                <span className="font-normal opacity-85">Empowering Minds</span><br />
+              <h1 className="text-[clamp(2.8rem,6vw,4.5rem)] font-extrabold leading-[1.05] text-[#0F172A] mb-5">
+                <span className="font-semibold text-[#1E293B]">Empowering Minds</span><br />
                 <span className="bg-gradient-to-r from-[#D4AC0D] to-[#E67E22] bg-clip-text text-transparent">Shaping Futures</span>
               </h1>
-              <p className="text-[clamp(1.1rem,1.8vw,1.4rem)] text-white/90 font-medium mb-4">{data.hero.subtitle}</p>
-              <p className="text-[clamp(0.95rem,1.2vw,1.1rem)] text-white/70 leading-relaxed max-w-[560px]">{data.hero.description}</p>
+              <p className="text-[clamp(1.1rem,1.8vw,1.4rem)] text-[#1E293B] font-semibold mb-4">{data.hero.subtitle}</p>
+              <p className="text-[clamp(0.95rem,1.2vw,1.1rem)] text-[#475569] leading-relaxed max-w-[560px]">{data.hero.description}</p>
             </EditableWrap>
           </motion.div>
         </div>
@@ -480,18 +478,18 @@ function AcademicsPage({
       </section>
 
       {/* Assessment */}
-      <section className="py-20 px-6" style={{ background: "linear-gradient(135deg, #0A1628 0%, #1A5276 100%)" }}>
+      <section className="py-20 px-6 border-t border-slate-200" style={{ background: "linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%)" }}>
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
             <EditableWrap editMode={adminEditMode} target={{ type: "assessment" }} onEditTarget={onEditTarget}>
-              <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(212,172,13,0.15)] text-[#D4AC0D] border border-[rgba(212,172,13,0.3)] mb-4">Assessment & Growth</span>
-              <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-white mb-4">{data.assessment.title}</h2>
-              <p className="text-[16px] text-white/75 leading-relaxed">{data.assessment.description}</p>
+              <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(26,82,118,0.08)] text-[#1A5276] border border-[rgba(26,82,118,0.2)] mb-4">Assessment & Growth</span>
+              <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#0F172A] mb-4">{data.assessment.title}</h2>
+              <p className="text-[16px] text-[#475569] leading-relaxed">{data.assessment.description}</p>
             </EditableWrap>
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {data.assessment.methods.map((m, i) => (
-              <div key={i} className="flex items-center gap-3 p-4 rounded-2xl bg-white/10 border border-white/20"><CheckCircle2Icon size={18} color={theme.accent1} /><span className="text-[14px] font-semibold text-white">{m}</span></div>
+              <div key={i} className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm"><CheckCircle2Icon size={18} color={theme.accent1} /><span className="text-[14px] font-bold text-[#1E293B]">{m}</span></div>
             ))}
           </motion.div>
         </div>
@@ -515,7 +513,7 @@ function Counter({ target, suffix, duration = 2000 }) {
 
 // ── DEFAULT DATA ──
 const defaultAcademicsContent = {
-  hero: { badge: "Excellence in Education", title: "Empowering Minds Shaping Futures", subtitle: "Nurturing the next generation of thinkers.", description: "At Smriti Secondary English Boarding School, education extends beyond textbooks." },
+  hero: { badge: "Excellence in Education", title: "Empowering Minds Shaping Futures", subtitle: "Nurturing the next generation of thinkers.", description: "At Red Rose Secondary English Boarding School, education extends beyond textbooks." },
   levelsHeading: {
     badge: "Academic Structure",
     title: "Explore Our Class Levels",
@@ -975,32 +973,40 @@ export default function AdminAcademics() {
   };
 
   return (
-    <div className="space-y-6 min-h-screen p-6" style={{ background: "#0B0E14" }}>
+    <div className="space-y-6 min-h-screen p-4 sm:p-6 bg-slate-100 font-sans">
       <style>{`.admin-edit-hidden { display: none; } .group:hover .admin-edit-hidden { display: flex; }`}</style>
 
-      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
-        className="rounded-[24px] p-6 backdrop-blur-xl border" style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>
+      <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm">
 
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3 bg-blue-500/10 text-blue-300 border border-blue-500/20">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold mb-2 bg-blue-50 text-blue-700 border border-blue-200">
               <Eye className="w-3.5 h-3.5" /> Visual Academics Editor
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Hover and Edit Academics Page</h2>
-            <p className="text-sm text-slate-400 mt-1">Hover any block to edit. Changes save directly to the public website.</p>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Hover and Edit Academics Page</h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Hover any block to edit. Changes save directly to the public website.</p>
           </div>
-          <div className="flex gap-3">
-            <button onClick={() => navigate("/admin/dashboard")} className="px-4 py-2 rounded-xl text-sm text-slate-300 hover:text-white bg-white/5 border border-white/10 transition">Dashboard</button>
-            <button onClick={async () => { setSaving(true); await saveToBackend(form, "All content saved successfully."); setSaving(false); }} disabled={saving} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md transition">
+          <div className="flex items-center gap-2.5">
+            <button onClick={() => navigate("/admin/dashboard")} className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-100 bg-slate-50 border border-slate-300 transition">Dashboard</button>
+            <a
+              href="/academics"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 text-xs sm:text-sm font-bold transition shadow-xs"
+            >
+              <ExternalLink size={14} /> View Public
+            </a>
+            <button onClick={async () => { setSaving(true); await saveToBackend(form, "All content saved successfully."); setSaving(false); }} disabled={saving} className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md transition disabled:opacity-50">
               {saving ? "Saving..." : "Save All Changes"}
             </button>
           </div>
         </div>
 
-        {success && <div className="mb-4 rounded-xl px-4 py-3 flex items-center gap-2 font-medium bg-green-500/10 text-green-400 border border-green-500/20"><CheckCircle2 className="w-4 h-4" />{success}</div>}
-        {error && <div className="mb-4 rounded-xl px-4 py-3 font-medium bg-red-500/10 text-red-400 border border-red-500/20"><AlertCircle className="w-4 h-4 inline mr-2" />{error}</div>}
+        {success && <div className="mb-4 rounded-xl px-4 py-3 flex items-center gap-2 text-xs sm:text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><CheckCircle2 className="w-4 h-4" />{success}</div>}
+        {error && <div className="mb-4 rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold bg-rose-50 text-rose-700 border border-rose-200"><AlertCircle className="w-4 h-4 inline mr-2" />{error}</div>}
 
-        <div className="rounded-[2rem] overflow-hidden border border-white/10 bg-white shadow-2xl relative">
+        <div className="rounded-2xl overflow-hidden border border-slate-300 bg-white shadow-xl relative">
           <AcademicsPage
             adminEditMode={true}
             contentOverride={form}

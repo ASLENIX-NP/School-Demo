@@ -110,8 +110,8 @@ const defaultAchievements = [
 
 const defaultContent = {
   heroBadge: "INTERACTIVE GALLERY",
-  heroTitle: "Smriti School",
-  heroHighlightedText: "Smriti",
+  heroTitle: "Red Rose School",
+  heroHighlightedText: "Red Rose",
   heroSubtitle: "Moments that become memories",
   heroExploreText: "Explore Moments",
   heroAchievementText: "Celebrate Achievements",
@@ -120,7 +120,7 @@ const defaultContent = {
   title: "Stories",
   highlightedText: "Stories",
   description:
-    "Explore classroom learning, school events, certificates, achievements, and student life at Smriti Secondary English Boarding School.",
+    "Explore classroom learning, school events, certificates, achievements, and student life at Red Rose Secondary English Boarding School.",
 
   categories: DEFAULT_CATEGORIES,
   categoryDescriptions: fallbackCategoryDescriptions,

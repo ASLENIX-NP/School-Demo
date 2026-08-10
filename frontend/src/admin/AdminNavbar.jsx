@@ -933,7 +933,7 @@ export default function AdminNavbar() {
                       onChange={(value) =>
                         updateModalField("schoolName", value)
                       }
-                      placeholder="Smriti"
+                      placeholder="Red Rose"
                     />
                   )}
 

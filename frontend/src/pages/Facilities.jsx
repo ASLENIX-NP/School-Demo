@@ -48,7 +48,7 @@ export const defaultFacilitiesContent = {
   title: "Spaces Built For How Students Actually Learn",
   highlightedText: "Learn",
   subtitle:
-    "Smriti Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
+    "Red Rose Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
   learnMoreText: "Learn More",
   highlightsTitle: "Facility Highlights",
   facilities: [
@@ -104,7 +104,7 @@ export const defaultFacilitiesContent = {
       description:
         "Monitored bus routes across Hetauda, so getting to school safely isn't something a family has to solve on their own.",
       details:
-        "Smriti Boarding School provides safe transportation with experienced drivers, route management, student safety monitoring, and comfortable buses for daily travel.",
+        "Red Rose Boarding School provides safe transportation with experienced drivers, route management, student safety monitoring, and comfortable buses for daily travel.",
       imageUrl: "",
       imageZoom: 1,
       imageOffsetX: 0,

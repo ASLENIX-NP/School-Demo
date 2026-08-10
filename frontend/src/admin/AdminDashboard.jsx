@@ -132,7 +132,7 @@ function SidebarContent({
             <Shield className="w-5 h-5 text-slate-950" />
           </div>
           <div>
-            <div className="font-bold text-white text-sm tracking-tight">Baljagriti</div>
+            <div className="font-bold text-white text-sm tracking-tight">Red Rose</div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-400/60">Admin Panel</div>
           </div>
         </div>
@@ -149,7 +149,7 @@ function SidebarContent({
           </div>
           <div className="min-w-0">
             <div className="text-white/80 text-xs font-semibold truncate">{adminUser.name || "Administrator"}</div>
-            <div className="text-[10px] truncate text-slate-500">{adminUser.email || "admin@baljagriti.edu.np"}</div>
+            <div className="text-[10px] truncate text-slate-500">{adminUser.email || "admin@Red Rose.edu.np"}</div>
           </div>
         </div>
       </div>
@@ -489,7 +489,15 @@ export default function AdminDashboard() {
                 <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-green-500" />
                 <span className="text-[10px] font-bold text-green-400 tracking-wide">Live</span>
               </div>
-              <a href="/" target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}><Globe className="w-4 h-4" /> View Site</a>
+              <a
+                href="/"
+                target="_blank"
+                rel="noreferrer"
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 shadow-sm border border-blue-400/40"
+              >
+                <Globe className="w-3.5 h-3.5 text-blue-100" />
+                <span>View Site</span>
+              </a>
               {activeEditor && <button onClick={() => handleSelectEditor(null)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}><X className="w-3.5 h-3.5" /><span className="hidden sm:inline">Close</span></button>}
             </div>
           </div>

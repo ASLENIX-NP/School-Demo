@@ -159,7 +159,7 @@ const LoginPage = () => {
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: colors.glass }}>
               <School size={28} className="text-white" />
             </div>
-            <span className="text-xl font-bold tracking-wide">Smriti School</span>
+            <span className="text-xl font-bold tracking-wide">Red Rose School</span>
           </div>
 
           <div className="flex justify-center mb-10">
@@ -372,7 +372,7 @@ const LoginPage = () => {
 
             {/* Clean Footer */}
             <div className="mt-8 text-center text-xs text-white/40">
-              © 2026 Smriti School. All Rights Reserved.
+              © 2026 Red Rose School. All Rights Reserved.
             </div>
           </div>
         </motion.div>

@@ -2,11 +2,11 @@
   "home": {
     "hero": {
       "badge": "Wisdom is Divine",
-      "schoolName": "SMRITI SCHOOL",
-      "titleLine1": "Smriti School",
+      "schoolName": "RED ROSE SCHOOL",
+      "titleLine1": "Red Rose School",
       "establishedYear": "ESTABLISHED 2046 BS",
       "subtitle": "Basudev Marga, Hetauda-2",
-      "description": "Smriti School blends academic discipline, digital learning, creativity, sports, and values for students from Play Group to Grade 10.",
+      "description": "Red Rose School blends academic discipline, digital learning, creativity, sports, and values for students from Play Group to Grade 10.",
       "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099978884_images_1UYiY_juR.jpeg",
       "images": [
         "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099978884_images_1UYiY_juR.jpeg",
@@ -59,7 +59,7 @@
         "imageTopTitle": "Our Campus",
         "imageTopSubtitle": "Hetauda-2",
         "paragraphs": [
-          "Established with a vision to provide quality education in Makawanpur, Smriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
+          "Established with a vision to provide quality education in Makawanpur, Red Rose Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
           "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
         ],
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786100017954_images_vwqcFhKbY.jpeg",
@@ -94,7 +94,7 @@
   },
   "navbar": {
     "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099529841_unnamed__p9IBiYmi.png",
-    "schoolName": "Smriti",
+    "schoolName": "Red Rose",
     "schoolSubtitle": "Secondary English School",
     "admissionButtonText": "Admission Open",
     "admissionButtonLink": "/admissions",
@@ -346,7 +346,7 @@
         "imageAlt": "New Blog Post",
         "pinned": false,
         "visible": true,
-        "author": "Smriti Team",
+        "author": "Red Rose Team",
         "authorRole": "School Administration"
       },
       {
@@ -356,7 +356,7 @@
         "category": "Sports",
         "date": "2026-07-28",
         "excerpt": "Our annual school sports meet brought together students, teachers, and parents for an unforgettable day of track and field competitions, inter-house matches, and sportsmanship awards.",
-        "content": "Smriti Secondary English School hosted its grand Annual Sports Day with unmatched enthusiasm and high-level athletic performance. Students across all grade levels competed in sprint races, relay competitions, long jump, chess, and football tournament finals. The Blue House claimed the overall championship trophy after an intense series of matches.",
+        "content": "Red Rose Secondary English School hosted its grand Annual Sports Day with unmatched enthusiasm and high-level athletic performance. Students across all grade levels competed in sprint races, relay competitions, long jump, chess, and football tournament finals. The Blue House claimed the overall championship trophy after an intense series of matches.",
         "imageUrl": "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=1200",
         "imageAlt": "Annual Sports Day",
         "pinned": true,
@@ -371,7 +371,7 @@
         "category": "Achievements",
         "date": "2026-07-15",
         "excerpt": "Our Grade 9 and 10 STEM innovation team secured the top prize at the National Inter-School Science Fair for their autonomous solar-powered water purification model.",
-        "content": "We are thrilled to announce that our young innovators from Smriti Secondary English School achieved 1st place in the National Inter-School STEM Championship. Their project presented a cost-effective, IoT-monitored water filtration system designed for rural communities.",
+        "content": "We are thrilled to announce that our young innovators from Red Rose Secondary English School achieved 1st place in the National Inter-School STEM Championship. Their project presented a cost-effective, IoT-monitored water filtration system designed for rural communities.",
         "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786093654139_Screenshot__3__vtL1j1JoO.png",
         "imageAlt": "Robotics Competition",
         "pinned": false,
@@ -381,7 +381,7 @@
       },
       {
         "id": "post-3",
-        "title": "Smriti Academic Excellence & Honor Roll Ceremony Announced",
+        "title": "Red Rose Academic Excellence & Honor Roll Ceremony Announced",
         "slug": "academic-excellence-awards-2026",
         "category": "Academics",
         "date": "2026-07-02",
@@ -401,7 +401,7 @@
         "category": "Events",
         "date": "2026-06-20",
         "excerpt": "A vibrant showcase of traditional music, drama performances, and student art galleries celebrating national heritage and creative expression.",
-        "content": "The annual Smriti Cultural Extravaganza transformed our school campus into a colorful hub of music, theatrical plays, folk dance, and fine art displays created by students from Grade 1 to Grade 10.",
+        "content": "The annual Red Rose Cultural Extravaganza transformed our school campus into a colorful hub of music, theatrical plays, folk dance, and fine art displays created by students from Grade 1 to Grade 10.",
         "imageUrl": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800",
         "imageAlt": "Cultural Festival",
         "pinned": false,
@@ -428,7 +428,7 @@
   },
   "footer": {
     "logoUrl": "",
-    "schoolName": "Smriti",
+    "schoolName": "Red Rose",
     "schoolSubtitle": "Secondary English Boarding School",
     "admissionBadgeText": "Admissions Open 2026",
     "showAdmissionBadge": true,
@@ -524,7 +524,7 @@
     ],
     "contact": {
       "address": "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
-      "mapUrl": "https://www.google.com/maps/search/?api=1&query=Baljagriti+English+Secondary+School+Hetauda",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=Red Rose+English+Secondary+School+Hetauda",
       "phones": [
         "057-590144",
         "057-590145",
@@ -532,18 +532,18 @@
       ],
       "email": "infobjess2046@gmail.com"
     },
-    "modalTitle": "Contact Smriti School",
+    "modalTitle": "Contact Red Rose School",
     "modalHint": "Click any number to copy it.",
     "copiedText": "Copied",
     "closeButtonText": "Close",
-    "copyrightText": "© 2026 Smriti Secondary English Boarding School. All rights reserved."
+    "copyrightText": "© 2026 Red Rose Secondary English Boarding School. All rights reserved."
   },
   "academics": {
     "hero": {
       "badge": "Excellence in Education",
       "title": "Empowering Minds Shaping Futures",
       "subtitle": "Nurturing the next generation of thinkers.",
-      "description": "At Smriti Secondary English Boarding School, education extends beyond textbooks."
+      "description": "At Red Rose Secondary English Boarding School, education extends beyond textbooks."
     },
     "levelsHeading": {
       "badge": "Academic Structure",
@@ -882,7 +882,7 @@
     "badgeText": "Faculty & Team",
     "title": "Our Staff Members",
     "highlightedWord": "Staff Members",
-    "subtitle": "Meet the dedicated educators, department heads, and leaders guiding students at Smriti Secondary English Boarding School.",
+    "subtitle": "Meet the dedicated educators, department heads, and leaders guiding students at Red Rose Secondary English Boarding School.",
     "stats": [
       {
         "id": "teachingStaff",
@@ -914,8 +914,8 @@
         "imageOffsetY": 0,
         "qualification": "M.Ed in Educational Leadership",
         "phone": "057-590144",
-        "email": "principal@smritischool.edu.np",
-        "description": "Mr. Binod Subedi has been leading Smriti Boarding School with vision and commitment for over a decade, driving academic rigor and holistic development.",
+        "email": "principal@redroseschool.edu.np",
+        "description": "Mr. Binod Subedi has been leading Red Rose Boarding School with vision and commitment for over a decade, driving academic rigor and holistic development.",
         "visible": true,
         "accentColor": ""
       },
@@ -929,7 +929,7 @@
         "imageOffsetY": 0,
         "qualification": "M.Ed",
         "phone": "057-590145",
-        "email": "viceprincipal@smritischool.edu.np",
+        "email": "viceprincipal@redroseschool.edu.np",
         "description": "Oversees daily academic administration, teacher development, and student welfare, maintaining high standards of discipline and achievement.",
         "visible": true,
         "accentColor": ""
@@ -944,7 +944,7 @@
         "imageOffsetY": 0,
         "qualification": "B.Sc, B.Ed",
         "phone": "057-590146",
-        "email": "prem.science@smritischool.edu.np",
+        "email": "prem.science@redroseschool.edu.np",
         "description": "Passionate science educator bringing hands-on practical experiments in Physics, Chemistry, and Biology to secondary school students.",
         "visible": true,
         "accentColor": ""
@@ -959,7 +959,7 @@
         "imageOffsetY": 0,
         "qualification": "M.A. English, B.Ed",
         "phone": "057-590144",
-        "email": "saraswati.english@smritischool.edu.np",
+        "email": "saraswati.english@redroseschool.edu.np",
         "description": "Specializes in English literature and communication skills, fostering creative writing and debate programs across all grade levels.",
         "visible": true,
         "accentColor": ""
@@ -974,7 +974,7 @@
         "imageOffsetY": 0,
         "qualification": "M.Sc Mathematics",
         "phone": "057-590145",
-        "email": "ramesh.math@smritischool.edu.np",
+        "email": "ramesh.math@redroseschool.edu.np",
         "description": "Dedicated to simplifying mathematics and encouraging logical thinking, problem-solving, and competitive Olympiad prep.",
         "visible": true,
         "accentColor": ""
@@ -989,7 +989,7 @@
         "imageOffsetY": 0,
         "qualification": "M.Ed in Child Psychology",
         "phone": "057-590146",
-        "email": "anita.primary@smritischool.edu.np",
+        "email": "anita.primary@redroseschool.edu.np",
         "description": "Guides primary educators to build a friendly, nurturing, activity-based foundation for young learners.",
         "visible": true,
         "accentColor": ""
@@ -1000,7 +1000,7 @@
     "badgeText": "Our Campus",
     "title": "Spaces Built For How Students Actually Learn",
     "highlightedText": "Learn",
-    "subtitle": "Smriti Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
+    "subtitle": "Red Rose Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
     "learnMoreText": "Learn More",
     "highlightsTitle": "Facility Highlights",
     "facilities": [
@@ -1051,7 +1051,7 @@
         "title": "School Transport",
         "category": "Safety & Comfort",
         "description": "Monitored bus routes across Hetauda, so getting to school safely isn't something a family has to solve on their own.",
-        "details": "Smriti Boarding School provides safe transportation with experienced drivers, route management, student safety monitoring, and comfortable buses for daily travel.",
+        "details": "Red Rose Boarding School provides safe transportation with experienced drivers, route management, student safety monitoring, and comfortable buses for daily travel.",
         "imageUrl": "",
         "imageZoom": 1,
         "imageOffsetX": 0,
@@ -1117,13 +1117,13 @@
   },
   "gallery": {
     "heroBadge": "INTERACTIVE GALLERY",
-    "heroTitle": "Smriti School",
-    "heroHighlightedText": "Smriti",
+    "heroTitle": "Red Rose School",
+    "heroHighlightedText": "Red Rose",
     "heroSubtitle": "Moments that become memories",
     "badge": "School Gallery",
     "title": "Stories",
     "highlightedText": "Stories",
-    "description": "Explore classroom learning, school events, certificates, achievements, and student life at Smriti Secondary English Boarding School.",
+    "description": "Explore classroom learning, school events, certificates, achievements, and student life at Red Rose Secondary English Boarding School.",
     "categories": [
       "Activity",
       "Events",
@@ -1313,7 +1313,7 @@
     "closedTitle": "Admissions Are Currently Closed",
     "closedDescription": "Applications for this academic session have officially ended. The next admission cycle will be announced soon.",
     "closedButtonText": "Contact Admissions Office",
-    "whyUsBadge": "Why Smriti School",
+    "whyUsBadge": "Why Red Rose School",
     "whyUsTitle": "Building a Foundation for Excellence",
     "whyUsDescription": "We offer a comprehensive educational journey designed to foster academic rigor, leadership, and moral values.",
     "whyUs": [
@@ -1374,7 +1374,7 @@
         "id": "step-5",
         "number": "05",
         "title": "Final Enrollment",
-        "desc": "Receive confirmation, complete fee payment, and welcome to Smriti School!"
+        "desc": "Receive confirmation, complete fee payment, and welcome to Red Rose School!"
       }
     ],
     "eligibilityBadge": "Requirements",
@@ -1538,11 +1538,11 @@
     "contactTitle": "Contact Admission Office",
     "contactDescription": "Have questions? Reach out directly to our friendly admission counselors.",
     "contactPhone": "+977 1-4567890 / +977 9851012345",
-    "contactEmail": "admissions@smritischool.edu.np",
+    "contactEmail": "admissions@redroseschool.edu.np",
     "contactHours": "Sun - Fri: 8:00 AM - 4:00 PM",
     "contactAddress": "Kathmandu, Nepal",
     "ctaTitle": "Give Your Child the Gift of World-Class Education",
-    "ctaDescription": "Take the first step towards a bright academic future with Smriti Secondary English Boarding School.",
+    "ctaDescription": "Take the first step towards a bright academic future with Red Rose Secondary English Boarding School.",
     "ctaButtonText": "Start Admission Inquiry Now",
     "ctaClosedButtonText": "Contact Us for Future Cycles"
   }

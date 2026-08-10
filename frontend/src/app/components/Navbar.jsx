@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 export const defaultNavbarContent = {
   logoUrl: "",
-  schoolName: "Smriti",
+  schoolName: "Red Rose",
   schoolSubtitle: "Secondary English School",
   admissionButtonText: "Admission Open",
   admissionButtonLink: "/admissions",

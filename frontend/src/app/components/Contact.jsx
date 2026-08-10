@@ -34,7 +34,7 @@ export const colors = {
 export const defaultContactContent = {
   badgeText: "Get In Touch",
   title: "Let's Connect",
-  highlightedText: "Smriti School",
+  highlightedText: "Red Rose School",
   subtitle:
     "Have questions about admissions, curriculum, or tuition? Our team is ready to assist you with any inquiry.",
 
@@ -57,7 +57,7 @@ export const defaultContactContent = {
       id: "email",
       icon: "mail",
       label: "Email Inquiries",
-      value: "infosmritischool@gmail.com",
+      value: "inforedroseschool@gmail.com",
       color: "#7C3AED",
     },
     {
@@ -69,7 +69,7 @@ export const defaultContactContent = {
     },
   ],
   mapCard: {
-    title: "Smriti Secondary English Boarding School",
+    title: "Red Rose Secondary English Boarding School",
     address: "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
     buttonText: "Open in Google Maps",
     mapUrl:
@@ -693,7 +693,7 @@ export default function Contact({
 
               <div className="mt-5 pt-5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold text-slate-800">{content.mapCard?.title || "Smriti Secondary English Boarding School"}</p>
+                  <p className="text-sm font-bold text-slate-800">{content.mapCard?.title || "Red Rose Secondary English Boarding School"}</p>
                   <p className="text-xs text-slate-500 mt-0.5">{content.mapCard?.address || "Basudev Marga, Hetauda-2, Makawanpur, Nepal"}</p>
                 </div>
                 <a

@@ -222,7 +222,7 @@ export default function BlogDetail() {
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-800 leading-none">{authorName}</p>
-                <p className="text-xs text-slate-500 mt-1">{post.authorRole || "Smriti School"}</p>
+                <p className="text-xs text-slate-500 mt-1">{post.authorRole || "Red Rose School"}</p>
               </div>
             </div>
           </div>

@@ -106,7 +106,7 @@ export const defaultStaffContent = {
   title: "Our Staff Members",
   highlightedWord: "Staff Members",
   subtitle:
-    "Meet the dedicated educators, department heads, and leaders guiding students at Smriti Secondary English Boarding School.",
+    "Meet the dedicated educators, department heads, and leaders guiding students at Red Rose Secondary English Boarding School.",
   stats: [
     {
       id: "teachingStaff",
@@ -138,9 +138,9 @@ export const defaultStaffContent = {
       imageOffsetY: 0,
       qualification: "M.Ed in Educational Leadership",
       phone: "057-590144",
-      email: "principal@smritischool.edu.np",
+      email: "principal@redroseschool.edu.np",
       description:
-        "Mr. Binod Subedi has been leading Smriti Boarding School with vision and commitment for over a decade, driving academic rigor and holistic development.",
+        "Mr. Binod Subedi has been leading Red Rose Boarding School with vision and commitment for over a decade, driving academic rigor and holistic development.",
       visible: true,
     },
     {
@@ -153,7 +153,7 @@ export const defaultStaffContent = {
       imageOffsetY: 0,
       qualification: "M.Ed",
       phone: "057-590145",
-      email: "viceprincipal@smritischool.edu.np",
+      email: "viceprincipal@redroseschool.edu.np",
       description:
         "Oversees daily academic administration, teacher development, and student welfare, maintaining high standards of discipline and achievement.",
       visible: true,
@@ -168,7 +168,7 @@ export const defaultStaffContent = {
       imageOffsetY: 0,
       qualification: "B.Sc, B.Ed",
       phone: "057-590146",
-      email: "prem.science@smritischool.edu.np",
+      email: "prem.science@redroseschool.edu.np",
       description:
         "Passionate science educator bringing hands-on practical experiments in Physics, Chemistry, and Biology to secondary school students.",
       visible: true,
@@ -183,7 +183,7 @@ export const defaultStaffContent = {
       imageOffsetY: 0,
       qualification: "M.A. English, B.Ed",
       phone: "057-590144",
-      email: "saraswati.english@smritischool.edu.np",
+      email: "saraswati.english@redroseschool.edu.np",
       description:
         "Specializes in English literature and communication skills, fostering creative writing and debate programs across all grade levels.",
       visible: true,
@@ -198,7 +198,7 @@ export const defaultStaffContent = {
       imageOffsetY: 0,
       qualification: "M.Sc Mathematics",
       phone: "057-590145",
-      email: "ramesh.math@smritischool.edu.np",
+      email: "ramesh.math@redroseschool.edu.np",
       description:
         "Dedicated to simplifying mathematics and encouraging logical thinking, problem-solving, and competitive Olympiad prep.",
       visible: true,
@@ -213,7 +213,7 @@ export const defaultStaffContent = {
       imageOffsetY: 0,
       qualification: "M.Ed in Child Psychology",
       phone: "057-590146",
-      email: "anita.primary@smritischool.edu.np",
+      email: "anita.primary@redroseschool.edu.np",
       description:
         "Guides primary educators to build a friendly, nurturing, activity-based foundation for young learners.",
       visible: true,
@@ -691,7 +691,7 @@ export function Staff({
 
             <p className="mt-4 text-base sm:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-light">
               {content.subtitle ||
-                "Meet the dedicated educators, department heads, and leaders guiding students at Smriti Secondary English Boarding School."}
+                "Meet the dedicated educators, department heads, and leaders guiding students at Red Rose Secondary English Boarding School."}
             </p>
           </motion.div>
         </EditableWrap>
