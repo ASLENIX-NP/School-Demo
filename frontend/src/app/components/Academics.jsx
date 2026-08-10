@@ -400,36 +400,116 @@ const AcademicsPage = () => {
 
   return (
     <div className="academics-page" style={styles.pageContainer}>
-      {/* ===== HERO SECTION ===== */}
-      <section style={styles.heroSection}>
-        <div style={styles.heroBackground}>
-          <div style={styles.heroOverlay} />
-          <div style={styles.heroPattern} />
+      {/* ===== ACADEMICS INTRO SECTION ===== */}
+      <section className="academics-intro-section" style={styles.heroSection}>
+        <div className="academics-intro-container" style={styles.heroContainer}>
+          <div style={styles.heroGlowOne} />
+          <div style={styles.heroGlowTwo} />
+          <div style={styles.heroOrbOne} />
+          <div style={styles.heroOrbTwo} />
+
+          <div className="academics-intro-content" style={styles.heroContent}>
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              style={styles.heroText}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.1 }}
+                style={styles.heroBadge}
+              >
+                <Sparkles size={15} />
+                {data.hero.badge}
+              </motion.div>
+
+              <h1 style={styles.heroTitle}>
+                Empowering Minds,
+                <br />
+                <span style={styles.heroTitleHighlight}>Shaping Futures.</span>
+              </h1>
+
+              <div style={styles.heroRule} />
+
+              <div className="academics-intro-description" style={styles.heroDescriptionBlock}>
+                <p style={styles.heroSubtitle}>{data.hero.subtitle}</p>
+                <p style={styles.heroDescription}>{data.hero.description}</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 35 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.75, delay: 0.15 }}
+              className="academics-intro-message"
+              style={styles.heroMessage}
+            >
+              <span style={styles.heroMessageNumber}>01</span>
+              <span style={styles.heroMessageLabel}>ACADEMIC FOUNDATION</span>
+              <div style={styles.heroMessageLine} />
+              <p style={styles.heroMessageText}>
+                A balanced academic journey built around knowledge,
+                curiosity, creativity, confidence and character.
+              </p>
+
+              <div style={styles.heroMessageDots}>
+                <span style={styles.heroMessageDotActive} />
+                <span style={styles.heroMessageDot} />
+                <span style={styles.heroMessageDot} />
+              </div>
+            </motion.div>
+          </div>
+
+          <div style={styles.heroBottomWave} />
+          <div style={styles.heroGoldEdge} />
         </div>
 
-        <div style={styles.heroContent}>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            style={styles.heroInner}
-          >
-            <motion.div
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              style={styles.heroBadge}
-            >
-              {data.hero.badge}
-            </motion.div>
-            <h1 style={styles.heroTitle}>
-              <span style={styles.heroTitleLight}>Empowering Minds</span>
-              <br />
-              <span style={styles.heroTitleHighlight}>Shaping Futures</span>
-            </h1>
-            <p style={styles.heroSubtitle}>{data.hero.subtitle}</p>
-            <p style={styles.heroDescription}>{data.hero.description}</p>
-          </motion.div>
-        </div>
+        <style>{`
+          @media (max-width: 900px) {
+            .academics-intro-content {
+              grid-template-columns: 1fr !important;
+              gap: 28px !important;
+              height: auto !important;
+              min-height: 520px !important;
+              height: auto !important;
+              padding: 55px 28px !important;
+            }
+
+            .academics-intro-message {
+              border-left: 0 !important;
+              border-top: 1px solid rgba(255,255,255,0.2) !important;
+              padding: 28px 0 0 !important;
+            }
+
+            .academics-intro-message {
+              max-width: 100% !important;
+              border-left: 0 !important;
+              border-top: 1px solid rgba(255,255,255,0.22) !important;
+              padding-left: 0 !important;
+              padding-top: 24px !important;
+            }
+          }
+
+          @media (max-width: 600px) {
+            .academics-intro-section {
+              padding: 25px 14px !important;
+            }
+
+            .academics-intro-container {
+              border-radius: 25px !important;
+            }
+
+            .academics-intro-content {
+              padding: 38px 25px !important;
+            }
+
+            .academics-intro-message {
+              padding-top: 20px !important;
+            }
+          }
+        `}</style>
       </section>
 
       {/* ===== STATS SECTION ===== */}
@@ -780,87 +860,243 @@ const styles = {
     minHeight: "100vh",
     background: "#F8F6F0",
     overflowX: "hidden",
+    paddingTop: "82px",
+    boxSizing: "border-box",
   },
   heroSection: {
     position: "relative",
-    paddingTop: "80px",
-    minHeight: "85vh",
-    display: "flex",
-    alignItems: "center",
+    padding: "0 0 55px",
+    background: "linear-gradient(180deg, #F7FAFF 0%, #FFFFFF 100%)",
+    boxSizing: "border-box",
     overflow: "hidden",
   },
-  heroBackground: {
-    position: "absolute",
-    inset: 0,
-    background: "linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 50%, #EFF6FF 100%)",
-    borderBottom: "1px solid #E2E8F0",
-  },
-  heroOverlay: {
-    position: "absolute",
-    inset: 0,
-    background: "radial-gradient(circle at 30% 50%, rgba(212, 172, 13, 0.08), transparent 60%)",
-  },
-  heroPattern: {
-    position: "absolute",
-    inset: 0,
-    backgroundImage: `radial-gradient(circle at 20px 20px, rgba(0,0,0,0.03) 1px, transparent 1px)`,
-    backgroundSize: "40px 40px",
-  },
-  heroContent: {
+
+  heroContainer: {
     position: "relative",
     width: "100%",
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "0 24px",
+    maxWidth: "none",
+    minHeight: "520px",
+    height: "auto",
+    margin: "0",
+    overflow: "visible",
+    borderRadius: "0 0 34px 34px",
+    background:
+      "linear-gradient(135deg, #104E78 0%, #176B99 48%, #2389B7 100%)",
+    boxShadow:
+      "0 30px 70px rgba(18, 82, 120, 0.22), 0 8px 25px rgba(15, 23, 42, 0.07)",
+    border: "1px solid rgba(255,255,255,0.28)",
+  },
+
+  heroGlowOne: {
+    position: "absolute",
+    width: "520px",
+    height: "520px",
+    borderRadius: "50%",
+    background: "rgba(255, 211, 74, 0.15)",
+    filter: "blur(8px)",
+    top: "-300px",
+    right: "-120px",
+  },
+
+  heroGlowTwo: {
+    position: "absolute",
+    width: "420px",
+    height: "420px",
+    borderRadius: "50%",
+    background: "rgba(117, 215, 255, 0.13)",
+    filter: "blur(10px)",
+    bottom: "-270px",
+    left: "-130px",
+  },
+
+  heroOrbOne: {
+    position: "absolute",
+    width: "210px",
+    height: "210px",
+    borderRadius: "50%",
+    border: "1px solid rgba(255,255,255,0.14)",
+    right: "7%",
+    top: "-90px",
+  },
+
+  heroOrbTwo: {
+    position: "absolute",
+    width: "115px",
+    height: "115px",
+    borderRadius: "50%",
+    border: "1px solid rgba(255,220,110,0.2)",
+    right: "38%",
+    bottom: "-55px",
+  },
+
+  heroContent: {
+    position: "relative",
     zIndex: 2,
+    minHeight: "520px",
+    height: "auto",
+    width: "100%",
+    maxWidth: "1440px",
+    margin: "0 auto",
+    padding: "72px clamp(40px, 7vw, 110px) 68px",
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1.45fr) minmax(260px, 0.55fr)",
+    alignItems: "center",
+    gap: "clamp(35px, 5vw, 80px)",
   },
-  heroInner: {
-    maxWidth: "700px",
+
+  heroText: {
+    width: "100%",
+    maxWidth: "820px",
   },
+
   heroBadge: {
-    display: "inline-block",
-    padding: "6px 20px",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "9px 18px",
     borderRadius: "50px",
-    fontSize: "13px",
-    fontWeight: "700",
+    background: "rgba(255,255,255,0.12)",
+    border: "1px solid rgba(255,255,255,0.28)",
+    backdropFilter: "blur(14px)",
+    WebkitBackdropFilter: "blur(14px)",
+    color: "#FFE08A",
+    fontSize: "12px",
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: "0.15em",
-    background: "rgba(212, 172, 13, 0.12)",
-    color: "#B7950B",
-    border: "1px solid rgba(212, 172, 13, 0.3)",
+    letterSpacing: "0.14em",
+    marginTop: "8px",
+    marginBottom: "24px",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+  },
+
+  heroTitle: {
+    fontSize: "clamp(3rem, 6vw, 5.4rem)",
+    lineHeight: "0.98",
+    fontWeight: "900",
+    letterSpacing: "-0.055em",
+    color: "#FFFFFF",
+    margin: "0 0 24px",
+  },
+
+  heroTitleHighlight: {
+    color: "#FFD85A",
+  },
+
+  heroRule: {
+    width: "92px",
+    height: "4px",
+    borderRadius: "10px",
+    background: "linear-gradient(90deg, #FFD85A, rgba(255,216,90,0.15))",
     marginBottom: "24px",
   },
-  heroTitle: {
-    fontSize: "clamp(2.8rem, 6vw, 4.5rem)",
-    fontWeight: "800",
-    lineHeight: 1.05,
-    color: "#0F172A",
-    marginBottom: "20px",
-    letterSpacing: "-0.03em",
+
+  heroDescriptionBlock: {
+    maxWidth: "800px",
   },
-  heroTitleLight: {
-    fontWeight: "500",
-    color: "#1E293B",
-  },
-  heroTitleHighlight: {
-    background: "linear-gradient(135deg, #D4AC0D 0%, #E67E22 100%)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-  },
+
   heroSubtitle: {
-    fontSize: "clamp(1.1rem, 1.8vw, 1.4rem)",
-    color: "#1E293B",
-    fontWeight: "600",
-    marginBottom: "16px",
-    lineHeight: 1.5,
+    fontSize: "clamp(1.05rem, 1.6vw, 1.3rem)",
+    color: "rgba(255,255,255,0.96)",
+    fontWeight: "700",
+    lineHeight: "1.55",
+    maxWidth: "760px",
+    margin: "0 0 13px",
   },
+
   heroDescription: {
-    fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
-    color: "#475569",
-    lineHeight: 1.8,
-    maxWidth: "560px",
-    marginBottom: "32px",
+    fontSize: "15px",
+    color: "rgba(255,255,255,0.72)",
+    lineHeight: "1.8",
+    maxWidth: "760px",
+    margin: 0,
   },
+
+  heroMessage: {
+    position: "relative",
+    alignSelf: "stretch",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    paddingLeft: "38px",
+    borderLeft: "1px solid rgba(255,255,255,0.2)",
+  },
+
+  heroMessageNumber: {
+    display: "block",
+    color: "#FFD85A",
+    fontSize: "48px",
+    lineHeight: "1",
+    fontWeight: "900",
+    letterSpacing: "-0.05em",
+    marginBottom: "7px",
+  },
+
+  heroMessageLabel: {
+    color: "rgba(255,255,255,0.65)",
+    fontSize: "10px",
+    fontWeight: "800",
+    letterSpacing: "0.17em",
+  },
+
+  heroMessageLine: {
+    width: "46px",
+    height: "3px",
+    borderRadius: "10px",
+    background: "#FFD85A",
+    margin: "24px 0 20px",
+  },
+
+  heroMessageText: {
+    color: "rgba(255,255,255,0.78)",
+    fontSize: "15px",
+    lineHeight: "1.75",
+    margin: 0,
+    maxWidth: "250px",
+  },
+
+  heroMessageDots: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    marginTop: "30px",
+  },
+
+  heroMessageDotActive: {
+    width: "30px",
+    height: "6px",
+    borderRadius: "20px",
+    background: "#FFD85A",
+  },
+
+  heroMessageDot: {
+    width: "6px",
+    height: "6px",
+    borderRadius: "50%",
+    background: "rgba(255,255,255,0.45)",
+  },
+
+  heroBottomWave: {
+    position: "absolute",
+    width: "520px",
+    height: "100px",
+    borderRadius: "50%",
+    background: "rgba(255,255,255,0.055)",
+    left: "-110px",
+    bottom: "-58px",
+    transform: "rotate(-5deg)",
+  },
+
+  heroGoldEdge: {
+    position: "absolute",
+    width: "35%",
+    height: "3px",
+    right: "8%",
+    bottom: 0,
+    borderRadius: "10px 10px 0 0",
+    background: "linear-gradient(90deg, transparent, #FFD85A, transparent)",
+    opacity: 0.8,
+  },
+
   statsSection: {
     padding: "40px 24px 60px",
     background: "#FFFFFF",
