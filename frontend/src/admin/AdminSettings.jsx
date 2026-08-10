@@ -282,140 +282,140 @@ export default function AdminSettings() {
     <div className="min-h-screen bg-gradient-to-br from-[#f8f5f5] via-[#f7f7fb] to-[#eef5ff] pb-12">
       
       {/* TOP NAVBAR */}
-<div
-  className="relative z-0"
-  style={{
-    background:
-      "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
-    borderBottom: "1px solid rgba(75,46,131,0.12)",
-    boxShadow: "0 14px 36px rgba(15,23,42,0.08)",
-    backdropFilter: "blur(18px)",
-  }}
->
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <Link
-      to="/admin/dashboard"
-      className="inline-flex w-fit items-center gap-2 font-black transition-all hover:-translate-x-1"
-      style={{ color: "#0B1020" }}
-    >
-      <ArrowLeft size={20} />
-      <span>Back to Dashboard</span>
-    </Link>
+      <div
+        className="relative z-0"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
+          borderBottom: "1px solid rgba(75,46,131,0.12)",
+          boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
+          backdropFilter: "blur(18px)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+          <Link
+            to="/admin/dashboard"
+            className="inline-flex w-fit items-center gap-2 text-sm font-black transition-all hover:-translate-x-1"
+            style={{ color: "#0B1020" }}
+          >
+            <ArrowLeft size={18} />
+            <span>Back to Dashboard</span>
+          </Link>
 
-    <button
-      onClick={handleSaveChanges}
-      disabled={saving}
-      className="inline-flex w-fit items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black shadow-lg transition-all hover:scale-105 disabled:opacity-70"
-      style={{
-        color: "#020617",
-        background: "linear-gradient(135deg, #FACC15, #38BDF8)",
-        boxShadow:
-          "0 18px 42px rgba(56,189,248,0.24), inset 0 1px 0 rgba(255,255,255,0.45)",
-      }}
-    >
-      <Save size={16} />
-      <span>{saving ? "Saving..." : saved ? "Saved ✓" : "Save Changes"}</span>
-    </button>
-  </div>
-</div>
+          <button
+            onClick={handleSaveChanges}
+            disabled={saving}
+            className="inline-flex w-fit items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-xs sm:text-sm font-black shadow-md transition-all hover:scale-105 disabled:opacity-70"
+            style={{
+              color: "#020617",
+              background: "linear-gradient(135deg, #FACC15, #38BDF8)",
+              boxShadow:
+                "0 12px 28px rgba(56,189,248,0.2), inset 0 1px 0 rgba(255,255,255,0.45)",
+            }}
+          >
+            <Save size={15} />
+            <span>{saving ? "Saving..." : saved ? "Saved ✓" : "Save Changes"}</span>
+          </button>
+        </div>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         
         {/* SECURITY STATISTICS ROW */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
-          <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-            <p className="text-slate-500 font-medium text-sm">Login Attempts</p>
-            <h3 className="text-3xl font-black text-slate-800 mt-1">
-  {activity.length}
-</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+            <p className="text-slate-500 font-semibold text-xs sm:text-sm">Login Attempts</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-800 mt-0.5">
+              {activity.length}
+            </h3>
           </div>
 
-          <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-            <p className="text-slate-500 font-medium text-sm">Devices</p>
-            <h3 className="text-3xl font-black text-slate-800 mt-1">
-  {uniqueDevices.length}
-</h3>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+            <p className="text-slate-500 font-semibold text-xs sm:text-sm">Devices</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-800 mt-0.5">
+              {uniqueDevices.length}
+            </h3>
           </div>
 
-          <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-            <p className="text-slate-500 font-medium text-sm">2FA Status</p>
-            <h3 className={`text-3xl font-black mt-1 ${twoFactor ? "text-green-600" : "text-red-500"}`}>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+            <p className="text-slate-500 font-semibold text-xs sm:text-sm">2FA Status</p>
+            <h3 className={`text-2xl sm:text-3xl font-black mt-0.5 ${twoFactor ? "text-green-600" : "text-red-500"}`}>
               {twoFactor ? "Enabled" : "Disabled"}
             </h3>
           </div>
 
-          <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-            <p className="text-slate-500 font-medium text-sm">Account Status</p>
-            <h3 className="text-3xl font-black text-green-600 mt-1">Secure</h3>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+            <p className="text-slate-500 font-semibold text-xs sm:text-sm">Account Status</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-green-600 mt-0.5">Secure</h3>
           </div>
         </div>
 
         {/* ADMIN ACCOUNT SECTION */}
-        <div className="bg-white rounded-[40px] p-8 shadow-sm border border-slate-100">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center">
-              <User className="text-purple-700" size={24} />
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+              <User className="text-purple-700" size={20} />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-slate-800">Admin Account</h2>
-              <p className="text-slate-500">Manage your administrator account info.</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Admin Account</h2>
+              <p className="text-xs sm:text-sm text-slate-500">Manage your administrator account info.</p>
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-5 sm:gap-6">
             {/* PROFILE LEFT */}
-            <div className="border border-slate-100 bg-slate-50/50 rounded-3xl p-6 flex flex-col justify-between">
-              <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+            <div className="border border-slate-100 bg-slate-50/50 rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start">
                 <img
                   src={settings?.profile_photo || "https://i.pravatar.cc/150?img=12"}
                   alt="Admin Avatar"
-                  className="w-24 h-24 rounded-2xl object-cover ring-4 ring-purple-100"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover ring-2 ring-purple-100"
                 />
-                <div className="space-y-1 text-center sm:text-left">
-                  <h3 className="text-xl font-bold text-slate-800">{settings?.admin_name}</h3>
-                  <p className="text-slate-500 text-sm">{settings?.admin_email}</p>
-                  <p className="text-xs text-purple-600 font-semibold bg-purple-50 inline-block px-2.5 py-1 rounded-md mt-1">
+                <div className="space-y-0.5 text-center sm:text-left">
+                  <h3 className="text-lg font-bold text-slate-800">{settings?.admin_name}</h3>
+                  <p className="text-slate-500 text-xs sm:text-sm">{settings?.admin_email}</p>
+                  <p className="text-[11px] text-purple-600 font-semibold bg-purple-50 inline-block px-2 py-0.5 rounded-md mt-1">
                     @{settings?.username}
                   </p>
                 </div>
               </div>
 
               {/* KPI Style Cards */}
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-                  <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">Role</p>
-                  <h4 className="font-bold text-slate-800 mt-0.5">{settings?.role}</h4>
+              <div className="grid grid-cols-2 gap-2.5 mt-4">
+                <div className="bg-white border border-slate-100 rounded-xl p-3 shadow-sm">
+                  <p className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider">Role</p>
+                  <h4 className="font-bold text-slate-800 text-xs sm:text-sm mt-0.5">{settings?.role}</h4>
                 </div>
 
-                <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-                  <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">Status</p>
-                  <h4 className="font-bold text-green-600 mt-0.5">Active</h4>
+                <div className="bg-white border border-slate-100 rounded-xl p-3 shadow-sm">
+                  <p className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider">Status</p>
+                  <h4 className="font-bold text-green-600 text-xs sm:text-sm mt-0.5">Active</h4>
                 </div>
 
-                <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-                  <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">Last Login</p>
-                  <h4 className="font-bold text-slate-800 mt-0.5">Today</h4>
+                <div className="bg-white border border-slate-100 rounded-xl p-3 shadow-sm">
+                  <p className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider">Last Login</p>
+                  <h4 className="font-bold text-slate-800 text-xs sm:text-sm mt-0.5">Today</h4>
                 </div>
 
-                <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-                  <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">Permissions</p>
-                  <h4 className="font-bold text-slate-800 mt-0.5">Full Access</h4>
+                <div className="bg-white border border-slate-100 rounded-xl p-3 shadow-sm">
+                  <p className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider">Permissions</p>
+                  <h4 className="font-bold text-slate-800 text-xs sm:text-sm mt-0.5">Full Access</h4>
                 </div>
               </div>
             </div>
 
             {/* ACTION CARDS RIGHT */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div 
                 onClick={() => setShowPasswordModal(true)}
-                className="group border border-slate-150 rounded-3xl p-5 flex items-start gap-4 hover:bg-slate-50 hover:shadow-md cursor-pointer transition-all duration-200"
+                className="group border border-slate-150 rounded-2xl p-3.5 sm:p-4 flex items-start gap-3 hover:bg-slate-50 hover:shadow-sm cursor-pointer transition-all duration-200"
               >
-                <div className="p-3 bg-slate-100 rounded-2xl text-slate-700 group-hover:bg-purple-100 group-hover:text-purple-700 transition-colors">
-                  <Lock size={20} />
+                <div className="p-2.5 bg-slate-100 rounded-xl text-slate-700 group-hover:bg-purple-100 group-hover:text-purple-700 transition-colors">
+                  <Lock size={18} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-800">Change Password</h4>
-                  <p className="text-slate-500 text-sm mt-0.5">Update administrator credentials security parameters.</p>
+                  <h4 className="font-bold text-sm text-slate-800">Change Password</h4>
+                  <p className="text-slate-500 text-xs mt-0.5">Update administrator credentials security parameters.</p>
                 </div>
               </div>
 
@@ -424,14 +424,14 @@ export default function AdminSettings() {
                   setNewEmail(settings?.admin_email || "");
                   setShowEmailModal(true);
                 }}
-                className="group border border-slate-150 rounded-3xl p-5 flex items-start gap-4 hover:bg-slate-50 hover:shadow-md cursor-pointer transition-all duration-200"
+                className="group border border-slate-150 rounded-2xl p-3.5 sm:p-4 flex items-start gap-3 hover:bg-slate-50 hover:shadow-sm cursor-pointer transition-all duration-200"
               >
-                <div className="p-3 bg-slate-100 rounded-2xl text-slate-700 group-hover:bg-purple-100 group-hover:text-purple-700 transition-colors">
-                  <Mail size={20} />
+                <div className="p-2.5 bg-slate-100 rounded-xl text-slate-700 group-hover:bg-purple-100 group-hover:text-purple-700 transition-colors">
+                  <Mail size={18} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-800">Change Email</h4>
-                  <p className="text-slate-500 text-sm mt-0.5">Update primary contact and system alert email address.</p>
+                  <h4 className="font-bold text-sm text-slate-800">Change Email</h4>
+                  <p className="text-slate-500 text-xs mt-0.5">Update primary contact and system alert email address.</p>
                 </div>
               </div>
 
@@ -440,13 +440,13 @@ export default function AdminSettings() {
                 console.log("CARD CLICKED");
                 document.getElementById("profileUpload")?.click();
               }}
-                className="group border border-slate-150 rounded-3xl p-5 flex items-start gap-4 hover:bg-slate-50 hover:shadow-md cursor-pointer transition-all duration-200"
+                className="group border border-slate-150 rounded-2xl p-3.5 sm:p-4 flex items-start gap-3 hover:bg-slate-50 hover:shadow-sm cursor-pointer transition-all duration-200"
               >
-                <div className="p-3 bg-slate-100 rounded-2xl text-slate-700 group-hover:bg-purple-100 group-hover:text-purple-700 transition-colors">
-                  <ImageIcon size={20} />
+                <div className="p-2.5 bg-slate-100 rounded-xl text-slate-700 group-hover:bg-purple-100 group-hover:text-purple-700 transition-colors">
+                  <ImageIcon size={18} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-800">Update Profile Photo</h4>
+                  <h4 className="font-bold text-sm text-slate-800">Update Profile Photo</h4>
                   <input
                     id="profileUpload"
                     type="file"
@@ -454,7 +454,7 @@ export default function AdminSettings() {
                     className="hidden"
                     onChange={handleProfileUpload}
                   />
-                  <p className="text-slate-500 text-sm mt-0.5">Upload a clean thumbnail layout to Supabase Storage bucket.</p>
+                  <p className="text-slate-500 text-xs mt-0.5">Upload a clean thumbnail layout to Supabase Storage bucket.</p>
                 </div>
               </div>
             </div>
@@ -462,28 +462,28 @@ export default function AdminSettings() {
         </div>
 
         {/* SECURITY SETTINGS SECTION */}
-        <div className="bg-white rounded-[40px] p-8 shadow-sm border border-slate-100">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center">
-              <Shield className="text-purple-700" size={24} />
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+              <Shield className="text-purple-700" size={20} />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-slate-800">Security Settings</h2>
-              <p className="text-slate-500">Configure global platform security rules.</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Security Settings</h2>
+              <p className="text-xs sm:text-sm text-slate-500">Configure global platform security rules.</p>
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-5 sm:gap-6">
             {/* CONFIGURATIONS LEFT */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div>
-                <label className="font-semibold text-slate-700 text-sm block">
+                <label className="font-semibold text-slate-700 text-xs sm:text-sm block">
                   Session Timeout
                 </label>
                 <select 
                   value={sessionTimeout}
                   onChange={(e) => setSessionTimeout(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl p-3 mt-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-purple-200 outline-none transition"
+                  className="w-full border border-slate-200 rounded-xl p-2.5 mt-1.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-purple-200 outline-none text-xs sm:text-sm transition"
                 >
                   <option value={30}>30 Minutes</option>
                   <option value={60}>60 Minutes</option>
@@ -492,13 +492,13 @@ export default function AdminSettings() {
               </div>
 
               <div>
-                <label className="font-semibold text-slate-700 text-sm block">
+                <label className="font-semibold text-slate-700 text-xs sm:text-sm block">
                   Maximum Login Attempts
                 </label>
                 <select 
                   value={maxAttempts}
                   onChange={(e) => setMaxAttempts(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl p-3 mt-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-purple-200 outline-none transition"
+                  className="w-full border border-slate-200 rounded-xl p-2.5 mt-1.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-purple-200 outline-none text-xs sm:text-sm transition"
                 >
                   <option value={5}>5 Attempts</option>
                   <option value={10}>10 Attempts</option>
@@ -506,8 +506,8 @@ export default function AdminSettings() {
               </div>
 
               {/* TOGGLE 1 */}
-              <div className="flex justify-between items-center border border-slate-150 rounded-2xl p-4 bg-slate-50/50">
-                <span className="font-medium text-slate-700 text-sm">
+              <div className="flex justify-between items-center border border-slate-150 rounded-xl p-3 bg-slate-50/50">
+                <span className="font-medium text-slate-700 text-xs sm:text-sm">
                   Lock Account After Failed Attempts
                 </span>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -517,13 +517,13 @@ export default function AdminSettings() {
                     checked={lockAccount}
                     onChange={(e) => setLockAccount(e.target.checked)}
                   />
-                  <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-10 h-5 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
                 </label>
               </div>
 
               {/* TOGGLE 2 */}
-              <div className="flex justify-between items-center border border-slate-150 rounded-2xl p-4 bg-slate-50/50">
-                <span className="font-medium text-slate-700 text-sm">
+              <div className="flex justify-between items-center border border-slate-150 rounded-xl p-3 bg-slate-50/50">
+                <span className="font-medium text-slate-700 text-xs sm:text-sm">
                   Two Factor Authentication
                 </span>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -533,7 +533,7 @@ export default function AdminSettings() {
                     checked={twoFactor}
                     onChange={(e) => setTwoFactor(e.target.checked)}
                   />
-                  <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-10 h-5 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
                 </label>
               </div>
             </div>
@@ -541,39 +541,39 @@ export default function AdminSettings() {
             {/* RECENT LOGIN & ALERTS RIGHT */}
             <div className="flex flex-col justify-between">
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold text-slate-800">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-800">
                     Recent Login Activity
                   </h3>
                   <button
-  onClick={() => setShowActivityModal(true)}
-  className="text-purple-700 font-semibold hover:text-purple-900"
->
-  View All
-</button>
+                    onClick={() => setShowActivityModal(true)}
+                    className="text-purple-700 font-semibold text-xs sm:text-sm hover:text-purple-900"
+                  >
+                    View All
+                  </button>
                 </div>
 
-                <div className="bg-slate-50/50 border border-slate-100 rounded-2xl px-5 divide-y divide-slate-100">
+                <div className="bg-slate-50/50 border border-slate-100 rounded-xl px-4 divide-y divide-slate-100">
                 {activity.map((item) => (
                    <div
                    key={item.id}
-                   className="flex justify-between items-center py-4"
+                   className="flex justify-between items-center py-2.5"
                  >
                    <div>
-                     <h4 className="font-semibold text-slate-800 text-sm">
+                     <h4 className="font-semibold text-slate-800 text-xs sm:text-sm">
                        {item.browser} {item.device}
                      </h4>
                  
-                     <p className="text-slate-400 text-xs">
+                     <p className="text-slate-400 text-[11px]">
                        {item.location}
                      </p>
                  
-                     <p className="text-slate-300 text-xs">
+                     <p className="text-slate-400 text-[10px]">
                        {new Date(item.login_time).toLocaleString()}
                      </p>
                    </div>
                  
-                   <span className="bg-green-50 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold">
+                   <span className="bg-green-50 text-green-700 text-[11px] px-2 py-0.5 rounded-full font-bold">
                      {item.status}
                    </span>
                  </div>
@@ -583,15 +583,15 @@ export default function AdminSettings() {
 
               {/* MODERN SECURITY RECOMMENDATION CARD */}
               {!twoFactor && (
-                <div className="mt-6 bg-amber-50 border border-amber-200 rounded-3xl p-5 flex gap-4 items-start animate-pulse">
-                  <div className="p-2 bg-amber-100 text-amber-800 rounded-xl mt-0.5">
-                    <Key size={18} />
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex gap-3 items-start animate-pulse">
+                  <div className="p-1.5 bg-amber-100 text-amber-800 rounded-lg mt-0.5">
+                    <Key size={16} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-amber-800 text-sm">
+                    <h4 className="font-bold text-amber-800 text-xs sm:text-sm">
                       Security Recommendation
                     </h4>
-                    <p className="text-amber-700/90 text-xs mt-1 leading-relaxed">
+                    <p className="text-amber-700/90 text-xs mt-0.5 leading-relaxed">
                       Enable Two Factor Authentication (2FA) immediately to safeguard global administrator rights.
                     </p>
                   </div>

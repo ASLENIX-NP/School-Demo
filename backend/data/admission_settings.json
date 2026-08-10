@@ -1,5 +1,9 @@
 {
   "isOpen": true,
+  "showAcademicSession": true,
+  "showStatusBadge": true,
+  "showDatesOnWebsite": true,
+  "hideWhenClosed": false,
   "academicSession": "2027–2028",
   "startDate": "2027-01-01",
   "endDate": "2027-04-30",
@@ -9,104 +13,244 @@
   "countdownEnabled": true,
   "applyButtonText": "Apply Now for Admission",
   "prospectusUrl": "",
+  "prospectusButtonText": "Download Prospectus",
+  "contactButtonText": "Contact Admissions",
   "feeStructureUrl": "",
-  "contactPhone": "+977 1-4567890 / +977 9851012345",
-  "contactEmail": "admissions@smritischool.edu.np",
-  "contactHours": "Sun - Fri: 8:00 AM - 4:00 PM",
-  "contactAddress": "Kathmandu, Nepal",
+  "feeButtonText": "Download Fee Structure PDF",
+  "feeRequestButtonText": "Request Fee Breakdown via Office",
+  "closedTitle": "Admissions Are Currently Closed",
+  "closedDescription": "Applications for this academic session have officially ended. The next admission cycle will be announced soon.",
+  "closedButtonText": "Contact Admissions Office",
+  "whyUsBadge": "Why Smriti School",
+  "whyUsTitle": "Building a Foundation for Excellence",
+  "whyUsDescription": "We offer a comprehensive educational journey designed to foster academic rigor, leadership, and moral values.",
+  "whyUs": [
+    {
+      "id": "why-1",
+      "icon": "Award",
+      "title": "Academic Excellence",
+      "desc": "Rigorous curriculum focused on conceptual clarity, critical thinking, and STEAM education."
+    },
+    {
+      "id": "why-2",
+      "icon": "Users",
+      "title": "Expert Educators",
+      "desc": "Passionate teachers dedicated to mentoring, inspiring, and bringing out the best in every child."
+    },
+    {
+      "id": "why-3",
+      "icon": "School",
+      "title": "World-Class Infrastructure",
+      "desc": "Smart classrooms, science & robotics labs, digital library, and comprehensive sports facilities."
+    },
+    {
+      "id": "why-4",
+      "icon": "ShieldCheck",
+      "title": "Safe & Nurturing Environment",
+      "desc": "CCTV-monitored campus, strict safety protocols, and caring staff ensuring student well-being."
+    }
+  ],
+  "processBadge": "Step-By-Step Workflow",
+  "processTitle": "Simple 5-Step Admission Process",
+  "processDescription": "A transparent, supportive, and hassle-free path to joining our school community.",
+  "timelineSteps": [
+    {
+      "id": "step-1",
+      "number": "01",
+      "title": "Submit Inquiry",
+      "desc": "Fill out our online inquiry form with student & parent details."
+    },
+    {
+      "id": "step-2",
+      "number": "02",
+      "title": "Campus Interaction",
+      "desc": "Visit our campus to meet counselors and explore our learning environment."
+    },
+    {
+      "id": "step-3",
+      "number": "03",
+      "title": "Assessment",
+      "desc": "Child participates in an age-appropriate assessment and friendly interaction."
+    },
+    {
+      "id": "step-4",
+      "number": "04",
+      "title": "Verification",
+      "desc": "Submit required academic documents and birth record for verification."
+    },
+    {
+      "id": "step-5",
+      "number": "05",
+      "title": "Final Enrollment",
+      "desc": "Receive confirmation, complete fee payment, and welcome to Smriti School!"
+    }
+  ],
+  "eligibilityBadge": "Requirements",
+  "eligibilityTitle": "Eligibility Criteria",
+  "eligibilityDescription": "Please ensure candidate meets age limits and academic prerequisites prior to applying.",
   "eligibilityCriteria": [
     {
+      "id": "elig-1",
       "grade": "Play Group & Nursery",
       "age": "2.5 - 3.5 years",
       "requirements": "Child birth certificate, medical immunization record."
     },
     {
+      "id": "elig-2",
       "grade": "LKG & UKG",
       "age": "4.0 - 5.0 years",
       "requirements": "Basic interaction, previous school report card if attended."
     },
     {
+      "id": "elig-3",
       "grade": "Grade 1 - 5 (Primary)",
       "age": "6.0+ years",
       "requirements": "Passed previous grade, Transfer Certificate (TC), marksheets."
     },
     {
+      "id": "elig-4",
       "grade": "Grade 6 - 9 (Secondary)",
       "age": "11.0+ years",
       "requirements": "Passed entrance test, character certificate, grade report card."
     }
   ],
+  "documentsBadge": "Checklist",
+  "documentsTitle": "Required Documents",
+  "documentsDescription": "Documents to be presented during the final verification stage.",
   "requiredDocuments": [
     {
+      "id": "doc-1",
       "name": "Birth Certificate",
       "desc": "Official copy issued by local municipality",
       "mandatory": true
     },
     {
+      "id": "doc-2",
       "name": "Transfer Certificate (TC)",
       "desc": "Original TC from previous school",
       "mandatory": true
     },
     {
+      "id": "doc-3",
       "name": "Previous Grade Marksheet",
       "desc": "Copy of last annual examination progress report",
       "mandatory": true
     },
     {
+      "id": "doc-4",
       "name": "Passport Size Photographs",
       "desc": "4 recent color photographs of student & 2 of parents",
       "mandatory": true
     },
     {
+      "id": "doc-5",
       "name": "Parent Citizenship / ID Proof",
       "desc": "Copy of Citizenship or Passport",
       "mandatory": true
     },
     {
+      "id": "doc-6",
       "name": "Character Certificate",
       "desc": "For Grade 6 and above",
       "mandatory": false
     }
   ],
-  "faqs": [
-    {
-      "question": "What is the admission procedure?",
-      "answer": "Fill out the online inquiry form or visit our campus. After submission, our admissions team will schedule an assessment and parent interaction session."
-    },
-    {
-      "question": "Is school transportation available?",
-      "answer": "Yes, we operate safe and modern bus services covering major routes across the city."
-    },
-    {
-      "question": "Are hostel / residential facilities provided?",
-      "answer": "Yes, we have separate well-equipped hostel facilities for boys and girls with 24/7 care and academic supervision."
-    },
-    {
-      "question": "What are the school hours?",
-      "answer": "Regular school hours are from 9:00 AM to 3:30 PM, Sunday through Friday."
-    }
-  ],
   "importantDatesEnabled": true,
+  "datesBadge": "Schedule",
+  "datesTitle": "Important Dates & Deadlines",
+  "datesDescription": "Keep track of key milestones for academic session.",
   "importantDates": [
     {
+      "id": "date-1",
       "title": "Admissions Open",
       "date": "2027-01-01",
       "desc": "Online inquiry submission portal opens."
     },
     {
+      "id": "date-2",
       "title": "Application Deadline",
       "date": "2027-04-30",
       "desc": "Last date to submit inquiry & register."
     },
     {
+      "id": "date-3",
       "title": "Entrance Assessment",
       "date": "Scheduled upon Inquiry",
       "desc": "Interactive student evaluation sessions."
     },
     {
+      "id": "date-4",
       "title": "Academic Session Starts",
       "date": "May 2027",
       "desc": "Official orientation and session commencement."
     }
-  ]
+  ],
+  "feeBadge": "Transparent Pricing",
+  "feeTitle": "Fee Structure & Scholarship Policy",
+  "feeDescription": "We provide transparent fee schedules with no hidden charges. Merit scholarships and need-based financial aid options are available for eligible candidates.",
+  "facilitiesBadge": "Campus Infrastructure",
+  "facilitiesTitle": "Facilities for Comprehensive Growth",
+  "facilitiesDescription": "Equipped with modern amenities to ensure safety, comfort, and interactive learning.",
+  "facilitiesList": [
+    {
+      "id": "fac-1",
+      "icon": "BookOpen",
+      "title": "Smart Classrooms",
+      "desc": "Interactive digital displays & multimedia learning."
+    },
+    {
+      "id": "fac-2",
+      "icon": "School",
+      "title": "Science & Computer Labs",
+      "desc": "Advanced hands-on practical learning environments."
+    },
+    {
+      "id": "fac-3",
+      "icon": "Bus",
+      "title": "School Transport",
+      "desc": "Safe GPS-tracked buses across major city routes."
+    },
+    {
+      "id": "fac-4",
+      "icon": "Home",
+      "title": "Student Hostel",
+      "desc": "Comfortable residential boarding with round-the-clock security."
+    }
+  ],
+  "faqsBadge": "Parent Assistance",
+  "faqsTitle": "Frequently Asked Questions",
+  "faqsDescription": "Got questions regarding admissions? We have answers.",
+  "faqs": [
+    {
+      "id": "faq-1",
+      "question": "What is the admission procedure?",
+      "answer": "Fill out the online inquiry form or visit our campus. After submission, our admissions team will schedule an assessment and parent interaction session."
+    },
+    {
+      "id": "faq-2",
+      "question": "Is school transportation available?",
+      "answer": "Yes, we operate safe and modern bus services covering major routes across the city."
+    },
+    {
+      "id": "faq-3",
+      "question": "Are hostel / residential facilities provided?",
+      "answer": "Yes, we have separate well-equipped hostel facilities for boys and girls with 24/7 care and academic supervision."
+    },
+    {
+      "id": "faq-4",
+      "question": "What are the school hours?",
+      "answer": "Regular school hours are from 9:00 AM to 3:30 PM, Sunday through Friday."
+    }
+  ],
+  "contactBadge": "Direct Assistance",
+  "contactTitle": "Contact Admission Office",
+  "contactDescription": "Have questions? Reach out directly to our friendly admission counselors.",
+  "contactPhone": "+977 1-4567890 / +977 9851012345",
+  "contactEmail": "admissions@smritischool.edu.np",
+  "contactHours": "Sun - Fri: 8:00 AM - 4:00 PM",
+  "contactAddress": "Kathmandu, Nepal",
+  "ctaTitle": "Give Your Child the Gift of World-Class Education",
+  "ctaDescription": "Take the first step towards a bright academic future with Smriti Secondary English Boarding School.",
+  "ctaButtonText": "Start Admission Inquiry Now",
+  "ctaClosedButtonText": "Contact Us for Future Cycles"
 }

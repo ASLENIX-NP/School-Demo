@@ -147,21 +147,21 @@ function getContactIcon(icon) {
 function EditorHint({ icon: Icon, title, text, color }) {
   return (
     <div
-      className="rounded-2xl p-4"
+      className="rounded-xl p-3 sm:p-3.5"
       style={{
         background: "rgba(255,255,255,0.9)",
         border: "1px solid rgba(75,46,131,0.1)",
-        boxShadow: "0 14px 34px rgba(15,23,42,0.06)",
+        boxShadow: "0 10px 24px rgba(15,23,42,0.04)",
       }}
     >
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+        className="w-8 h-8 rounded-lg flex items-center justify-center mb-2"
         style={{ background: `${color}12`, color }}
       >
-        <Icon className="w-5 h-5" />
+        <Icon className="w-4 h-4" />
       </div>
-      <div className="font-black text-slate-950">{title}</div>
-      <div className="text-sm text-slate-500 mt-1">{text}</div>
+      <div className="text-xs sm:text-sm font-black text-slate-950">{title}</div>
+      <div className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">{text}</div>
     </div>
   );
 }
@@ -632,30 +632,30 @@ export default function AdminContact() {
           backdropFilter: "blur(18px)",
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
           <button
             type="button"
             onClick={() => navigate("/admin/dashboard")}
-            className="inline-flex items-center gap-2 font-black transition-all hover:-translate-x-1"
+            className="inline-flex items-center gap-2 text-sm font-black transition-all hover:-translate-x-1"
             style={{ color: colors.dark }}
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </button>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <button
               type="button"
               onClick={() => navigate("/admin/contact-messages")}
-              className="hidden md:inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black transition-all hover:scale-105"
+              className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition-all hover:scale-105"
               style={{
                 color: colors.dark,
                 background: "rgba(255,255,255,0.72)",
                 border: "1px solid rgba(75,46,131,0.12)",
-                boxShadow: "0 10px 26px rgba(15,23,42,0.06)",
+                boxShadow: "0 8px 20px rgba(15,23,42,0.05)",
               }}
             >
-              <Inbox className="w-4 h-4" />
+              <Inbox className="w-3.5 h-3.5" />
               Messages
             </button>
 
@@ -663,15 +663,15 @@ export default function AdminContact() {
               href="/contact"
               target="_blank"
               rel="noreferrer"
-              className="hidden md:inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black transition-all hover:scale-105"
+              className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition-all hover:scale-105"
               style={{
                 color: colors.dark,
                 background: "rgba(255,255,255,0.72)",
                 border: "1px solid rgba(75,46,131,0.12)",
-                boxShadow: "0 10px 26px rgba(15,23,42,0.06)",
+                boxShadow: "0 8px 20px rgba(15,23,42,0.05)",
               }}
             >
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink className="w-3.5 h-3.5" />
               View Contact Page
             </a>
 
@@ -679,73 +679,73 @@ export default function AdminContact() {
               type="button"
               onClick={() => saveContent(form)}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl font-black transition-all hover:scale-105 disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all hover:scale-105 disabled:opacity-60"
               style={{
                 color: "#020617",
                 background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
                 boxShadow:
-                  "0 18px 42px rgba(56,189,248,0.24), inset 0 1px 0 rgba(255,255,255,0.45)",
+                  "0 12px 30px rgba(56,189,248,0.2), inset 0 1px 0 rgba(255,255,255,0.45)",
               }}
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-3.5 h-3.5" />
               {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-[1600px] mx-auto px-3 sm:px-6 py-6 sm:py-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 sm:mb-8 rounded-[28px] sm:rounded-[34px] p-5 md:p-8"
+          className="mb-4 sm:mb-5 rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6"
           style={lightAdminPanelStyle}
         >
           <span
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-black mb-5"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black mb-2 sm:mb-3"
             style={{
               background: "rgba(215,25,32,0.08)",
               color: colors.red,
               border: "1px solid rgba(215,25,32,0.18)",
             }}
           >
-            <ContactIcon className="w-4 h-4" />
+            <ContactIcon className="w-3.5 h-3.5" />
             Visual Contact Editor
           </span>
 
           <h1
-            className="text-4xl md:text-6xl mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl mb-1.5"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 850,
               color: colors.dark,
-              letterSpacing: "-0.045em",
+              letterSpacing: "-0.04em",
             }}
           >
             Edit Contact Page
           </h1>
 
-          <p className="text-slate-500 max-w-3xl text-lg">
+          <p className="text-slate-500 max-w-2xl text-xs sm:text-sm">
             Hover the real Contact page below. Edit heading, contact cards, map
             card, and form text directly from the visual preview.
           </p>
         </motion.div>
 
         {success && (
-          <div className="mb-6 rounded-2xl px-5 py-4 flex items-center gap-3 font-semibold bg-green-50 text-green-700 border border-green-100">
-            <CheckCircle2 className="w-5 h-5" />
+          <div className="mb-4 rounded-xl px-4 py-3 flex items-center gap-2 text-sm font-semibold bg-green-50 text-green-700 border border-green-100">
+            <CheckCircle2 className="w-4 h-4" />
             {success}
           </div>
         )}
 
         {error && (
-          <div className="mb-6 rounded-2xl px-5 py-4 flex items-center gap-3 font-semibold bg-red-50 text-red-700 border border-red-100">
-            <AlertCircle className="w-5 h-5" />
+          <div className="mb-4 rounded-xl px-4 py-3 flex items-center gap-2 text-sm font-semibold bg-red-50 text-red-700 border border-red-100">
+            <AlertCircle className="w-4 h-4" />
             {error}
           </div>
         )}
 
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           <EditorHint
             icon={Type}
             title="Heading"

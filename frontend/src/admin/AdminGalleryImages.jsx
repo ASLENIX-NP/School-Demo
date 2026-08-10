@@ -347,9 +347,9 @@ function Button({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-black shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone]}`}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-black shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone]}`}
     >
-      {Icon && <Icon size={16} />}
+      {Icon && <Icon size={15} />}
       {children}
     </button>
   );
@@ -503,7 +503,7 @@ function ConfirmModal({ target, onClose, onConfirm }) {
 
 function AdminHero({ content, onEdit }) {
   return (
-    <section className="relative min-h-[560px] overflow-hidden bg-[linear-gradient(135deg,#102B45,#1D4C6D_45%,#173C58)]">
+    <section className="relative min-h-[340px] sm:min-h-[400px] overflow-hidden bg-[linear-gradient(135deg,#102B45,#1D4C6D_45%,#173C58)]">
       <div className="absolute inset-0 opacity-30">
         <motion.div
           animate={{ x: [0, 45, 0], y: [0, -30, 0], scale: [1, 1.1, 1] }}
@@ -529,26 +529,26 @@ function AdminHero({ content, onEdit }) {
       <button
         type="button"
         onClick={onEdit}
-        className="absolute right-5 top-5 z-30 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-black text-slate-800 shadow-xl transition hover:-translate-y-0.5"
+        className="absolute right-4 top-4 z-30 inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs sm:text-sm font-black text-slate-800 shadow-xl transition hover:-translate-y-0.5"
       >
-        <Edit3 size={16} />
+        <Edit3 size={15} />
         Edit Hero
       </button>
 
-      <div className="relative z-10 mx-auto flex min-h-[560px] max-w-5xl flex-col items-center justify-center px-6 py-24 text-center">
+      <div className="relative z-10 mx-auto flex min-h-[340px] sm:min-h-[400px] max-w-4xl flex-col items-center justify-center px-4 py-12 sm:py-16 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 25 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-amber-300/10 px-5 py-2.5 text-xs font-black tracking-[.15em] text-amber-300 backdrop-blur"
+          className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/30 bg-amber-300/10 px-3.5 py-1.5 text-xs font-black tracking-wide text-amber-300 backdrop-blur"
         >
-          <Sparkles size={15} />
+          <Sparkles size={14} />
           {content.heroBadge}
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mt-8 text-[clamp(58px,10vw,125px)] font-black leading-[.9] tracking-[-.07em] text-white"
+          className="mt-4 text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight text-white"
         >
           <span className="text-amber-300">
             {content.heroHighlightedText}
@@ -557,44 +557,44 @@ function AdminHero({ content, onEdit }) {
         </motion.h1>
 
         <motion.p
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-7 max-w-2xl text-lg leading-8 text-white/65 md:text-2xl"
+          className="mt-3 max-w-xl text-xs sm:text-sm md:text-base leading-relaxed text-white/70"
         >
           {content.heroSubtitle}
         </motion.p>
 
-        <div className="mt-12 flex items-center gap-8 text-white">
+        <div className="mt-6 flex items-center gap-6 text-white">
           <div>
-            <div className="text-2xl font-black">
+            <div className="text-xl font-black">
               {(content.images || []).reduce(
                 (total, item) => total + getUrls(item).length,
                 0
               )}
             </div>
-            <div className="text-[10px] uppercase tracking-[.15em] text-white/45">
+            <div className="text-[10px] uppercase tracking-wider text-white/45">
               Photos
             </div>
           </div>
 
-          <div className="h-9 w-px bg-white/15" />
+          <div className="h-7 w-px bg-white/15" />
 
           <div>
-            <div className="text-2xl font-black">
+            <div className="text-xl font-black">
               {content.categories.length}
             </div>
-            <div className="text-[10px] uppercase tracking-[.15em] text-white/45">
+            <div className="text-[10px] uppercase tracking-wider text-white/45">
               Collections
             </div>
           </div>
 
-          <div className="h-9 w-px bg-white/15" />
+          <div className="h-7 w-px bg-white/15" />
 
           <div>
-            <div className="text-2xl font-black">
+            <div className="text-xl font-black">
               {content.achievements.length}
             </div>
-            <div className="text-[10px] uppercase tracking-[.15em] text-white/45">
+            <div className="text-[10px] uppercase tracking-wider text-white/45">
               Achievements
             </div>
           </div>
@@ -606,16 +606,16 @@ function AdminHero({ content, onEdit }) {
 
 function AchievementSection({ content, onAdd, onEdit, onDelete }) {
   return (
-    <section className="bg-[#F7F8FA] px-5 py-20">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
+    <section className="bg-[#F7F8FA] px-4 py-8 sm:py-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-black text-emerald-700">
-              <Trophy size={15} />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+              <Trophy size={14} />
               OUR ACHIEVEMENTS
             </span>
 
-            <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
+            <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-950">
               Celebrating{" "}
               <span className="bg-gradient-to-r from-emerald-700 to-orange-400 bg-clip-text text-transparent">
                 Excellence
@@ -628,39 +628,39 @@ function AchievementSection({ content, onAdd, onEdit, onDelete }) {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {(content.achievements || []).map((item) => (
             <motion.div
               key={item.id}
-              whileHover={{ y: -7 }}
-              className="group relative overflow-hidden rounded-[24px] border border-slate-100 bg-white p-6 text-center shadow-sm transition hover:shadow-xl"
+              whileHover={{ y: -4 }}
+              className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 text-center shadow-sm transition hover:shadow-lg"
             >
-              <div className="absolute right-3 top-3 flex gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
+              <div className="absolute right-2.5 top-2.5 flex gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
                 <button
                   type="button"
                   onClick={() => onEdit(item)}
-                  className="rounded-full bg-violet-600 p-2 text-white"
+                  className="rounded-full bg-violet-600 p-1.5 text-white"
                 >
-                  <Edit3 size={14} />
+                  <Edit3 size={12} />
                 </button>
                 <button
                   type="button"
                   onClick={() => onDelete(item)}
-                  className="rounded-full bg-red-600 p-2 text-white"
+                  className="rounded-full bg-red-600 p-1.5 text-white"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={12} />
                 </button>
               </div>
 
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-amber-50 text-emerald-700 transition group-hover:scale-110">
-                <IconFor name={item.icon} size={27} />
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-50 to-amber-50 text-emerald-700 transition group-hover:scale-105">
+                <IconFor name={item.icon} size={22} />
               </div>
 
-              <div className="mt-5 text-[10px] font-black uppercase tracking-[.16em] text-orange-500">
+              <div className="mt-3 text-[10px] font-black uppercase tracking-wider text-orange-500">
                 {item.year}
               </div>
 
-              <h3 className="mt-2 text-base font-black text-slate-950">
+              <h3 className="mt-1 text-sm font-black text-slate-950">
                 {item.title}
               </h3>
             </motion.div>
@@ -680,62 +680,62 @@ function GalleryPreviewCard({
 }) {
   return (
     <motion.article
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: Math.min(index * 0.05, 0.25) }}
-      whileHover={{ y: -7 }}
-      className="group relative overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm transition hover:shadow-2xl"
+      transition={{ delay: Math.min(index * 0.04, 0.2) }}
+      whileHover={{ y: -4 }}
+      className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-xl"
     >
-      <div className="relative h-[300px] overflow-hidden bg-slate-100">
+      <div className="relative h-[200px] sm:h-[220px] overflow-hidden bg-slate-100">
         {album.cover ? (
           <img
             src={album.cover}
             alt={album.title}
-            className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+            className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-300">
-            <ImageIcon size={52} />
+          <div className="flex h-full flex-col items-center justify-center gap-1.5 text-slate-300">
+            <ImageIcon size={40} />
             <span className="text-xs font-bold">No images yet</span>
           </div>
         )}
 
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/70" />
 
-        <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-          <span className="rounded-full border border-white/15 bg-slate-950/45 px-3 py-1.5 text-[10px] font-black text-white backdrop-blur">
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+          <span className="rounded-full border border-white/15 bg-slate-950/45 px-2.5 py-1 text-[10px] font-black text-white backdrop-blur">
             {album.category}
           </span>
 
           {album.subcategory && (
-            <span className="rounded-full bg-amber-300 px-3 py-1.5 text-[10px] font-black text-slate-900">
+            <span className="rounded-full bg-amber-300 px-2.5 py-1 text-[10px] font-black text-slate-900">
               {album.subcategory}
             </span>
           )}
         </div>
 
-        <div className="absolute bottom-4 right-4 rounded-full bg-black/45 px-3 py-1.5 text-[10px] font-black text-white backdrop-blur">
+        <div className="absolute bottom-3 right-3 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-black text-white backdrop-blur">
           {album.total} photos
         </div>
 
-        <div className="absolute right-4 top-4 flex gap-2 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
+        <div className="absolute right-3 top-3 flex gap-1.5 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
           {!album.subcategory && (
             <>
               <button
                 type="button"
                 onClick={() => onEditCategory(album.category)}
-                className="rounded-full bg-violet-600 p-2.5 text-white shadow-lg"
+                className="rounded-full bg-violet-600 p-2 text-white shadow-md"
               >
-                <Edit3 size={15} />
+                <Edit3 size={13} />
               </button>
 
               <button
                 type="button"
                 onClick={() => onDeleteCategory(album.category)}
-                className="rounded-full bg-red-600 p-2.5 text-white shadow-lg"
+                className="rounded-full bg-red-600 p-2 text-white shadow-md"
               >
-                <Trash2 size={15} />
+                <Trash2 size={13} />
               </button>
             </>
           )}
@@ -745,9 +745,9 @@ function GalleryPreviewCard({
             onClick={() =>
               onManage(album.category, album.subcategory)
             }
-            className="rounded-full bg-emerald-600 p-2.5 text-white shadow-lg"
+            className="rounded-full bg-emerald-600 p-2 text-white shadow-md"
           >
-            <Upload size={15} />
+            <Upload size={13} />
           </button>
         </div>
 
@@ -756,27 +756,27 @@ function GalleryPreviewCard({
           onClick={() =>
             onManage(album.category, album.subcategory)
           }
-          className="absolute bottom-1/2 left-1/2 flex translate-x-[-50%] translate-y-1/2 items-center gap-2 rounded-xl bg-white/95 px-4 py-3 text-xs font-black text-slate-900 opacity-0 shadow-xl transition group-hover:opacity-100"
+          className="absolute bottom-1/2 left-1/2 flex translate-x-[-50%] translate-y-1/2 items-center gap-1.5 rounded-xl bg-white/95 px-3 py-2 text-xs font-black text-slate-900 opacity-0 shadow-xl transition group-hover:opacity-100"
         >
-          <Camera size={15} />
+          <Camera size={14} />
           Manage Photos
         </button>
       </div>
 
-      <div className="p-5">
-        <div className="text-[10px] font-black uppercase tracking-[.12em] text-slate-400">
+      <div className="p-4">
+        <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
           {album.date}
         </div>
 
-        <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-950">
+        <h3 className="mt-1 text-base sm:text-lg font-black tracking-tight text-slate-950">
           {album.title}
         </h3>
 
-        <p className="mt-2 line-clamp-3 min-h-[63px] text-sm leading-6 text-slate-500">
+        <p className="mt-1 line-clamp-2 min-h-[38px] text-xs leading-5 text-slate-500">
           {album.description || "No description added yet."}
         </p>
 
-        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+        <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
           <span className="text-xs font-black text-slate-400">
             {album.total} {album.total === 1 ? "memory" : "memories"}
           </span>
@@ -786,9 +786,9 @@ function GalleryPreviewCard({
             onClick={() =>
               onManage(album.category, album.subcategory)
             }
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white transition hover:rotate-6 hover:bg-emerald-700"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white transition hover:bg-emerald-700"
           >
-            <ExternalLink size={17} />
+            <ExternalLink size={14} />
           </button>
         </div>
       </div>
@@ -821,30 +821,30 @@ function GalleryPreview({
   };
 
   return (
-    <section className="bg-white px-5 py-20">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="mb-10 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-black text-emerald-700">
-            <Camera size={15} />
+    <section className="bg-white px-4 py-8 sm:py-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-6 text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+            <Camera size={14} />
             {content.badge}
           </span>
 
-          <h2 className="mt-5 text-5xl font-black tracking-[-.05em] text-slate-950 md:text-6xl">
+          <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-950">
             {content.title}
           </h2>
 
-          <p className="mx-auto mt-5 max-w-3xl text-sm leading-7 text-slate-500">
+          <p className="mx-auto mt-2 max-w-2xl text-xs sm:text-sm text-slate-500">
             {content.description}
           </p>
 
-          <div className="mt-5">
+          <div className="mt-3">
             <Button tone="white" icon={Edit3} onClick={onEditHeading}>
               Edit Gallery Heading
             </Button>
           </div>
         </div>
 
-        <div className="mb-10 flex justify-center gap-2 overflow-x-auto pb-2">
+        <div className="mb-6 flex justify-center gap-2 overflow-x-auto pb-2">
           {categories.map((category) => {
             const Icon = iconFor(category);
             const active = category === activeCategory;
@@ -854,20 +854,20 @@ function GalleryPreview({
                 key={category}
                 type="button"
                 onClick={() => setActiveCategory(category)}
-                className={`inline-flex flex-none items-center gap-2 rounded-2xl px-5 py-3 text-xs font-black transition ${
+                className={`inline-flex flex-none items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-black transition ${
                   active
-                    ? "bg-[linear-gradient(135deg,#173B5F,#2D6A4F)] text-white shadow-xl"
-                    : "border border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md"
+                    ? "bg-[linear-gradient(135deg,#173B5F,#2D6A4F)] text-white shadow-md"
+                    : "border border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-sm"
                 }`}
               >
-                <Icon size={16} />
+                <Icon size={14} />
                 {category}
               </button>
             );
           })}
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {albums.map((album, index) => (
             <GalleryPreviewCard
               key={`${album.category}-${album.subcategory || album.title}`}
@@ -886,31 +886,31 @@ function GalleryPreview({
 
 function BottomPreview({ content, onEdit }) {
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#112F49,#1D536F)] px-5 py-20 text-center text-white">
-      <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300/10 blur-3xl" />
+    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#112F49,#1D536F)] px-4 py-10 text-center text-white">
+      <div className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300/10 blur-3xl" />
 
-      <div className="relative mx-auto max-w-2xl">
+      <div className="relative mx-auto max-w-xl">
         <button
           type="button"
           onClick={onEdit}
-          className="absolute -right-2 -top-2 rounded-full bg-white px-4 py-2 text-xs font-black text-slate-900 shadow-xl"
+          className="absolute -right-2 -top-2 rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-900 shadow-lg"
         >
-          <Edit3 size={14} className="mr-1 inline" />
+          <Edit3 size={13} className="mr-1 inline" />
           Edit
         </button>
 
-        <Sparkles size={24} className="mx-auto text-amber-300" />
+        <Sparkles size={20} className="mx-auto text-amber-300" />
 
-        <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
+        <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight">
           {content.bottomTitle}
         </h2>
 
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-white/60">
+        <p className="mx-auto mt-2 max-w-lg text-xs sm:text-sm text-white/70">
           {content.bottomDescription}
         </p>
 
-        <div className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/55">
-          <Sparkles size={14} className="text-amber-300" />
+        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/60">
+          <Sparkles size={13} className="text-amber-300" />
           {content.bottomNote}
         </div>
       </div>
@@ -986,21 +986,21 @@ function ImageManager({
   return (
     <section
       id="image-manager"
-      className="scroll-mt-24 bg-[#F7F8FA] px-5 py-20"
+      className="scroll-mt-24 bg-[#F7F8FA] px-4 py-8 sm:py-10"
     >
-      <div className="mx-auto max-w-[1400px]">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-4 py-2 text-xs font-black text-violet-700">
-              <Layers size={15} />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-700">
+              <Layers size={14} />
               EDIT IMAGES HERE
             </span>
 
-            <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
+            <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-950">
               Gallery Images
             </h2>
 
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+            <p className="mt-1 max-w-xl text-xs sm:text-sm text-slate-500">
               Upload, replace, move, hide, or delete images without opening
               another admin page.
             </p>
@@ -1027,7 +1027,7 @@ function ImageManager({
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
           <div className="grid gap-5 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
             <label className="block">
               <span className="mb-2 block text-sm font-black text-slate-700">
@@ -3005,8 +3005,8 @@ export default function AdminGallery() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#F7F8FA]">
       {/* TOP ADMIN BAR */}
-      <header className="sticky top-0 z-[100] border-b border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
+      <header className="sticky top-0 z-[100] border-b border-slate-200 bg-white/90 px-4 py-2.5 sm:py-3 shadow-sm backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2.5">
           <button
             type="button"
             onClick={() =>
@@ -3014,9 +3014,9 @@ export default function AdminGallery() {
                 "/admin/dashboard"
               )
             }
-            className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-black text-slate-800 transition hover:bg-slate-100"
+            className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs sm:text-sm font-black text-slate-800 transition hover:bg-slate-100"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={16} />
             Dashboard
           </button>
 
@@ -3042,9 +3042,9 @@ export default function AdminGallery() {
               href="/gallery"
               target="_blank"
               rel="noreferrer"
-              className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:inline-flex"
+              className="hidden items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-black text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:inline-flex"
             >
-              <ExternalLink size={16} />
+              <ExternalLink size={15} />
               View Gallery
             </a>
 
@@ -3065,19 +3065,19 @@ export default function AdminGallery() {
       </header>
 
       {/* PAGE INTRO */}
-      <div className="mx-auto max-w-[1500px] px-4 py-7">
-        <div className="flex flex-wrap items-end justify-between gap-5">
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:py-5">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-black text-emerald-700">
-              <Sparkles size={14} />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+              <Sparkles size={13} />
               ONE PAGE GALLERY ADMIN
             </span>
 
-            <h1 className="mt-4 text-4xl font-black tracking-[-.05em] text-slate-950 md:text-6xl">
+            <h1 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-950">
               Edit Gallery
             </h1>
 
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+            <p className="mt-1 max-w-xl text-xs sm:text-sm text-slate-500">
               You no longer need to open a separate
               Image Manager page. Edit the complete
               gallery from this one page.
@@ -3127,7 +3127,7 @@ export default function AdminGallery() {
               opacity: 1,
               y: 0,
             }}
-            className={`mt-5 flex items-center gap-2 rounded-2xl px-5 py-4 text-sm font-black ${
+            className={`mt-4 flex items-center gap-2 rounded-xl px-4 py-3 text-xs sm:text-sm font-black ${
               message.type ===
               "error"
                 ? "bg-red-50 text-red-700"
@@ -3137,11 +3137,11 @@ export default function AdminGallery() {
             {message.type ===
             "error" ? (
               <AlertTriangle
-                size={18}
+                size={16}
               />
             ) : (
               <CheckCircle2
-                size={18}
+                size={16}
               />
             )}
 
