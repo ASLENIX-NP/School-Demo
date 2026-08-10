@@ -1,454 +1,1515 @@
-// Hero.jsx
 import { useEffect, useState } from "react";
-import api from "../../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Camera,
-  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
   Pencil,
   Sparkles,
-  School,
-  Star,
+  Play,
 } from "lucide-react";
+import api from "../../lib/api";
 
-const palette = {
-  primary: "#1E3A5F",
-  secondary: "#2D6A4F",
-  accent: "#E9C46A",
-  accent2: "#F4A261",
-  light: "#F8F9FA",
-  dark: "#1A1A2E",
-  gray: "#6C757D",
-  lightGray: "#E9ECEF",
+/* =========================================================
+   SCHOOL COLORS
+========================================================= */
+
+const COLORS = {
+  navy: "#152438",
+  navySoft: "#5E7084",
+  gold: "#D9AA32",
+  goldLight: "#F4D77E",
+  cream: "#FFFDF8",
+  creamDark: "#F8F2E6",
   white: "#FFFFFF",
-  gold: "#C9A84C",
-  goldLight: "#E8D5A3",
-  goldDark: "#B8960F",
-  navy: "#0A1628",
-  gradient1: "linear-gradient(135deg, #1E3A5F 0%, #2D6A4F 100%)",
-  gradient2: "linear-gradient(135deg, #E9C46A 0%, #F4A261 100%)",
-  gradient3: "linear-gradient(135deg, #2D6A4F 0%, #1E3A5F 100%)",
-  gradientGold: "linear-gradient(135deg, #C9A84C 0%, #E8D5A3 50%, #C9A84C 100%)",
+  blue: "#DDEFF3",
+  border: "rgba(21,36,56,0.10)",
 };
 
-// Hardcoded St. Mary's style school image
-const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80";
+/* =========================================================
+   DEFAULT HERO DATA
+========================================================= */
 
-export const defaultHeroData = {
-  badge: "Wisdom is Divine",
+const DEFAULT_IMAGE =
+  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=2000&q=90";
+
+const defaultHeroData = {
+  badge: "WISDOM IS DIVINE",
+
   schoolName: "SMRITI SCHOOL",
-  titleLine1: "Smriti School",
+
+  titleLine1: "Learning Today.",
+  titleLine2: "Leading Tomorrow.",
+
   establishedYear: "ESTABLISHED 2046 BS",
+
   subtitle: "Basudev Marga, Hetauda-2",
+
   description:
-    "Smriti School blends academic discipline, digital learning, creativity, sports, and values for students from Play Group to Grade 10.",
-  image: DEFAULT_HERO_IMAGE,
-  images: [DEFAULT_HERO_IMAGE],
-  imageAdjustments: {},
+    "A welcoming learning community where curiosity, creativity, discipline and values help every student grow with confidence.",
+
+  image: DEFAULT_IMAGE,
+
+  images: [DEFAULT_IMAGE],
+
   primaryButtonText: "Start Admission",
   primaryButtonLink: "/admissions",
-  secondaryButtonText: "Explore Facilities",
-  secondaryButtonLink: "/facilities",
+
+  secondaryButtonText: "Explore School",
+  secondaryButtonLink: "/about",
 };
 
-export function mergeHeroData(saved = {}) {
-  const merged = {
-    ...defaultHeroData,
-    ...(saved || {}),
-  };
-  const savedImages = Array.isArray(saved?.images)
-    ? saved.images
-    : Array.isArray(merged.images)
-    ? merged.images
-    : [DEFAULT_HERO_IMAGE];
-  const cleanImages = Array.from(
-    new Set(
-      savedImages
+/* =========================================================
+   MERGE DATA
+========================================================= */
+
+function mergeHeroData(data = {}) {
+  const images = Array.isArray(data.images)
+    ? data.images
         .map((item) => String(item || "").trim())
-        .filter((item) => item)
-    )
-  );
+        .filter(Boolean)
+    : [];
+
+  const finalImages =
+    images.length > 0
+      ? Array.from(new Set(images))
+      : [data.image || DEFAULT_IMAGE];
+
   return {
-    ...merged,
-    image: cleanImages[0] || DEFAULT_HERO_IMAGE,
-    images: cleanImages.length > 0 ? cleanImages : [DEFAULT_HERO_IMAGE],
-    imageAdjustments: {},
+    ...defaultHeroData,
+    ...data,
+    image: finalImages[0],
+    images: finalImages,
   };
 }
 
-function safeLink(link, fallback) {
-  const clean = String(link || "").trim();
-  return clean.startsWith("/") ? clean : fallback;
+/* =========================================================
+   SAFE LINK
+========================================================= */
+
+function safeLink(value, fallback) {
+  const link = String(value || "").trim();
+
+  return link.startsWith("/") ? link : fallback;
 }
 
-function EditIconButton({ editMode, target, onEditTarget, icon: Icon = Pencil, label = "Edit" }) {
+/* =========================================================
+   EDIT BUTTON
+========================================================= */
+
+function EditButton({
+  editMode,
+  target,
+  onEditTarget,
+  label = "Edit",
+}) {
   if (!editMode) return null;
+
   return (
     <button
       type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      title={label}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
         onEditTarget(target);
       }}
-      className="absolute -top-2 -right-2 z-[80] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
-      style={{
-        background: palette.gradient2,
-        color: palette.dark,
-        border: `2px solid ${palette.white}`,
-      }}
-      title={label}
+      className="
+        absolute
+        -right-3
+        -top-3
+        z-50
+        flex
+        h-9
+        w-9
+        items-center
+        justify-center
+        rounded-full
+        border-2
+        border-white
+        bg-[#D9AA32]
+        text-[#152438]
+        shadow-xl
+        opacity-0
+        transition-all
+        duration-200
+        group-hover:opacity-100
+        hover:scale-110
+      "
     >
-      <Icon className="w-3.5 h-3.5" />
+      <Pencil className="h-4 w-4" />
     </button>
   );
 }
 
-function EditableWrap({ editMode, target, onEditTarget, icon = Pencil, label = "Edit", className = "", children }) {
-  if (!editMode) return children;
+/* =========================================================
+   EDITABLE AREA
+========================================================= */
+
+function Editable({
+  editMode,
+  target,
+  onEditTarget,
+  label,
+  children,
+  className = "",
+}) {
+  if (!editMode) {
+    return children;
+  }
+
   return (
     <div className={`relative group ${className}`}>
       {children}
-      <EditIconButton editMode={editMode} target={target} onEditTarget={onEditTarget} icon={icon} label={label} />
+
+      <EditButton
+        editMode={editMode}
+        target={target}
+        onEditTarget={onEditTarget}
+        label={label}
+      />
     </div>
   );
 }
 
-function Hero({ editMode = false, contentOverride = null, onEditTarget = () => {} }) {
+/* =========================================================
+   HERO COMPONENT
+========================================================= */
+
+export default function Hero({
+  editMode = false,
+  contentOverride = null,
+  onEditTarget = () => {},
+}) {
   const [heroData, setHeroData] = useState(() =>
     mergeHeroData(contentOverride || defaultHeroData)
   );
 
-  // ── SLIDESHOW LOGIC ──
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentImage, setCurrentImage] = useState(0);
+
+  /* =======================================================
+     LOAD HERO CONTENT
+  ======================================================= */
 
   useEffect(() => {
     if (contentOverride) {
       setHeroData(mergeHeroData(contentOverride));
       return;
     }
-    let alive = true;
-    const loadHeroContent = async () => {
+
+    let mounted = true;
+
+    async function loadHero() {
       try {
-        const res = await api.get("/api/site-content/home");
-        if (!alive) return;
-        const hero = res.data.data.content.hero;
-        setHeroData(mergeHeroData(hero));
+        const response = await api.get("/api/site-content/home");
+
+        if (!mounted) return;
+
+        const hero =
+          response?.data?.data?.content?.hero;
+
+        if (hero) {
+          setHeroData(mergeHeroData(hero));
+        }
       } catch (error) {
-        console.error("Hero content load error:", error);
-        if (alive) {
-          setHeroData(mergeHeroData(defaultHeroData));
+        console.error("Hero loading error:", error);
+
+        if (mounted) {
+          setHeroData(
+            mergeHeroData(defaultHeroData)
+          );
         }
       }
+    }
+
+    loadHero();
+
+    return () => {
+      mounted = false;
     };
-    loadHeroContent();
-    return () => { alive = false; };
   }, [contentOverride]);
 
-  // Auto-rotate images every 3 seconds
+  /* =======================================================
+     RESET SLIDER
+  ======================================================= */
+
   useEffect(() => {
-    if (!heroData?.images || heroData.images.length < 2) return;
+    setCurrentImage(0);
+  }, [heroData.images?.length]);
+
+  /* =======================================================
+     AUTO SLIDER
+  ======================================================= */
+
+  useEffect(() => {
+    if (!heroData.images || heroData.images.length <= 1) {
+      return;
+    }
 
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => 
-        (prevIndex + 1) % heroData.images.length
+      setCurrentImage(
+        (previous) =>
+          (previous + 1) %
+          heroData.images.length
       );
-    }, 3000);
+    }, 5500);
 
     return () => clearInterval(interval);
-  }, [heroData?.images]);
+  }, [heroData.images]);
 
-  // Fallback to single image if array is empty
-  const heroImages = heroData.images?.length > 0 ? heroData.images : [DEFAULT_HERO_IMAGE];
-  const currentImage = heroImages[currentImageIndex % heroImages.length] || DEFAULT_HERO_IMAGE;
+  const images =
+    heroData.images?.length > 0
+      ? heroData.images
+      : [DEFAULT_IMAGE];
+
+  const image =
+    images[currentImage % images.length] ||
+    DEFAULT_IMAGE;
+
+  /* =======================================================
+     IMAGE CONTROLS
+  ======================================================= */
+
+  const previousImage = () => {
+    setCurrentImage((previous) =>
+      previous === 0
+        ? images.length - 1
+        : previous - 1
+    );
+  };
+
+  const nextImage = () => {
+    setCurrentImage(
+      (previous) =>
+        (previous + 1) % images.length
+    );
+  };
+
+  /* =======================================================
+     PAGE
+  ======================================================= */
 
   return (
-    <section 
-      id="home" 
-      className="relative min-h-[80vh] flex items-center overflow-hidden"
-      style={{
-        background: palette.navy,
-      }}
+    <section
+      className="
+        relative
+        min-h-[calc(100vh-80px)]
+        overflow-hidden
+        bg-[#FFFDF8]
+      "
     >
-      {/* Background Image Slideshow - Lighter and more visible */}
-      <div className="absolute inset-0 z-0">
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={currentImage}
-            src={currentImage}
-            alt="Smriti School Campus"
-            className="absolute inset-0 w-full h-full object-cover"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            style={{
-              filter: "brightness(0.55) saturate(1.1) contrast(1)",
-            }}
-          />
-        </AnimatePresence>
-        
-        {/* Lighter Gradient Overlay */}
-        <div 
-          className="absolute inset-0"
+      {/* ===================================================
+          BACKGROUND
+      =================================================== */}
+
+      <div className="absolute inset-0 pointer-events-none">
+        {/* warm glow */}
+
+        <div
+          className="
+            absolute
+            -left-32
+            top-24
+            h-[420px]
+            w-[420px]
+            rounded-full
+            blur-3xl
+          "
           style={{
-            background: `
-              linear-gradient(135deg, rgba(10,22,40,0.65) 0%, rgba(10,22,40,0.3) 40%, rgba(10,22,40,0.5) 100%),
-              radial-gradient(circle at 70% 30%, rgba(201,168,76,0.06) 0%, transparent 50%)
+            background:
+              "rgba(244,215,126,0.18)",
+          }}
+        />
+
+        {/* blue glow */}
+
+        <div
+          className="
+            absolute
+            -right-32
+            bottom-10
+            h-[500px]
+            w-[500px]
+            rounded-full
+            blur-3xl
+          "
+          style={{
+            background:
+              "rgba(221,239,243,0.65)",
+          }}
+        />
+
+        {/* subtle grid */}
+
+        <div
+          className="
+            absolute
+            inset-0
+            opacity-[0.16]
+          "
+          style={{
+            backgroundImage: `
+              linear-gradient(
+                rgba(21,36,56,0.05) 1px,
+                transparent 1px
+              ),
+              linear-gradient(
+                90deg,
+                rgba(21,36,56,0.05) 1px,
+                transparent 1px
+              )
             `,
+            backgroundSize:
+              "70px 70px",
+
+            maskImage:
+              "linear-gradient(to bottom, black 0%, transparent 75%)",
           }}
         />
       </div>
 
-      {/* Content - Left aligned like original */}
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-5 sm:px-8 py-12 md:py-20">
-        <div className="max-w-3xl">
-          {/* Badge - Wisdom is Divine */}
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "heroBadge" }}
-            onEditTarget={onEditTarget}
-            label="Edit badge"
-            className="inline-block"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6"
-              style={{
-                background: "rgba(201, 168, 76, 0.15)",
-                border: "1px solid rgba(201, 168, 76, 0.25)",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              <Star className="w-3.5 h-3.5" style={{ color: palette.gold }} />
-              <span className="text-xs font-semibold tracking-wide" style={{ color: palette.goldLight }}>
-                {heroData.badge || "Wisdom is Divine"}
-              </span>
-            </motion.div>
-          </EditableWrap>
+      {/* ===================================================
+          DECORATIVE GOLD OVAL
+      =================================================== */}
 
-          {/* School Name */}
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "heroTitle" }}
-            onEditTarget={onEditTarget}
-            label="Edit school name"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.05 }}
+      <motion.div
+        className="
+          absolute
+          -right-36
+          top-12
+          hidden
+          h-[240px]
+          w-[470px]
+          rounded-[50%]
+          lg:block
+        "
+        animate={{
+          rotate: [-8, -4, -8],
+          y: [0, 8, 0],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{
+          border:
+            "1px solid rgba(217,170,50,0.18)",
+
+          background:
+            "rgba(244,215,126,0.08)",
+
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.8)",
+        }}
+      />
+
+      {/* ===================================================
+          MAIN CONTAINER
+      =================================================== */}
+
+      <div
+        className="
+          relative
+          z-10
+          mx-auto
+          flex
+          min-h-[calc(100vh-80px)]
+          w-full
+          max-w-[1450px]
+          items-center
+          px-6
+          py-16
+          sm:px-8
+          lg:px-12
+          xl:px-16
+          2xl:px-20
+        "
+      >
+        <div
+          className="
+            grid
+            w-full
+            items-center
+            gap-12
+            lg:grid-cols-[0.88fr_1.12fr]
+            lg:gap-10
+            xl:gap-16
+          "
+        >
+          {/* =================================================
+              LEFT SIDE
+          ================================================= */}
+
+          <div className="relative z-20">
+            {/* BADGE */}
+
+            <Editable
+              editMode={editMode}
+              target={{
+                type: "heroBadge",
+              }}
+              onEditTarget={onEditTarget}
+              label="Edit hero badge"
             >
-              {/* School Name Label */}
-              <div className="flex items-center gap-4 mb-3">
-                <div 
-                  className="w-10 h-0.5"
-                  style={{ background: palette.gold }}
-                />
-                <span 
-                  className="text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase"
-                  style={{ color: palette.gold }}
-                >
-                  {heroData.schoolName || "SMRITI SCHOOL"}
-                </span>
-                <div 
-                  className="flex-1 h-0.5"
-                  style={{ background: "rgba(201, 168, 76, 0.2)" }}
-                />
-              </div>
-              
-              <h1
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05]"
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  x: -20,
+                }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                }}
+                transition={{
+                  duration: 0.7,
+                }}
+                className="
+                  inline-flex
+                  items-center
+                  gap-2
+                  rounded-full
+                  border
+                  bg-white/80
+                  px-4
+                  py-2.5
+                  shadow-sm
+                  backdrop-blur-xl
+                "
                 style={{
-                  background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 40%, ${palette.gold} 100%)`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  fontFamily: "var(--font-display)",
-                  letterSpacing: "-0.02em",
-                  textShadow: "0 2px 20px rgba(0,0,0,0.2)",
+                  borderColor:
+                    COLORS.border,
+                }}
+              >
+                <Sparkles
+                  className="h-4 w-4"
+                  style={{
+                    color:
+                      COLORS.gold,
+                  }}
+                />
+
+                <span
+                  className="
+                    text-[10px]
+                    font-black
+                    tracking-[0.28em]
+                    sm:text-xs
+                  "
+                  style={{
+                    color:
+                      COLORS.navy,
+                  }}
+                >
+                  {heroData.badge}
+                </span>
+              </motion.div>
+            </Editable>
+
+            {/* SCHOOL NAME */}
+
+            <Editable
+              editMode={editMode}
+              target={{
+                type: "heroSchoolName",
+              }}
+              onEditTarget={onEditTarget}
+              label="Edit school name"
+            >
+              <motion.p
+                initial={{
+                  opacity: 0,
+                  x: -20,
+                }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.08,
+                }}
+                className="
+                  mt-9
+                  text-xs
+                  font-black
+                  tracking-[0.38em]
+                "
+                style={{
+                  color:
+                    COLORS.gold,
+                }}
+              >
+                {heroData.schoolName}
+              </motion.p>
+            </Editable>
+
+            {/* =================================================
+                MAIN TITLE
+            ================================================= */}
+
+            <Editable
+              editMode={editMode}
+              target={{
+                type: "heroTitle",
+              }}
+              onEditTarget={onEditTarget}
+              label="Edit hero title"
+            >
+              <motion.h1
+                initial={{
+                  opacity: 0,
+                  y: 25,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                transition={{
+                  duration: 0.9,
+                  delay: 0.12,
+                  ease: [
+                    0.22,
+                    1,
+                    0.36,
+                    1,
+                  ],
+                }}
+                className="
+                  mt-4
+                  max-w-2xl
+                  text-[3.2rem]
+                  font-black
+                  leading-[0.94]
+                  tracking-[-0.055em]
+                  sm:text-6xl
+                  md:text-7xl
+                  lg:text-[5rem]
+                  xl:text-[5.7rem]
+                "
+                style={{
+                  color:
+                    COLORS.navy,
                 }}
               >
                 {heroData.titleLine1}
-              </h1>
 
-              {/* Established Year */}
-              <div className="flex items-center gap-3 mt-3">
-                <div 
-                  className="h-px w-8 md:w-12"
-                  style={{ background: "rgba(201, 168, 76, 0.3)" }}
-                />
-                <span 
-                  className="text-xs md:text-sm font-semibold tracking-[0.15em]"
-                  style={{ color: palette.goldLight }}
+                <br />
+
+                <span
+                  style={{
+                    color:
+                      COLORS.gold,
+                  }}
                 >
-                  {heroData.establishedYear || "ESTABLISHED 2046 BS"}
+                  {heroData.titleLine2}
                 </span>
-                <div 
-                  className="h-px flex-1"
-                  style={{ background: "rgba(201, 168, 76, 0.1)" }}
+              </motion.h1>
+            </Editable>
+
+            {/* DESCRIPTION */}
+
+            <Editable
+              editMode={editMode}
+              target={{
+                type: "heroDescription",
+              }}
+              onEditTarget={onEditTarget}
+              label="Edit description"
+            >
+              <motion.p
+                initial={{
+                  opacity: 0,
+                  y: 20,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.25,
+                }}
+                className="
+                  mt-6
+                  max-w-xl
+                  text-base
+                  leading-7
+                  sm:text-lg
+                  sm:leading-8
+                "
+                style={{
+                  color:
+                    COLORS.navySoft,
+                }}
+              >
+                {heroData.description}
+              </motion.p>
+            </Editable>
+
+            {/* =================================================
+                DETAILS
+            ================================================= */}
+
+            <Editable
+              editMode={editMode}
+              target={{
+                type: "heroMeta",
+              }}
+              onEditTarget={onEditTarget}
+              label="Edit school details"
+            >
+              <motion.div
+                initial={{
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.3,
+                }}
+                className="
+                  mt-6
+                  flex
+                  flex-wrap
+                  items-center
+                  gap-x-5
+                  gap-y-2
+                "
+              >
+                <span
+                  className="
+                    text-xs
+                    font-black
+                    tracking-[0.12em]
+                  "
+                  style={{
+                    color:
+                      COLORS.navySoft,
+                  }}
+                >
+                  {heroData.establishedYear}
+                </span>
+
+                <span
+                  className="
+                    h-1.5
+                    w-1.5
+                    rounded-full
+                  "
+                  style={{
+                    background:
+                      COLORS.gold,
+                  }}
                 />
+
+                <span
+                  className="
+                    flex
+                    items-center
+                    gap-1.5
+                    text-sm
+                    font-semibold
+                  "
+                  style={{
+                    color:
+                      COLORS.navySoft,
+                  }}
+                >
+                  <MapPin
+                    className="h-4 w-4"
+                    style={{
+                      color:
+                        COLORS.gold,
+                    }}
+                  />
+
+                  {heroData.subtitle}
+                </span>
+              </motion.div>
+            </Editable>
+
+            {/* =================================================
+                BUTTONS
+            ================================================= */}
+
+            <Editable
+              editMode={editMode}
+              target={{
+                type: "heroButtons",
+              }}
+              onEditTarget={onEditTarget}
+              label="Edit hero buttons"
+            >
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  y: 20,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.35,
+                }}
+                className="
+                  mt-8
+                  flex
+                  flex-wrap
+                  gap-3
+                "
+              >
+                {/* PRIMARY */}
+
+                <Link
+                  to={safeLink(
+                    heroData.primaryButtonLink,
+                    "/admissions"
+                  )}
+                  onClick={(event) => {
+                    if (editMode) {
+                      event.preventDefault();
+                    }
+                  }}
+                  className="
+                    group
+                    inline-flex
+                    items-center
+                    gap-3
+                    rounded-full
+                    px-6
+                    py-3.5
+                    text-sm
+                    font-black
+                    transition-all
+                    duration-300
+                    hover:-translate-y-1
+                  "
+                  style={{
+                    color:
+                      COLORS.navy,
+
+                    background:
+                      "linear-gradient(135deg,#D9AA32,#F4D77E)",
+
+                    boxShadow:
+                      "0 14px 30px rgba(217,170,50,0.22)",
+                  }}
+                >
+                  {heroData.primaryButtonText}
+
+                  <span
+                    className="
+                      flex
+                      h-7
+                      w-7
+                      items-center
+                      justify-center
+                      rounded-full
+                    "
+                    style={{
+                      background:
+                        "rgba(255,255,255,0.55)",
+                    }}
+                  >
+                    <ArrowRight
+                      className="
+                        h-4
+                        w-4
+                        transition-transform
+                        duration-300
+                        group-hover:translate-x-1
+                      "
+                    />
+                  </span>
+                </Link>
+
+                {/* SECONDARY */}
+
+                <Link
+                  to={safeLink(
+                    heroData.secondaryButtonLink,
+                    "/about"
+                  )}
+                  onClick={(event) => {
+                    if (editMode) {
+                      event.preventDefault();
+                    }
+                  }}
+                  className="
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-full
+                    border
+                    bg-white/75
+                    px-6
+                    py-3.5
+                    text-sm
+                    font-bold
+                    shadow-sm
+                    backdrop-blur-xl
+                    transition-all
+                    duration-300
+                    hover:-translate-y-1
+                    hover:bg-white
+                  "
+                  style={{
+                    color:
+                      COLORS.navy,
+
+                    borderColor:
+                      COLORS.border,
+                  }}
+                >
+                  {heroData.secondaryButtonText}
+                </Link>
+              </motion.div>
+            </Editable>
+
+            {/* =================================================
+                SMALL BOTTOM MESSAGE
+            ================================================= */}
+
+            <motion.div
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+              }}
+              transition={{
+                duration: 0.8,
+                delay: 0.55,
+              }}
+              className="
+                mt-10
+                flex
+                items-center
+                gap-3
+              "
+            >
+              <div
+                className="
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
+                  rounded-full
+                "
+                style={{
+                  background:
+                    COLORS.creamDark,
+
+                  color:
+                    COLORS.gold,
+                }}
+              >
+                <Sparkles className="h-4 w-4" />
+              </div>
+
+              <div>
+                <p
+                  className="
+                    text-[10px]
+                    font-black
+                    uppercase
+                    tracking-[0.2em]
+                  "
+                  style={{
+                    color:
+                      COLORS.navySoft,
+                  }}
+                >
+                  A place to learn
+                </p>
+
+                <p
+                  className="
+                    mt-0.5
+                    text-sm
+                    font-bold
+                  "
+                  style={{
+                    color:
+                      COLORS.navy,
+                  }}
+                >
+                  A place to belong.
+                </p>
               </div>
             </motion.div>
-          </EditableWrap>
+          </div>
 
-          {/* Subtitle */}
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "heroSubtitle" }}
-            onEditTarget={onEditTarget}
-            label="Edit subtitle"
-          >
-            <motion.p
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-base md:text-lg font-medium mt-4 mb-3"
-              style={{ color: "rgba(255,255,255,0.8)" }}
-            >
-              {heroData.subtitle || "Basudev Marga, Hetauda-2"}
-            </motion.p>
-          </EditableWrap>
+          {/* =================================================
+              RIGHT IMAGE
+          ================================================= */}
 
-          {/* Description */}
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "heroDescription" }}
-            onEditTarget={onEditTarget}
-            label="Edit description"
+          <div
+            className="
+              relative
+              min-h-[400px]
+              sm:min-h-[500px]
+              lg:min-h-[600px]
+            "
           >
-            <motion.p
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="text-sm md:text-base max-w-xl leading-relaxed mb-8"
-              style={{ color: "rgba(255,255,255,0.65)" }}
-            >
-              {heroData.description}
-            </motion.p>
-          </EditableWrap>
+            {/* =============================================
+                GOLD 3D RING
+            ============================================= */}
 
-          {/* Buttons */}
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "heroButtons" }}
-            onEditTarget={onEditTarget}
-            label="Edit buttons"
-          >
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-wrap gap-4"
+              className="
+                absolute
+                right-[-4%]
+                top-[4%]
+                h-[82%]
+                w-[82%]
+                rounded-[48%]
+              "
+              animate={{
+                rotate: [8, 10, 8],
+                y: [0, 8, 0],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              style={{
+                border:
+                  "2px solid rgba(217,170,50,0.30)",
+
+                background:
+                  "rgba(244,215,126,0.12)",
+
+                boxShadow:
+                  "0 30px 70px rgba(217,170,50,0.12)",
+              }}
+            />
+
+            {/* =============================================
+                BLUE SHAPE
+            ============================================= */}
+
+            <div
+              className="
+                absolute
+                bottom-[2%]
+                left-[2%]
+                h-[55%]
+                w-[35%]
+                rounded-[50%]
+                blur-[1px]
+              "
+              style={{
+                background:
+                  "rgba(221,239,243,0.85)",
+
+                transform:
+                  "rotate(-18deg)",
+              }}
+            />
+
+            {/* =============================================
+                IMAGE
+            ============================================= */}
+
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.94,
+                x: 30,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                x: 0,
+              }}
+              transition={{
+                duration: 1,
+                delay: 0.2,
+                ease: [
+                  0.22,
+                  1,
+                  0.36,
+                  1,
+                ],
+              }}
+              className="
+                absolute
+                inset-y-5
+                left-[7%]
+                right-[2%]
+                overflow-hidden
+              "
+              style={{
+                borderRadius:
+                  "48% 48% 42% 42% / 24% 24% 18% 18%",
+
+                border:
+                  "7px solid rgba(255,255,255,0.92)",
+
+                boxShadow:
+                  "0 35px 80px rgba(21,36,56,0.16), 0 10px 25px rgba(21,36,56,0.08)",
+
+                background:
+                  COLORS.navy,
+              }}
             >
-              <Link
-                to={safeLink(heroData.primaryButtonLink, "/admissions")}
-                onClick={(e) => {
-                  if (editMode) e.preventDefault();
-                }}
-                className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 hover:gap-3 hover:-translate-y-0.5"
+              {/* IMAGE */}
+
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={image}
+                  src={image}
+                  alt="Smriti School campus"
+                  className="
+                    absolute
+                    inset-0
+                    h-full
+                    w-full
+                    object-cover
+                  "
+                  initial={{
+                    opacity: 0,
+                    scale: 1.08,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    scale: 1,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    scale: 1.03,
+                  }}
+                  transition={{
+                    duration: 0.9,
+                  }}
+                />
+              </AnimatePresence>
+
+              {/* VERY LIGHT OVERLAY */}
+
+              <div
+                className="
+                  absolute
+                  inset-0
+                  pointer-events-none
+                "
                 style={{
-                  color: palette.navy,
-                  background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 100%)`,
-                  boxShadow: "0 8px 32px rgba(201, 168, 76, 0.35)",
+                  background:
+                    "linear-gradient(180deg, rgba(21,36,56,0) 50%, rgba(21,36,56,0.30) 100%)",
+                }}
+              />
+
+              {/* =========================================
+                  CAMERA BUTTON
+              ========================================= */}
+
+              <div
+                className="
+                  absolute
+                  right-5
+                  top-5
+                  z-20
+                  flex
+                  h-11
+                  w-11
+                  items-center
+                  justify-center
+                  rounded-full
+                "
+                style={{
+                  background:
+                    "rgba(255,255,255,0.76)",
+
+                  color:
+                    COLORS.navy,
+
+                  backdropFilter:
+                    "blur(14px)",
+
+                  boxShadow:
+                    "0 8px 20px rgba(0,0,0,0.10)",
                 }}
               >
-                {heroData.primaryButtonText || "Start Admission"}
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                to={safeLink(heroData.secondaryButtonLink, "/facilities")}
-                onClick={(e) => {
-                  if (editMode) e.preventDefault();
-                }}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20"
-                style={{
-                  color: palette.white,
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  backdropFilter: "blur(10px)",
-                }}
+                <Camera className="h-5 w-5" />
+              </div>
+
+              {/* =========================================
+                  ADMIN IMAGE BUTTON
+              ========================================= */}
+
+              {editMode && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onEditTarget({
+                      type: "heroImage",
+                    })
+                  }
+                  className="
+                    absolute
+                    right-20
+                    top-5
+                    z-30
+                    flex
+                    items-center
+                    gap-2
+                    rounded-full
+                    bg-white
+                    px-4
+                    py-2.5
+                    text-xs
+                    font-black
+                    text-[#152438]
+                    shadow-xl
+                    transition-transform
+                    hover:scale-105
+                  "
+                >
+                  <Camera className="h-4 w-4" />
+
+                  Change Image
+                </button>
+              )}
+
+              {/* =========================================
+                  IMAGE CAPTION
+              ========================================= */}
+
+              <div
+                className="
+                  absolute
+                  bottom-7
+                  left-7
+                  z-20
+                  sm:bottom-9
+                  sm:left-9
+                "
               >
-                {heroData.secondaryButtonText || "Explore Facilities"}
-              </Link>
+                <p
+                  className="
+                    text-[10px]
+                    font-black
+                    uppercase
+                    tracking-[0.25em]
+                    text-white
+                  "
+                >
+                  SMRITI SCHOOL
+                </p>
+
+                <p
+                  className="
+                    mt-1
+                    text-xl
+                    font-black
+                    tracking-tight
+                    text-white
+                    sm:text-2xl
+                  "
+                >
+                  A place to belong.
+                </p>
+              </div>
+
+              {/* =========================================
+                  SLIDER
+              ========================================= */}
+
+              {images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={previousImage}
+                    aria-label="Previous image"
+                    className="
+                      absolute
+                      left-4
+                      top-1/2
+                      z-30
+                      flex
+                      h-10
+                      w-10
+                      -translate-y-1/2
+                      items-center
+                      justify-center
+                      rounded-full
+                      bg-white/85
+                      text-[#152438]
+                      shadow-lg
+                      backdrop-blur-md
+                      transition-all
+                      hover:scale-110
+                    "
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={nextImage}
+                    aria-label="Next image"
+                    className="
+                      absolute
+                      right-4
+                      top-1/2
+                      z-30
+                      flex
+                      h-10
+                      w-10
+                      -translate-y-1/2
+                      items-center
+                      justify-center
+                      rounded-full
+                      bg-white/85
+                      text-[#152438]
+                      shadow-lg
+                      backdrop-blur-md
+                      transition-all
+                      hover:scale-110
+                    "
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+
+                  <div
+                    className="
+                      absolute
+                      bottom-7
+                      right-7
+                      z-30
+                      flex
+                      items-center
+                      gap-2
+                      rounded-full
+                      bg-[#152438]/35
+                      px-3
+                      py-2
+                      backdrop-blur-md
+                    "
+                  >
+                    {images.map(
+                      (_, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() =>
+                            setCurrentImage(
+                              index
+                            )
+                          }
+                          aria-label={`Show image ${
+                            index + 1
+                          }`}
+                          className="
+                            h-1.5
+                            rounded-full
+                            transition-all
+                            duration-300
+                          "
+                          style={{
+                            width:
+                              currentImage ===
+                              index
+                                ? "25px"
+                                : "7px",
+
+                            background:
+                              currentImage ===
+                              index
+                                ? COLORS.goldLight
+                                : "rgba(255,255,255,0.70)",
+                          }}
+                        />
+                      )
+                    )}
+                  </div>
+                </>
+              )}
             </motion.div>
-          </EditableWrap>
+
+            {/* =============================================
+                FLOATING INFO PILL
+            ============================================= */}
+
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 20,
+              }}
+              animate={{
+                opacity: 1,
+                y: [0, -7, 0],
+              }}
+              transition={{
+                opacity: {
+                  duration: 0.7,
+                  delay: 0.8,
+                },
+
+                y: {
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+              }}
+              className="
+                absolute
+                bottom-[5%]
+                left-0
+                z-40
+                rounded-[22px]
+                border
+                bg-white/90
+                px-5
+                py-4
+                shadow-xl
+                backdrop-blur-xl
+                sm:px-6
+                sm:py-5
+              "
+              style={{
+                borderColor:
+                  COLORS.border,
+              }}
+            >
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-3
+                "
+              >
+                <div
+                  className="
+                    flex
+                    h-10
+                    w-10
+                    items-center
+                    justify-center
+                    rounded-full
+                  "
+                  style={{
+                    background:
+                      COLORS.creamDark,
+
+                    color:
+                      COLORS.gold,
+                  }}
+                >
+                  <Sparkles className="h-5 w-5" />
+                </div>
+
+                <div>
+                  <p
+                    className="
+                      text-[9px]
+                      font-black
+                      uppercase
+                      tracking-[0.18em]
+                    "
+                    style={{
+                      color:
+                        COLORS.navySoft,
+                    }}
+                  >
+                    Our Philosophy
+                  </p>
+
+                  <p
+                    className="
+                      mt-0.5
+                      text-sm
+                      font-black
+                    "
+                    style={{
+                      color:
+                        COLORS.navy,
+                    }}
+                  >
+                    Learn • Lead • Serve
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* Bottom gradient fade - lighter */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-20 z-5 pointer-events-none"
-        style={{
-          background: "linear-gradient(to top, rgba(10,22,40,0.4) 0%, transparent 100%)",
-        }}
-      />
+      {/* ===================================================
+          BOTTOM SCROLL INDICATOR
+      =================================================== */}
 
-      {/* Edit mode indicator */}
-      {editMode && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20">
-          <EditableWrap
-            editMode={editMode}
-            target={{ type: "heroImage" }}
-            onEditTarget={onEditTarget}
-            icon={Camera}
-            label="Change hero background image"
-            className="inline-block"
-          >
-            <div 
-              className="px-4 py-2 rounded-xl text-sm font-semibold backdrop-blur-sm"
-              style={{
-                background: "rgba(255,255,255,0.15)",
-                color: palette.white,
-                border: "1px solid rgba(255,255,255,0.2)",
-              }}
-            >
-              <Camera className="w-4 h-4 inline mr-2" />
-              Change Background Image
-            </div>
-          </EditableWrap>
-        </div>
-      )}
+      <motion.div
+        initial={{
+          opacity: 0,
+        }}
+        animate={{
+          opacity: 1,
+        }}
+        transition={{
+          delay: 1.2,
+        }}
+        className="
+          absolute
+          bottom-5
+          left-1/2
+          hidden
+          -translate-x-1/2
+          items-center
+          gap-2
+          lg:flex
+        "
+      >
+        <div
+          className="
+            h-1.5
+            w-1.5
+            rounded-full
+          "
+          style={{
+            background:
+              COLORS.gold,
+          }}
+        />
 
-      {/* Gold corner accents - decorative */}
-      <div 
-        className="absolute top-0 left-0 w-16 h-16 pointer-events-none"
-        style={{
-          borderTop: `2px solid rgba(201, 168, 76, 0.12)`,
-          borderLeft: `2px solid rgba(201, 168, 76, 0.12)`,
-          borderTopLeftRadius: "2px",
-        }}
-      />
-      <div 
-        className="absolute top-0 right-0 w-16 h-16 pointer-events-none"
-        style={{
-          borderTop: `2px solid rgba(201, 168, 76, 0.12)`,
-          borderRight: `2px solid rgba(201, 168, 76, 0.12)`,
-          borderTopRightRadius: "2px",
-        }}
-      />
-      <div 
-        className="absolute bottom-0 left-0 w-16 h-16 pointer-events-none"
-        style={{
-          borderBottom: `2px solid rgba(201, 168, 76, 0.12)`,
-          borderLeft: `2px solid rgba(201, 168, 76, 0.12)`,
-          borderBottomLeftRadius: "2px",
-        }}
-      />
-      <div 
-        className="absolute bottom-0 right-0 w-16 h-16 pointer-events-none"
-        style={{
-          borderBottom: `2px solid rgba(201, 168, 76, 0.12)`,
-          borderRight: `2px solid rgba(201, 168, 76, 0.12)`,
-          borderBottomRightRadius: "2px",
-        }}
-      />
+        <span
+          className="
+            text-[9px]
+            font-black
+            uppercase
+            tracking-[0.3em]
+          "
+          style={{
+            color:
+              COLORS.navySoft,
+          }}
+        >
+          Discover Smriti
+        </span>
+
+        <div
+          className="
+            h-px
+            w-12
+          "
+          style={{
+            background:
+              "rgba(21,36,56,0.15)",
+          }}
+        />
+      </motion.div>
     </section>
   );
 }
-
-export { Hero };
-export default Hero;
