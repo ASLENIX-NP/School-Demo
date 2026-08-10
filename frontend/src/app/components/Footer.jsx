@@ -12,7 +12,22 @@ import {
     UploadCloud,
   } from "lucide-react";
   
-  import { FaFacebook, FaYoutube } from "react-icons/fa";
+import {
+  FaFacebook,
+  FaInstagram,
+  FaYoutube,
+  FaLinkedin,
+  FaXTwitter,
+  FaTiktok,
+  FaWhatsapp,
+  FaTelegram,
+  FaGithub,
+  FaDiscord,
+  FaThreads,
+  FaPinterest,
+  FaReddit,
+  FaSnapchat,
+} from "react-icons/fa6";
 
 // Shared identity palette — same navy / forest-green / gold family used
 // across the Hero and homepage sections, so the footer reads as part of
@@ -137,11 +152,69 @@ export function normalizeMapUrl(value = "", fallbackAddress = "") {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanValue)}`;
 }
 
-function getSocialIcon(type) {
-    if (type === "facebook") return FaFacebook;
-    if (type === "youtube") return FaYoutube;
-    return Globe;
+export function getSocialIcon(socialOrType) {
+  let type = "";
+  let label = "";
+  let href = "";
+
+  if (typeof socialOrType === "string") {
+    type = socialOrType.toLowerCase().trim();
+  } else if (socialOrType && typeof socialOrType === "object") {
+    type = (socialOrType.type || "").toLowerCase().trim();
+    label = (socialOrType.label || "").toLowerCase().trim();
+    href = (socialOrType.href || "").toLowerCase().trim();
   }
+
+  // 1. Direct type matching
+  if (type === "facebook" || type === "fb") return FaFacebook;
+  if (type === "instagram" || type === "insta") return FaInstagram;
+  if (type === "youtube" || type === "yt") return FaYoutube;
+  if (type === "linkedin" || type === "linkdin") return FaLinkedin;
+  if (type === "twitter" || type === "x" || type === "twitter_x") return FaXTwitter;
+  if (type === "tiktok") return FaTiktok;
+  if (type === "whatsapp") return FaWhatsapp;
+  if (type === "telegram") return FaTelegram;
+  if (type === "github") return FaGithub;
+  if (type === "discord") return FaDiscord;
+  if (type === "threads") return FaThreads;
+  if (type === "pinterest") return FaPinterest;
+  if (type === "reddit") return FaReddit;
+  if (type === "snapchat") return FaSnapchat;
+
+  // 2. Fallback to label keyword matching
+  if (label.includes("facebook") || label.includes("fb")) return FaFacebook;
+  if (label.includes("instagram") || label.includes("insta")) return FaInstagram;
+  if (label.includes("youtube") || label.includes("yt")) return FaYoutube;
+  if (label.includes("linkedin") || label.includes("linkdin")) return FaLinkedin;
+  if (label.includes("twitter") || label === "x" || label.includes("x (twitter)")) return FaXTwitter;
+  if (label.includes("tiktok")) return FaTiktok;
+  if (label.includes("whatsapp")) return FaWhatsapp;
+  if (label.includes("telegram")) return FaTelegram;
+  if (label.includes("github")) return FaGithub;
+  if (label.includes("discord")) return FaDiscord;
+  if (label.includes("threads")) return FaThreads;
+  if (label.includes("pinterest")) return FaPinterest;
+  if (label.includes("reddit")) return FaReddit;
+  if (label.includes("snapchat")) return FaSnapchat;
+
+  // 3. Fallback to href / URL matching
+  if (href.includes("facebook.com") || href.includes("fb.me") || href.includes("fb.com")) return FaFacebook;
+  if (href.includes("instagram.com")) return FaInstagram;
+  if (href.includes("youtube.com") || href.includes("youtu.be")) return FaYoutube;
+  if (href.includes("linkedin.com")) return FaLinkedin;
+  if (href.includes("twitter.com") || href.includes("x.com")) return FaXTwitter;
+  if (href.includes("tiktok.com")) return FaTiktok;
+  if (href.includes("whatsapp.com") || href.includes("wa.me")) return FaWhatsapp;
+  if (href.includes("telegram.me") || href.includes("t.me") || href.includes("telegram.org")) return FaTelegram;
+  if (href.includes("github.com")) return FaGithub;
+  if (href.includes("discord.com") || href.includes("discord.gg")) return FaDiscord;
+  if (href.includes("threads.net")) return FaThreads;
+  if (href.includes("pinterest.com")) return FaPinterest;
+  if (href.includes("reddit.com")) return FaReddit;
+  if (href.includes("snapchat.com")) return FaSnapchat;
+
+  return Globe;
+}
 
 function stopEditNavigation(event, editMode) {
   if (!editMode) return;
@@ -395,7 +468,7 @@ export function Footer({
               )}
 
               {visibleSocials.map((social) => {
-                const Icon = getSocialIcon(social.type);
+                const Icon = getSocialIcon(social);
 
                 return (
                   <a

@@ -1,6 +1,6 @@
 // Contact.jsx
 import { useEffect, useState, useRef, useCallback } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import {
   MapPin,
@@ -14,6 +14,10 @@ import {
   Sparkles,
   MessageSquare,
   Building2,
+  Pencil,
+  Trash2,
+  Plus,
+  Compass,
 } from "lucide-react";
 
 export const colors = {
@@ -26,8 +30,6 @@ export const colors = {
   purple: "#4B2E83",
   cyan: "#38BDF8",
 };
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 export const defaultContactContent = {
   badgeText: "Get In Touch",
@@ -74,14 +76,15 @@ export const defaultContactContent = {
       "https://www.google.com/maps/place/Bal+Jagriti+Boarding+School/@27.4312792,85.0379093,19z/data=!4m6!3m5!1s0x39eb4991159e4289:0x8707a51c9add8d8e!8m2!3d27.4312792!4d85.0379093!16s%2Fg%2F11bw3f8rbl",
   },
   form: {
-    title: "Send a Message",
+    title: "Send Us a Message",
     nameLabel: "Full Name",
     namePlaceholder: "e.g. Ram Shrestha",
     emailLabel: "Email Address",
     emailPlaceholder: "ram@example.com",
     phoneLabel: "Phone Number",
     phonePlaceholder: "98XXXXXXXX",
-    subjectLabel: "Inquiry Type",
+    subjectLabel: "Inquiry Category",
+    subjectPlaceholder: "Admissions Inquiry",
     messageLabel: "Your Message",
     messagePlaceholder: "Write your message or inquiry details here...",
     buttonText: "Send Message",
@@ -89,12 +92,13 @@ export const defaultContactContent = {
 };
 
 export function mergeContactContent(saved = {}) {
+  const safeSaved = saved || {};
   return {
     ...defaultContactContent,
-    ...(saved || {}),
+    ...safeSaved,
     contactInfo:
-      Array.isArray(saved?.contactInfo) && saved.contactInfo.length
-        ? saved.contactInfo.map((item, index) => ({
+      Array.isArray(safeSaved.contactInfo) && safeSaved.contactInfo.length
+        ? safeSaved.contactInfo.map((item, index) => ({
             id: item.id || `contact-${index}`,
             icon: item.icon || "map",
             label: item.label || "Contact",
@@ -104,11 +108,11 @@ export function mergeContactContent(saved = {}) {
         : defaultContactContent.contactInfo,
     mapCard: {
       ...defaultContactContent.mapCard,
-      ...(saved?.mapCard || {}),
+      ...(safeSaved.mapCard || {}),
     },
     form: {
       ...defaultContactContent.form,
-      ...(saved?.form || {}),
+      ...(safeSaved.form || {}),
     },
   };
 }
@@ -120,8 +124,8 @@ export function normalizeExternalUrl(url = "") {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanUrl)}`;
 }
 
-// ─── 3D TILT HOOK (Reused for contact cards) ───
-const useTilt = (max = 12) => {
+// ─── 3D TILT HOOK ───
+const useTilt = (max = 10) => {
   const ref = useRef(null);
   const x = useMotionValue(0.5);
   const y = useMotionValue(0.5);
@@ -146,7 +150,7 @@ const useTilt = (max = 12) => {
 
 // ─── 3D TILT CARD COMPONENT ───
 function TiltCard({ children, className = "", style = {}, ...props }) {
-  const { ref, style: tiltStyle, handlers } = useTilt(12);
+  const { ref, style: tiltStyle, handlers } = useTilt(8);
   return (
     <motion.div
       ref={ref}
@@ -160,7 +164,7 @@ function TiltCard({ children, className = "", style = {}, ...props }) {
   );
 }
 
-// ─── CUSTOM INTERSECTION OBSERVER HOOK (Replaces react-intersection-observer) ───
+// ─── CUSTOM INTERSECTION OBSERVER HOOK ───
 function useInViewOnce() {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -186,8 +190,66 @@ function useInViewOnce() {
   return { ref, inView };
 }
 
+// ─── ROUND FLOATING EDIT BUTTON ───
+function EditCircleButton({ onClick, label = "Edit" }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onClick();
+      }}
+      className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+      style={{
+        background: "linear-gradient(135deg, #F59E0B, #F97316)",
+        color: "#0F172A",
+        border: "2px solid #FFFFFF",
+        boxShadow: "0 4px 14px rgba(245,158,11,0.4)",
+      }}
+      title={label}
+    >
+      <Pencil className="w-3.5 h-3.5" />
+    </button>
+  );
+}
+
+// ─── ROUND FLOATING DELETE BUTTON ───
+function DeleteCircleButton({ onClick, label = "Delete" }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onClick();
+      }}
+      className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+      style={{
+        background: "linear-gradient(135deg, #EF4444, #DC2626)",
+        color: "#FFFFFF",
+        border: "2px solid #FFFFFF",
+        boxShadow: "0 4px 14px rgba(239,68,68,0.4)",
+      }}
+      title={label}
+    >
+      <Trash2 className="w-3.5 h-3.5" />
+    </button>
+  );
+}
+
 // ─── CONTACT COMPONENT ───
-export default function Contact({ contentOverride = null }) {
+export default function Contact({
+  editMode = false,
+  contentOverride = null,
+  onEditHero = () => {},
+  onEditContactInfo = () => {},
+  onDeleteContactInfo = () => {},
+  onAddContactInfo = () => {},
+  onEditMap = () => {},
+  onEditForm = () => {},
+  onEditTarget = () => {},
+}) {
   const [content, setContent] = useState(() =>
     mergeContactContent(contentOverride || defaultContactContent)
   );
@@ -204,9 +266,39 @@ export default function Contact({ contentOverride = null }) {
     error: "",
   });
 
-  // Custom Hook usage
   const { ref: headerRef, inView: headerInView } = useInViewOnce();
   const { ref: cardsRef, inView: cardsInView } = useInViewOnce();
+
+  // Helper trigger callbacks supporting both specific props and generic onEditTarget
+  const handleHeroEdit = () => {
+    onEditHero();
+    onEditTarget({ type: "hero" });
+  };
+
+  const handleContactInfoEdit = (id) => {
+    onEditContactInfo(id);
+    onEditTarget({ type: "contactInfo", id });
+  };
+
+  const handleContactInfoDelete = (id) => {
+    onDeleteContactInfo(id);
+    onEditTarget({ type: "deleteContactInfo", id });
+  };
+
+  const handleAddContactInfo = () => {
+    onAddContactInfo();
+    onEditTarget({ type: "addContactInfo" });
+  };
+
+  const handleMapEdit = () => {
+    onEditMap();
+    onEditTarget({ type: "mapCard" });
+  };
+
+  const handleFormEdit = () => {
+    onEditForm();
+    onEditTarget({ type: "form" });
+  };
 
   useEffect(() => {
     if (contentOverride) {
@@ -216,7 +308,7 @@ export default function Contact({ contentOverride = null }) {
     let alive = true;
     const loadContact = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/site-content/contact`, { timeout: 12000 });
+        const res = await api.get("/api/site-content/contact", { timeout: 12000 });
         if (!alive) return;
         setContent(mergeContactContent(res.data?.data?.content || {}));
       } catch (error) {
@@ -235,13 +327,16 @@ export default function Contact({ contentOverride = null }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (editMode) {
+      return; // In admin preview mode, do not actually post
+    }
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       setStatus({ loading: false, success: false, error: "Please fill in your name, email, and message." });
       return;
     }
     setStatus({ loading: true, success: false, error: "" });
     try {
-      await axios.post(`${API_URL}/api/site-content/contact/messages`, {
+      await api.post("/api/contact-messages", {
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
@@ -257,11 +352,13 @@ export default function Contact({ contentOverride = null }) {
     }
   };
 
-  const MAP_EMBED_URL =
-    "https://maps.google.com/maps?q=Bal+Jagriti+Boarding+School+Hetauda+Nepal&t=&z=16&ie=UTF8&iwloc=&output=embed";
+  const mapQuery = encodeURIComponent(
+    content.mapCard?.address || content.mapCard?.title || "Bal Jagriti Boarding School Hetauda Nepal"
+  );
+  const MAP_EMBED_URL = `https://maps.google.com/maps?q=${mapQuery}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
 
   return (
-    <section className="min-h-screen pt-28 pb-24 relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-slate-50">
+    <section className={`min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-slate-50 ${editMode ? "pt-8 pb-16" : "pt-28 pb-24"}`}>
       
       {/* Ambient Background Glows */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -272,17 +369,28 @@ export default function Contact({ contentOverride = null }) {
 
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 relative z-10">
         
-        {/* ─── HEADER ─── */}
+        {/* ─── HEADER (HERO SECTION) ─── */}
         <motion.div
           ref={headerRef}
           initial={{ opacity: 0, y: 30 }}
-          animate={headerInView ? { opacity: 1, y: 0 } : {}}
+          animate={headerInView || editMode ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className={`text-center max-w-3xl mx-auto mb-16 relative group ${
+            editMode
+              ? "p-6 rounded-3xl transition-all duration-300 cursor-pointer hover:bg-amber-500/5 hover:outline-dashed hover:outline-2 hover:outline-amber-400/60"
+              : ""
+          }`}
+          onClick={editMode ? handleHeroEdit : undefined}
         >
+          {editMode && (
+            <div className="absolute top-2 right-2 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
+              <EditCircleButton onClick={handleHeroEdit} label="Edit Heading" />
+            </div>
+          )}
+
           <motion.div 
             initial={{ scale: 0.95 }}
-            animate={headerInView ? { scale: 1 } : {}}
+            animate={headerInView || editMode ? { scale: 1 } : {}}
             transition={{ delay: 0.2, duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6 bg-blue-100/80 text-blue-700 border border-blue-200/50 shadow-sm backdrop-blur-sm"
           >
@@ -301,23 +409,46 @@ export default function Contact({ contentOverride = null }) {
           </p>
         </motion.div>
 
-        {/* ─── 4 CONTACT CARDS GRID (3D TILT) ─── */}
-        <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+        {/* ─── 4 CONTACT CARDS GRID ─── */}
+        <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {content.contactInfo.map((info, i) => {
             const Icon = info.icon === "map" ? MapPin : info.icon === "phone" ? Phone : info.icon === "mail" ? Mail : Clock;
             return (
               <motion.div
                 key={info.id}
+                data-contact-card-id={info.id}
                 initial={{ opacity: 0, y: 20 }}
-                animate={cardsInView ? { opacity: 1, y: 0 } : {}}
+                animate={cardsInView || editMode ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="relative group h-full"
+                onClick={editMode ? () => handleContactInfoEdit(info.id) : undefined}
               >
+                {/* Floating Pencil & Delete Buttons on Hover/Click */}
+                {editMode && (
+                  <div className="absolute -top-2.5 -right-2.5 z-30 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-1.5 pointer-events-none group-hover:pointer-events-auto">
+                    <EditCircleButton
+                      onClick={() => handleContactInfoEdit(info.id)}
+                      label={`Edit ${info.label}`}
+                    />
+                    {content.contactInfo.length > 1 && (
+                      <DeleteCircleButton
+                        onClick={() => handleContactInfoDelete(info.id)}
+                        label={`Delete ${info.label}`}
+                      />
+                    )}
+                  </div>
+                )}
+
                 <TiltCard
-                  className="h-full group relative rounded-2xl p-7 bg-white/60 backdrop-blur-lg border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.08)] transition-all duration-300"
+                  className={`h-full relative rounded-2xl p-7 bg-white/70 backdrop-blur-lg border shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.08)] transition-all duration-300 ${
+                    editMode
+                      ? "cursor-pointer hover:border-amber-400 border-white/60"
+                      : "border-white/50"
+                  }`}
                 >
                   {/* Floating Glow under icon */}
                   <div 
-                    className="absolute -inset-1 rounded-full blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-500"
+                    className="absolute -inset-1 rounded-full blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
                     style={{ background: info.color }}
                   />
 
@@ -336,7 +467,7 @@ export default function Contact({ contentOverride = null }) {
                     <h3 className="text-sm font-bold text-slate-800 mb-1.5" style={{ transform: "translateZ(15px)" }}>
                       {info.label}
                     </h3>
-                    <p className="text-sm text-slate-500 leading-relaxed flex-1" style={{ transform: "translateZ(10px)" }}>
+                    <p className="text-sm text-slate-500 leading-relaxed flex-1 whitespace-pre-line" style={{ transform: "translateZ(10px)" }}>
                       {info.value}
                     </p>
                   </div>
@@ -346,26 +477,53 @@ export default function Contact({ contentOverride = null }) {
           })}
         </div>
 
+        {/* Add Contact Card Button (Clean centered button in Edit Mode) */}
+        {editMode && (
+          <div className="flex justify-center mb-16">
+            <button
+              type="button"
+              onClick={handleAddContactInfo}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold shadow-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer text-slate-950"
+              style={{
+                background: "linear-gradient(135deg, #F59E0B, #F97316)",
+                boxShadow: "0 6px 20px rgba(245,158,11,0.25)",
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Contact Card</span>
+            </button>
+          </div>
+        )}
+
         {/* ─── MAIN FORM & MAP GRID ─── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 items-start ${editMode ? "" : "mt-8"}`}>
           
-          {/* LEFT: 3D CONTACT FORM */}
+          {/* LEFT: CONTACT FORM */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="lg:col-span-7 rounded-3xl p-8 sm:p-10 bg-white/70 backdrop-blur-md border border-white/50 shadow-xl shadow-slate-200/50 relative overflow-hidden"
+            className={`lg:col-span-7 rounded-3xl p-8 sm:p-10 bg-white/70 backdrop-blur-md border shadow-xl shadow-slate-200/50 relative overflow-hidden group ${
+              editMode ? "cursor-pointer hover:border-amber-400 border-white/60" : "border-white/50"
+            }`}
+            onClick={editMode ? handleFormEdit : undefined}
           >
             {/* Glossy highlight bar at top */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
             
+            {editMode && (
+              <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
+                <EditCircleButton onClick={handleFormEdit} label="Edit Form Text" />
+              </div>
+            )}
+
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
                 <MessageSquare className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-800">{content.form.title || "Send Us a Message"}</h2>
+                <h2 className="text-2xl font-bold text-slate-800">{content.form?.title || "Send Us a Message"}</h2>
                 <p className="text-xs text-slate-400">Fill out the form below and we will respond promptly.</p>
               </div>
             </div>
@@ -388,30 +546,32 @@ export default function Contact({ contentOverride = null }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="group">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                    Full Name <span className="text-red-400">*</span>
+                    {content.form?.nameLabel || "Full Name"} <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="e.g. Ram Shrestha"
+                    placeholder={content.form?.namePlaceholder || "e.g. Ram Shrestha"}
                     required
-                    className="w-full rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm"
+                    disabled={editMode}
+                    className="w-full rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm disabled:bg-slate-50"
                   />
                 </div>
                 <div className="group">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                    Email Address <span className="text-red-400">*</span>
+                    {content.form?.emailLabel || "Email Address"} <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="ram@example.com"
+                    placeholder={content.form?.emailPlaceholder || "ram@example.com"}
                     required
-                    className="w-full rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm"
+                    disabled={editMode}
+                    className="w-full rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm disabled:bg-slate-50"
                   />
                 </div>
               </div>
@@ -419,26 +579,28 @@ export default function Contact({ contentOverride = null }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                    Phone Number
+                    {content.form?.phoneLabel || "Phone Number"}
                   </label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="98XXXXXXXX"
-                    className="w-full rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm"
+                    placeholder={content.form?.phonePlaceholder || "98XXXXXXXX"}
+                    disabled={editMode}
+                    className="w-full rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm disabled:bg-slate-50"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                    Inquiry Category
+                    {content.form?.subjectLabel || "Inquiry Category"}
                   </label>
                   <select
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer shadow-sm"
+                    disabled={editMode}
+                    className="w-full rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer shadow-sm disabled:bg-slate-50"
                   >
                     <option value="Admissions Inquiry">Admissions Inquiry</option>
                     <option value="Academic Programs">Academic Programs</option>
@@ -450,31 +612,34 @@ export default function Contact({ contentOverride = null }) {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                  Message <span className="text-red-400">*</span>
+                  {content.form?.messageLabel || "Message"} <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   name="message"
                   rows="5"
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder="Write your message or inquiry details here..."
+                  placeholder={content.form?.messagePlaceholder || "Write your message or inquiry details here..."}
                   required
-                  className="w-full rounded-xl border border-slate-200/80 bg-white p-4 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none shadow-sm"
+                  disabled={editMode}
+                  className="w-full rounded-xl border border-slate-200/80 bg-white p-4 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none shadow-sm disabled:bg-slate-50"
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={status.loading}
-                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-8 py-4 text-sm font-bold text-white transition-all duration-200 shadow-lg shadow-blue-600/20 hover:shadow-xl hover:-translate-y-0.5 cursor-pointer disabled:opacity-60"
+                disabled={status.loading || editMode}
+                className={`group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-8 py-4 text-sm font-bold text-white transition-all duration-200 shadow-lg shadow-blue-600/20 hover:shadow-xl hover:-translate-y-0.5 ${
+                  editMode ? "cursor-not-allowed opacity-80" : "cursor-pointer"
+                }`}
               >
-                <span>{status.loading ? "Sending Message..." : "Send Message"}</span>
+                <span>{status.loading ? "Sending Message..." : content.form?.buttonText || "Send Message"}</span>
                 <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
           </motion.div>
 
-          {/* RIGHT: 3D MAP CARD */}
+          {/* RIGHT: MAP CARD */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -483,22 +648,33 @@ export default function Contact({ contentOverride = null }) {
             className="lg:col-span-5 flex flex-col gap-6"
           >
             <div
-              className="rounded-3xl p-6 bg-white/70 backdrop-blur-md border border-white/50 shadow-xl shadow-slate-200/50 overflow-hidden"
+              className={`rounded-3xl p-6 bg-white/70 backdrop-blur-md border shadow-xl shadow-slate-200/50 overflow-hidden relative group ${
+                editMode ? "cursor-pointer hover:border-amber-400 border-white/60" : "border-white/50"
+              }`}
+              onClick={editMode ? handleMapEdit : undefined}
             >
+              {editMode && (
+                <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
+                  <EditCircleButton onClick={handleMapEdit} label="Edit Map & Location" />
+                </div>
+              )}
+
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2.5">
                   <Building2 className="w-5 h-5 text-slate-700" />
                   <h3 className="text-lg font-bold text-slate-800">School Campus Map</h3>
                 </div>
-                <a
-                  href={normalizeExternalUrl(content.mapCard?.mapUrl)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  <span>Open Maps</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+                {!editMode && (
+                  <a
+                    href={normalizeExternalUrl(content.mapCard?.mapUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    <span>Open Maps</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
               </div>
 
               <div className="relative w-full h-[350px] rounded-xl overflow-hidden bg-slate-200 border border-slate-200/80 shadow-inner">
@@ -511,22 +687,24 @@ export default function Contact({ contentOverride = null }) {
                   allowFullScreen=""
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full h-full"
+                  className="w-full h-full pointer-events-none"
                 />
               </div>
 
-              <div className="mt-5 pt-5 border-t border-slate-100 flex items-center justify-between">
+              <div className="mt-5 pt-5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold text-slate-800">Smriti Secondary English Boarding School</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Basudev Marga, Hetauda-2, Makawanpur, Nepal</p>
+                  <p className="text-sm font-bold text-slate-800">{content.mapCard?.title || "Smriti Secondary English Boarding School"}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{content.mapCard?.address || "Basudev Marga, Hetauda-2, Makawanpur, Nepal"}</p>
                 </div>
                 <a
                   href={normalizeExternalUrl(content.mapCard?.mapUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition-colors shadow-md shrink-0"
+                  onClick={editMode ? (e) => e.stopPropagation() : undefined}
+                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition-colors shadow-md shrink-0 inline-flex items-center justify-center gap-1.5"
                 >
-                  Directions ↗
+                  <Compass className="w-3.5 h-3.5" />
+                  <span>{content.mapCard?.buttonText || "Directions ↗"}</span>
                 </a>
               </div>
             </div>

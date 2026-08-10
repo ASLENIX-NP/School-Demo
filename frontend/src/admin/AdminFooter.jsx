@@ -29,6 +29,7 @@ import {
   mergeFooterContent,
   normalizeExternalUrl,
   normalizeMapUrl,
+  getSocialIcon,
 } from "../app/components/Footer";
 
 const colors = {
@@ -1301,95 +1302,123 @@ export default function AdminFooter() {
                         </button>
                       </div>
 
-                      {(modalForm.socials || []).map((social, index) => (
-                        <div
-                          key={social.id || index}
-                          className="rounded-3xl p-5 space-y-4"
-                          style={{ background: "rgba(15,23,42,0.04)", border: "1px solid rgba(15,23,42,0.08)" }}
-                        >
-                          <div className="flex items-center justify-between gap-4">
-                            <div>
-                              <div className="font-black text-slate-950">Social {index + 1}</div>
-                              <div className="text-sm text-slate-500">{social.label || "Website"}</div>
+                      {(modalForm.socials || []).map((social, index) => {
+                        const SocialIcon = getSocialIcon(social);
+                        return (
+                          <div
+                            key={social.id || index}
+                            className="rounded-3xl p-5 space-y-4"
+                            style={{ background: "rgba(15,23,42,0.04)", border: "1px solid rgba(15,23,42,0.08)" }}
+                          >
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-center text-slate-800 shrink-0">
+                                  <SocialIcon className="w-5 h-5 text-slate-800" />
+                                </div>
+                                <div>
+                                  <div className="font-black text-slate-950">Social {index + 1}</div>
+                                  <div className="text-sm text-slate-500">{social.label || "Website"}</div>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => deleteModalSocial(index)}
+                                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-black cursor-pointer"
+                                style={{ background: "rgba(215,25,32,0.09)", color: colors.red, border: "1px solid rgba(215,25,32,0.18)" }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                Delete
+                              </button>
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={() => deleteModalSocial(index)}
-                              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-black"
-                              style={{ background: "rgba(215,25,32,0.09)", color: colors.red, border: "1px solid rgba(215,25,32,0.18)" }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                              Delete
-                            </button>
-                          </div>
-
-                          <Toggle
-                            checked={social.visible !== false}
-                            onChange={(value) => updateModalListItem("socials", index, "visible", value)}
-                            label="Show this social link"
-                          />
-
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <Field
-                              label="Label"
-                              value={social.label}
-                              onChange={(value) => updateModalListItem("socials", index, "label", value)}
-                              placeholder="Facebook"
+                            <Toggle
+                              checked={social.visible !== false}
+                              onChange={(value) => updateModalListItem("socials", index, "visible", value)}
+                              label="Show this social link"
                             />
 
-                            <SelectField
-                              label="Type"
-                              value={social.type}
-                              onChange={(value) => updateModalListItem("socials", index, "type", value)}
-                            >
-                              <option value="">Select Social</option>
-                              <option value="facebook">Facebook</option>
-                              <option value="instagram">Instagram</option>
-                              <option value="youtube">YouTube</option>
-                              <option value="linkedin">LinkedIn</option>
-                              <option value="twitter">X (Twitter)</option>
-                              <option value="tiktok">TikTok</option>
-                              <option value="whatsapp">WhatsApp</option>
-                              <option value="telegram">Telegram</option>
-                              <option value="github">GitHub</option>
-                              <option value="discord">Discord</option>
-                              <option value="website">Website</option>
-                            </SelectField>
-                          </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <Field
+                                label="Label"
+                                value={social.label}
+                                onChange={(value) => updateModalListItem("socials", index, "label", value)}
+                                placeholder="Facebook"
+                              />
 
-                          <Field
-                            label="URL"
-                            value={social.href}
-                            onChange={(value) => updateModalListItem("socials", index, "href", value)}
-                            placeholder="https://..."
-                          />
-                        </div>
-                      ))}
+                              <SelectField
+                                label="Type"
+                                value={social.type}
+                                onChange={(value) => updateModalListItem("socials", index, "type", value)}
+                              >
+                                <option value="">Select Social</option>
+                                <option value="facebook">Facebook</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="twitter">X (Twitter)</option>
+                                <option value="tiktok">TikTok</option>
+                                <option value="whatsapp">WhatsApp</option>
+                                <option value="telegram">Telegram</option>
+                                <option value="github">GitHub</option>
+                                <option value="discord">Discord</option>
+                                <option value="threads">Threads</option>
+                                <option value="pinterest">Pinterest</option>
+                                <option value="reddit">Reddit</option>
+                                <option value="snapchat">Snapchat</option>
+                                <option value="website">Website</option>
+                              </SelectField>
+                            </div>
+
+                            <Field
+                              label="URL"
+                              value={social.href}
+                              onChange={(value) => updateModalListItem("socials", index, "href", value)}
+                              placeholder="https://..."
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
-                  {editingTarget.type === "social" && (
-                    <>
-                      <Toggle checked={modalForm.visible !== false} onChange={(value) => updateModalField("visible", value)} label="Show this social link" />
-                      <Field label="Label" value={modalForm.label} onChange={(value) => updateModalField("label", value)} placeholder="Facebook" />
-                      <SelectField label="Type" value={modalForm.type} onChange={(value) => updateModalField("type", value)}>
-                        <option value="">Select Social</option>
-                        <option value="facebook">Facebook</option>
-                        <option value="instagram">Instagram</option>
-                        <option value="youtube">YouTube</option>
-                        <option value="linkedin">LinkedIn</option>
-                        <option value="twitter">X (Twitter)</option>
-                        <option value="tiktok">TikTok</option>
-                        <option value="whatsapp">WhatsApp</option>
-                        <option value="telegram">Telegram</option>
-                        <option value="github">GitHub</option>
-                        <option value="discord">Discord</option>
-                        <option value="website">Website</option>
-                      </SelectField>
-                      <Field label="URL" value={modalForm.href} onChange={(value) => updateModalField("href", value)} placeholder="https://..." />
-                    </>
-                  )}
+                  {editingTarget.type === "social" && (() => {
+                    const SocialIcon = getSocialIcon(modalForm);
+                    return (
+                      <>
+                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 mb-2">
+                          <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-800 shrink-0">
+                            <SocialIcon className="w-5 h-5 text-slate-800" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-slate-800">Selected Icon: {modalForm.type || modalForm.label || "Website"}</div>
+                            <div className="text-xs text-slate-500">Live preview of the social icon shown on the footer.</div>
+                          </div>
+                        </div>
+                        <Toggle checked={modalForm.visible !== false} onChange={(value) => updateModalField("visible", value)} label="Show this social link" />
+                        <Field label="Label" value={modalForm.label} onChange={(value) => updateModalField("label", value)} placeholder="Facebook" />
+                        <SelectField label="Type" value={modalForm.type} onChange={(value) => updateModalField("type", value)}>
+                          <option value="">Select Social</option>
+                          <option value="facebook">Facebook</option>
+                          <option value="instagram">Instagram</option>
+                          <option value="youtube">YouTube</option>
+                          <option value="linkedin">LinkedIn</option>
+                          <option value="twitter">X (Twitter)</option>
+                          <option value="tiktok">TikTok</option>
+                          <option value="whatsapp">WhatsApp</option>
+                          <option value="telegram">Telegram</option>
+                          <option value="github">GitHub</option>
+                          <option value="discord">Discord</option>
+                          <option value="threads">Threads</option>
+                          <option value="pinterest">Pinterest</option>
+                          <option value="reddit">Reddit</option>
+                          <option value="snapchat">Snapchat</option>
+                          <option value="website">Website</option>
+                        </SelectField>
+                        <Field label="URL" value={modalForm.href} onChange={(value) => updateModalField("href", value)} placeholder="https://..." />
+                      </>
+                    );
+                  })()}
 
                   {editingTarget.type === "contact" && (
                     <>

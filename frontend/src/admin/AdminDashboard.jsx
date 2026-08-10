@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../lib/api";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -103,7 +103,7 @@ function getCurrentTime() {
   return new Date().toLocaleString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 }
 
-// ✨ NEW: Dynamic Greeting based on Time
+// Dynamic Greeting based on Time
 function getTimeBasedGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return { text: "Good Morning", emoji: "🌅" };
@@ -111,8 +111,141 @@ function getTimeBasedGreeting() {
   return { text: "Good Evening", emoji: "🌙" };
 }
 
+// ── Standalone Sidebar Component to avoid unmount/remount on re-render ──
+function SidebarContent({
+  adminUser,
+  activeEditor,
+  setActiveEditor,
+  setSidebarOpen,
+  onLogoutClick,
+  theme,
+}) {
+  return (
+    <div className="flex flex-col h-full min-h-0 select-none">
+      {/* Header / User Info */}
+      <div className="px-4 pt-6 pb-4 flex-shrink-0 border-b" style={{ borderColor: theme.border }}>
+        <div className="flex items-center gap-3 mb-5">
+          <div
+            className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)", boxShadow: "0 6px 18px rgba(245,158,11,0.25)" }}
+          >
+            <Shield className="w-5 h-5 text-slate-950" />
+          </div>
+          <div>
+            <div className="font-bold text-white text-sm tracking-tight">Baljagriti</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-400/60">Admin Panel</div>
+          </div>
+        </div>
+
+        <div
+          className="px-3 py-2.5 rounded-xl flex items-center gap-2.5"
+          style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${theme.border}` }}
+        >
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-slate-950"
+            style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)" }}
+          >
+            {(adminUser.email || "A")[0].toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <div className="text-white/80 text-xs font-semibold truncate">{adminUser.name || "Administrator"}</div>
+            <div className="text-[10px] truncate text-slate-500">{adminUser.email || "admin@baljagriti.edu.np"}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Nav List */}
+      <nav className="flex-1 px-3 py-4 overflow-y-auto min-h-0 space-y-1.5 custom-sidebar-scroll">
+        {navigationItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeEditor === item.editorKey || (item.editorKey === null && activeEditor === null);
+
+          return (
+            <button
+              key={item.title}
+              type="button"
+              data-sidebar-active={isActive ? "true" : undefined}
+              onClick={() => {
+                setSidebarOpen(false);
+                setActiveEditor(item.editorKey);
+              }}
+              className="w-full relative group block text-left"
+            >
+              <div
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left ${
+                  isActive ? "bg-white/10" : "bg-transparent"
+                }`}
+                style={{
+                  color: isActive ? "#FFFFFF" : "#64748B",
+                  border: isActive ? `1px solid ${theme.border}` : "1px solid transparent",
+                  transform: isActive ? "translateY(-1px)" : "translateY(0)",
+                  boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                    e.currentTarget.style.color = "#FFFFFF";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "#64748B";
+                  }
+                }}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                <span className="text-sm font-medium truncate">{item.title}</span>
+              </div>
+
+              {/* Glowing Amber Underline Indicator */}
+              {isActive && (
+                <motion.div
+                  layoutId="sidebarActiveIndicator"
+                  className="absolute left-3 right-3 -bottom-0.5 h-0.5 rounded-full pointer-events-none"
+                  style={{
+                    background: "linear-gradient(90deg, #F59E0B, #F97316)",
+                    boxShadow: "0 0 12px #F59E0B",
+                  }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Logout button */}
+      <div className="px-3 pb-5 flex-shrink-0 border-t" style={{ borderColor: theme.border }}>
+        <button
+          type="button"
+          onClick={onLogoutClick}
+          className="w-full mt-3 flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group"
+          style={{
+            background: "rgba(239, 68, 68, 0.1)",
+            color: "#F87171",
+            border: "1px solid rgba(239, 68, 68, 0.1)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)";
+            e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)";
+            e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.1)";
+          }}
+        >
+          <LogOut className="w-4 h-4 flex-shrink-0" />
+          <span className="text-sm font-bold">Logout</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get("tab");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [notices, setNotices] = useState([]);
@@ -121,10 +254,40 @@ export default function AdminDashboard() {
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [currentTime] = useState(getCurrentTime());
-  const [activeEditor, setActiveEditor] = useState(null);
+  const [activeEditor, setActiveEditor] = useState(urlTab || null);
 
   const adminUser = JSON.parse(localStorage.getItem("adminUser") || "{}");
   const greeting = getTimeBasedGreeting();
+
+  // Sync activeEditor when search params in URL change
+  useEffect(() => {
+    setActiveEditor(urlTab || null);
+  }, [urlTab]);
+
+  const handleSelectEditor = (key) => {
+    setActiveEditor(key);
+    if (key) {
+      setSearchParams({ tab: key }, { replace: true });
+    } else {
+      setSearchParams({}, { replace: true });
+    }
+  };
+
+  // Smoothly scroll active sidebar button into view if it's hidden or at the lower end
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const activeElements = document.querySelectorAll('[data-sidebar-active="true"]');
+      activeElements.forEach((el) => {
+        el.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "nearest",
+        });
+      });
+    }, 80);
+
+    return () => clearTimeout(timer);
+  }, [activeEditor, sidebarOpen]);
 
   useEffect(() => {
     let alive = true;
@@ -215,109 +378,28 @@ export default function AdminDashboard() {
     { icon: Users,     label: "Staff Members",   value: staff.length,      sub: "Active teachers",        color: colors.cyan,   trend: "Active" },
   ];
 
-  // ── Sidebar component ──────────────────────────────────────────────
-  const SidebarContent = () => (
-    <>
-      <div className="px-4 pt-6 pb-4 flex-shrink-0 border-b" style={{ borderColor: theme.border }}>
-        <div className="flex items-center gap-3 mb-5">
-          <div
-            className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)", boxShadow: "0 6px 18px rgba(245,158,11,0.25)" }}
-          >
-            <Shield className="w-5 h-5 text-slate-950" />
-          </div>
-          <div>
-            <div className="font-bold text-white text-sm tracking-tight">Baljagriti</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-400/60">Admin Panel</div>
-          </div>
-        </div>
-
-        <div
-          className="px-3 py-2.5 rounded-xl flex items-center gap-2.5"
-          style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${theme.border}` }}
-        >
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-slate-950"
-            style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)" }}
-          >
-            {(adminUser.email || "A")[0].toUpperCase()}
-          </div>
-          <div className="min-w-0">
-            <div className="text-white/80 text-xs font-semibold truncate">{adminUser.name || "Administrator"}</div>
-            <div className="text-[10px] truncate text-slate-500">{adminUser.email || "admin@baljagriti.edu.np"}</div>
-          </div>
-        </div>
-      </div>
-
-      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1.5">
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeEditor === item.editorKey || (item.editorKey === null && activeEditor === null);
-          
-          return (
-            <button
-              key={item.title}
-              onClick={() => {
-                setSidebarOpen(false);
-                setActiveEditor(item.editorKey);
-              }}
-              className="w-full relative group"
-            >
-              <div
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-left ${
-                  isActive ? "bg-white/10" : "bg-transparent"
-                }`}
-                style={{
-                  color: isActive ? "#FFFFFF" : "#64748B",
-                  border: isActive ? `1px solid ${theme.border}` : "1px solid transparent",
-                  transform: isActive ? "translateY(-2px)" : "translateY(0)",
-                  boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
-                }}
-                onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#FFFFFF"; } }}
-                onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748B"; } }}
-              >
-                <Icon className="w-4 h-4 flex-shrink-0" />
-                <span className="text-sm font-medium truncate">{item.title}</span>
-              </div>
-              
-              {/* Glowing Amber Underline Indicator */}
-              {isActive && (
-                <motion.div 
-                  layoutId="sidebarActiveIndicator"
-                  className="absolute left-3 right-3 -bottom-1 h-0.5 rounded-full"
-                  style={{ 
-                    background: "linear-gradient(90deg, #F59E0B, #F97316)",
-                    boxShadow: "0 0 12px #F59E0B"
-                  }}
-                />
-              )}
-            </button>
-          );
-        })}
-      </nav>
-
-      <div className="px-3 pb-5 flex-shrink-0">
-        <div className="h-px mb-3" style={{ background: theme.border }} />
-        <button
-          onClick={() => setShowLogoutConfirm(true)}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group"
-          style={{ 
-            background: "rgba(239, 68, 68, 0.1)", 
-            color: "#F87171", 
-            border: "1px solid rgba(239, 68, 68, 0.1)" 
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.1)"; }}
-        >
-          <LogOut className="w-4 h-4 flex-shrink-0" />
-          <span className="text-sm font-bold">Logout</span>
-        </button>
-      </div>
-    </>
-  );
-
   return (
     <div className="min-h-screen flex" style={{ background: theme.bg, fontFamily: "'Inter', sans-serif" }}>
+      {/* Sleek Custom Scrollbar Styles for the Sidebar */}
+      <style>{`
+        .custom-sidebar-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(245, 158, 11, 0.3) transparent;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar {
+          width: 5px;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar-thumb {
+          background: rgba(245, 158, 11, 0.25);
+          border-radius: 9999px;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(245, 158, 11, 0.55);
+        }
+      `}</style>
 
       {/* ── Mobile overlay ── */}
       <AnimatePresence>
@@ -335,26 +417,35 @@ export default function AdminDashboard() {
       <motion.aside
         animate={{ x: sidebarOpen ? 0 : -280 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="fixed inset-y-0 left-0 z-40 w-[260px] flex flex-col lg:hidden backdrop-blur-xl border-r shadow-2xl"
+        className="fixed inset-y-0 left-0 z-40 w-[260px] flex flex-col lg:hidden backdrop-blur-xl border-r shadow-2xl overflow-hidden h-full"
         style={{ background: theme.sidebarBg, borderColor: theme.border }}
       >
-        <SidebarContent />
+        <SidebarContent
+          adminUser={adminUser}
+          activeEditor={activeEditor}
+          setActiveEditor={handleSelectEditor}
+          setSidebarOpen={setSidebarOpen}
+          onLogoutClick={() => setShowLogoutConfirm(true)}
+          theme={theme}
+        />
       </motion.aside>
 
       {/* ── Desktop sidebar ── */}
       <aside
-        className="hidden lg:flex flex-col w-[240px] flex-shrink-0 backdrop-blur-xl border-r shadow-xl"
+        className="hidden lg:flex flex-col w-[240px] flex-shrink-0 backdrop-blur-xl border-r shadow-xl sticky top-0 h-screen overflow-hidden z-20"
         style={{
           background: theme.sidebarBg,
           borderColor: theme.border,
-          minHeight: "100vh",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          overflowY: "auto",
         }}
       >
-        <SidebarContent />
+        <SidebarContent
+          adminUser={adminUser}
+          activeEditor={activeEditor}
+          setActiveEditor={handleSelectEditor}
+          setSidebarOpen={setSidebarOpen}
+          onLogoutClick={() => setShowLogoutConfirm(true)}
+          theme={theme}
+        />
       </aside>
 
       {/* ── Main content ── */}
@@ -399,7 +490,7 @@ export default function AdminDashboard() {
                 <span className="text-[10px] font-bold text-green-400 tracking-wide">Live</span>
               </div>
               <a href="/" target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}><Globe className="w-4 h-4" /> View Site</a>
-              {activeEditor && <button onClick={() => setActiveEditor(null)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}><X className="w-3.5 h-3.5" /><span className="hidden sm:inline">Close</span></button>}
+              {activeEditor && <button onClick={() => handleSelectEditor(null)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}><X className="w-3.5 h-3.5" /><span className="hidden sm:inline">Close</span></button>}
             </div>
           </div>
         </header>
@@ -444,7 +535,7 @@ export default function AdminDashboard() {
                         <span className="text-2xl">{greeting.emoji}</span>
                         <span className="text-xs font-bold uppercase tracking-[0.14em] text-amber-400/60">Admin Dashboard</span>
                       </div>
-                      {/* ✨ Dynamic Greeting based on Time ✨ */}
+                      {/* Dynamic Greeting based on Time */}
                       <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight tracking-tight">
                         {greeting.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">{adminUser.name || "Admin"}!</span>
                       </h2>
@@ -452,10 +543,10 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex flex-wrap gap-3">
-                      <button onClick={() => setActiveEditor("notices")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-950 shadow-md" style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)" }}>
+                      <button onClick={() => handleSelectEditor("notices")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-950 shadow-md" style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)" }}>
                         <PlusCircle className="w-4 h-4" /> Add Notice
                       </button>
-                      <button onClick={() => setActiveEditor("announcements")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}>
+                      <button onClick={() => handleSelectEditor("announcements")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}>
                         <Megaphone className="w-4 h-4" /> Add Announcement
                       </button>
                     </div>
@@ -501,10 +592,10 @@ export default function AdminDashboard() {
                 {/* ✨ QUICK ACTION TASK BAR ✨ */}
                 <div className="flex flex-wrap gap-3 py-2 border-b border-white/5 pb-6">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wider pr-4 self-center">Quick Actions:</span>
-                  <button onClick={() => setActiveEditor("notices")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Manage Notices</button>
-                  <button onClick={() => setActiveEditor("staff")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Manage Staff</button>
-                  <button onClick={() => setActiveEditor("gallery")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Update Gallery</button>
-                  <button onClick={() => setActiveEditor("settings")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">⚙ Settings</button>
+                  <button onClick={() => handleSelectEditor("notices")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Manage Notices</button>
+                  <button onClick={() => handleSelectEditor("staff")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Manage Staff</button>
+                  <button onClick={() => handleSelectEditor("gallery")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Update Gallery</button>
+                  <button onClick={() => handleSelectEditor("settings")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">⚙ Settings</button>
                 </div>
 
                 {/* ── Recent Messages (Frosted Glass Full Width) ── */}

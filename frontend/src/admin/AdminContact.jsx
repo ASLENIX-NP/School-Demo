@@ -62,7 +62,7 @@ function getAdminToken() {
 
 function getAuthHeaders() {
   const token = getAdminToken();
-  return token ? { Authorization: `Bearer ${token}` } : null;
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 function Field({ label, value, onChange, placeholder = "", type = "text" }) {
@@ -417,11 +417,6 @@ export default function AdminContact() {
       const cleanContent = cleanBeforeSave(nextContent);
       const authHeaders = getAuthHeaders();
 
-      if (!authHeaders) {
-        setError("Admin login expired. Please logout and login again.");
-        return null;
-      }
-
       await api.put(
         "/api/site-content/contact",
         { content: cleanContent },
@@ -618,145 +613,11 @@ export default function AdminContact() {
       <style>
         {`
           .admin-contact-preview-frame {
-            overflow: hidden !important;
+            overflow: visible !important;
             max-width: 100% !important;
             width: 100% !important;
             position: relative !important;
             z-index: 0 !important;
-          }
-
-          .admin-contact-preview-frame .bg-slate-950 {
-            background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95)) !important;
-            color: #0F172A !important;
-            border: 1px solid rgba(75,46,131,0.12) !important;
-            boxShadow: 0 18px 44px rgba(15,23,42,0.08) !important;
-          }
-
-          .admin-contact-preview-frame .bg-slate-950 [class*="text-white"] {
-            color: #0F172A !important;
-          }
-
-          .admin-contact-preview-frame .bg-slate-950 [class*="text-white/45"],
-          .admin-contact-preview-frame .bg-slate-950 [class*="text-white/55"],
-          .admin-contact-preview-frame .bg-slate-950 [class*="text-white/70"] {
-            color: #7C5CC4 !important;
-          }
-
-          @media (max-width: 767px) {
-            .admin-contact-preview-frame {
-              overflow-x: hidden !important;
-            }
-
-            .admin-contact-preview-frame * {
-              box-sizing: border-box !important;
-            }
-
-            .admin-contact-preview-frame .group .opacity-0,
-            .admin-contact-preview-frame .group [class*="opacity-0"],
-            .admin-contact-preview-frame .group .md\\:opacity-0,
-            .admin-contact-preview-frame .group [class*="md:opacity-0"],
-            .admin-contact-preview-frame .group [class*="group-hover:opacity"],
-            .admin-contact-preview-frame [class*="group-hover:opacity"] {
-              opacity: 1 !important;
-              visibility: visible !important;
-              pointer-events: auto !important;
-            }
-
-            .admin-contact-preview-frame .group .pointer-events-none,
-            .admin-contact-preview-frame .group [class*="pointer-events-none"] {
-              pointer-events: auto !important;
-            }
-
-            .admin-contact-preview-frame .group button[class*="opacity-0"],
-            .admin-contact-preview-frame button[class*="group-hover:opacity"],
-            .admin-contact-preview-frame button[class*="opacity-0"] {
-              opacity: 1 !important;
-              visibility: visible !important;
-              pointer-events: auto !important;
-            }
-
-            .admin-contact-preview-frame [data-contact-card-id] {
-              position: relative !important;
-              padding-top: 3.2rem !important;
-              padding-right: 1rem !important;
-              overflow: hidden !important;
-            }
-
-            .admin-contact-preview-frame [data-contact-card-id] * {
-              min-width: 0 !important;
-            }
-
-            .admin-contact-preview-frame [data-contact-card-id] p,
-            .admin-contact-preview-frame [data-contact-card-id] span,
-            .admin-contact-preview-frame [data-contact-card-id] div {
-              word-break: normal !important;
-              overflow-wrap: break-word !important;
-              white-space: normal !important;
-              writing-mode: horizontal-tb !important;
-              text-orientation: mixed !important;
-            }
-
-            .admin-contact-preview-frame [data-contact-card-id] [class*="tracking"] {
-              letter-spacing: 0.06em !important;
-              white-space: normal !important;
-              word-break: normal !important;
-              overflow-wrap: normal !important;
-            }
-
-            .admin-contact-preview-frame [data-contact-card-id] [class*="absolute"] {
-              top: 0.75rem !important;
-              right: 0.75rem !important;
-              left: auto !important;
-              display: flex !important;
-              flex-direction: row !important;
-              align-items: center !important;
-              justify-content: flex-end !important;
-              gap: 0.4rem !important;
-              width: auto !important;
-              max-width: calc(100% - 1.5rem) !important;
-              z-index: 35 !important;
-              pointer-events: auto !important;
-            }
-
-            .admin-contact-preview-frame [class*="absolute"] button,
-            .admin-contact-preview-frame button[class*="rounded-full"] {
-              min-width: 2.15rem !important;
-              width: 2.15rem !important;
-              height: 2.15rem !important;
-              padding: 0 !important;
-              border-radius: 9999px !important;
-              font-size: 0 !important;
-              display: inline-flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              gap: 0 !important;
-              white-space: nowrap !important;
-              z-index: 35 !important;
-              pointer-events: auto !important;
-              cursor: pointer !important;
-              flex-shrink: 0 !important;
-            }
-
-            .admin-contact-preview-frame [class*="absolute"] button svg,
-            .admin-contact-preview-frame button[class*="rounded-full"] svg {
-              width: 0.95rem !important;
-              height: 0.95rem !important;
-              margin: 0 !important;
-              flex-shrink: 0 !important;
-              pointer-events: none !important;
-            }
-
-            .admin-contact-preview-frame input,
-            .admin-contact-preview-frame textarea,
-            .admin-contact-preview-frame select {
-              width: 100% !important;
-              max-width: 100% !important;
-            }
-
-            .admin-contact-preview-frame [class*="lg:grid-cols"],
-            .admin-contact-preview-frame [class*="md:grid-cols"] {
-              grid-template-columns: minmax(0, 1fr) !important;
-            }
           }
         `}
       </style>
