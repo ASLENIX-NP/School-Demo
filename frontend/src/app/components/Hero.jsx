@@ -278,25 +278,26 @@ export function Hero({
   };
 
   /* =======================================================
-     PAGE
+     PAGE - Lighter yellow background with larger fonts
   ======================================================= */
 
   return (
     <section
       className="
         relative
-        min-h-[calc(100vh-80px)]
+        min-h-screen
         overflow-hidden
-        bg-[#FFFDF8]
       "
+      style={{
+        background: "linear-gradient(180deg, #FFF8E7 0%, #FFF3D6 45%, #FFE8B0 100%)",
+      }}
     >
       {/* ===================================================
-          BACKGROUND
+          BACKGROUND - Decorative elements
       =================================================== */}
 
       <div className="absolute inset-0 pointer-events-none">
         {/* Warm glow */}
-
         <div
           className="
             absolute
@@ -335,19 +336,12 @@ export function Hero({
           className="
             absolute
             inset-0
-            opacity-[0.16]
+            opacity-[0.06]
           "
           style={{
             backgroundImage: `
-              linear-gradient(
-                rgba(21,36,56,0.05) 1px,
-                transparent 1px
-              ),
-              linear-gradient(
-                90deg,
-                rgba(21,36,56,0.05) 1px,
-                transparent 1px
-              )
+              radial-gradient(circle at 20% 50%, rgba(255,215,0,0.08) 0%, transparent 50%),
+              radial-gradient(circle at 80% 50%, rgba(255,215,0,0.08) 0%, transparent 50%)
             `,
             backgroundSize: "70px 70px",
             maskImage:
@@ -398,14 +392,17 @@ export function Hero({
           z-10
           mx-auto
           flex
-          min-h-[calc(100vh-80px)]
+          min-h-screen
           w-full
           max-w-[1450px]
           items-center
           px-6
-          py-16
+          pb-16
+          pt-28
           sm:px-8
+          sm:pt-24
           lg:px-12
+          lg:pt-20
           xl:px-16
           2xl:px-20
         "
@@ -422,11 +419,11 @@ export function Hero({
           "
         >
           {/* =================================================
-              LEFT SIDE
+              LEFT SIDE - INCREASED FONT SIZES
           ================================================= */}
 
           <div className="relative z-20">
-            {/* BADGE */}
+            {/* BADGE - Increased size */}
 
             <Editable
               editMode={editMode}
@@ -455,8 +452,8 @@ export function Hero({
                   rounded-full
                   border
                   bg-white/80
-                  px-4
-                  py-2.5
+                  px-5
+                  py-3
                   shadow-sm
                   backdrop-blur-xl
                   mt-3
@@ -469,10 +466,10 @@ export function Hero({
               >
                 <span
                   className="
-                    text-[10px]
+                    text-sm
                     font-black
                     tracking-[0.28em]
-                    sm:text-xs
+                    sm:text-base
                   "
                   style={{
                     color: COLORS.navy,
@@ -483,7 +480,7 @@ export function Hero({
               </motion.div>
             </Editable>
 
-            {/* SCHOOL NAME */}
+            {/* SCHOOL NAME - Increased size */}
 
             <Editable
               editMode={editMode}
@@ -507,10 +504,11 @@ export function Hero({
                   delay: 0.08,
                 }}
                 className="
-                  mt-9
-                  text-xs
+                  mt-8
+                  text-base
                   font-black
                   tracking-[0.38em]
+                  sm:text-lg
                 "
                 style={{
                   color: COLORS.gold,
@@ -521,7 +519,7 @@ export function Hero({
             </Editable>
 
             {/* =================================================
-                MAIN TITLE
+                MAIN TITLE - Increased size
             ================================================= */}
 
             <Editable
@@ -549,14 +547,14 @@ export function Hero({
                 className="
                   mt-2
                   max-w-2xl
-                  text-[3.2rem]
+                  text-5xl
                   font-black
-                  leading-[0.94]
-                  tracking-[-0.055em]
+                  leading-[0.98]
+                  tracking-[-0.045em]
                   sm:text-6xl
                   md:text-7xl
-                  lg:text-[5rem]
-                  xl:text-[5.7rem]
+                  lg:text-[4.5rem]
+                  xl:text-[5rem]
                 "
                 style={{
                   color: COLORS.navy,
@@ -576,7 +574,7 @@ export function Hero({
               </motion.h1>
             </Editable>
 
-            {/* DESCRIPTION */}
+            {/* DESCRIPTION - Increased size */}
 
             <Editable
               editMode={editMode}
@@ -600,12 +598,12 @@ export function Hero({
                   delay: 0.25,
                 }}
                 className="
-                  mt-6
+                  mt-4
                   max-w-xl
-                  text-base
-                  leading-7
-                  sm:text-lg
-                  sm:leading-8
+                  text-lg
+                  leading-8
+                  sm:text-xl
+                  sm:leading-9
                 "
                 style={{
                   color: COLORS.navySoft,
@@ -616,7 +614,7 @@ export function Hero({
             </Editable>
 
             {/* =================================================
-                DETAILS
+                DETAILS - Increased size
             ================================================= */}
 
             <Editable
@@ -639,19 +637,20 @@ export function Hero({
                   delay: 0.3,
                 }}
                 className="
-                  mt-6
+                  mt-4
                   flex
                   flex-wrap
                   items-center
-                  gap-x-5
+                  gap-x-6
                   gap-y-2
                 "
               >
                 <span
                   className="
-                    text-xs
+                    text-sm
                     font-black
                     tracking-[0.12em]
+                    sm:text-base
                   "
                   style={{
                     color: COLORS.navySoft,
@@ -662,8 +661,8 @@ export function Hero({
 
                 <span
                   className="
-                    h-1.5
-                    w-1.5
+                    h-2
+                    w-2
                     rounded-full
                   "
                   style={{
@@ -675,16 +674,17 @@ export function Hero({
                   className="
                     flex
                     items-center
-                    gap-1.5
-                    text-sm
+                    gap-2
+                    text-base
                     font-semibold
+                    sm:text-lg
                   "
                   style={{
                     color: COLORS.navySoft,
                   }}
                 >
                   <MapPin
-                    className="h-4 w-4"
+                    className="h-5 w-5"
                     style={{
                       color: COLORS.gold,
                     }}
@@ -696,7 +696,7 @@ export function Hero({
             </Editable>
 
             {/* =================================================
-                BUTTONS
+                BUTTONS - Increased size
             ================================================= */}
 
             <Editable
@@ -721,10 +721,10 @@ export function Hero({
                   delay: 0.35,
                 }}
                 className="
-                  mt-8
+                  mt-5
                   flex
                   flex-wrap
-                  gap-3
+                  gap-4
                 "
               >
                 {/* PRIMARY */}
@@ -745,13 +745,14 @@ export function Hero({
                     items-center
                     gap-3
                     rounded-full
-                    px-6
-                    py-3.5
-                    text-sm
+                    px-8
+                    py-4
+                    text-base
                     font-black
                     transition-all
                     duration-300
                     hover:-translate-y-1
+                    sm:text-lg
                   "
                   style={{
                     color: COLORS.navy,
@@ -766,21 +767,20 @@ export function Hero({
                   <span
                     className="
                       flex
-                      h-7
-                      w-7
+                      h-8
+                      w-8
                       items-center
                       justify-center
                       rounded-full
                     "
                     style={{
-                      background:
-                        "rgba(255,255,255,0.55)",
+                      background: "rgba(255,255,255,0.55)",
                     }}
                   >
                     <ArrowRight
                       className="
-                        h-4
-                        w-4
+                        h-5
+                        w-5
                         transition-transform
                         duration-300
                         group-hover:translate-x-1
@@ -808,9 +808,9 @@ export function Hero({
                     rounded-full
                     border
                     bg-white/75
-                    px-6
-                    py-3.5
-                    text-sm
+                    px-8
+                    py-4
+                    text-base
                     font-bold
                     shadow-sm
                     backdrop-blur-xl
@@ -818,6 +818,7 @@ export function Hero({
                     duration-300
                     hover:-translate-y-1
                     hover:bg-white
+                    sm:text-lg
                   "
                   style={{
                     color: COLORS.navy,
@@ -830,7 +831,7 @@ export function Hero({
             </Editable>
 
             {/* =================================================
-                SMALL BOTTOM MESSAGE
+                SMALL BOTTOM MESSAGE - MOVED UP TO FIT ABOVE
             ================================================= */}
 
             <motion.div
@@ -845,17 +846,17 @@ export function Hero({
                 delay: 0.55,
               }}
               className="
-                mt-10
+                mt-6
                 flex
                 items-center
-                gap-3
+                gap-4
               "
             >
               <div
                 className="
                   flex
-                  h-9
-                  w-9
+                  h-11
+                  w-11
                   items-center
                   justify-center
                   rounded-full
@@ -865,16 +866,17 @@ export function Hero({
                   color: COLORS.gold,
                 }}
               >
-                <Sparkles className="h-4 w-4" />
+                <Sparkles className="h-5 w-5" />
               </div>
 
               <div>
                 <p
                   className="
-                    text-[10px]
+                    text-sm
                     font-black
                     uppercase
                     tracking-[0.2em]
+                    sm:text-base
                   "
                   style={{
                     color: COLORS.navySoft,
@@ -886,8 +888,9 @@ export function Hero({
                 <p
                   className="
                     mt-0.5
-                    text-sm
+                    text-lg
                     font-bold
+                    sm:text-xl
                   "
                   style={{
                     color: COLORS.navy,
@@ -900,7 +903,7 @@ export function Hero({
           </div>
 
           {/* =================================================
-              RIGHT IMAGE
+              RIGHT IMAGE - FIXED: No white gaps
           ================================================= */}
 
           <div
@@ -966,7 +969,7 @@ export function Hero({
             />
 
             {/* =============================================
-                IMAGE
+                IMAGE - FIXED: No gaps, full coverage
             ============================================= */}
 
             <motion.div
@@ -979,6 +982,9 @@ export function Hero({
                 opacity: 1,
                 scale: 1,
                 x: 0,
+              }}
+              whileHover={{
+                scale: 1.015,
               }}
               transition={{
                 duration: 1,
@@ -994,17 +1000,10 @@ export function Hero({
                 overflow-hidden
               "
               style={{
-                borderRadius:
-                  "48% 48% 42% 42% / 24% 24% 18% 18%",
-
-                border:
-                  "7px solid rgba(255,255,255,0.92)",
-
-                boxShadow:
-                  "0 35px 80px rgba(21,36,56,0.16), 0 10px 25px rgba(21,36,56,0.08)",
-
-                background:
-                  COLORS.navy,
+                borderRadius: "48% 48% 42% 42% / 24% 24% 18% 18%",
+                border: "7px solid rgba(255,255,255,0.92)",
+                boxShadow: "0 45px 90px rgba(21,36,56,0.22), 0 18px 34px rgba(21,36,56,0.14), 0 4px 10px rgba(217,170,50,0.18)",
+                background: COLORS.navy,
               }}
             >
               {/* IMAGE */}
@@ -1048,8 +1047,7 @@ export function Hero({
                   pointer-events-none
                 "
                 style={{
-                  background:
-                    "linear-gradient(180deg, rgba(21,36,56,0) 50%, rgba(21,36,56,0.30) 100%)",
+                  background: "linear-gradient(180deg, rgba(21,36,56,0) 50%, rgba(21,36,56,0.30) 100%)",
                 }}
               />
 
@@ -1349,8 +1347,7 @@ export function Hero({
                       tracking-[0.18em]
                     "
                     style={{
-                      color:
-                        COLORS.navySoft,
+                      color: COLORS.navySoft,
                     }}
                   >
                     Our Philosophy
@@ -1363,8 +1360,7 @@ export function Hero({
                       font-black
                     "
                     style={{
-                      color:
-                        COLORS.navy,
+                      color: COLORS.navy,
                     }}
                   >
                     Learn • Lead • Serve
@@ -1408,8 +1404,7 @@ export function Hero({
             rounded-full
           "
           style={{
-            background:
-              COLORS.gold,
+            background: COLORS.gold,
           }}
         />
 
@@ -1421,8 +1416,7 @@ export function Hero({
             tracking-[0.3em]
           "
           style={{
-            color:
-              COLORS.navySoft,
+            color: COLORS.navySoft,
           }}
         >
           Discover Red Rose
@@ -1434,8 +1428,7 @@ export function Hero({
             w-12
           "
           style={{
-            background:
-              "rgba(21,36,56,0.15)",
+            background: "rgba(21,36,56,0.15)",
           }}
         />
       </motion.div>
