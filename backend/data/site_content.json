@@ -426,6 +426,83 @@
       }
     ]
   },
+  "footer": {
+    "logoUrl": "",
+    "schoolName": "Smriti",
+    "schoolSubtitle": "Secondary English Boarding School",
+    "admissionBadgeText": "Admissions Open 2026",
+    "showAdmissionBadge": true,
+    "navLinks": [
+      {
+        "id": 1,
+        "label": "About",
+        "href": "/about",
+        "visible": true
+      },
+      {
+        "id": 2,
+        "label": "Academics",
+        "href": "/academics",
+        "visible": true
+      },
+      {
+        "id": 3,
+        "label": "Facilities",
+        "href": "/facilities",
+        "visible": true
+      },
+      {
+        "id": 4,
+        "label": "Gallery",
+        "href": "/gallery",
+        "visible": true
+      },
+      {
+        "id": 5,
+        "label": "Contact",
+        "href": "/contact",
+        "visible": true
+      }
+    ],
+    "socials": [
+      {
+        "id": 1,
+        "label": "Facebook",
+        "type": "facebook",
+        "href": "#",
+        "visible": true
+      },
+      {
+        "id": 1786094349033,
+        "label": "Website",
+        "type": "website",
+        "href": "#",
+        "visible": true
+      },
+      {
+        "id": 1786094453754,
+        "label": "Website",
+        "type": "website",
+        "href": "#",
+        "visible": true
+      }
+    ],
+    "contact": {
+      "address": "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=Baljagriti+English+Secondary+School+Hetauda",
+      "phones": [
+        "057-590144",
+        "057-590145",
+        "057-590146"
+      ],
+      "email": "infobjess2046@gmail.com"
+    },
+    "modalTitle": "Contact Smriti School",
+    "modalHint": "Click any number to copy it.",
+    "copiedText": "Copied",
+    "closeButtonText": "Close",
+    "copyrightText": "© 2026 Smriti Secondary English Boarding School. All rights reserved."
+  },
   "academics": {
     "hero": {
       "badge": "Excellence in Education",
@@ -546,97 +623,7 @@
         "Co-curricular & Moral Progress Logs"
       ]
     },
-    "classLevels": [
-      {
-        "id": "pre-primary",
-        "name": "Pre-Primary / Early Years",
-        "shortBadge": "Early Childhood",
-        "span": "Play Group, Nursery, LKG, UKG",
-        "ageGroup": "3 – 5.5 Years",
-        "color": "#D4AC0D",
-        "tagline": "Foundation of Curiosity, Play-Based Learning",
-        "description": "Our early childhood program nurtures young minds through playful exploration, phonics, storytelling, and creative arts.",
-        "classes": [
-          {
-            "id": "pg-nursery",
-            "name": "Play Group & Nursery",
-            "focus": "Sensory, Language Readiness & Social Interaction",
-            "subjects": [
-              {
-                "name": "Phonics & Rhymes",
-                "type": "Core",
-                "hours": "5 hrs/wk"
-              },
-              {
-                "name": "Picture Reading & Storytelling",
-                "type": "Core",
-                "hours": "4 hrs/wk"
-              },
-              {
-                "name": "Number Games & Counting",
-                "type": "Core",
-                "hours": "4 hrs/wk"
-              },
-              {
-                "name": "Creative Arts & Craft",
-                "type": "Activity",
-                "hours": "5 hrs/wk"
-              },
-              {
-                "name": "Play & Motor Skills",
-                "type": "Activity",
-                "hours": "4 hrs/wk"
-              }
-            ],
-            "curriculumHighlights": [
-              "Montessori-inspired tactile learning corners",
-              "Daily storytelling sessions in English & Nepali",
-              "Zero exam pressure",
-              "Color & pattern recognition"
-            ],
-            "assessmentMethod": "Continuous Activity Milestone Logs"
-          },
-          {
-            "id": "lkg-ukg",
-            "name": "LKG & UKG",
-            "focus": "Early Literacy, Numeracy & Environmental Awareness",
-            "subjects": [
-              {
-                "name": "English Reading & Writing",
-                "type": "Core",
-                "hours": "6 hrs/wk"
-              },
-              {
-                "name": "Nepali Barnamala & Words",
-                "type": "Core",
-                "hours": "5 hrs/wk"
-              },
-              {
-                "name": "Elementary Mathematics",
-                "type": "Core",
-                "hours": "5 hrs/wk"
-              },
-              {
-                "name": "General Knowledge & Nature",
-                "type": "Core",
-                "hours": "3 hrs/wk"
-              },
-              {
-                "name": "Drawing, Color & Music",
-                "type": "Activity",
-                "hours": "4 hrs/wk"
-              }
-            ],
-            "curriculumHighlights": [
-              "Phonics-based English reading",
-              "Nepali alphabet recognition",
-              "Basic addition & subtraction",
-              "Group & team building activities"
-            ],
-            "assessmentMethod": "Playful Classroom Assessments & Progress Certificates"
-          }
-        ]
-      },
+    "levels": [
       {
         "id": "primary",
         "name": "Primary Level",

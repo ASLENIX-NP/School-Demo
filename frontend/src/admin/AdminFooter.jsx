@@ -403,13 +403,44 @@ export default function AdminFooter() {
     }));
   };
 
-
   const updateModalListItem = (listName, index, field, value) => {
     setModalForm((prev) => ({
       ...prev,
-      [listName]: (prev[listName] || []).map((item, itemIndex) =>
-        itemIndex === index ? { ...item, [field]: value } : item
-      ),
+      [listName]: (prev[listName] || []).map((item, itemIndex) => {
+        if (itemIndex !== index) return item;
+
+        const updated = {
+          ...item,
+          [field]: value,
+        };
+
+        // Auto-update label when type changes, but only if label is empty or was auto-generated
+        if (field === "type") {
+          const typeLabels = {
+            facebook: "Facebook",
+            instagram: "Instagram",
+            youtube: "YouTube",
+            linkedin: "LinkedIn",
+            twitter: "X (Twitter)",
+            tiktok: "TikTok",
+            whatsapp: "WhatsApp",
+            telegram: "Telegram",
+            github: "GitHub",
+            discord: "Discord",
+            website: "Website",
+          };
+
+          // Only change label if it's empty or was the default from previous type
+          const oldLabel = item.label || "";
+          const isDefaultLabel = Object.values(typeLabels).includes(oldLabel) || oldLabel === "";
+
+          if (isDefaultLabel) {
+            updated.label = typeLabels[value] || value.charAt(0).toUpperCase() + value.slice(1);
+          }
+        }
+
+        return updated;
+      }),
     }));
   };
 
@@ -452,8 +483,8 @@ export default function AdminFooter() {
         ...(prev.socials || []),
         {
           id: Date.now(),
-          label: "Website",
           type: "website",
+          label: "Website",
           href: "",
           visible: true,
         },
@@ -709,11 +740,11 @@ export default function AdminFooter() {
           navLinks: nextForm.navLinks.map((link) =>
             link.id === editingTarget.id
               ? {
-                  ...link,
-                  label: modalForm.label || "",
-                  href: modalForm.href || "/",
-                  visible: modalForm.visible !== false,
-                }
+                ...link,
+                label: modalForm.label || "",
+                href: modalForm.href || "/",
+                visible: modalForm.visible !== false,
+              }
               : link
           ),
         };
@@ -742,12 +773,12 @@ export default function AdminFooter() {
           socials: nextForm.socials.map((social) =>
             social.id === editingTarget.id
               ? {
-                  ...social,
-                  label: modalForm.label || "",
-                  type: modalForm.type || "website",
-                  href: normalizeExternalUrl(modalForm.href || ""),
-                  visible: modalForm.visible !== false,
-                }
+                ...social,
+                label: modalForm.label || "",
+                type: modalForm.type || "website",
+                href: normalizeExternalUrl(modalForm.href || ""),
+                visible: modalForm.visible !== false,
+              }
               : social
           ),
         };
@@ -842,7 +873,7 @@ export default function AdminFooter() {
       }}
     >
       <style>
-  {`
+        {`
     .admin-footer-preview-frame {
       overflow: hidden !important;
       position: relative !important;
@@ -899,47 +930,47 @@ export default function AdminFooter() {
       }
     }
   `}
-</style>
-     <header
-  className="relative z-0"
-  style={{
-    background:
-      "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
-    borderBottom: "1px solid rgba(75,46,131,0.12)",
-    boxShadow: "0 14px 36px rgba(15,23,42,0.08)",
-    backdropFilter: "blur(18px)",
-  }}
->
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <button
-      type="button"
-      onClick={() => navigate("/admin/dashboard")}
-      className="inline-flex w-fit items-center gap-2 font-black transition-all hover:-translate-x-1"
-      style={{ color: colors.dark }}
-    >
-      <ArrowLeft className="w-5 h-5" />
-      Back to Dashboard
-    </button>
-
-    <div className="flex flex-wrap items-center gap-3">
-      <a
-        href="/"
-        target="_blank"
-        rel="noreferrer"
-        className="hidden md:inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black transition-all hover:scale-105"
+      </style>
+      <header
+        className="relative z-0"
         style={{
-          color: colors.dark,
-          background: "rgba(255,255,255,0.72)",
-          border: "1px solid rgba(75,46,131,0.12)",
-          boxShadow: "0 10px 26px rgba(15,23,42,0.06)",
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
+          borderBottom: "1px solid rgba(75,46,131,0.12)",
+          boxShadow: "0 14px 36px rgba(15,23,42,0.08)",
+          backdropFilter: "blur(18px)",
         }}
       >
-        <ExternalLink className="w-4 h-4" />
-        View Website
-      </a>
-    </div>
-  </div>
-</header>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/admin/dashboard")}
+            className="inline-flex w-fit items-center gap-2 font-black transition-all hover:-translate-x-1"
+            style={{ color: colors.dark }}
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Dashboard
+          </button>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href="/"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden md:inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black transition-all hover:scale-105"
+              style={{
+                color: colors.dark,
+                background: "rgba(255,255,255,0.72)",
+                border: "1px solid rgba(75,46,131,0.12)",
+                boxShadow: "0 10px 26px rgba(15,23,42,0.06)",
+              }}
+            >
+              <ExternalLink className="w-4 h-4" />
+              View Website
+            </a>
+          </div>
+        </div>
+      </header>
 
       <main className="max-w-[1600px] mx-auto px-6 py-10">
         <motion.div
@@ -991,15 +1022,15 @@ export default function AdminFooter() {
         )}
 
         <div
-  className="admin-footer-preview-frame rounded-[24px] sm:rounded-[32px] p-3 sm:p-4 md:p-6"
-  style={{
-    background:
-      "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.78))",
-    border: "1px solid rgba(11,16,32,0.08)",
-    boxShadow:
-      "0 18px 48px rgba(11,16,32,0.075), inset 0 1px 0 rgba(255,255,255,0.85)",
-  }}
->
+          className="admin-footer-preview-frame rounded-[24px] sm:rounded-[32px] p-3 sm:p-4 md:p-6"
+          style={{
+            background:
+              "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.78))",
+            border: "1px solid rgba(11,16,32,0.08)",
+            boxShadow:
+              "0 18px 48px rgba(11,16,32,0.075), inset 0 1px 0 rgba(255,255,255,0.85)",
+          }}
+        >
           <Footer
             editMode
             contentOverride={form}
@@ -1312,8 +1343,17 @@ export default function AdminFooter() {
                               value={social.type}
                               onChange={(value) => updateModalListItem("socials", index, "type", value)}
                             >
+                              <option value="">Select Social</option>
                               <option value="facebook">Facebook</option>
+                              <option value="instagram">Instagram</option>
                               <option value="youtube">YouTube</option>
+                              <option value="linkedin">LinkedIn</option>
+                              <option value="twitter">X (Twitter)</option>
+                              <option value="tiktok">TikTok</option>
+                              <option value="whatsapp">WhatsApp</option>
+                              <option value="telegram">Telegram</option>
+                              <option value="github">GitHub</option>
+                              <option value="discord">Discord</option>
                               <option value="website">Website</option>
                             </SelectField>
                           </div>
@@ -1334,8 +1374,17 @@ export default function AdminFooter() {
                       <Toggle checked={modalForm.visible !== false} onChange={(value) => updateModalField("visible", value)} label="Show this social link" />
                       <Field label="Label" value={modalForm.label} onChange={(value) => updateModalField("label", value)} placeholder="Facebook" />
                       <SelectField label="Type" value={modalForm.type} onChange={(value) => updateModalField("type", value)}>
+                        <option value="">Select Social</option>
                         <option value="facebook">Facebook</option>
+                        <option value="instagram">Instagram</option>
                         <option value="youtube">YouTube</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="twitter">X (Twitter)</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="telegram">Telegram</option>
+                        <option value="github">GitHub</option>
+                        <option value="discord">Discord</option>
                         <option value="website">Website</option>
                       </SelectField>
                       <Field label="URL" value={modalForm.href} onChange={(value) => updateModalField("href", value)} placeholder="https://..." />
@@ -1453,4 +1502,3 @@ export default function AdminFooter() {
     </section>
   );
 }
-
