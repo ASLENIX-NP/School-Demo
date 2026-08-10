@@ -104,7 +104,7 @@
     }
   },
   "navbar": {
-    "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786081424298_Screenshot_2026-08-06_at_1.12.34___PM_hyxuGaxzU.png",
+    "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786083534935_Screenshot_2026-07-10_234100_5YakIo7k0.png",
     "schoolName": "Smriti",
     "schoolSubtitle": "Secondary English School",
     "admissionButtonText": "Admission Open",
@@ -332,76 +332,6 @@
     "ctaButtonLink": "/contact",
     "storyImageAlt": ""
   },
-  "navbar": {
-    "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786083534935_Screenshot_2026-07-10_234100_5YakIo7k0.png",
-    "schoolName": "Smriti",
-    "schoolSubtitle": "Secondary English School",
-    "admissionButtonText": "Admission Open",
-    "admissionButtonLink": "/admissions",
-    "showAdmissionButton": true,
-    "links": [
-      {
-        "id": "home",
-        "label": "Home",
-        "href": "/",
-        "visible": true
-      },
-      {
-        "id": "about",
-        "label": "About",
-        "href": "/about",
-        "visible": true
-      },
-      {
-        "id": "academics",
-        "label": "Academics",
-        "href": "/academics",
-        "visible": true
-      },
-      {
-        "id": "notices",
-        "label": "Notices",
-        "href": "/notices",
-        "visible": true
-      },
-      {
-        "id": "calendar",
-        "label": "Calendar",
-        "href": "/calendar",
-        "visible": true
-      },
-      {
-        "id": "blogs",
-        "label": "Blog",
-        "href": "/blogs",
-        "visible": true
-      },
-      {
-        "id": "facilities",
-        "label": "Facilities",
-        "href": "/facilities",
-        "visible": true
-      },
-      {
-        "id": "staff",
-        "label": "Staff",
-        "href": "/staff",
-        "visible": true
-      },
-      {
-        "id": "gallery",
-        "label": "Gallery",
-        "href": "/gallery",
-        "visible": true
-      },
-      {
-        "id": "contact",
-        "label": "Contact",
-        "href": "/contact",
-        "visible": true
-      }
-    ]
-  },
   "blogs": {
     "pageBadge": "Knowledge Hub",
     "pageTitle": "School Blog & Insights",
@@ -506,5 +436,82 @@
         "authorRole": "Administration"
       }
     ]
+  },
+  "footer": {
+    "logoUrl": "",
+    "schoolName": "Smriti",
+    "schoolSubtitle": "Secondary English Boarding School",
+    "admissionBadgeText": "Admissions Open 2026",
+    "showAdmissionBadge": true,
+    "navLinks": [
+      {
+        "id": 1,
+        "label": "About",
+        "href": "/about",
+        "visible": true
+      },
+      {
+        "id": 2,
+        "label": "Academics",
+        "href": "/academics",
+        "visible": true
+      },
+      {
+        "id": 3,
+        "label": "Facilities",
+        "href": "/facilities",
+        "visible": true
+      },
+      {
+        "id": 4,
+        "label": "Gallery",
+        "href": "/gallery",
+        "visible": true
+      },
+      {
+        "id": 5,
+        "label": "Contact",
+        "href": "/contact",
+        "visible": true
+      }
+    ],
+    "socials": [
+      {
+        "id": 1,
+        "label": "Facebook",
+        "type": "facebook",
+        "href": "#",
+        "visible": true
+      },
+      {
+        "id": 1786094349033,
+        "label": "Website",
+        "type": "website",
+        "href": "#",
+        "visible": true
+      },
+      {
+        "id": 1786094453754,
+        "label": "Website",
+        "type": "website",
+        "href": "#",
+        "visible": true
+      }
+    ],
+    "contact": {
+      "address": "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=Baljagriti+English+Secondary+School+Hetauda",
+      "phones": [
+        "057-590144",
+        "057-590145",
+        "057-590146"
+      ],
+      "email": "infobjess2046@gmail.com"
+    },
+    "modalTitle": "Contact Smriti School",
+    "modalHint": "Click any number to copy it.",
+    "copiedText": "Copied",
+    "closeButtonText": "Close",
+    "copyrightText": "© 2026 Smriti Secondary English Boarding School. All rights reserved."
   }
 }
