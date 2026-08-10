@@ -24,11 +24,11 @@ import Calendar, {
 const colors = {
   red: "#D71920",
   green: "#168A3A",
-  purple: "#4B2E83",
-  dark: "#0B1020",
+  purple: "#6D5ACF",
+  dark: "#172033",
   cyan: "#38BDF8",
-  blue: "#1877F2",
-  gold: "#FACC15",
+  blue: "#4E9FD1",
+  gold: "#E9C46A",
   orange: "#F97316",
 };
 
@@ -36,10 +36,12 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const lightAdminPanelStyle = {
   background:
-    "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
-  border: "1px solid rgba(75,46,131,0.12)",
-  boxShadow: "0 18px 44px rgba(15,23,42,0.08)",
-  backdropFilter: "blur(14px)",
+    "linear-gradient(135deg, rgba(255,255,255,0.80), rgba(255,250,240,0.74), rgba(239,249,255,0.78))",
+  border: "1px solid rgba(255,255,255,0.92)",
+  boxShadow:
+    "0 28px 70px rgba(51,65,85,0.10), inset 0 1px 0 rgba(255,255,255,0.95)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
 };
 
 function Field({
@@ -221,11 +223,15 @@ function EventListItem({
 
   return (
     <div
-      className="rounded-2xl p-4"
+      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5"
       style={{
         background:
-          event.visible === false ? "rgba(248,250,252,0.7)" : "#FFFFFF",
-        border: "1px solid rgba(15,23,42,0.08)",
+          event.visible === false
+            ? "rgba(248,250,252,0.72)"
+            : "rgba(255,255,255,0.78)",
+        border: "1px solid rgba(255,255,255,0.92)",
+        boxShadow: "0 12px 30px rgba(51,65,85,0.06), inset 0 1px 0 rgba(255,255,255,0.96)",
+        backdropFilter: "blur(14px)",
       }}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -561,11 +567,66 @@ export default function AdminCalendar() {
       : "Edit Calendar Event";
 
   return (
-    <div className="space-y-6">
+    <>
+      <style>{`
+        .calendar-admin-glass {
+          transition: transform .35s ease, box-shadow .35s ease;
+        }
+        .calendar-admin-glass:hover {
+          transform: translateY(-2px);
+          box-shadow:
+            0 34px 80px rgba(51,65,85,.12),
+            inset 0 1px 0 rgba(255,255,255,.98);
+        }
+        .calendar-admin-button {
+          transition: transform .25s ease, box-shadow .25s ease;
+        }
+        .calendar-admin-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 14px 28px rgba(51,65,85,.10);
+        }
+      `}</style>
+
+      <div
+        className="relative min-h-full overflow-hidden rounded-[34px] p-3 sm:p-5 md:p-7"
+        style={{
+          background:
+            "linear-gradient(135deg, #F7FBFF 0%, #FFFDF8 45%, #F1FAF8 100%)",
+        }}
+      >
+        <motion.div
+          className="pointer-events-none absolute -top-24 -left-20 h-80 w-80 rounded-full blur-3xl"
+          style={{ background: "rgba(244,201,93,0.20)" }}
+          animate={{ x: [0, 30, 0], y: [0, 15, 0], scale: [1, 1.06, 1] }}
+          transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="pointer-events-none absolute top-1/3 -right-24 h-96 w-96 rounded-full blur-3xl"
+          style={{ background: "rgba(56,189,248,0.15)" }}
+          animate={{ x: [0, -25, 0], y: [0, 25, 0], scale: [1, 1.05, 1] }}
+          transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full blur-3xl"
+          style={{ background: "rgba(216,193,255,0.16)" }}
+          animate={{ x: [0, -20, 0], y: [0, -20, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(100,116,139,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(100,116,139,0.05) 1px, transparent 1px)",
+            backgroundSize: "54px 54px",
+            maskImage: "linear-gradient(to bottom, black, transparent 80%)",
+          }}
+        />
+
+        <div className="relative z-10 space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-[24px] p-4 sm:p-5 md:p-6"
+        className="calendar-admin-glass rounded-[30px] p-4 sm:p-5 md:p-6"
         style={lightAdminPanelStyle}
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-5">
@@ -596,7 +657,7 @@ export default function AdminCalendar() {
             <button
               type="button"
               onClick={() => openNewEvent("event")}
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
+              className="calendar-admin-button inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
               style={{
                 background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
                 color: colors.dark,
@@ -609,7 +670,7 @@ export default function AdminCalendar() {
             <button
               type="button"
               onClick={() => openNewEvent("holiday")}
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
+              className="calendar-admin-button inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
               style={{
                 background: "rgba(215,25,32,0.08)",
                 color: colors.red,
@@ -623,9 +684,9 @@ export default function AdminCalendar() {
             <button
               type="button"
               onClick={() => setShowEventsPanel(true)}
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
+              className="calendar-admin-button inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
               style={{
-                background: "rgba(255,255,255,0.86)",
+                background: "rgba(255,255,255,0.76)",
                 color: colors.purple,
                 border: "1px solid rgba(75,46,131,0.18)",
               }}
@@ -636,9 +697,9 @@ export default function AdminCalendar() {
 
             <Link
               to="/admin/dashboard"
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
+              className="calendar-admin-button inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
               style={{
-                background: "rgba(15,23,42,0.06)",
+                background: "rgba(255,255,255,0.68)",
                 color: "rgba(15,23,42,0.72)",
                 border: "1px solid rgba(15,23,42,0.08)",
               }}
@@ -667,11 +728,12 @@ export default function AdminCalendar() {
           className="rounded-[2rem] overflow-x-auto"
           style={{
             background:
-              "radial-gradient(circle at top left, rgba(56,189,248,0.14), transparent 34%), linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)",
-            border: "1px solid rgba(15,23,42,0.08)",
+              "radial-gradient(circle at 12% 8%, rgba(244,201,93,0.16), transparent 28%), radial-gradient(circle at 88% 85%, rgba(56,189,248,0.14), transparent 30%), rgba(255,255,255,0.42)",
+            border: "1px solid rgba(255,255,255,0.90)",
+            boxShadow: "0 22px 60px rgba(51,65,85,0.08)",
           }}
         >
-          <div className="min-w-0 bg-white">
+          <div className="min-w-0">
             <Calendar
               editMode
               contentOverride={form}
@@ -972,7 +1034,7 @@ export default function AdminCalendar() {
                     disabled={saving}
                     className="flex-1 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60"
                     style={{
-                      background: "rgba(15,23,42,0.06)",
+                      background: "rgba(255,255,255,0.68)",
                       color: "rgba(15,23,42,0.65)",
                       border: "1px solid rgba(15,23,42,0.08)",
                     }}
@@ -1050,7 +1112,7 @@ export default function AdminCalendar() {
                     onClick={() => setDeleteTarget(null)}
                     className="flex-1 py-3 rounded-2xl text-sm font-black disabled:opacity-60"
                     style={{
-                      background: "rgba(15,23,42,0.06)",
+                      background: "rgba(255,255,255,0.68)",
                       color: "rgba(15,23,42,0.68)",
                       border: "1px solid rgba(15,23,42,0.08)",
                     }}
@@ -1078,6 +1140,8 @@ export default function AdminCalendar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+        </div>
+      </div>
+    </>
   );
 }
