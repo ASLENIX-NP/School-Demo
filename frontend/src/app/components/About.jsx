@@ -1,9 +1,3 @@
-// About.jsx
-// Features individual Staff Containers that open a dedicated Popup on click.
-// Page Header is now left-aligned, containerized, and wrapped in a colorful glass gradient card.
-// FIXED: Mission & Vision emojis are now fully visible without getting cut off.
-// ALL HEADERS NOW EDITABLE FROM BACKEND
-
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -628,42 +622,89 @@ export default function About({
               glare={true}
               className="relative rounded-3xl p-8 md:p-12 overflow-hidden"
               style={{
-                background: "linear-gradient(145deg, #EFF6FF 0%, #F0F0FF 45%, #FEFCE8 100%)",
-                border: "1px solid rgba(37, 99, 235, 0.10)",
-                boxShadow: "0 20px 50px rgba(37, 99, 235, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
+                background:
+                  "linear-gradient(135deg, #2563EB 0%, #4F46E5 42%, #7C3AED 72%, #F59E0B 135%)",
+                border: "1px solid rgba(255,255,255,0.35)",
+                boxShadow:
+                  "0 25px 60px rgba(37,99,235,0.25), 0 8px 30px rgba(124,58,237,0.18), inset 0 1px 0 rgba(255,255,255,0.3)",
               }}
             >
-              {/* Decorative floating blobs inside the header to make it colorful */}
-              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-purple-400/10 blur-3xl pointer-events-none" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-amber-200/10 blur-2xl pointer-events-none" />
+              {/* Bright decorative glow effects inside the header */}
+              <div
+                className="absolute -top-32 -right-32 w-80 h-80 rounded-full pointer-events-none"
+                style={{
+                  background: "rgba(56,189,248,0.28)",
+                  filter: "blur(70px)",
+                }}
+              />
+              <div
+                className="absolute -bottom-32 -left-24 w-80 h-80 rounded-full pointer-events-none"
+                style={{
+                  background: "rgba(245,158,11,0.20)",
+                  filter: "blur(75px)",
+                }}
+              />
+              <div
+                className="absolute top-1/2 right-1/3 w-72 h-72 rounded-full pointer-events-none"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  filter: "blur(80px)",
+                }}
+              />
 
               <div className="relative z-10 max-w-2xl">
-                <motion.span
-                  initial={{ scale: 0.9 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-5"
-                  style={{ background: "rgba(37, 99, 235, 0.10)", color: palette.primary }}
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  {content.pageBadge}
-                </motion.span>
+              <motion.span
+  initial={{ scale: 0.9, opacity: 0 }}
+  whileInView={{ scale: 1, opacity: 1 }}
+  viewport={{ once: true }}
+  whileHover={{ scale: 1.04, y: -2 }}
+  transition={{ duration: 0.35 }}
+  className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold tracking-wide mb-5 text-white cursor-default"
+  style={{
+    background:
+      "linear-gradient(135deg, #2563EB 0%, #7C3AED 55%, #F59E0B 100%)",
+    boxShadow:
+      "0 8px 22px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255,255,255,0.35)",
+    border: "1px solid rgba(255,255,255,0.45)",
+  }}
+>
+  <span
+    className="flex items-center justify-center w-6 h-6 rounded-full"
+    style={{
+      background: "rgba(255,255,255,0.2)",
+      boxShadow: "inset 0 1px 2px rgba(255,255,255,0.3)",
+    }}
+  >
+    <Sparkles className="w-3.5 h-3.5" />
+  </span>
+
+  {content.pageBadge}
+</motion.span>
                 <h1
                   className="text-4xl md:text-5xl lg:text-6xl font-bold mb-5"
                   style={{
-                    color: palette.dark,
+                    color: palette.white,
                     fontFamily: "var(--font-display)",
                     letterSpacing: "-0.02em",
                     lineHeight: 1.08,
+                    textShadow: "0 3px 18px rgba(15,23,42,0.18)",
                   }}
                 >
                   {content.pageTitle}
                 </h1>
-                <p className="text-lg leading-relaxed" style={{ color: palette.gray }}>
+                <p
+                  className="text-lg leading-relaxed"
+                  style={{ color: "rgba(255,255,255,0.88)" }}
+                >
                   {content.pageSubtitle}
                 </p>
-                <div className="w-16 h-1 rounded-full mt-6" style={{ background: palette.gradient1 }} />
+                <div
+                  className="w-16 h-1 rounded-full mt-6"
+                  style={{
+                    background: "linear-gradient(90deg, #FDE047, #F59E0B)",
+                    boxShadow: "0 4px 14px rgba(245,158,11,0.45)",
+                  }}
+                />
               </div>
             </TiltCard>
           </motion.div>
