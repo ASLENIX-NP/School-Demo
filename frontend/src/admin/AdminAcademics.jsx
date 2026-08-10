@@ -1,4 +1,3 @@
-// AdminAcademics.jsx
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -245,6 +244,8 @@ function AcademicsPage({
   onDeleteTarget = () => {},
   onAddLevel = () => {},
   onAddClass = () => {},
+  onAddStrength = () => {},
+  onAddAchievement = () => {},
 }) {
   const data = contentOverride || defaultAcademicsContent;
   const levels = Array.isArray(data.classLevels) && data.classLevels.length ? data.classLevels : classLevelsData;
@@ -316,12 +317,14 @@ function AcademicsPage({
 
       {/* Levels */}
       <section className="py-20 px-6 bg-white max-w-[1240px] mx-auto">
-        <div className="text-center max-w-[700px] mx-auto mb-12">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(26,82,118,0.08)] text-[#1A5276] mb-4">Academic Structure</span>
-          <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#1C2833] mb-3">Explore Our <span className="text-[#D4AC0D]">Class Levels</span></h2>
-          <p className="text-[#5D6D7E] leading-relaxed">Click on any academic level below to view the classes, subjects, curriculum, and grading structure.</p>
-          <div className="w-[60px] h-1 mx-auto mt-5 rounded-full bg-gradient-to-r from-[#D4AC0D] to-[#E67E22]" />
-        </div>
+        <EditableWrap editMode={adminEditMode} target={{ type: "levelsHeading" }} onEditTarget={onEditTarget}>
+          <div className="text-center max-w-[700px] mx-auto mb-12">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(26,82,118,0.08)] text-[#1A5276] mb-4">Academic Structure</span>
+            <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#1C2833] mb-3">Explore Our <span className="text-[#D4AC0D]">Class Levels</span></h2>
+            <p className="text-[#5D6D7E] leading-relaxed">Click on any academic level below to view the classes, subjects, curriculum, and grading structure.</p>
+            <div className="w-[60px] h-1 mx-auto mt-5 rounded-full bg-gradient-to-r from-[#D4AC0D] to-[#E67E22]" />
+          </div>
+        </EditableWrap>
 
         {/* All 4+ Class Cards are fully editable and driven by saved data */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
@@ -420,18 +423,20 @@ function AcademicsPage({
 
       {/* Strengths */}
       <section className="py-20 px-6 bg-[#F8F6F0]">
-        <div className="max-w-[1200px] mx-auto text-center mb-12">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(26,82,118,0.08)] text-[#1A5276] mb-4">What Sets Us Apart</span>
-          <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#1C2833] mb-3">Our <span className="text-[#D4AC0D]">Academic Strengths</span></h2>
-          <p className="text-[#5D6D7E] leading-relaxed max-w-[600px] mx-auto">A learning ecosystem built on innovation, expertise, and unwavering commitment to student success.</p>
-          <div className="w-[60px] h-1 mx-auto mt-5 rounded-full bg-gradient-to-r from-[#D4AC0D] to-[#E67E22]" />
-        </div>
+        <EditableWrap editMode={adminEditMode} target={{ type: "strengthsHeading" }} onEditTarget={onEditTarget}>
+          <div className="max-w-[1200px] mx-auto text-center mb-12">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(26,82,118,0.08)] text-[#1A5276] mb-4">What Sets Us Apart</span>
+            <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#1C2833] mb-3">Our <span className="text-[#D4AC0D]">Academic Strengths</span></h2>
+            <p className="text-[#5D6D7E] leading-relaxed max-w-[600px] mx-auto">A learning ecosystem built on innovation, expertise, and unwavering commitment to student success.</p>
+            <div className="w-[60px] h-1 mx-auto mt-5 rounded-full bg-gradient-to-r from-[#D4AC0D] to-[#E67E22]" />
+          </div>
+        </EditableWrap>
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
           {data.strengths.map((item, i) => {
             const Icon = item.icon === "Layout" ? Layout : item.icon === "FlaskConical" ? FlaskConical : item.icon === "Globe" ? Globe : item.icon === "Sparkles" ? Sparkles : item.icon === "Heart" ? Heart : Target;
             return (
               <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, delay: i * 0.06 }} className="p-7 rounded-2xl border border-black/5" style={{ background: withAlpha(item.color || theme.primary, 0.06) }}>
-                <EditableWrap editMode={adminEditMode} target={{ type: "strength", index: i }} onEditTarget={onEditTarget} canDelete={true} onDeleteTarget={onDeleteTarget}>
+                <EditableWrap editMode={adminEditMode} target={{ type: "strength", index: i }} onEditTarget={onEditTarget} canDelete={data.strengths.length > 1} onDeleteTarget={onDeleteTarget}>
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: `${item.color || theme.primary}18` }}><Icon size={24} color={item.color || theme.primary} /></div>
                   <h4 className="text-[18px] font-bold text-[#1C2833] mb-2">{item.title}</h4>
                   <p className="text-[14px] text-[#5D6D7E] leading-relaxed">{item.description}</p>
@@ -440,22 +445,27 @@ function AcademicsPage({
             );
           })}
         </div>
+        <div className="max-w-[1200px] mx-auto mt-8 flex justify-center">
+          <AddButton editMode={adminEditMode} label="Add Academic Strength" onClick={onAddStrength} />
+        </div>
       </section>
 
       {/* Achievements */}
       <section className="py-20 px-6 bg-white">
-        <div className="max-w-[1200px] mx-auto text-center mb-12">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(212,172,13,0.1)] text-[#D4AC0D] mb-4">Our Milestones</span>
-          <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#1C2833] mb-3">Celebrating <span className="text-[#D4AC0D]">Excellence</span></h2>
-          <p className="text-[#5D6D7E] leading-relaxed max-w-[600px] mx-auto">A legacy of achievement that reflects our commitment to quality education.</p>
-          <div className="w-[60px] h-1 mx-auto mt-5 rounded-full bg-gradient-to-r from-[#D4AC0D] to-[#E67E22]" />
-        </div>
+        <EditableWrap editMode={adminEditMode} target={{ type: "achievementsHeading" }} onEditTarget={onEditTarget}>
+          <div className="max-w-[1200px] mx-auto text-center mb-12">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(212,172,13,0.1)] text-[#D4AC0D] mb-4">Our Milestones</span>
+            <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#1C2833] mb-3">Celebrating <span className="text-[#D4AC0D]">Excellence</span></h2>
+            <p className="text-[#5D6D7E] leading-relaxed max-w-[600px] mx-auto">A legacy of achievement that reflects our commitment to quality education.</p>
+            <div className="w-[60px] h-1 mx-auto mt-5 rounded-full bg-gradient-to-r from-[#D4AC0D] to-[#E67E22]" />
+          </div>
+        </EditableWrap>
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
           {data.achievements.map((item, i) => {
             const Icon = i === 0 ? Trophy : i === 1 ? Zap : i === 2 ? Shield : Globe;
             return (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.08 }} className="p-8 rounded-3xl text-center border border-black/5" style={{ background: withAlpha(theme.primary, 0.05) }}>
-                <EditableWrap editMode={adminEditMode} target={{ type: "achievement", index: i }} onEditTarget={onEditTarget} canDelete={true} onDeleteTarget={onDeleteTarget}>
+                <EditableWrap editMode={adminEditMode} target={{ type: "achievement", index: i }} onEditTarget={onEditTarget} canDelete={data.achievements.length > 1} onDeleteTarget={onDeleteTarget}>
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-5 shadow-lg" style={{ background: theme.accent1, boxShadow: "0 8px 20px rgba(212,172,13,0.3)" }}><Icon size={24} color={theme.white} /></div>
                   <h4 className="text-[18px] font-bold text-[#1C2833] mb-2">{item.title}</h4>
                   <p className="text-[14px] text-[#5D6D7E] leading-relaxed">{item.description}</p>
@@ -463,6 +473,9 @@ function AcademicsPage({
               </motion.div>
             );
           })}
+        </div>
+        <div className="max-w-[1200px] mx-auto mt-8 flex justify-center">
+          <AddButton editMode={adminEditMode} label="Add Achievement" onClick={onAddAchievement} />
         </div>
       </section>
 
@@ -503,6 +516,21 @@ function Counter({ target, suffix, duration = 2000 }) {
 // ── DEFAULT DATA ──
 const defaultAcademicsContent = {
   hero: { badge: "Excellence in Education", title: "Empowering Minds Shaping Futures", subtitle: "Nurturing the next generation of thinkers.", description: "At Smriti Secondary English Boarding School, education extends beyond textbooks." },
+  levelsHeading: {
+    badge: "Academic Structure",
+    title: "Explore Our Class Levels",
+    description: "Click on any academic level below to view the classes, subjects, curriculum, and grading structure.",
+  },
+  strengthsHeading: {
+    badge: "What Sets Us Apart",
+    title: "Our Academic Strengths",
+    description: "A learning ecosystem built on innovation, expertise, and unwavering commitment to student success.",
+  },
+  achievementsHeading: {
+    badge: "Our Milestones",
+    title: "Celebrating Excellence",
+    description: "A legacy of achievement that reflects our commitment to quality education.",
+  },
   stats: [
     { value: "1500", suffix: "+", label: "Active Learners", color: "#D4AC0D" },
     { value: "85", suffix: "+", label: "Dedicated Educators", color: "#E67E22" },
@@ -532,6 +560,9 @@ function mergeAcademicsContent(saved = {}) {
     ...defaultAcademicsContent,
     ...(saved || {}),
     hero: { ...defaultAcademicsContent.hero, ...(saved?.hero || {}) },
+    levelsHeading: { ...defaultAcademicsContent.levelsHeading, ...(saved?.levelsHeading || {}) },
+    strengthsHeading: { ...defaultAcademicsContent.strengthsHeading, ...(saved?.strengthsHeading || {}) },
+    achievementsHeading: { ...defaultAcademicsContent.achievementsHeading, ...(saved?.achievementsHeading || {}) },
     stats: Array.isArray(saved?.stats) && saved.stats.length ? saved.stats : defaultAcademicsContent.stats,
     strengths: Array.isArray(saved?.strengths) && saved.strengths.length ? saved.strengths : defaultAcademicsContent.strengths,
     achievements: Array.isArray(saved?.achievements) && saved.achievements.length ? saved.achievements : defaultAcademicsContent.achievements,
@@ -625,6 +656,30 @@ export default function AdminAcademics() {
       };
     }
 
+    if (editingTarget.type === "levelsHeading") {
+      nextForm.levelsHeading = {
+        badge: modalForm.badge || defaultAcademicsContent.levelsHeading.badge,
+        title: modalForm.title || defaultAcademicsContent.levelsHeading.title,
+        description: modalForm.description || defaultAcademicsContent.levelsHeading.description,
+      };
+    }
+
+    if (editingTarget.type === "strengthsHeading") {
+      nextForm.strengthsHeading = {
+        badge: modalForm.badge || defaultAcademicsContent.strengthsHeading.badge,
+        title: modalForm.title || defaultAcademicsContent.strengthsHeading.title,
+        description: modalForm.description || defaultAcademicsContent.strengthsHeading.description,
+      };
+    }
+
+    if (editingTarget.type === "achievementsHeading") {
+      nextForm.achievementsHeading = {
+        badge: modalForm.badge || defaultAcademicsContent.achievementsHeading.badge,
+        title: modalForm.title || defaultAcademicsContent.achievementsHeading.title,
+        description: modalForm.description || defaultAcademicsContent.achievementsHeading.description,
+      };
+    }
+
     if (editingTarget.type === "stat") {
       const idx = editingTarget.index;
       nextForm.stats[idx] = {
@@ -638,7 +693,7 @@ export default function AdminAcademics() {
     if (editingTarget.type === "strength") {
       const idx = editingTarget.index;
       if (editingTarget.isNew) {
-        nextForm.strengths.push({ id: Date.now(), title: modalForm.title, description: modalForm.description, icon: "Sparkles" });
+        nextForm.strengths.push({ id: Date.now(), title: modalForm.title, description: modalForm.description, icon: "Sparkles", color: "#1A5276" });
       } else {
         nextForm.strengths[idx] = { ...nextForm.strengths[idx], title: modalForm.title, description: modalForm.description };
       }
@@ -778,8 +833,18 @@ export default function AdminAcademics() {
     let nextForm = mergeAcademicsContent(form);
 
     if (target.type === "strength") {
+      if (nextForm.strengths.length <= 1) {
+        setError("At least one Strength must remain.");
+        setSaving(false);
+        return;
+      }
       nextForm.strengths = nextForm.strengths.filter((_, i) => i !== target.index);
     } else if (target.type === "achievement") {
+      if (nextForm.achievements.length <= 1) {
+        setError("At least one Achievement must remain.");
+        setSaving(false);
+        return;
+      }
       nextForm.achievements = nextForm.achievements.filter((_, i) => i !== target.index);
     } else if (target.type === "levelCard") {
       if (nextForm.classLevels.length <= 1) {
@@ -810,6 +875,27 @@ export default function AdminAcademics() {
 
     if (target.type === "hero") {
       setModalForm({ badge: form.hero.badge || "", title: form.hero.title || "", subtitle: form.hero.subtitle || "", description: form.hero.description || "" });
+    } else if (target.type === "levelsHeading") {
+      const heading = form.levelsHeading || defaultAcademicsContent.levelsHeading;
+      setModalForm({
+        badge: heading.badge || "Academic Structure",
+        title: heading.title || "Explore Our Class Levels",
+        description: heading.description || "Click on any academic level below to view the classes, subjects, curriculum, and grading structure.",
+      });
+    } else if (target.type === "strengthsHeading") {
+      const heading = form.strengthsHeading || defaultAcademicsContent.strengthsHeading;
+      setModalForm({
+        badge: heading.badge || "What Sets Us Apart",
+        title: heading.title || "Our Academic Strengths",
+        description: heading.description || "A learning ecosystem built on innovation, expertise, and unwavering commitment to student success.",
+      });
+    } else if (target.type === "achievementsHeading") {
+      const heading = form.achievementsHeading || defaultAcademicsContent.achievementsHeading;
+      setModalForm({
+        badge: heading.badge || "Our Milestones",
+        title: heading.title || "Celebrating Excellence",
+        description: heading.description || "A legacy of achievement that reflects our commitment to quality education.",
+      });
     } else if (target.type === "stat") {
       const s = form.stats[target.index];
       setModalForm({ value: s.value, suffix: s.suffix, label: s.label });
@@ -864,15 +950,20 @@ export default function AdminAcademics() {
 
   const openAddLevel = () => openEditor({ type: "levelCard", index: form.classLevels.length, isNew: true });
   const openAddClass = (levelId) => openEditor({ type: "className", levelId, isNew: true });
+  const openAddStrength = () => openEditor({ type: "strength", index: form.strengths.length, isNew: true });
+  const openAddAchievement = () => openEditor({ type: "achievement", index: form.achievements.length, isNew: true });
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#0B0E14] text-white">Loading Academics Editor...</div>;
 
   const titleForTarget = (t) => {
     const labels = {
       hero: "Hero Section",
+      levelsHeading: "Class Levels Heading",
+      strengthsHeading: "Academic Strengths Heading",
+      achievementsHeading: "Achievements Heading",
       stat: "Stat",
-      strength: "Academic Strength",
-      achievement: "Achievement",
+      strength: t?.isNew ? "New Academic Strength" : "Academic Strength",
+      achievement: t?.isNew ? "New Achievement" : "Achievement",
       assessment: "Assessment Section",
       levelCard: t?.isNew ? "New Class Level" : "Class Level",
       curriculumPanel: "Curriculum Panel",
@@ -917,6 +1008,8 @@ export default function AdminAcademics() {
             onDeleteTarget={(t) => { setDeleteTarget(t); deleteTargetItem(t); }}
             onAddLevel={openAddLevel}
             onAddClass={openAddClass}
+            onAddStrength={openAddStrength}
+            onAddAchievement={openAddAchievement}
           />
         </div>
       </motion.div>
@@ -930,6 +1023,30 @@ export default function AdminAcademics() {
                 <Field label="Badge Text" value={modalForm.badge} onChange={(v) => setModalForm({ ...modalForm, badge: v })} />
                 <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
                 <Field label="Subtitle" value={modalForm.subtitle} onChange={(v) => setModalForm({ ...modalForm, subtitle: v })} textarea rows={2} />
+                <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
+              </div>
+            )}
+
+            {editingTarget.type === "levelsHeading" && (
+              <div className="space-y-4">
+                <Field label="Badge Text" value={modalForm.badge} onChange={(v) => setModalForm({ ...modalForm, badge: v })} />
+                <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
+                <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
+              </div>
+            )}
+
+            {editingTarget.type === "strengthsHeading" && (
+              <div className="space-y-4">
+                <Field label="Badge Text" value={modalForm.badge} onChange={(v) => setModalForm({ ...modalForm, badge: v })} />
+                <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
+                <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
+              </div>
+            )}
+
+            {editingTarget.type === "achievementsHeading" && (
+              <div className="space-y-4">
+                <Field label="Badge Text" value={modalForm.badge} onChange={(v) => setModalForm({ ...modalForm, badge: v })} />
+                <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
                 <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
               </div>
             )}

@@ -7,18 +7,17 @@
       "establishedYear": "ESTABLISHED 2046 BS",
       "subtitle": "Basudev Marga, Hetauda-2",
       "description": "Smriti School blends academic discipline, digital learning, creativity, sports, and values for students from Play Group to Grade 10.",
-      "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80",
+      "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099978884_images_1UYiY_juR.jpeg",
       "images": [
-        "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80",
-        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786080914167_Screenshot_2026-08-07_at_10.28.19___AM_mNSunPcm0.png"
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099978884_images_1UYiY_juR.jpeg",
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099995606_images_RtIsg5c3F.jpeg",
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099997161_images__1__To7ygfTRi.jpeg"
       ],
       "imageAdjustments": {},
       "primaryButtonText": "Start Admission",
       "primaryButtonLink": "/admissions",
       "secondaryButtonText": "Explore Facilities",
-      "secondaryButtonLink": "/facilities",
-      "titleLine2": "",
-      "titleLine3": ""
+      "secondaryButtonLink": "/facilities"
     },
     "statsSection": {
       "eyebrow": "Our Impact",
@@ -30,36 +29,28 @@
           "suffix": "+",
           "label": "Students Enrolled",
           "note": "Across school programs",
-          "color": "#1E3A5F",
-          "id": 1,
-          "visible": true
+          "color": "#1E3A5F"
         },
         {
           "value": "240",
           "suffix": "+",
           "label": "Expert Teachers",
           "note": "Academic support team",
-          "color": "#2D6A4F",
-          "id": 2,
-          "visible": true
+          "color": "#2D6A4F"
         },
         {
           "value": "35",
           "suffix": " yrs",
           "label": "Years of Excellence",
           "note": "Serving Makwanpur",
-          "color": "#E9C46A",
-          "id": 3,
-          "visible": true
+          "color": "#E9C46A"
         },
         {
           "value": "98",
           "suffix": "%",
           "label": "Success Rate",
           "note": "Academic performance",
-          "color": "#F4A261",
-          "id": 4,
-          "visible": true
+          "color": "#F4A261"
         }
       ],
       "story": {
@@ -71,13 +62,11 @@
           "Established with a vision to provide quality education in Makawanpur, Smriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
           "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
         ],
-        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786086331644_Screenshot_2026-08-07_at_10.28.19___AM_BDV3d55qV.png",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786100017954_images_vwqcFhKbY.jpeg",
         "buttonText": "Read Our Story",
-        "imageBottomTitle": "Quality Education Since 2046 BS",
-        "imageBottomDescription": "A legacy of academic excellence.",
         "imageZoom": 1,
-        "imageOffsetX": -5.564259496228448,
-        "imageOffsetY": 3.0246043159423253
+        "imageOffsetX": 0,
+        "imageOffsetY": 0
       },
       "excellence": {
         "title": "Academic Focus",
@@ -104,7 +93,11 @@
     }
   },
   "navbar": {
+<<<<<<< HEAD
     "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786083534935_Screenshot_2026-07-10_234100_5YakIo7k0.png",
+=======
+    "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099529841_unnamed__p9IBiYmi.png",
+>>>>>>> ef52e067c1177472efbfe9254ca2885b99667fee
     "schoolName": "Smriti",
     "schoolSubtitle": "Secondary English School",
     "admissionButtonText": "Admission Open",
@@ -512,6 +505,434 @@
     "modalHint": "Click any number to copy it.",
     "copiedText": "Copied",
     "closeButtonText": "Close",
-    "copyrightText": "© 2026 Smriti Secondary English Boarding School. All rights reserved."
+    "copyrightText": "© 2026 Smriti Secondary English Boarding School. All rights reserved.""academics": {
+      "hero": {
+        "badge": "Excellence in Education",
+        "title": "Empowering Minds Shaping Futures",
+        "subtitle": "Nurturing the next generation of thinkers.",
+        "description": "At Smriti Secondary English Boarding School, education extends beyond textbooks."
+      },
+      "levelsHeading": {
+        "badge": "Academic Structure",
+        "title": "Explore Our Class Levels",
+        "description": "Click on any academic level below to view the classes, subjects, curriculum, and grading structure."
+      },
+      "strengthsHeading": {
+        "badge": "What Sets Us Apart",
+        "title": "Our Academic Strengths",
+        "description": "A learning ecosystem built on innovation, expertise, and unwavering commitment to student success."
+      },
+      "achievementsHeading": {
+        "badge": "Our Milestones",
+        "title": "Celebrating Excellence",
+        "description": "A legacy of achievement that reflects our commitment to quality education."
+      },
+      "stats": [
+        {
+          "value": "1500",
+          "suffix": "+",
+          "label": "Active Learners",
+          "color": "#D4AC0D"
+        },
+        {
+          "value": "85",
+          "suffix": "+",
+          "label": "Dedicated Educators",
+          "color": "#E67E22"
+        },
+        {
+          "value": "35",
+          "suffix": "+",
+          "label": "Years of Impact",
+          "color": "#1E8449"
+        },
+        {
+          "value": "100",
+          "suffix": "%",
+          "label": "SEE Pass Rate",
+          "color": "#1A5276"
+        }
+      ],
+      "strengths": [
+        {
+          "id": 1,
+          "title": "Innovation Hub",
+          "description": "State-of-the-art learning spaces with interactive technology.",
+          "color": "#1A5276"
+        },
+        {
+          "id": 2,
+          "title": "STEM Excellence",
+          "description": "Robust science, technology, and engineering programs.",
+          "color": "#1E8449"
+        },
+        {
+          "id": 3,
+          "title": "Global Perspective",
+          "description": "Integrated curriculum emphasizing critical thinking.",
+          "color": "#D4AC0D"
+        },
+        {
+          "id": 4,
+          "title": "Arts & Expression",
+          "description": "Comprehensive arts education nurturing creativity.",
+          "color": "#E67E22"
+        },
+        {
+          "id": 5,
+          "title": "Character Development",
+          "description": "Values-based education cultivating integrity.",
+          "color": "#7D3C98"
+        },
+        {
+          "id": 6,
+          "title": "Future Ready",
+          "description": "Career and college counseling with mentorship.",
+          "color": "#2E86C1"
+        }
+      ],
+      "achievements": [
+        {
+          "id": 1,
+          "title": "Academic Excellence Awards",
+          "description": "Consistent top-tier SEE performance."
+        },
+        {
+          "id": 2,
+          "title": "Science & STEM Showcase",
+          "description": "Student science exhibition projects."
+        },
+        {
+          "id": 3,
+          "title": "Community & Service",
+          "description": "Student-led service initiatives."
+        },
+        {
+          "id": 1786094934644,
+          "title": "Community Leadership Awards",
+          "description": "Student-led service initiatives"
+        }
+      ],
+      "assessment": {
+        "title": "Holistic Assessment Framework",
+        "description": "Our evaluation system celebrates growth through multiple dimensions.",
+        "methods": [
+          "Continuous Assessment System (CAS)",
+          "Laboratory Practical Examinations",
+          "Project-Based & Group Presentations",
+          "Periodic Diagnostic Unit Tests",
+          "Terminal Examinations & SEE Model Series",
+          "Co-curricular & Moral Progress Logs"
+        ]
+      },
+      "classLevels": [
+        {
+          "id": "pre-primary",
+          "name": "Pre-Primary / Early Years",
+          "shortBadge": "Early Childhood",
+          "span": "Play Group, Nursery, LKG, UKG",
+          "ageGroup": "3 – 5.5 Years",
+          "color": "#D4AC0D",
+          "tagline": "Foundation of Curiosity, Play-Based Learning",
+          "description": "Our early childhood program nurtures young minds through playful exploration, phonics, storytelling, and creative arts.",
+          "classes": [
+            {
+              "id": "pg-nursery",
+              "name": "Play Group & Nursery",
+              "focus": "Sensory, Language Readiness & Social Interaction",
+              "subjects": [
+                {
+                  "name": "Phonics & Rhymes",
+                  "type": "Core",
+                  "hours": "5 hrs/wk"
+                },
+                {
+                  "name": "Picture Reading & Storytelling",
+                  "type": "Core",
+                  "hours": "4 hrs/wk"
+                },
+                {
+                  "name": "Number Games & Counting",
+                  "type": "Core",
+                  "hours": "4 hrs/wk"
+                },
+                {
+                  "name": "Creative Arts & Craft",
+                  "type": "Activity",
+                  "hours": "5 hrs/wk"
+                },
+                {
+                  "name": "Play & Motor Skills",
+                  "type": "Activity",
+                  "hours": "4 hrs/wk"
+                }
+              ],
+              "curriculumHighlights": [
+                "Montessori-inspired tactile learning corners",
+                "Daily storytelling sessions in English & Nepali",
+                "Zero exam pressure",
+                "Color & pattern recognition"
+              ],
+              "assessmentMethod": "Continuous Activity Milestone Logs"
+            },
+            {
+              "id": "lkg-ukg",
+              "name": "LKG & UKG",
+              "focus": "Early Literacy, Numeracy & Environmental Awareness",
+              "subjects": [
+                {
+                  "name": "English Reading & Writing",
+                  "type": "Core",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Nepali Barnamala & Words",
+                  "type": "Core",
+                  "hours": "5 hrs/wk"
+                },
+                {
+                  "name": "Elementary Mathematics",
+                  "type": "Core",
+                  "hours": "5 hrs/wk"
+                },
+                {
+                  "name": "General Knowledge & Nature",
+                  "type": "Core",
+                  "hours": "3 hrs/wk"
+                },
+                {
+                  "name": "Drawing, Color & Music",
+                  "type": "Activity",
+                  "hours": "4 hrs/wk"
+                }
+              ],
+              "curriculumHighlights": [
+                "Phonics-based English reading",
+                "Nepali alphabet recognition",
+                "Basic addition & subtraction",
+                "Group & team building activities"
+              ],
+              "assessmentMethod": "Playful Classroom Assessments & Progress Certificates"
+            }
+          ]
+        },
+        {
+          "id": "primary",
+          "name": "Primary Level",
+          "shortBadge": "Grades 1 – 5",
+          "span": "Class 1 to Class 5",
+          "ageGroup": "6 – 10 Years",
+          "color": "#1E8449",
+          "tagline": "Core Academic Fundamentals & STEAM",
+          "description": "Building strong intellectual foundations in languages, mathematics, and science alongside computer literacy.",
+          "classes": [
+            {
+              "id": "grade-1-3",
+              "name": "Grade 1 – 3 (Lower Primary)",
+              "focus": "Foundational Literacy, Numeracy & Scientific Inquiry",
+              "subjects": [
+                {
+                  "name": "English Grammar & Reader",
+                  "type": "Compulsory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Nepali Bhasa & Vyakaran",
+                  "type": "Compulsory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Mathematics & Reasoning",
+                  "type": "Compulsory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Our Surroundings (Science & Social)",
+                  "type": "Compulsory",
+                  "hours": "5 hrs/wk"
+                },
+                {
+                  "name": "Computer Literacy & Drawing",
+                  "type": "Practical",
+                  "hours": "3 hrs/wk"
+                }
+              ],
+              "curriculumHighlights": [
+                "Aligned with CDC Primary Curriculum",
+                "Equal mastery in English and Nepali",
+                "Hands-on science experiments",
+                "Continuous Assessment System (CAS)"
+              ],
+              "assessmentMethod": "40% CAS + 60% Terminal Examinations"
+            },
+            {
+              "id": "grade-4-5",
+              "name": "Grade 4 – 5 (Upper Primary)",
+              "focus": "Analytical Reasoning, Science Exploration & Digital Basics",
+              "subjects": [
+                {
+                  "name": "English Language & Literature",
+                  "type": "Compulsory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Nepali Bhasa & Vyakaran",
+                  "type": "Compulsory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Mathematics & Geometry",
+                  "type": "Compulsory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "General Science & Environment",
+                  "type": "Compulsory",
+                  "hours": "5 hrs/wk"
+                },
+                {
+                  "name": "Social Studies & Local Culture",
+                  "type": "Compulsory",
+                  "hours": "4 hrs/wk"
+                },
+                {
+                  "name": "Computer Science & ICT Lab",
+                  "type": "Practical",
+                  "hours": "3 hrs/wk"
+                }
+              ],
+              "curriculumHighlights": [
+                "Structured problem-solving in Arithmetic & Geometry",
+                "Introductory computer lab sessions",
+                "Project work & chart presentations",
+                "Inter-house competitions"
+              ],
+              "assessmentMethod": "30% Practical/Project Work + 70% Terminal Examinations"
+            }
+          ]
+        },
+        {
+          "id": "middle",
+          "name": "Middle Level (Lower Secondary)",
+          "shortBadge": "Grades 6 – 8",
+          "span": "Class 6 to Class 8",
+          "ageGroup": "11 – 13 Years",
+          "color": "#7D3C98",
+          "tagline": "Critical Thinking, Laboratory Science & BLE Prep",
+          "description": "Empowering students to think analytically, conduct laboratory experiments, and build digital applications.",
+          "classes": [
+            {
+              "id": "grade-6-8",
+              "name": "Grade 6 – 8 (Class 6, 7 & 8)",
+              "focus": "Conceptual Mastery, Practical Science & BLE Board Readiness",
+              "subjects": [
+                {
+                  "name": "English Language & Composition",
+                  "type": "Compulsory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Nepali Bhasa & Sahitya",
+                  "type": "Compulsory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Compulsory Mathematics",
+                  "type": "Compulsory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Science & Technology",
+                  "type": "Lab & Theory",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Social Studies & Population",
+                  "type": "Compulsory",
+                  "hours": "5 hrs/wk"
+                },
+                {
+                  "name": "Health, Physical & Creative Arts",
+                  "type": "Practical",
+                  "hours": "3 hrs/wk"
+                },
+                {
+                  "name": "Computer Science & Coding",
+                  "type": "Lab",
+                  "hours": "3 hrs/wk"
+                }
+              ],
+              "curriculumHighlights": [
+                "Physics, Chemistry, and Biology lab experiments",
+                "Basic computer programming",
+                "Grade 8 BLE district-level model test prep",
+                "Science quizzes and debates"
+              ],
+              "assessmentMethod": "Grade 8 BLE: 25% Practical/Internal + 75% Written Examinations"
+            }
+          ]
+        },
+        {
+          "id": "high",
+          "name": "High / Secondary Level",
+          "shortBadge": "Grades 9 – 10 (SEE)",
+          "span": "Class 9 & Class 10",
+          "ageGroup": "14 – 16 Years",
+          "color": "#2E86C1",
+          "tagline": "SEE Exam Excellence, Electives & Career Guidance",
+          "description": "Intensive academic preparation for the SEE examination with specialized electives and science labs.",
+          "classes": [
+            {
+              "id": "grade-9-10",
+              "name": "Grade 9 & Grade 10 (SEE Stream)",
+              "focus": "SEE Board Examination Mastery",
+              "subjects": [
+                {
+                  "name": "Compulsory English",
+                  "type": "Board Subject",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Compulsory Nepali",
+                  "type": "Board Subject",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Compulsory Mathematics",
+                  "type": "Board Subject",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Science & Technology (Phys, Chem, Bio)",
+                  "type": "Lab & Board",
+                  "hours": "6 hrs/wk"
+                },
+                {
+                  "name": "Social Studies",
+                  "type": "Board Subject",
+                  "hours": "5 hrs/wk"
+                },
+                {
+                  "name": "Optional Math / Economics",
+                  "type": "Elective",
+                  "hours": "5 hrs/wk"
+                },
+                {
+                  "name": "Accountancy / Computer Science",
+                  "type": "Elective Lab",
+                  "hours": "4 hrs/wk"
+                }
+              ],
+              "curriculumHighlights": [
+                "Rigorous SEE curriculum aligned with NEB",
+                "Weekly SEE model examination series",
+                "Dedicated practical sessions for Science & Computer Science",
+                "Career counseling"
+              ],
+              "assessmentMethod": "NEB SEE: 25% Internal Practical + 75% Final SEE Examination"
+            }
+          ]
+        }
+      ]
+    }
   }
-}

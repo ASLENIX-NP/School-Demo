@@ -21,6 +21,7 @@ import {
   Camera,
   Trash2,
   Plus,
+  AlertCircle,
 } from "lucide-react";
 import PdfNoticePreview from "./PdfNoticePreview";
 import HomeAnnouncementPopup from "./HomeAnnouncementPopup";
@@ -135,56 +136,132 @@ function StatsEditableWrap({ editMode, target, onEditTarget, onDeleteTarget, can
   );
 }
 
+// ─── DEFAULT DATA FOR FALLBACK ───
+const defaultStatsData = {
+  eyebrow: "Our Impact",
+  title: "Creating Futures, One Student at a Time",
+  description: "Real numbers that reflect our commitment to excellence and holistic education in the Makwanpur region.",
+  stats: [
+    { value: "3800", suffix: "+", label: "Students Enrolled", note: "Across school programs", color: "#1E3A5F" },
+    { value: "240", suffix: "+", label: "Expert Teachers", note: "Academic support team", color: "#2D6A4F" },
+    { value: "35", suffix: " yrs", label: "Years of Excellence", note: "Serving Makwanpur", color: "#E9C46A" },
+    { value: "98", suffix: "%", label: "Success Rate", note: "Academic performance", color: "#F4A261" }
+  ],
+  story: {
+    badge: "Our Story",
+    title: "Building Tomorrow's Leaders Today",
+    imageTopTitle: "Our Campus",
+    imageTopSubtitle: "Hetauda-2",
+    paragraphs: [
+      "Established with a vision to provide quality education in Makawanpur, Smriti Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
+      "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
+    ],
+    image: "https://images.unsplash.com/photo-1588072432836-e10032774350?w=1000&h=800&fit=crop&auto=format",
+    buttonText: "Read Our Story"
+  },
+  excellence: {
+    title: "Academic Focus",
+    description: "Our students consistently achieve outstanding results in the SEE examinations.",
+    cards: [
+      { title: "Best SEE Results", description: "Achieving top results in the Secondary Education Examination." },
+      { title: "GPA 4.00 Achievers", description: "Our brightest students attain a perfect GPA of 4.00." },
+      { title: "Holistic Development", description: "Fostering creativity, leadership, and sportsmanship." }
+    ]
+  },
+  notices: {
+    title: "Latest Notices",
+    description: "Stay informed with the latest announcements."
+  }
+};
+
 // ─── 4. MAIN STATS SECTION ───
 export default function Stats({ editMode = false, contentOverride = null, onEditTarget = () => {}, onDeleteTarget = () => {} }) {
   const [loading, setLoading] = useState(true);
   const [notices, setNotices] = useState([]);
   const [selectedNotice, setSelectedNotice] = useState(null);
+  const [error, setError] = useState(null);
 
-  // ✅ FIX: Use contentOverride directly if provided (syncs with AdminHome instantly)
-  const data = contentOverride;
+  // FIXED: Use local state to store API data instead of a static variable
+  const [data, setData] = useState(defaultStatsData);
 
   useEffect(() => {
     let alive = true;
     
-    const loadStatsContent = async () => {
-      try {
-        const res = await api.get("/api/site-content/home");
-        if (!alive) return;
-        // Note: If no contentOverride, we set a local state.
-        // But since we removed local state, we just trigger re-render here if needed
-        // For simplicity, the parent passes contentOverride down.
-      } catch (err) {
-        console.error("Load stats content error:", err);
-      } finally {
-        if (alive) setLoading(false);
-      }
-    };
-    
-    // If contentOverride is NOT passed (view mode), load it
-    if (!contentOverride) {
-      loadStatsContent();
+    // If contentOverride is provided, use it directly
+    if (contentOverride) {
+      setData(contentOverride);
+      setLoading(false);
     } else {
-      setLoading(false); // Data is already ready via props
+      // Load from API if no contentOverride (view mode)
+      const loadStatsContent = async () => {
+        try {
+          const res = await api.get("/api/site-content/home");
+          if (!alive) return;
+          
+          // FIXED: Actually use the fetched data and update the state
+          if (res.data && res.data.data && res.data.data.content && res.data.data.content.statsSection) {
+            setData(res.data.data.content.statsSection);
+          }
+        } catch (err) {
+          console.error("Load stats content error:", err);
+          // Keep default data on error
+        } finally {
+          if (alive) setLoading(false);
+        }
+      };
+      loadStatsContent();
     }
 
-    // ✅ FIX: Changed hardcoded fetch to use the imported api instance
-    api.get("/api/notices")
-      .then((res) => {
-        const list = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        setNotices(list.slice(0, 3));
-      })
-      .catch(console.error);
+    // Load notices only if not in edit mode
+    if (!editMode) {
+      api.get("/api/notices")
+        .then((res) => {
+          if (!alive) return;
+          const list = Array.isArray(res.data) ? res.data : res.data?.data || [];
+          setNotices(list.slice(0, 3));
+        })
+        .catch((err) => {
+          console.error("Failed to load notices:", err);
+          if (alive) setNotices([]);
+        });
+    } else {
+      // In edit mode, we don't need notices
+      setNotices([]);
+    }
 
     return () => { alive = false; };
-  }, [contentOverride]);
+  }, [contentOverride, editMode]);
 
-  if (loading || !data) {
+  // Show loading state
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-indigo-400/30 border-t-indigo-500 rounded-full animate-spin" />
           <p className="text-sm font-medium tracking-widest text-slate-400">LOADING EXPERIENCE</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900">
+        <div className="flex flex-col items-center gap-4">
+          <AlertCircle className="w-12 h-12 text-red-500" />
+          <p className="text-sm font-medium text-red-500">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Ensure we have data
+  if (!data || !data.stats || data.stats.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900">
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-sm font-medium text-slate-400">No content available</p>
         </div>
       </div>
     );
@@ -272,7 +349,6 @@ export default function Stats({ editMode = false, contentOverride = null, onEdit
             {editMode && (
               <div className="flex items-center justify-center h-full min-h-[200px] border-2 border-dashed border-indigo-300/50 rounded-2xl bg-indigo-50/30 hover:bg-indigo-100/50 transition-colors cursor-pointer group"
                 onClick={() => {
-                  // ✅ FIX: Pass the accurate index and isNew flag
                   onEditTarget({ type: "statsCard", index: data.stats.length, isNew: true });
                 }}
               >
@@ -384,7 +460,6 @@ export default function Stats({ editMode = false, contentOverride = null, onEdit
               {editMode && (
                 <div className="flex items-center justify-center min-h-[200px] border-2 border-dashed border-purple-300/50 rounded-2xl bg-purple-50/30 hover:bg-purple-100/50 transition-colors cursor-pointer group"
                   onClick={() => {
-                    // ✅ FIX: Pass the accurate index and isNew flag
                     onEditTarget({ type: "excellenceCard", index: data.excellence.cards.length, isNew: true });
                   }}
                 >
