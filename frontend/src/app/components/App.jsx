@@ -21,7 +21,7 @@ const Calendar = lazy(() => import("../../pages/Calendar"));
 const Blogs = lazy(() => import("../../pages/Blogs"));
 const BlogDetail = lazy(() => import("../../pages/BlogDetail"));
 const NoticeDetail = lazy(() => import("../../pages/NoticeDetail"));
-const StaffDirectory = lazy(() => import("../../pages/StaffDirectory"));
+const Staff = lazy(() => import("../../pages/Staff.jsx"));
 const TeacherProfile = lazy(() => import("../../pages/TeacherProfile"));
 const Facilities = lazy(() => import("../../pages/Facilities"));
 
@@ -41,7 +41,6 @@ const AdminAdmissions = lazy(() => import("../../admin/AdminAdmissions"));
 const AdminFooter = lazy(() => import("../../admin/AdminFooter"));
 const AdminGallery = lazy(() => import("../../admin/AdminGallery"));
 const AdminSettings = lazy(() => import("../../admin/AdminSettings"));
-const AdminGalleryImages = lazy(() => import("../../admin/AdminGalleryImages"));
 const AdminContact = lazy(() => import("../../admin/AdminContact"));
 const AdminContactMessages = lazy(() => import("../../admin/AdminContactMessages"));
 const AdminAddNotice = lazy(() => import("../../admin/AdminAddNotice"));
@@ -142,7 +141,7 @@ function SchoolApp() {
             <Route path="/blogs" element={<BlogsPage />} />
             <Route path="/blogs/:slug" element={<BlogDetail />} />
             <Route path="/notices/:id" element={<NoticeDetail />} />
-            <Route path="/staff" element={<StaffDirectory />} />
+            <Route path="/staff" element={<Staff />} />
             <Route path="/staff/:id" element={<TeacherProfile />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
@@ -299,15 +298,6 @@ function SchoolApp() {
               element={
                 <ProtectedPage>
                   <AdminGallery />
-                </ProtectedPage>
-              }
-            />
-
-            <Route
-              path="/admin/gallery-images"
-              element={
-                <ProtectedPage>
-                  <AdminGalleryImages />
                 </ProtectedPage>
               }
             />

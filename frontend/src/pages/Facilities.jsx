@@ -31,8 +31,6 @@ const palette = {
   gradient3: "linear-gradient(135deg, #2D6A4F 0%, #1E3A5F 100%)",
 };
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 const facilityTints = [
   palette.primary,
   palette.secondary,
@@ -264,6 +262,61 @@ function DeleteIconButton({ editMode, target, onDeleteTarget, label = "Delete" }
   );
 }
 
+// Edit + delete grouped into ONE absolutely-positioned row, exactly like the
+// Staff page's ActionButtons. This is what the standalone EditIconButton /
+// DeleteIconButton pair above could not guarantee: when they're two separate
+// elements at "-right-2" and "-right-12", the delete button sits further
+// outside the card's box — if any ancestor has overflow-hidden (as the
+// facility card did), that delete button gets silently clipped off while the
+// edit button (closer to the edge) still shows. Grouping them removes that
+// class of bug entirely, and pairs with removing overflow-hidden from the
+// card container below.
+function CardActionButtons({
+  editMode,
+  target,
+  onEditTarget,
+  onDeleteTarget,
+  canDelete = false,
+  label = "Edit",
+  icon: Icon = Pencil,
+}) {
+  if (!editMode) return null;
+
+  return (
+    <div className="absolute -top-2 -right-2 z-[95] flex items-center gap-1.5 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onEditTarget(target);
+        }}
+        className="rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
+        style={{ background: palette.gradient2, color: palette.dark, border: `2px solid ${palette.white}` }}
+        title={label}
+      >
+        <Icon className="w-3.5 h-3.5" />
+      </button>
+
+      {canDelete && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDeleteTarget(target);
+          }}
+          className="rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
+          style={{ background: "#FCE4E4", color: "#B3261E", border: `2px solid ${palette.white}` }}
+          title="Delete"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function EditableWrap({
   editMode,
   target,
@@ -432,7 +485,12 @@ export function Facilities({
     let alive = true;
     const loadFacilitiesContent = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/site-content/facilities`, { timeout: 10000 });
+        // NOTE: previously called `axios.get(...)` here, but this file never
+        // imports axios — that would throw "axios is not defined" the moment
+        // a real visitor hit the public Facilities page. Using the shared
+        // `api` instance (same as every other page) fixes that and picks up
+        // its configured baseURL/timeout handling automatically.
+        const res = await api.get("/api/site-content/facilities", { timeout: 10000 });
         if (!alive) return;
         const saved = res.data?.data?.content || {};
         setContent(mergeFacilitiesContent(saved));
@@ -503,19 +561,34 @@ export function Facilities({
                 onClick={() => {
                   if (!editMode) setSelectedFacility(facility);
                 }}
-                className="group relative overflow-hidden rounded-2xl h-full flex flex-col transition-all duration-300 hover:-translate-y-2 cursor-pointer"
+                // overflow-hidden intentionally REMOVED here — it was clipping
+                // the delete button off the edge of the card (see
+                // CardActionButtons above for the full explanation). Each
+                // child below that actually needs clipped corners (the top
+                // accent bar, the image) now rounds itself explicitly instead
+                // of relying on this container to do it for them.
+                className="group relative rounded-2xl h-full flex flex-col transition-all duration-300 hover:-translate-y-2 cursor-pointer"
                 style={{
                   background: palette.white,
                   border: editMode ? `2px dashed ${palette.accent2}88` : `1px solid ${tint}2e`,
                   boxShadow: `0 4px 22px ${tint}1a`,
                 }}
               >
-                <EditIconButton editMode={editMode} target={{ type: "facilityCard", index: realIndex }} onEditTarget={onEditTarget} label="Edit facility" />
-                <DeleteIconButton editMode={editMode} target={{ type: "facilityCard", index: realIndex }} onDeleteTarget={onDeleteTarget} label="Delete facility" />
+                <CardActionButtons
+                  editMode={editMode}
+                  target={{ type: "facilityCard", index: realIndex }}
+                  onEditTarget={onEditTarget}
+                  onDeleteTarget={onDeleteTarget}
+                  canDelete
+                  label="Edit facility"
+                />
 
-                <div className="absolute top-0 left-0 right-0 h-1.5 z-10 transition-all duration-300 group-hover:h-2" style={{ background: `linear-gradient(90deg, ${tint}, ${palette.accent})` }} />
+                <div
+                  className="absolute top-0 left-0 right-0 h-1.5 z-10 rounded-t-2xl transition-all duration-300 group-hover:h-2"
+                  style={{ background: `linear-gradient(90deg, ${tint}, ${palette.accent})` }}
+                />
 
-                <div className="h-48 relative overflow-hidden">
+                <div className="h-48 relative overflow-hidden rounded-t-2xl">
                   <div className="w-full h-full transition-transform duration-500 group-hover:scale-105">
                     <FacilityVisual facility={facility} tint={tint} />
                   </div>
@@ -546,7 +619,7 @@ export function Facilities({
                   </div>
                 </div>
 
-                <div className="p-6 flex flex-col flex-1">
+                <div className="p-6 flex flex-col flex-1 rounded-b-2xl">
                   <h3 className="text-xl font-bold mb-2" style={{ color: palette.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}>
                     {facility.title}
                   </h3>
