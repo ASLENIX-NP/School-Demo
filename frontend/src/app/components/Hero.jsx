@@ -9,7 +9,6 @@ import {
   MapPin,
   Pencil,
   Sparkles,
-  Play,
 } from "lucide-react";
 import api from "../../lib/api";
 
@@ -36,10 +35,10 @@ const COLORS = {
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=2000&q=90";
 
-const defaultHeroData = {
+export const defaultHeroData = {
   badge: "WISDOM IS DIVINE",
 
-  schoolName: "SMRITI SCHOOL",
+  schoolName: "RED ROSE SCHOOL",
 
   titleLine1: "Learning Today.",
   titleLine2: "Leading Tomorrow.",
@@ -66,11 +65,11 @@ const defaultHeroData = {
    MERGE DATA
 ========================================================= */
 
-function mergeHeroData(data = {}) {
+export function mergeHeroData(data = {}) {
   const images = Array.isArray(data.images)
     ? data.images
-        .map((item) => String(item || "").trim())
-        .filter(Boolean)
+      .map((item) => String(item || "").trim())
+      .filter(Boolean)
     : [];
 
   const finalImages =
@@ -180,10 +179,10 @@ function Editable({
    HERO COMPONENT
 ========================================================= */
 
-export default function Hero({
+export function Hero({
   editMode = false,
   contentOverride = null,
-  onEditTarget = () => {},
+  onEditTarget = () => { },
 }) {
   const [heroData, setHeroData] = useState(() =>
     mergeHeroData(contentOverride || defaultHeroData)
@@ -209,8 +208,7 @@ export default function Hero({
 
         if (!mounted) return;
 
-        const hero =
-          response?.data?.data?.content?.hero;
+        const hero = response?.data?.data?.content?.hero;
 
         if (hero) {
           setHeroData(mergeHeroData(hero));
@@ -219,9 +217,7 @@ export default function Hero({
         console.error("Hero loading error:", error);
 
         if (mounted) {
-          setHeroData(
-            mergeHeroData(defaultHeroData)
-          );
+          setHeroData(mergeHeroData(defaultHeroData));
         }
       }
     }
@@ -252,9 +248,7 @@ export default function Hero({
 
     const interval = setInterval(() => {
       setCurrentImage(
-        (previous) =>
-          (previous + 1) %
-          heroData.images.length
+        (previous) => (previous + 1) % heroData.images.length
       );
     }, 5500);
 
@@ -262,13 +256,10 @@ export default function Hero({
   }, [heroData.images]);
 
   const images =
-    heroData.images?.length > 0
-      ? heroData.images
-      : [DEFAULT_IMAGE];
+    heroData.images?.length > 0 ? heroData.images : [DEFAULT_IMAGE];
 
   const image =
-    images[currentImage % images.length] ||
-    DEFAULT_IMAGE;
+    images[currentImage % images.length] || DEFAULT_IMAGE;
 
   /* =======================================================
      IMAGE CONTROLS
@@ -276,16 +267,13 @@ export default function Hero({
 
   const previousImage = () => {
     setCurrentImage((previous) =>
-      previous === 0
-        ? images.length - 1
-        : previous - 1
+      previous === 0 ? images.length - 1 : previous - 1
     );
   };
 
   const nextImage = () => {
     setCurrentImage(
-      (previous) =>
-        (previous + 1) % images.length
+      (previous) => (previous + 1) % images.length
     );
   };
 
@@ -307,7 +295,7 @@ export default function Hero({
       =================================================== */}
 
       <div className="absolute inset-0 pointer-events-none">
-        {/* warm glow */}
+        {/* Warm glow */}
 
         <div
           className="
@@ -320,12 +308,11 @@ export default function Hero({
             blur-3xl
           "
           style={{
-            background:
-              "rgba(244,215,126,0.18)",
+            background: "rgba(244,215,126,0.18)",
           }}
         />
 
-        {/* blue glow */}
+        {/* Blue glow */}
 
         <div
           className="
@@ -338,12 +325,11 @@ export default function Hero({
             blur-3xl
           "
           style={{
-            background:
-              "rgba(221,239,243,0.65)",
+            background: "rgba(221,239,243,0.65)",
           }}
         />
 
-        {/* subtle grid */}
+        {/* Subtle grid */}
 
         <div
           className="
@@ -363,9 +349,7 @@ export default function Hero({
                 transparent 1px
               )
             `,
-            backgroundSize:
-              "70px 70px",
-
+            backgroundSize: "70px 70px",
             maskImage:
               "linear-gradient(to bottom, black 0%, transparent 75%)",
           }}
@@ -397,12 +381,8 @@ export default function Hero({
           ease: "easeInOut",
         }}
         style={{
-          border:
-            "1px solid rgba(217,170,50,0.18)",
-
-          background:
-            "rgba(244,215,126,0.08)",
-
+          border: "1px solid rgba(217,170,50,0.18)",
+          background: "rgba(244,215,126,0.08)",
           boxShadow:
             "inset 0 1px 0 rgba(255,255,255,0.8)",
         }}
@@ -471,7 +451,7 @@ export default function Hero({
                 className="
                   inline-flex
                   items-center
-                  gap-2
+                  gap-1.5
                   rounded-full
                   border
                   bg-white/80
@@ -479,20 +459,14 @@ export default function Hero({
                   py-2.5
                   shadow-sm
                   backdrop-blur-xl
+                  mt-3
+                  sm:mt-4
+                  lg:mt-5
                 "
                 style={{
-                  borderColor:
-                    COLORS.border,
+                  borderColor: COLORS.border,
                 }}
               >
-                <Sparkles
-                  className="h-4 w-4"
-                  style={{
-                    color:
-                      COLORS.gold,
-                  }}
-                />
-
                 <span
                   className="
                     text-[10px]
@@ -501,8 +475,7 @@ export default function Hero({
                     sm:text-xs
                   "
                   style={{
-                    color:
-                      COLORS.navy,
+                    color: COLORS.navy,
                   }}
                 >
                   {heroData.badge}
@@ -540,8 +513,7 @@ export default function Hero({
                   tracking-[0.38em]
                 "
                 style={{
-                  color:
-                    COLORS.gold,
+                  color: COLORS.gold,
                 }}
               >
                 {heroData.schoolName}
@@ -572,15 +544,10 @@ export default function Hero({
                 transition={{
                   duration: 0.9,
                   delay: 0.12,
-                  ease: [
-                    0.22,
-                    1,
-                    0.36,
-                    1,
-                  ],
+                  ease: [0.22, 1, 0.36, 1],
                 }}
                 className="
-                  mt-4
+                  mt-2
                   max-w-2xl
                   text-[3.2rem]
                   font-black
@@ -592,8 +559,7 @@ export default function Hero({
                   xl:text-[5.7rem]
                 "
                 style={{
-                  color:
-                    COLORS.navy,
+                  color: COLORS.navy,
                 }}
               >
                 {heroData.titleLine1}
@@ -602,8 +568,7 @@ export default function Hero({
 
                 <span
                   style={{
-                    color:
-                      COLORS.gold,
+                    color: COLORS.gold,
                   }}
                 >
                   {heroData.titleLine2}
@@ -643,8 +608,7 @@ export default function Hero({
                   sm:leading-8
                 "
                 style={{
-                  color:
-                    COLORS.navySoft,
+                  color: COLORS.navySoft,
                 }}
               >
                 {heroData.description}
@@ -690,8 +654,7 @@ export default function Hero({
                     tracking-[0.12em]
                   "
                   style={{
-                    color:
-                      COLORS.navySoft,
+                    color: COLORS.navySoft,
                   }}
                 >
                   {heroData.establishedYear}
@@ -704,8 +667,7 @@ export default function Hero({
                     rounded-full
                   "
                   style={{
-                    background:
-                      COLORS.gold,
+                    background: COLORS.gold,
                   }}
                 />
 
@@ -718,15 +680,13 @@ export default function Hero({
                     font-semibold
                   "
                   style={{
-                    color:
-                      COLORS.navySoft,
+                    color: COLORS.navySoft,
                   }}
                 >
                   <MapPin
                     className="h-4 w-4"
                     style={{
-                      color:
-                        COLORS.gold,
+                      color: COLORS.gold,
                     }}
                   />
 
@@ -794,12 +754,9 @@ export default function Hero({
                     hover:-translate-y-1
                   "
                   style={{
-                    color:
-                      COLORS.navy,
-
+                    color: COLORS.navy,
                     background:
                       "linear-gradient(135deg,#D9AA32,#F4D77E)",
-
                     boxShadow:
                       "0 14px 30px rgba(217,170,50,0.22)",
                   }}
@@ -863,11 +820,8 @@ export default function Hero({
                     hover:bg-white
                   "
                   style={{
-                    color:
-                      COLORS.navy,
-
-                    borderColor:
-                      COLORS.border,
+                    color: COLORS.navy,
+                    borderColor: COLORS.border,
                   }}
                 >
                   {heroData.secondaryButtonText}
@@ -907,11 +861,8 @@ export default function Hero({
                   rounded-full
                 "
                 style={{
-                  background:
-                    COLORS.creamDark,
-
-                  color:
-                    COLORS.gold,
+                  background: COLORS.creamDark,
+                  color: COLORS.gold,
                 }}
               >
                 <Sparkles className="h-4 w-4" />
@@ -926,8 +877,7 @@ export default function Hero({
                     tracking-[0.2em]
                   "
                   style={{
-                    color:
-                      COLORS.navySoft,
+                    color: COLORS.navySoft,
                   }}
                 >
                   A place to learn
@@ -940,8 +890,7 @@ export default function Hero({
                     font-bold
                   "
                   style={{
-                    color:
-                      COLORS.navy,
+                    color: COLORS.navy,
                   }}
                 >
                   A place to belong.
@@ -970,7 +919,7 @@ export default function Hero({
               className="
                 absolute
                 right-[-4%]
-                top-[4%]
+                top-[0%]
                 h-[82%]
                 w-[82%]
                 rounded-[48%]
@@ -987,10 +936,8 @@ export default function Hero({
               style={{
                 border:
                   "2px solid rgba(217,170,50,0.30)",
-
                 background:
                   "rgba(244,215,126,0.12)",
-
                 boxShadow:
                   "0 30px 70px rgba(217,170,50,0.12)",
               }}
@@ -1013,7 +960,6 @@ export default function Hero({
               style={{
                 background:
                   "rgba(221,239,243,0.85)",
-
                 transform:
                   "rotate(-18deg)",
               }}
@@ -1037,18 +983,14 @@ export default function Hero({
               transition={{
                 duration: 1,
                 delay: 0.2,
-                ease: [
-                  0.22,
-                  1,
-                  0.36,
-                  1,
-                ],
+                ease: [0.22, 1, 0.36, 1],
               }}
               className="
                 absolute
-                inset-y-5
-                left-[7%]
-                right-[2%]
+                top-0
+                bottom-14
+                left-[9%]
+                right-[6%]
                 overflow-hidden
               "
               style={{
@@ -1071,7 +1013,7 @@ export default function Hero({
                 <motion.img
                   key={image}
                   src={image}
-                  alt="Smriti School campus"
+                  alt="Red Rose School campus"
                   className="
                     absolute
                     inset-0
@@ -1131,13 +1073,9 @@ export default function Hero({
                 style={{
                   background:
                     "rgba(255,255,255,0.76)",
-
-                  color:
-                    COLORS.navy,
-
+                  color: COLORS.navy,
                   backdropFilter:
                     "blur(14px)",
-
                   boxShadow:
                     "0 8px 20px rgba(0,0,0,0.10)",
                 }}
@@ -1206,7 +1144,7 @@ export default function Hero({
                     text-white
                   "
                 >
-                  SMRITI SCHOOL
+                  RED ROSE SCHOOL
                 </p>
 
                 <p
@@ -1299,41 +1237,34 @@ export default function Hero({
                       backdrop-blur-md
                     "
                   >
-                    {images.map(
-                      (_, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() =>
-                            setCurrentImage(
-                              index
-                            )
-                          }
-                          aria-label={`Show image ${
-                            index + 1
+                    {images.map((_, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() =>
+                          setCurrentImage(index)
+                        }
+                        aria-label={`Show image ${index + 1
                           }`}
-                          className="
-                            h-1.5
-                            rounded-full
-                            transition-all
-                            duration-300
-                          "
-                          style={{
-                            width:
-                              currentImage ===
-                              index
-                                ? "25px"
-                                : "7px",
+                        className="
+                          h-1.5
+                          rounded-full
+                          transition-all
+                          duration-300
+                        "
+                        style={{
+                          width:
+                            currentImage === index
+                              ? "25px"
+                              : "7px",
 
-                            background:
-                              currentImage ===
-                              index
-                                ? COLORS.goldLight
-                                : "rgba(255,255,255,0.70)",
-                          }}
-                        />
-                      )
-                    )}
+                          background:
+                            currentImage === index
+                              ? COLORS.goldLight
+                              : "rgba(255,255,255,0.70)",
+                        }}
+                      />
+                    ))}
                   </div>
                 </>
               )}
@@ -1369,7 +1300,7 @@ export default function Hero({
                 bottom-[5%]
                 left-0
                 z-40
-                rounded-[22px]
+                rounded-[20px]
                 border
                 bg-white/90
                 px-5
@@ -1380,8 +1311,7 @@ export default function Hero({
                 sm:py-5
               "
               style={{
-                borderColor:
-                  COLORS.border,
+                borderColor: COLORS.border,
               }}
             >
               <div
@@ -1403,7 +1333,6 @@ export default function Hero({
                   style={{
                     background:
                       COLORS.creamDark,
-
                     color:
                       COLORS.gold,
                   }}
@@ -1496,7 +1425,7 @@ export default function Hero({
               COLORS.navySoft,
           }}
         >
-          Discover Smriti
+          Discover Red Rose
         </span>
 
         <div
@@ -1513,3 +1442,5 @@ export default function Hero({
     </section>
   );
 }
+
+export default Hero;
