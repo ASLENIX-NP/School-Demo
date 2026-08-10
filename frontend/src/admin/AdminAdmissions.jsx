@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import AdmissionsPage, { defaultSettings } from "../app/components/Admissions";
 import {
   ArrowLeft,
   Settings,
@@ -13,7 +14,7 @@ import {
   Upload,
   Plus,
   Trash2,
-  Edit,
+  Edit3,
   Eye,
   CheckCircle,
   XCircle,
@@ -33,12 +34,41 @@ import {
   Layers,
   TrendingUp,
   MapPin,
-  X
+  X,
+  RefreshCw,
+  Award,
+  BookOpen,
+  Bus,
+  Home,
+  ShieldCheck,
+  HelpCircle,
+  ExternalLink,
+  ChevronDown
 } from "lucide-react";
+
+const ICON_OPTIONS = [
+  { label: "Award / Excellence", value: "Award" },
+  { label: "Users / Educators", value: "Users" },
+  { label: "School / Campus", value: "School" },
+  { label: "Shield / Safety", value: "ShieldCheck" },
+  { label: "Book / Classroom", value: "BookOpen" },
+  { label: "Bus / Transport", value: "Bus" },
+  { label: "Home / Hostel", value: "Home" },
+  { label: "Sparkles / Star", value: "Sparkles" },
+  { label: "Graduation Cap", value: "GraduationCap" },
+  { label: "Clock / Time", value: "Clock" },
+  { label: "Phone / Support", value: "Phone" },
+  { label: "Mail / Email", value: "Mail" },
+  { label: "Map Pin / Location", value: "MapPin" },
+  { label: "File / Document", value: "FileText" },
+  { label: "Calendar / Schedule", value: "Calendar" },
+  { label: "Help / FAQ", value: "HelpCircle" },
+  { label: "Checkmark", value: "CheckCircle2" }
+];
 
 export default function AdminAdmissions() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard', 'settings', 'analytics'
+  const [activeTab, setActiveTab] = useState("settings"); // 'settings', 'preview', 'dashboard', 'analytics'
 
   // Loading & notification states
   const [loading, setLoading] = useState(true);
@@ -46,27 +76,7 @@ export default function AdminAdmissions() {
   const [message, setMessage] = useState({ type: "", text: "" });
 
   // Admission Settings State
-  const [settings, setSettings] = useState({
-    isOpen: true,
-    academicSession: "2027–2028",
-    startDate: "2027-01-01",
-    endDate: "2027-04-30",
-    heroBadgeText: "Admissions Open for 2027–2028",
-    heroTitle: "Empowering Next Generation Leaders",
-    heroDescription:
-      "Join our vibrant learning community. We offer holistic education, state-of-the-art facilities, and an environment where every child excels.",
-    countdownEnabled: true,
-    applyButtonText: "Apply Now for Admission",
-    prospectusUrl: "",
-    feeStructureUrl: "",
-    contactPhone: "+977 1-4567890 / +977 9851012345",
-    contactEmail: "admissions@smritischool.edu.np",
-    contactHours: "Sun - Fri: 8:00 AM - 4:00 PM",
-    contactAddress: "Kathmandu, Nepal",
-    eligibilityCriteria: [],
-    requiredDocuments: [],
-    faqs: []
-  });
+  const [settings, setSettings] = useState(defaultSettings);
 
   // Inquiries & Analytics State
   const [inquiries, setInquiries] = useState([]);
@@ -91,9 +101,8 @@ export default function AdminAdmissions() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [classFilter, setClassFilter] = useState("All");
 
-  // Selected Inquiry for Modal View/Edit
+  // Selected Inquiry for Modal View
   const [viewInquiry, setViewInquiry] = useState(null);
-  const [editInquiry, setEditInquiry] = useState(null);
 
   // File Uploading Indicators
   const [uploadingProspectus, setUploadingProspectus] = useState(false);
@@ -109,7 +118,9 @@ export default function AdminAdmissions() {
         api.get("/api/admissions/analytics")
       ]);
 
-      if (settingsRes.data?.data) setSettings(settingsRes.data.data);
+      if (settingsRes.data?.data) {
+        setSettings({ ...defaultSettings, ...settingsRes.data.data });
+      }
       if (inquiriesRes.data?.data) setInquiries(inquiriesRes.data.data);
       if (analyticsRes.data?.data) setAnalytics(analyticsRes.data.data);
     } catch (err) {
@@ -129,19 +140,32 @@ export default function AdminAdmissions() {
     setTimeout(() => setMessage({ type: "", text: "" }), 4000);
   };
 
+  // General field updater for simple scalar settings
+  const handleFieldChange = (field, value) => {
+    setSettings((prev) => ({ ...prev, [field]: value }));
+  };
+
   // Save Admission Settings
   const handleSaveSettings = async () => {
     setSaving(true);
     try {
       const res = await api.put("/api/admissions/settings", settings);
       if (res.data?.success) {
-        showMessage("success", "Admission settings saved successfully!");
+        showMessage("success", "Admission settings & content saved successfully!");
         fetchData();
       }
     } catch (err) {
       showMessage("error", err.response?.data?.message || "Failed to update settings.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Reset to Defaults
+  const handleResetToDefaults = () => {
+    if (window.confirm("Are you sure you want to reset all admission page content to default values?")) {
+      setSettings(defaultSettings);
+      showMessage("success", "Reset to default template. Click 'Save Changes' to apply.");
     }
   };
 
@@ -175,6 +199,190 @@ export default function AdminAdmissions() {
       if (type === "prospectus") setUploadingProspectus(false);
       else setUploadingFee(false);
     }
+  };
+
+  // --- Dynamic Array Helpers: Why Us ---
+  const addWhyUs = () => {
+    setSettings((prev) => ({
+      ...prev,
+      whyUs: [
+        ...(prev.whyUs || []),
+        { id: `why-${Date.now()}`, icon: "Award", title: "New Highlight Feature", desc: "Detailed description of why parents and students should choose our school." }
+      ]
+    }));
+  };
+
+  const updateWhyUs = (index, field, value) => {
+    setSettings((prev) => {
+      const list = [...(prev.whyUs || [])];
+      list[index] = { ...list[index], [field]: value };
+      return { ...prev, whyUs: list };
+    });
+  };
+
+  const removeWhyUs = (index) => {
+    setSettings((prev) => ({
+      ...prev,
+      whyUs: (prev.whyUs || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  // --- Dynamic Array Helpers: Timeline Steps ---
+  const addProcessStep = () => {
+    const currentLen = (settings.timelineSteps || []).length;
+    const nextNum = currentLen < 9 ? `0${currentLen + 1}` : `${currentLen + 1}`;
+    setSettings((prev) => ({
+      ...prev,
+      timelineSteps: [
+        ...(prev.timelineSteps || []),
+        { id: `step-${Date.now()}`, number: nextNum, title: "New Step", desc: "Explain the action required by parent/student." }
+      ]
+    }));
+  };
+
+  const updateProcessStep = (index, field, value) => {
+    setSettings((prev) => {
+      const list = [...(prev.timelineSteps || [])];
+      list[index] = { ...list[index], [field]: value };
+      return { ...prev, timelineSteps: list };
+    });
+  };
+
+  const removeProcessStep = (index) => {
+    setSettings((prev) => ({
+      ...prev,
+      timelineSteps: (prev.timelineSteps || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  // --- Dynamic Array Helpers: Eligibility Criteria ---
+  const addEligibility = () => {
+    setSettings((prev) => ({
+      ...prev,
+      eligibilityCriteria: [
+        ...(prev.eligibilityCriteria || []),
+        { id: `elig-${Date.now()}`, grade: "New Grade / Class", age: "6.0+ years", requirements: "Passed entrance test & previous academic records." }
+      ]
+    }));
+  };
+
+  const updateEligibility = (index, field, value) => {
+    setSettings((prev) => {
+      const list = [...(prev.eligibilityCriteria || [])];
+      list[index] = { ...list[index], [field]: value };
+      return { ...prev, eligibilityCriteria: list };
+    });
+  };
+
+  const removeEligibility = (index) => {
+    setSettings((prev) => ({
+      ...prev,
+      eligibilityCriteria: (prev.eligibilityCriteria || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  // --- Dynamic Array Helpers: Required Documents ---
+  const addDocument = () => {
+    setSettings((prev) => ({
+      ...prev,
+      requiredDocuments: [
+        ...(prev.requiredDocuments || []),
+        { id: `doc-${Date.now()}`, name: "New Document Requirement", desc: "Official copy to be verified during enrollment.", mandatory: true }
+      ]
+    }));
+  };
+
+  const updateDocument = (index, field, value) => {
+    setSettings((prev) => {
+      const list = [...(prev.requiredDocuments || [])];
+      list[index] = { ...list[index], [field]: value };
+      return { ...prev, requiredDocuments: list };
+    });
+  };
+
+  const removeDocument = (index) => {
+    setSettings((prev) => ({
+      ...prev,
+      requiredDocuments: (prev.requiredDocuments || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  // --- Dynamic Array Helpers: Important Dates ---
+  const addImportantDate = () => {
+    setSettings((prev) => ({
+      ...prev,
+      importantDates: [
+        ...(prev.importantDates || []),
+        { id: `date-${Date.now()}`, title: "New Milestone Event", date: "2027-05-01", desc: "Key timeline date for parents." }
+      ]
+    }));
+  };
+
+  const updateImportantDate = (index, field, value) => {
+    setSettings((prev) => {
+      const list = [...(prev.importantDates || [])];
+      list[index] = { ...list[index], [field]: value };
+      return { ...prev, importantDates: list };
+    });
+  };
+
+  const removeImportantDate = (index) => {
+    setSettings((prev) => ({
+      ...prev,
+      importantDates: (prev.importantDates || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  // --- Dynamic Array Helpers: Facilities ---
+  const addFacility = () => {
+    setSettings((prev) => ({
+      ...prev,
+      facilitiesList: [
+        ...(prev.facilitiesList || []),
+        { id: `fac-${Date.now()}`, icon: "BookOpen", title: "New Campus Facility", desc: "Modern infrastructure to support student growth." }
+      ]
+    }));
+  };
+
+  const updateFacility = (index, field, value) => {
+    setSettings((prev) => {
+      const list = [...(prev.facilitiesList || [])];
+      list[index] = { ...list[index], [field]: value };
+      return { ...prev, facilitiesList: list };
+    });
+  };
+
+  const removeFacility = (index) => {
+    setSettings((prev) => ({
+      ...prev,
+      facilitiesList: (prev.facilitiesList || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  // --- Dynamic Array Helpers: FAQs ---
+  const addFaq = () => {
+    setSettings((prev) => ({
+      ...prev,
+      faqs: [
+        ...(prev.faqs || []),
+        { id: `faq-${Date.now()}`, question: "New Frequently Asked Question?", answer: "Clear, helpful answer explaining the procedure." }
+      ]
+    }));
+  };
+
+  const updateFaq = (index, field, value) => {
+    setSettings((prev) => {
+      const list = [...(prev.faqs || [])];
+      list[index] = { ...list[index], [field]: value };
+      return { ...prev, faqs: list };
+    });
+  };
+
+  const removeFaq = (index) => {
+    setSettings((prev) => ({
+      ...prev,
+      faqs: (prev.faqs || []).filter((_, i) => i !== index)
+    }));
   };
 
   // Inquiry Status Change
@@ -247,110 +455,6 @@ export default function AdminAdmissions() {
     document.body.removeChild(link);
   };
 
-  // Manage Dynamic Array Helper: Eligibility Criteria
-  const addEligibility = () => {
-    setSettings((prev) => ({
-      ...prev,
-      eligibilityCriteria: [
-        ...(prev.eligibilityCriteria || []),
-        { grade: "New Grade", age: "5+ years", requirements: "Pass entrance exam." }
-      ]
-    }));
-  };
-
-  const updateEligibility = (index, field, value) => {
-    setSettings((prev) => {
-      const updated = [...(prev.eligibilityCriteria || [])];
-      updated[index][field] = value;
-      return { ...prev, eligibilityCriteria: updated };
-    });
-  };
-
-  const removeEligibility = (index) => {
-    setSettings((prev) => ({
-      ...prev,
-      eligibilityCriteria: prev.eligibilityCriteria.filter((_, i) => i !== index)
-    }));
-  };
-
-  // Manage Dynamic Array Helper: Documents
-  const addDocument = () => {
-    setSettings((prev) => ({
-      ...prev,
-      requiredDocuments: [
-        ...(prev.requiredDocuments || []),
-        { name: "Document Name", desc: "Document description", mandatory: true }
-      ]
-    }));
-  };
-
-  const updateDocument = (index, field, value) => {
-    setSettings((prev) => {
-      const updated = [...(prev.requiredDocuments || [])];
-      updated[index][field] = value;
-      return { ...prev, requiredDocuments: updated };
-    });
-  };
-
-  const removeDocument = (index) => {
-    setSettings((prev) => ({
-      ...prev,
-      requiredDocuments: prev.requiredDocuments.filter((_, i) => i !== index)
-    }));
-  };
-
-  // Manage Dynamic Array Helper: FAQs
-  const addFaq = () => {
-    setSettings((prev) => ({
-      ...prev,
-      faqs: [
-        ...(prev.faqs || []),
-        { question: "New Frequently Asked Question?", answer: "Clear detailed answer here." }
-      ]
-    }));
-  };
-
-  const updateFaq = (index, field, value) => {
-    setSettings((prev) => {
-      const updated = [...(prev.faqs || [])];
-      updated[index][field] = value;
-      return { ...prev, faqs: updated };
-    });
-  };
-
-  const removeFaq = (index) => {
-    setSettings((prev) => ({
-      ...prev,
-      faqs: prev.faqs.filter((_, i) => i !== index)
-    }));
-  };
-
-  // Manage Dynamic Array Helper: Important Dates
-  const addImportantDate = () => {
-    setSettings((prev) => ({
-      ...prev,
-      importantDates: [
-        ...(prev.importantDates || []),
-        { title: "New Milestone Event", date: "2027-05-01", desc: "Short description of milestone date." }
-      ]
-    }));
-  };
-
-  const updateImportantDate = (index, field, value) => {
-    setSettings((prev) => {
-      const updated = [...(prev.importantDates || [])];
-      updated[index][field] = value;
-      return { ...prev, importantDates: updated };
-    });
-  };
-
-  const removeImportantDate = (index) => {
-    setSettings((prev) => ({
-      ...prev,
-      importantDates: prev.importantDates.filter((_, i) => i !== index)
-    }));
-  };
-
   // Filter inquiries
   const filteredInquiries = inquiries.filter((item) => {
     const matchesSearch =
@@ -371,8 +475,8 @@ export default function AdminAdmissions() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm font-semibold text-slate-400">Loading Admission Control Panel...</p>
+          <div className="w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-xs font-bold text-slate-400">Loading Admission Control Panel...</p>
         </div>
       </div>
     );
@@ -380,558 +484,829 @@ export default function AdminAdmissions() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950">
-      {/* ================= HEADER ================= */}
-      <header className="sticky top-0 z-30 bg-slate-900/90 border-b border-white/10 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate("/admin/dashboard")}
-            className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl font-extrabold text-white tracking-tight">Admission Management Center</h1>
+      {/* ================= COMPACT HEADER BAR ================= */}
+      <header className="sticky top-0 z-40 bg-slate-900/90 border-b border-white/10 backdrop-blur-md px-4 sm:px-6 py-2.5 sm:py-3 shadow-md">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate("/admin/dashboard")}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white/5 border border-white/10 px-2.5 py-1.5 text-xs sm:text-sm font-bold text-slate-300 transition hover:bg-white/10"
+            >
+              <ArrowLeft size={16} />
+              Dashboard
+            </button>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm sm:text-base font-black text-white">Admissions Manager</span>
               <span
-                className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                   settings.isOpen ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
                 }`}
               >
-                {settings.isOpen ? "Admissions Open" : "Admissions Closed"}
+                {settings.isOpen ? "Open" : "Closed"}
               </span>
             </div>
-            <p className="text-xs text-slate-400">Control real-world admission workflows, inquiries, settings & analytics.</p>
           </div>
-        </div>
 
-        {/* Tab Switcher & Quick Preview */}
-        <div className="flex items-center gap-3">
-          <a
-            href="/admissions"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 rounded-xl bg-amber-400/10 border border-amber-400/20 text-amber-300 hover:bg-amber-400/20 transition-colors text-xs font-bold flex items-center gap-2"
-          >
-            <Eye className="w-4 h-4" /> Live Website View
-          </a>
+          {/* Tab Switcher & Action Buttons */}
+          <div className="flex items-center flex-wrap gap-2">
+            <div className="flex items-center p-1 rounded-xl bg-slate-950 border border-white/10">
+              {[
+                { id: "settings", label: "Page Editor", icon: Settings },
+                { id: "preview", label: "Live Preview", icon: Eye },
+                { id: "dashboard", label: "Inquiries Desk", icon: Users },
+                { id: "analytics", label: "Analytics", icon: BarChart3 }
+              ].map((tab) => {
+                const TabIcon = tab.icon;
+                const active = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      active ? "bg-amber-400 text-slate-950 shadow-sm" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <TabIcon size={14} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-          <div className="flex items-center p-1 rounded-xl bg-slate-900 border border-white/10">
-            {[
-              { id: "dashboard", label: "Inquiries Desk", icon: Users },
-              { id: "settings", label: "Page Controls", icon: Settings },
-              { id: "analytics", label: "Demand Analytics", icon: BarChart3 }
-            ].map((tab) => {
-              const TabIcon = tab.icon;
-              const active = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                    active ? "bg-amber-400 text-slate-950 shadow-md" : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <TabIcon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
+            <a
+              href="/admissions"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 text-xs font-bold transition"
+            >
+              <ExternalLink size={14} /> View Public
+            </a>
+
+            {activeTab === "settings" && (
+              <button
+                type="button"
+                onClick={handleSaveSettings}
+                disabled={saving}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 px-3.5 py-1.5 text-xs sm:text-sm font-black text-slate-950 shadow-md transition hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                <Save size={14} />
+                {saving ? "Saving..." : "Save All"}
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Notifications */}
+      {/* Notifications Toast */}
       {message.text && (
         <div
-          className={`mx-4 sm:mx-8 mt-4 p-4 rounded-xl text-sm font-semibold border flex items-center justify-between ${
-            message.type === "success"
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
-              : "bg-rose-500/10 border-rose-500/20 text-rose-300"
-          }`}
+          className={`mx-auto max-w-7xl px-4 sm:px-6 mt-3`}
         >
-          <div className="flex items-center gap-2">
-            {message.type === "success" ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-            {message.text}
+          <div
+            className={`p-3 rounded-xl text-xs sm:text-sm font-bold border flex items-center justify-between ${
+              message.type === "success"
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {message.type === "success" ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+              {message.text}
+            </div>
+            <button type="button" onClick={() => setMessage({ type: "", text: "" })}>
+              <X size={14} />
+            </button>
           </div>
-          <button onClick={() => setMessage({ type: "", text: "" })}>
-            <X className="w-4 h-4" />
-          </button>
         </div>
       )}
 
       {/* ================= MAIN CONTENT ================= */}
-      <main className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
-        {/* ================= TAB 1: INQUIRIES DESK & TABLE ================= */}
-        {activeTab === "dashboard" && (
-          <div className="space-y-8">
-            {/* Metric Summary Cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Inquiries</p>
-                  <h3 className="text-3xl font-extrabold text-white">{analytics.total}</h3>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-amber-400/10 text-amber-400 flex items-center justify-center font-bold">
-                  <Users className="w-6 h-6" />
-                </div>
-              </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6">
 
-              <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Today's Received</p>
-                  <h3 className="text-3xl font-extrabold text-white">{analytics.todayCount}</h3>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">
-                  <Clock className="w-6 h-6" />
-                </div>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Converted Students</p>
-                  <h3 className="text-3xl font-extrabold text-emerald-400">{analytics.convertedCount}</h3>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
-                  <UserCheck className="w-6 h-6" />
-                </div>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Most Applied Class</p>
-                  <h3 className="text-2xl font-extrabold text-amber-400">{analytics.mostAppliedClass}</h3>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold">
-                  <GraduationCap className="w-6 h-6" />
-                </div>
-              </div>
-            </div>
-
-            {/* Filter Controls & Export */}
-            <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex flex-1 flex-wrap items-center gap-3">
-                {/* Search */}
-                <div className="relative flex-1 min-w-[240px]">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search Student, Parent, ID or Phone..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
-                  />
-                </div>
-
-                {/* Status Filter */}
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-slate-400" />
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-3 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
-                  >
-                    <option value="All">All Statuses</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Follow-up">Follow-up</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Converted">Converted</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
-                </div>
-
-                {/* Class Filter */}
-                <select
-                  value={classFilter}
-                  onChange={(e) => setClassFilter(e.target.value)}
-                  className="px-3 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
-                >
-                  <option value="All">All Classes</option>
-                  {["Play Group", "Nursery", "LKG", "UKG", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9"].map(
-                    (cls) => (
-                      <option key={cls} value={cls}>{cls}</option>
-                    )
-                  )}
-                </select>
-              </div>
-
-              <button
-                onClick={handleExportCSV}
-                className="px-4 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs hover:bg-amber-300 transition-colors flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" /> Export CSV
-              </button>
-            </div>
-
-            {/* Inquiries Data Table */}
-            <div className="rounded-2xl bg-slate-900 border border-white/10 overflow-hidden shadow-2xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-950/80 border-b border-white/10 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      <th className="p-4">Inquiry ID</th>
-                      <th className="p-4">Student & Class</th>
-                      <th className="p-4">Parent Details</th>
-                      <th className="p-4">Address / District</th>
-                      <th className="p-4">Submission Date</th>
-                      <th className="p-4">Status</th>
-                      <th className="p-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 text-xs text-slate-300">
-                    {filteredInquiries.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="p-8 text-center text-slate-500">
-                          No admission inquiries found.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredInquiries.map((item) => {
-                        const statusColors = {
-                          Pending: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-                          "Follow-up": "bg-blue-500/20 text-blue-300 border-blue-500/30",
-                          Approved: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-                          Converted: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-                          Rejected: "bg-rose-500/20 text-rose-300 border-rose-500/30"
-                        };
-
-                        return (
-                          <tr key={item.id} className="hover:bg-white/[0.02] transition-colors">
-                            <td className="p-4 font-mono font-bold text-amber-400">{item.inquiryId || item.id}</td>
-                            <td className="p-4">
-                              <p className="font-bold text-white text-sm">{item.studentName}</p>
-                              <span className="text-[10px] font-semibold text-slate-400 bg-white/5 px-2 py-0.5 rounded">
-                                {item.applyingClass}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <p className="font-semibold text-slate-200">{item.parentName} ({item.relationship || "Parent"})</p>
-                              <p className="text-slate-400 text-[11px]">{item.mobile} | {item.email}</p>
-                            </td>
-                            <td className="p-4 text-slate-300">
-                              <p>{item.district || item.province || "N/A"}</p>
-                              <p className="text-[10px] text-slate-500 truncate max-w-[150px]">{item.fullAddress}</p>
-                            </td>
-                            <td className="p-4 text-slate-400">
-                              {new Date(item.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="p-4">
-                              <select
-                                value={item.status}
-                                onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border outline-none cursor-pointer ${
-                                  statusColors[item.status] || "bg-slate-800 text-slate-300 border-white/10"
-                                }`}
-                              >
-                                <option value="Pending" className="bg-slate-900 text-amber-300">Pending</option>
-                                <option value="Follow-up" className="bg-slate-900 text-blue-300">Follow-up</option>
-                                <option value="Approved" className="bg-slate-900 text-emerald-300">Approved</option>
-                                <option value="Converted" className="bg-slate-900 text-purple-300">Converted</option>
-                                <option value="Rejected" className="bg-slate-900 text-rose-300">Rejected</option>
-                              </select>
-                            </td>
-                            <td className="p-4 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <button
-                                  onClick={() => setViewInquiry(item)}
-                                  title="View Details"
-                                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition-colors"
-                                >
-                                  <Eye className="w-4 h-4 text-amber-400" />
-                                </button>
-
-                                {item.status !== "Converted" && (
-                                  <button
-                                    onClick={() => handleConvertToStudent(item.id)}
-                                    title="Convert to Student"
-                                    className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-[11px] font-bold flex items-center gap-1 transition-colors"
-                                  >
-                                    <UserCheck className="w-3.5 h-3.5" /> Convert
-                                  </button>
-                                )}
-
-                                <button
-                                  onClick={() => handleDeleteInquiry(item.id)}
-                                  title="Delete Inquiry"
-                                  className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ================= TAB 2: PAGE CONTROLS & SETTINGS ================= */}
+        {/* ================= TAB 1: VISUAL PAGE EDITOR ================= */}
         {activeTab === "settings" && (
-          <div className="space-y-8">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="space-y-6">
+
+            {/* Quick Actions / Reset Header */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-white/10 rounded-2xl p-4">
               <div>
-                <h2 className="text-2xl font-extrabold text-white">Admission Page & System Controls</h2>
-                <p className="text-xs text-slate-400">Manage admission dates, open/close state, hero banner, prospectus PDF, eligibility & FAQs.</p>
+                <h2 className="text-base sm:text-lg font-black text-white">Full Admission Page Editor</h2>
+                <p className="text-xs text-slate-400">Edit any heading, card, workflow step, requirement, document, date, FAQ, or contact info.</p>
               </div>
-              <button
-                onClick={handleSaveSettings}
-                disabled={saving}
-                className="px-6 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-extrabold text-xs hover:bg-amber-300 transition-colors flex items-center gap-2 shadow-lg"
-              >
-                <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save All Changes"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleResetToDefaults}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/10 transition"
+                >
+                  <RefreshCw size={13} /> Reset Defaults
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("preview")}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-300 hover:bg-blue-500/20 transition"
+                >
+                  <Eye size={13} /> Preview Live Changes
+                </button>
+              </div>
             </div>
 
-            {/* OPEN/CLOSE SWITCH & DATES */}
-            <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 space-y-6">
-              <h3 className="text-lg font-bold text-amber-400 flex items-center gap-2">
-                <ToggleLeft className="w-5 h-5" /> 1. Admission Status & Cycle Dates
-              </h3>
+            {/* 1. ADMISSION CYCLE & STATUS */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
+                    <Sparkles size={16} /> 1. Admission Status & Academic Session
+                  </h3>
+                  <p className="text-xs text-slate-400">Control application status, academic session dates, and what is visible on the website.</p>
+                </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="p-4 rounded-xl bg-slate-950 border border-white/10 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-slate-300">Admission Open/Closed</p>
-                    <p className="text-[10px] text-slate-500">Toggle public application form</p>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-300">
+                    {settings.isOpen ? "Applications Open" : "Applications Closed"}
+                  </span>
                   <button
                     type="button"
-                    onClick={() => setSettings((prev) => ({ ...prev, isOpen: !prev.isOpen }))}
-                    className={`text-2xl transition-colors ${settings.isOpen ? "text-emerald-400" : "text-slate-600"}`}
+                    onClick={() => handleFieldChange("isOpen", !settings.isOpen)}
+                    className={`transition-colors ${settings.isOpen ? "text-emerald-400" : "text-slate-600"}`}
+                    title={settings.isOpen ? "Click to lock / close admissions" : "Click to open admissions"}
                   >
-                    {settings.isOpen ? <ToggleRight className="w-10 h-10" /> : <ToggleLeft className="w-10 h-10" />}
+                    {settings.isOpen ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
                   </button>
                 </div>
+              </div>
 
+              {/* Website Visibility Controls */}
+              <div className="p-3.5 sm:p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-black uppercase tracking-wider text-amber-400">Website Display & Visibility Options</p>
+                  <span className="text-[10px] text-slate-400">Hide/Show info on the live website</span>
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-3">
+                  {/* Toggle: Academic Session Year */}
+                  <label className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-900 border border-white/5 cursor-pointer hover:border-white/10 transition">
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-bold text-white block">Academic Session</span>
+                      <span className="text-[10px] text-slate-400 block">Show Session {settings.academicSession || ""}</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.showAcademicSession !== false}
+                      onChange={(e) => handleFieldChange("showAcademicSession", e.target.checked)}
+                      className="w-4 h-4 text-amber-400 accent-amber-400 cursor-pointer"
+                    />
+                  </label>
+
+                  {/* Toggle: Status Badge */}
+                  <label className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-900 border border-white/5 cursor-pointer hover:border-white/10 transition">
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-bold text-white block">Status Badge</span>
+                      <span className="text-[10px] text-slate-400 block">Show Open/Closed badge</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.showStatusBadge !== false}
+                      onChange={(e) => handleFieldChange("showStatusBadge", e.target.checked)}
+                      className="w-4 h-4 text-amber-400 accent-amber-400 cursor-pointer"
+                    />
+                  </label>
+
+                  {/* Toggle: Session Dates */}
+                  <label className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-900 border border-white/5 cursor-pointer hover:border-white/10 transition">
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-bold text-white block">Session Dates</span>
+                      <span className="text-[10px] text-slate-400 block">Show Start & Deadline dates</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.showDatesOnWebsite !== false}
+                      onChange={(e) => handleFieldChange("showDatesOnWebsite", e.target.checked)}
+                      className="w-4 h-4 text-amber-400 accent-amber-400 cursor-pointer"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-4 pt-1">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Academic Session</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Academic Session</label>
                   <input
                     type="text"
-                    value={settings.academicSession}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, academicSession: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                    value={settings.academicSession || ""}
+                    onChange={(e) => handleFieldChange("academicSession", e.target.value)}
+                    placeholder="e.g. 2027–2028"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-semibold outline-none focus:border-amber-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Start Date</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Start Date</label>
                   <input
                     type="date"
-                    value={settings.startDate}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, startDate: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                    value={settings.startDate || ""}
+                    onChange={(e) => handleFieldChange("startDate", e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-semibold outline-none focus:border-amber-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">End Date</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">End Date / Deadline</label>
                   <input
                     type="date"
-                    value={settings.endDate}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, endDate: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                    value={settings.endDate || ""}
+                    onChange={(e) => handleFieldChange("endDate", e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-semibold outline-none focus:border-amber-400"
                   />
                 </div>
               </div>
             </div>
 
-            {/* HERO BANNER & BUTTONS */}
-            <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 space-y-6">
-              <h3 className="text-lg font-bold text-amber-400 flex items-center gap-2">
-                <Sparkles className="w-5 h-5" /> 2. Hero Banner & Action Controls
+            {/* 2. HERO BANNER & PRIMARY ACTIONS */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2 border-b border-white/10 pb-3">
+                <Sparkles size={16} /> 2. Hero Banner & Buttons
               </h3>
 
-              <div className="grid sm:grid-cols-2 gap-6">
+              <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Hero Badge Text</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Hero Badge Text</label>
                   <input
                     type="text"
-                    value={settings.heroBadgeText}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, heroBadgeText: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                    value={settings.heroBadgeText || ""}
+                    onChange={(e) => handleFieldChange("heroBadgeText", e.target.value)}
+                    placeholder="e.g. Admissions Open for 2027–2028"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-semibold outline-none focus:border-amber-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Apply Button Text</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Apply Button Text</label>
                   <input
                     type="text"
-                    value={settings.applyButtonText}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, applyButtonText: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                    value={settings.applyButtonText || ""}
+                    onChange={(e) => handleFieldChange("applyButtonText", e.target.value)}
+                    placeholder="e.g. Apply Now for Admission"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-semibold outline-none focus:border-amber-400"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Hero Title</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Hero Main Title</label>
                   <input
                     type="text"
-                    value={settings.heroTitle}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, heroTitle: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                    value={settings.heroTitle || ""}
+                    onChange={(e) => handleFieldChange("heroTitle", e.target.value)}
+                    placeholder="e.g. Empowering Next Generation Leaders"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Hero Description</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Hero Subtitle / Description</label>
                   <textarea
                     rows={2}
-                    value={settings.heroDescription}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, heroDescription: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                    value={settings.heroDescription || ""}
+                    onChange={(e) => handleFieldChange("heroDescription", e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-normal outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Prospectus Button Text</label>
+                  <input
+                    type="text"
+                    value={settings.prospectusButtonText || ""}
+                    onChange={(e) => handleFieldChange("prospectusButtonText", e.target.value)}
+                    placeholder="Download Prospectus"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Contact Button Text</label>
+                  <input
+                    type="text"
+                    value={settings.contactButtonText || ""}
+                    onChange={(e) => handleFieldChange("contactButtonText", e.target.value)}
+                    placeholder="Contact Admissions"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
                   />
                 </div>
               </div>
             </div>
 
-            {/* DOCUMENT UPLOADS */}
-            <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 space-y-6">
-              <h3 className="text-lg font-bold text-amber-400 flex items-center gap-2">
-                <Upload className="w-5 h-5" /> 3. Prospectus & Fee Structure PDFs
+            {/* 3. CLOSED NOTICE BANNER (WHEN ADMISSIONS ARE CLOSED) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2 border-b border-white/10 pb-3">
+                <AlertCircle size={16} /> 3. Closed Notice Banner (Active When Admissions Are Closed)
               </h3>
 
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
-                  <p className="text-xs font-bold text-white">Prospectus PDF</p>
-                  <p className="text-[11px] text-slate-400 truncate">{settings.prospectusUrl || "No file uploaded yet."}</p>
-                  <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer hover:bg-amber-300 transition-colors">
-                    <Upload className="w-3.5 h-3.5" />
-                    {uploadingProspectus ? "Uploading..." : "Upload Prospectus PDF"}
-                    <input type="file" accept="application/pdf" className="hidden" onChange={(e) => handleFileUpload(e, "prospectus")} />
-                  </label>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Closed Banner Heading</label>
+                  <input
+                    type="text"
+                    value={settings.closedTitle || ""}
+                    onChange={(e) => handleFieldChange("closedTitle", e.target.value)}
+                    placeholder="Admissions Are Currently Closed"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                  />
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
-                  <p className="text-xs font-bold text-white">Fee Structure PDF</p>
-                  <p className="text-[11px] text-slate-400 truncate">{settings.feeStructureUrl || "No file uploaded yet."}</p>
-                  <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer hover:bg-amber-300 transition-colors">
-                    <Upload className="w-3.5 h-3.5" />
-                    {uploadingFee ? "Uploading..." : "Upload Fee Structure PDF"}
-                    <input type="file" accept="application/pdf" className="hidden" onChange={(e) => handleFileUpload(e, "feeStructure")} />
-                  </label>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Closed CTA Button Text</label>
+                  <input
+                    type="text"
+                    value={settings.closedButtonText || ""}
+                    onChange={(e) => handleFieldChange("closedButtonText", e.target.value)}
+                    placeholder="Contact Admissions Office"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Closed Notice Message</label>
+                  <textarea
+                    rows={2}
+                    value={settings.closedDescription || ""}
+                    onChange={(e) => handleFieldChange("closedDescription", e.target.value)}
+                    placeholder="Applications for this academic session have ended..."
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* DYNAMIC ELIGIBILITY CRITERIA */}
-            <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-amber-400 flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5" /> 4. Manage Eligibility Criteria
-                </h3>
+            {/* 4. PROSPECTUS & FEE PDF UPLOADS */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2 border-b border-white/10 pb-3">
+                <Upload size={16} /> 4. Prospectus & Fee Structure PDF Documents
+              </h3>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-white">School Prospectus PDF</p>
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer hover:bg-amber-300 transition">
+                      <Upload size={13} />
+                      {uploadingProspectus ? "Uploading..." : "Upload File"}
+                      <input type="file" accept="application/pdf" className="hidden" onChange={(e) => handleFileUpload(e, "prospectus")} />
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    value={settings.prospectusUrl || ""}
+                    onChange={(e) => handleFieldChange("prospectusUrl", e.target.value)}
+                    placeholder="PDF URL or uploaded path..."
+                    className="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-300 text-xs font-mono outline-none"
+                  />
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-white">Fee Structure PDF</p>
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer hover:bg-amber-300 transition">
+                      <Upload size={13} />
+                      {uploadingFee ? "Uploading..." : "Upload File"}
+                      <input type="file" accept="application/pdf" className="hidden" onChange={(e) => handleFileUpload(e, "feeStructure")} />
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    value={settings.feeStructureUrl || ""}
+                    onChange={(e) => handleFieldChange("feeStructureUrl", e.target.value)}
+                    placeholder="PDF URL or uploaded path..."
+                    className="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-300 text-xs font-mono outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 5. WHY CHOOSE US (WHY SMRITI SCHOOL) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
+                    <Award size={16} /> 5. Why Choose Us / Highlights Section
+                  </h3>
+                  <p className="text-xs text-slate-400">Add, edit, or delete any highlight card with customizable icons.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addWhyUs}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition"
+                >
+                  <Plus size={14} /> Add Why Us Card
+                </button>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Badge</label>
+                  <input
+                    type="text"
+                    value={settings.whyUsBadge || ""}
+                    onChange={(e) => handleFieldChange("whyUsBadge", e.target.value)}
+                    placeholder="Why Smriti School"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={settings.whyUsTitle || ""}
+                    onChange={(e) => handleFieldChange("whyUsTitle", e.target.value)}
+                    placeholder="Building a Foundation for Excellence"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div className="sm:col-span-3">
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Description</label>
+                  <textarea
+                    rows={2}
+                    value={settings.whyUsDescription || ""}
+                    onChange={(e) => handleFieldChange("whyUsDescription", e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              {/* List of Why Us Cards */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Cards List ({(settings.whyUs || []).length})</p>
+                {(settings.whyUs || []).map((item, idx) => (
+                  <div key={item.id || idx} className="p-3.5 sm:p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-bold text-amber-400">Card #{idx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeWhyUs(idx)}
+                        className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                        title="Delete Card"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Card Icon</label>
+                        <select
+                          value={item.icon || "Award"}
+                          onChange={(e) => updateWhyUs(idx, "icon", e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
+                        >
+                          {ICON_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Card Title</label>
+                        <input
+                          type="text"
+                          value={item.title || ""}
+                          onChange={(e) => updateWhyUs(idx, "title", e.target.value)}
+                          placeholder="e.g. Academic Excellence"
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-3">
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Card Description</label>
+                        <textarea
+                          rows={2}
+                          value={item.desc || ""}
+                          onChange={(e) => updateWhyUs(idx, "desc", e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 6. STEP-BY-STEP ADMISSION PROCESS TIMELINE */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
+                    <Layers size={16} /> 6. Admission Process Steps
+                  </h3>
+                  <p className="text-xs text-slate-400">Manage the step-by-step workflow for parents and students.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addProcessStep}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition"
+                >
+                  <Plus size={14} /> Add Process Step
+                </button>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Badge</label>
+                  <input
+                    type="text"
+                    value={settings.processBadge || ""}
+                    onChange={(e) => handleFieldChange("processBadge", e.target.value)}
+                    placeholder="Step-By-Step Workflow"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={settings.processTitle || ""}
+                    onChange={(e) => handleFieldChange("processTitle", e.target.value)}
+                    placeholder="Simple 5-Step Admission Process"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div className="sm:col-span-3">
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Description</label>
+                  <textarea
+                    rows={2}
+                    value={settings.processDescription || ""}
+                    onChange={(e) => handleFieldChange("processDescription", e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              {/* Steps List */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Steps List ({(settings.timelineSteps || []).length})</p>
+                {(settings.timelineSteps || []).map((step, idx) => (
+                  <div key={step.id || idx} className="p-3.5 sm:p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-bold text-amber-400">Step #{idx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeProcessStep(idx)}
+                        className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                        title="Delete Step"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+
+                    <div className="grid sm:grid-cols-4 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Step Number</label>
+                        <input
+                          type="text"
+                          value={step.number || ""}
+                          onChange={(e) => updateProcessStep(idx, "number", e.target.value)}
+                          placeholder="e.g. 01"
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-amber-400 text-xs font-black outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-3">
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Step Title</label>
+                        <input
+                          type="text"
+                          value={step.title || ""}
+                          onChange={(e) => updateProcessStep(idx, "title", e.target.value)}
+                          placeholder="e.g. Submit Inquiry"
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-4">
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Step Description</label>
+                        <textarea
+                          rows={2}
+                          value={step.desc || ""}
+                          onChange={(e) => updateProcessStep(idx, "desc", e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 7. ELIGIBILITY CRITERIA */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
+                    <GraduationCap size={16} /> 7. Eligibility Criteria
+                  </h3>
+                  <p className="text-xs text-slate-400">Configure grade-level age requirements and academic prerequisites.</p>
+                </div>
                 <button
                   type="button"
                   onClick={addEligibility}
-                  className="px-3 py-1.5 rounded-lg bg-amber-400/10 text-amber-300 text-xs font-bold flex items-center gap-1 hover:bg-amber-400/20"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Add Grade Criteria
+                  <Plus size={14} /> Add Grade Criteria
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Badge</label>
+                  <input
+                    type="text"
+                    value={settings.eligibilityBadge || ""}
+                    onChange={(e) => handleFieldChange("eligibilityBadge", e.target.value)}
+                    placeholder="Requirements"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={settings.eligibilityTitle || ""}
+                    onChange={(e) => handleFieldChange("eligibilityTitle", e.target.value)}
+                    placeholder="Eligibility Criteria"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              {/* Criteria List */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Grade Items ({(settings.eligibilityCriteria || []).length})</p>
                 {(settings.eligibilityCriteria || []).map((item, idx) => (
-                  <div key={idx} className="p-4 rounded-xl bg-slate-950 border border-white/10 grid sm:grid-cols-3 gap-3 items-center">
-                    <input
-                      type="text"
-                      placeholder="Grade Level"
-                      value={item.grade}
-                      onChange={(e) => updateEligibility(idx, "grade", e.target.value)}
-                      className="px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Age Limit"
-                      value={item.age}
-                      onChange={(e) => updateEligibility(idx, "age", e.target.value)}
-                      className="px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
-                    />
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        placeholder="Requirements"
-                        value={item.requirements}
-                        onChange={(e) => updateEligibility(idx, "requirements", e.target.value)}
-                        className="flex-1 px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
-                      />
+                  <div key={item.id || idx} className="p-3.5 sm:p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-bold text-amber-400">Criteria #{idx + 1}</span>
                       <button
                         type="button"
                         onClick={() => removeEligibility(idx)}
-                        className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                        className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                        title="Delete Criteria"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 size={14} />
                       </button>
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Grade / Class Name</label>
+                        <input
+                          type="text"
+                          value={item.grade || ""}
+                          onChange={(e) => updateEligibility(idx, "grade", e.target.value)}
+                          placeholder="e.g. Play Group & Nursery"
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Age Limit / Requirement</label>
+                        <input
+                          type="text"
+                          value={item.age || ""}
+                          onChange={(e) => updateEligibility(idx, "age", e.target.value)}
+                          placeholder="e.g. 2.5 - 3.5 years"
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-amber-400 text-xs font-semibold outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-3">
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Prerequisites / Requirements</label>
+                        <textarea
+                          rows={2}
+                          value={item.requirements || ""}
+                          onChange={(e) => updateEligibility(idx, "requirements", e.target.value)}
+                          placeholder="e.g. Child birth certificate, medical immunization record..."
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* DYNAMIC FAQs */}
-            <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-amber-400 flex items-center gap-2">
-                  <FileText className="w-5 h-5" /> 5. Manage Admission FAQs
-                </h3>
+            {/* 8. REQUIRED DOCUMENTS CHECKLIST */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
+                    <FileText size={16} /> 8. Required Documents Checklist
+                  </h3>
+                  <p className="text-xs text-slate-400">Specify mandatory or optional documents required for verification.</p>
+                </div>
                 <button
                   type="button"
-                  onClick={addFaq}
-                  className="px-3 py-1.5 rounded-lg bg-amber-400/10 text-amber-300 text-xs font-bold flex items-center gap-1 hover:bg-amber-400/20"
+                  onClick={addDocument}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Add FAQ
+                  <Plus size={14} /> Add Document
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {(settings.faqs || []).map((faq, idx) => (
-                  <div key={idx} className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <input
-                        type="text"
-                        placeholder="Question"
-                        value={faq.question}
-                        onChange={(e) => updateFaq(idx, "question", e.target.value)}
-                        className="flex-1 px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
-                      />
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Badge</label>
+                  <input
+                    type="text"
+                    value={settings.documentsBadge || ""}
+                    onChange={(e) => handleFieldChange("documentsBadge", e.target.value)}
+                    placeholder="Checklist"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={settings.documentsTitle || ""}
+                    onChange={(e) => handleFieldChange("documentsTitle", e.target.value)}
+                    placeholder="Required Documents"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              {/* Documents List */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Documents List ({(settings.requiredDocuments || []).length})</p>
+                {(settings.requiredDocuments || []).map((doc, idx) => (
+                  <div key={doc.id || idx} className="p-3.5 sm:p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-amber-400">Doc #{idx + 1}</span>
+                        <label className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={doc.mandatory !== false}
+                            onChange={(e) => updateDocument(idx, "mandatory", e.target.checked)}
+                            className="w-3.5 h-3.5 text-amber-400 accent-amber-400"
+                          />
+                          <span>Mandatory</span>
+                        </label>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => removeFaq(idx)}
-                        className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                        onClick={() => removeDocument(idx)}
+                        className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                        title="Delete Document"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 size={14} />
                       </button>
                     </div>
-                    <textarea
-                      rows={2}
-                      placeholder="Answer"
-                      value={faq.answer}
-                      onChange={(e) => updateFaq(idx, "answer", e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
-                    />
+
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Document Name</label>
+                        <input
+                          type="text"
+                          value={doc.name || ""}
+                          onChange={(e) => updateDocument(idx, "name", e.target.value)}
+                          placeholder="e.g. Birth Certificate"
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Description / Notes</label>
+                        <input
+                          type="text"
+                          value={doc.desc || ""}
+                          onChange={(e) => updateDocument(idx, "desc", e.target.value)}
+                          placeholder="e.g. Official copy issued by local municipality"
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* DYNAMIC IMPORTANT DATES */}
-            <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* 9. IMPORTANT DATES & DEADLINES */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
                 <div>
-                  <h3 className="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <Calendar className="w-5 h-5" /> 6. Manage Important Dates & Deadlines Block
+                  <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
+                    <Calendar size={16} /> 9. Important Dates & Deadlines Block
                   </h3>
-                  <p className="text-xs text-slate-400">Add or remove key milestones. This block only shows on the website when dates are active.</p>
+                  <p className="text-xs text-slate-400">Milestone schedule for upcoming academic terms.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-slate-300 cursor-pointer">
                     <input
                       type="checkbox"
-                      name="importantDatesEnabled"
                       checked={settings.importantDatesEnabled !== false}
-                      onChange={handleSettingsChange}
+                      onChange={(e) => handleFieldChange("importantDatesEnabled", e.target.checked)}
                       className="w-4 h-4 text-amber-400 accent-amber-400"
                     />
                     Enable Block
@@ -940,98 +1315,640 @@ export default function AdminAdmissions() {
                   <button
                     type="button"
                     onClick={addImportantDate}
-                    className="px-3 py-1.5 rounded-lg bg-amber-400/10 text-amber-300 text-xs font-bold flex items-center gap-1 hover:bg-amber-400/20"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Add Milestone Date
+                    <Plus size={14} /> Add Milestone Date
                   </button>
                 </div>
               </div>
 
               {settings.importantDatesEnabled !== false && (
-                <div className="space-y-4">
-                  {(!settings.importantDates || settings.importantDates.length === 0) ? (
-                    <div className="p-6 text-center text-xs text-slate-500 rounded-xl bg-slate-950 border border-white/5">
-                      No milestone dates added. The Important Dates block will be hidden on the website.
+                <div className="space-y-3">
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Section Badge</label>
+                      <input
+                        type="text"
+                        value={settings.datesBadge || ""}
+                        onChange={(e) => handleFieldChange("datesBadge", e.target.value)}
+                        placeholder="Schedule"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                      />
                     </div>
-                  ) : (
-                    (settings.importantDates || []).map((item, idx) => (
-                      <div key={idx} className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <input
-                            type="text"
-                            placeholder="Milestone Title (e.g. Admissions Open)"
-                            value={item.title}
-                            onChange={(e) => updateImportantDate(idx, "title", e.target.value)}
-                            className="flex-1 px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
-                          />
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Section Title</label>
+                      <input
+                        type="text"
+                        value={settings.datesTitle || ""}
+                        onChange={(e) => handleFieldChange("datesTitle", e.target.value)}
+                        placeholder="Important Dates & Deadlines"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Milestone Dates List */}
+                  <div className="space-y-3 pt-2">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Milestones List ({(settings.importantDates || []).length})</p>
+                    {(settings.importantDates || []).map((item, idx) => (
+                      <div key={item.id || idx} className="p-3.5 sm:p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-xs font-bold text-amber-400">Milestone #{idx + 1}</span>
                           <button
                             type="button"
                             onClick={() => removeImportantDate(idx)}
-                            className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                            className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                            title="Delete Milestone"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 size={14} />
                           </button>
                         </div>
-                        <div className="grid sm:grid-cols-2 gap-3">
-                          <input
-                            type="text"
-                            placeholder="Date / Schedule (e.g. 2027-01-01 or May 2027)"
-                            value={item.date}
-                            onChange={(e) => updateImportantDate(idx, "date", e.target.value)}
-                            className="px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-amber-400 text-xs font-semibold outline-none"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Description"
-                            value={item.desc}
-                            onChange={(e) => updateImportantDate(idx, "desc", e.target.value)}
-                            className="px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
-                          />
+
+                        <div className="grid sm:grid-cols-3 gap-3">
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-400 mb-1">Event Title</label>
+                            <input
+                              type="text"
+                              value={item.title || ""}
+                              onChange={(e) => updateImportantDate(idx, "title", e.target.value)}
+                              placeholder="e.g. Admissions Open"
+                              className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-400 mb-1">Date / Month</label>
+                            <input
+                              type="text"
+                              value={item.date || ""}
+                              onChange={(e) => updateImportantDate(idx, "date", e.target.value)}
+                              placeholder="e.g. 2027-01-01 or May 2027"
+                              className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-amber-400 text-xs font-bold outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-400 mb-1">Description</label>
+                            <input
+                              type="text"
+                              value={item.desc || ""}
+                              onChange={(e) => updateImportantDate(idx, "desc", e.target.value)}
+                              placeholder="e.g. Online portal opens"
+                              className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
+                            />
+                          </div>
                         </div>
                       </div>
-                    ))
-                  )}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Sticky Save All Bar */}
-            <div className="sticky bottom-6 z-30 p-4 rounded-2xl bg-slate-900/95 border border-amber-400/30 backdrop-blur-md shadow-2xl flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-white">Unsaved Changes in Admission Page Controls?</p>
-                <p className="text-[11px] text-slate-400">Click save to update the live public website and backend database.</p>
+            {/* 10. CAMPUS FACILITIES */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
+                    <Building size={16} /> 10. Campus Facilities Showcase
+                  </h3>
+                  <p className="text-xs text-slate-400">Manage highlights of school infrastructure on the admissions page.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addFacility}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition"
+                >
+                  <Plus size={14} /> Add Facility Card
+                </button>
               </div>
-              <button
-                onClick={handleSaveSettings}
-                disabled={saving}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-slate-950 font-extrabold text-xs hover:shadow-lg hover:shadow-amber-500/25 transition-all flex items-center gap-2 cursor-pointer"
-              >
-                <Save className="w-4 h-4" /> {saving ? "Saving Changes..." : "Save All Admission Settings"}
-              </button>
+
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Badge</label>
+                  <input
+                    type="text"
+                    value={settings.facilitiesBadge || ""}
+                    onChange={(e) => handleFieldChange("facilitiesBadge", e.target.value)}
+                    placeholder="Campus Infrastructure"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={settings.facilitiesTitle || ""}
+                    onChange={(e) => handleFieldChange("facilitiesTitle", e.target.value)}
+                    placeholder="Facilities for Comprehensive Growth"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              {/* Facilities List */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Facilities List ({(settings.facilitiesList || []).length})</p>
+                {(settings.facilitiesList || []).map((fac, idx) => (
+                  <div key={fac.id || idx} className="p-3.5 sm:p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-bold text-amber-400">Facility #{idx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeFacility(idx)}
+                        className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                        title="Delete Facility"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Icon</label>
+                        <select
+                          value={fac.icon || "BookOpen"}
+                          onChange={(e) => updateFacility(idx, "icon", e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
+                        >
+                          {ICON_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Facility Title</label>
+                        <input
+                          type="text"
+                          value={fac.title || ""}
+                          onChange={(e) => updateFacility(idx, "title", e.target.value)}
+                          placeholder="e.g. Smart Classrooms"
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-3">
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Description</label>
+                        <input
+                          type="text"
+                          value={fac.desc || ""}
+                          onChange={(e) => updateFacility(idx, "desc", e.target.value)}
+                          placeholder="Interactive digital displays & multimedia learning."
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 11. FREQUENTLY ASKED QUESTIONS (FAQS) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
+                    <HelpCircle size={16} /> 11. Frequently Asked Questions (FAQs)
+                  </h3>
+                  <p className="text-xs text-slate-400">Add, edit, or delete questions and answers for prospective parents.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addFaq}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition"
+                >
+                  <Plus size={14} /> Add FAQ
+                </button>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Badge</label>
+                  <input
+                    type="text"
+                    value={settings.faqsBadge || ""}
+                    onChange={(e) => handleFieldChange("faqsBadge", e.target.value)}
+                    placeholder="Parent Assistance"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={settings.faqsTitle || ""}
+                    onChange={(e) => handleFieldChange("faqsTitle", e.target.value)}
+                    placeholder="Frequently Asked Questions"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              {/* FAQs List */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Questions ({(settings.faqs || []).length})</p>
+                {(settings.faqs || []).map((faq, idx) => (
+                  <div key={faq.id || idx} className="p-3.5 sm:p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-bold text-amber-400">FAQ #{idx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeFaq(idx)}
+                        className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                        title="Delete FAQ"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={faq.question || ""}
+                        onChange={(e) => updateFaq(idx, "question", e.target.value)}
+                        placeholder="e.g. What is the admission procedure?"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                      />
+                      <textarea
+                        rows={2}
+                        value={faq.answer || ""}
+                        onChange={(e) => updateFaq(idx, "answer", e.target.value)}
+                        placeholder="Detailed answer for parents..."
+                        className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 12. CONTACT OFFICE & CTA SECTION */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <h3 className="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2 border-b border-white/10 pb-3">
+                <Phone size={16} /> 12. Contact Office Details & Final Call To Action
+              </h3>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Phone Numbers</label>
+                  <input
+                    type="text"
+                    value={settings.contactPhone || ""}
+                    onChange={(e) => handleFieldChange("contactPhone", e.target.value)}
+                    placeholder="+977 1-4567890 / +977 9851012345"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Email Address</label>
+                  <input
+                    type="text"
+                    value={settings.contactEmail || ""}
+                    onChange={(e) => handleFieldChange("contactEmail", e.target.value)}
+                    placeholder="admissions@smritischool.edu.np"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Office Hours</label>
+                  <input
+                    type="text"
+                    value={settings.contactHours || ""}
+                    onChange={(e) => handleFieldChange("contactHours", e.target.value)}
+                    placeholder="Sun - Fri: 8:00 AM - 4:00 PM"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Campus Location</label>
+                  <input
+                    type="text"
+                    value={settings.contactAddress || ""}
+                    onChange={(e) => handleFieldChange("contactAddress", e.target.value)}
+                    placeholder="Kathmandu, Nepal"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 pt-2 border-t border-white/10">
+                  <p className="text-xs font-bold text-amber-400 mb-2">Bottom Call to Action Banner</p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11px] font-semibold text-slate-400 mb-1">CTA Heading</label>
+                      <input
+                        type="text"
+                        value={settings.ctaTitle || ""}
+                        onChange={(e) => handleFieldChange("ctaTitle", e.target.value)}
+                        placeholder="Give Your Child the Gift of World-Class Education"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none focus:border-amber-400"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11px] font-semibold text-slate-400 mb-1">CTA Description</label>
+                      <textarea
+                        rows={2}
+                        value={settings.ctaDescription || ""}
+                        onChange={(e) => handleFieldChange("ctaDescription", e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-400 mb-1">CTA Button (When Open)</label>
+                      <input
+                        type="text"
+                        value={settings.ctaButtonText || ""}
+                        onChange={(e) => handleFieldChange("ctaButtonText", e.target.value)}
+                        placeholder="Start Admission Inquiry Now"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-400 mb-1">CTA Button (When Closed)</label>
+                      <input
+                        type="text"
+                        value={settings.ctaClosedButtonText || ""}
+                        onChange={(e) => handleFieldChange("ctaClosedButtonText", e.target.value)}
+                        placeholder="Contact Us for Future Cycles"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* STICKY SAVE BAR */}
+            <div className="sticky bottom-4 z-40 p-3 sm:p-4 rounded-2xl bg-slate-900/95 border border-amber-400/30 backdrop-blur-md shadow-2xl flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold text-white">Save Changes to Public Admissions Portal</p>
+                <p className="text-[11px] text-slate-400">All modifications update instantly on the live website and database.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("preview")}
+                  className="px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition"
+                >
+                  Preview First
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveSettings}
+                  disabled={saving}
+                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 font-black text-xs shadow-lg transition hover:scale-105 active:scale-95 disabled:opacity-50"
+                >
+                  <Save size={14} /> {saving ? "Saving Changes..." : "Save All Changes"}
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* ================= TAB 3: DEMAND ANALYTICS ================= */}
-        {activeTab === "analytics" && (
-          <div className="space-y-8">
-            <div className="border-b border-white/10 pb-4">
-              <h2 className="text-2xl font-extrabold text-white">Admission Demand & Conversion Analytics</h2>
-              <p className="text-xs text-slate-400">Statistical breakdown of student application trends, conversion rates & demographics.</p>
+        {/* ================= TAB 2: LIVE PREVIEW ================= */}
+        {activeTab === "preview" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between bg-slate-900 border border-white/10 rounded-2xl p-4">
+              <div>
+                <h3 className="text-sm sm:text-base font-black text-white">Live Admissions Page Preview</h3>
+                <p className="text-xs text-slate-400">This interactive preview reflects your current in-editor changes in real-time.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("settings")}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition"
+                >
+                  <Edit3 size={14} /> Back to Editor
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveSettings}
+                  disabled={saving}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs hover:bg-amber-300 transition shadow-md"
+                >
+                  <Save size={14} /> {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Embedded Live Preview Container */}
+            <div className="rounded-2xl border border-slate-700 bg-white overflow-hidden shadow-2xl">
+              <AdmissionsPage previewData={settings} />
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 3: INQUIRIES DESK ================= */}
+        {activeTab === "dashboard" && (
+          <div className="space-y-6">
+            {/* Metric Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total Inquiries</p>
+                  <h3 className="text-2xl font-black text-white">{analytics.total}</h3>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-400/10 text-amber-400 flex items-center justify-center font-bold">
+                  <Users size={18} />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Today's Received</p>
+                  <h3 className="text-2xl font-black text-white">{analytics.todayCount}</h3>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">
+                  <Clock size={18} />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Converted</p>
+                  <h3 className="text-2xl font-black text-emerald-400">{analytics.convertedCount}</h3>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
+                  <UserCheck size={18} />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Pending</p>
+                  <h3 className="text-2xl font-black text-yellow-400">{analytics.pendingCount}</h3>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-yellow-500/10 text-yellow-400 flex items-center justify-center font-bold">
+                  <Filter size={18} />
+                </div>
+              </div>
+            </div>
+
+            {/* Inquiries Filter Bar */}
+            <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-1 items-center gap-2 min-w-[240px]">
+                <div className="relative flex-1">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search by student, parent, ID or phone..."
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="New">New</option>
+                  <option value="Follow-up">Follow-up</option>
+                  <option value="Under Review">Under Review</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Converted">Converted</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+
+                <select
+                  value={classFilter}
+                  onChange={(e) => setClassFilter(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-slate-950 border border-white/10 text-white text-xs font-bold outline-none"
+                >
+                  <option value="All">All Classes</option>
+                  <option value="Play Group">Play Group</option>
+                  <option value="Nursery">Nursery</option>
+                  <option value="LKG">LKG</option>
+                  <option value="UKG">UKG</option>
+                  {[...Array(10)].map((_, i) => (
+                    <option key={i} value={`Grade ${i + 1}`}>Grade {i + 1}</option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition"
+                >
+                  <Download size={13} /> Export CSV
+                </button>
+              </div>
+            </div>
+
+            {/* Inquiries Table */}
+            <div className="rounded-2xl border border-white/10 bg-slate-900 overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider font-bold border-b border-white/10">
+                    <tr>
+                      <th className="px-4 py-3">Inquiry ID</th>
+                      <th className="px-4 py-3">Student Name</th>
+                      <th className="px-4 py-3">Class</th>
+                      <th className="px-4 py-3">Parent Info</th>
+                      <th className="px-4 py-3">Location</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {filteredInquiries.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                          No admission inquiries found matching your filters.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredInquiries.map((item) => (
+                        <tr key={item.id} className="hover:bg-white/5 transition">
+                          <td className="px-4 py-3 font-mono font-bold text-amber-400">
+                            {item.inquiryId || item.id}
+                          </td>
+                          <td className="px-4 py-3 font-bold text-white">
+                            {item.studentName}
+                            <span className="block text-[10px] text-slate-400 font-normal">
+                              {item.gender} • {item.dob}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 font-semibold text-slate-300">
+                            {item.applyingClass}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="font-bold text-slate-200">{item.parentName}</span>
+                            <span className="block text-[10px] text-slate-400">{item.mobile}</span>
+                          </td>
+                          <td className="px-4 py-3 text-slate-400">
+                            {item.district || item.fullAddress || "N/A"}
+                          </td>
+                          <td className="px-4 py-3">
+                            <select
+                              value={item.status || "New"}
+                              onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                              className="px-2 py-1 rounded-lg bg-slate-950 border border-white/10 text-[11px] font-bold outline-none"
+                            >
+                              <option value="New">New</option>
+                              <option value="Follow-up">Follow-up</option>
+                              <option value="Under Review">Under Review</option>
+                              <option value="Approved">Approved</option>
+                              <option value="Converted">Converted</option>
+                              <option value="Rejected">Rejected</option>
+                            </select>
+                          </td>
+                          <td className="px-4 py-3 text-right space-x-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setViewInquiry(item)}
+                              className="p-1.5 rounded-lg bg-blue-500/10 text-blue-300 hover:bg-blue-500/20"
+                              title="View Details"
+                            >
+                              <Eye size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteInquiry(item.id)}
+                              className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                              title="Delete Inquiry"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 4: DEMAND ANALYTICS ================= */}
+        {activeTab === "analytics" && (
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-3">
+              <h2 className="text-lg font-black text-white">Admission Demand & Conversion Analytics</h2>
+              <p className="text-xs text-slate-400">Statistical breakdown of student application trends and conversion metrics.</p>
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-4">
               {/* Conversion Rate Card */}
-              <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 text-center space-y-3">
-                <TrendingUp className="w-10 h-10 text-emerald-400 mx-auto" />
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Admission Conversion Rate</h3>
-                <p className="text-4xl font-extrabold text-white">{analytics.conversionRate}%</p>
-                <p className="text-xs text-slate-500">Ratio of total inquiries converted to active students.</p>
+              <div className="p-5 rounded-2xl bg-slate-900 border border-white/10 text-center space-y-2">
+                <TrendingUp size={32} className="text-emerald-400 mx-auto" />
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Conversion Rate</h3>
+                <p className="text-3xl font-black text-white">{analytics.conversionRate}%</p>
+                <p className="text-[11px] text-slate-500">Inquiries converted to active enrolled students.</p>
               </div>
 
               {/* Gender Breakdown */}
-              <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
-                <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Gender Distribution</h3>
+              <div className="p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-3">
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Gender Distribution</h3>
                 <div className="space-y-2">
                   {Object.entries(analytics.genderBreakdown || {}).map(([g, count]) => {
                     const pct = analytics.total > 0 ? ((count / analytics.total) * 100).toFixed(0) : 0;
@@ -1051,27 +1968,27 @@ export default function AdminAdmissions() {
               </div>
 
               {/* Most Applied Class */}
-              <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 text-center space-y-3">
-                <GraduationCap className="w-10 h-10 text-amber-400 mx-auto" />
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Top Requested Class</h3>
-                <p className="text-3xl font-extrabold text-amber-400">{analytics.mostAppliedClass}</p>
-                <p className="text-xs text-slate-500">Highest volume of student inquiries recorded.</p>
+              <div className="p-5 rounded-2xl bg-slate-900 border border-white/10 text-center space-y-2">
+                <GraduationCap size={32} className="text-amber-400 mx-auto" />
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Top Requested Class</h3>
+                <p className="text-2xl font-black text-amber-400">{analytics.mostAppliedClass}</p>
+                <p className="text-[11px] text-slate-500">Highest volume of student inquiries recorded.</p>
               </div>
             </div>
 
             {/* Class Breakdown Progress Bars */}
-            <div className="p-6 rounded-2xl bg-slate-900 border border-white/10 space-y-6">
-              <h3 className="text-lg font-bold text-white">Inquiries Volume by Class</h3>
-              <div className="grid sm:grid-cols-2 gap-4">
+            <div className="p-5 rounded-2xl bg-slate-900 border border-white/10 space-y-4">
+              <h3 className="text-sm font-bold text-white">Inquiries Volume by Class</h3>
+              <div className="grid sm:grid-cols-2 gap-3">
                 {Object.entries(analytics.classBreakdown || {}).map(([cls, count]) => {
                   const pct = analytics.total > 0 ? ((count / analytics.total) * 100).toFixed(0) : 0;
                   return (
-                    <div key={cls} className="p-4 rounded-xl bg-slate-950 border border-white/5 space-y-2">
+                    <div key={cls} className="p-3 rounded-xl bg-slate-950 border border-white/5 space-y-1.5">
                       <div className="flex justify-between text-xs font-bold text-white">
                         <span>{cls}</span>
                         <span className="text-amber-400">{count} Inquiries ({pct}%)</span>
                       </div>
-                      <div className="h-2.5 rounded-full bg-slate-900 overflow-hidden">
+                      <div className="h-2 rounded-full bg-slate-900 overflow-hidden">
                         <div className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full" style={{ width: `${pct}%` }}></div>
                       </div>
                     </div>
@@ -1091,24 +2008,24 @@ export default function AdminAdmissions() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-3xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-xl bg-slate-900 border border-white/10 rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto"
             >
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div>
                   <span className="text-xs font-mono font-bold text-amber-400">{viewInquiry.inquiryId || viewInquiry.id}</span>
-                  <h3 className="text-xl font-extrabold text-white">{viewInquiry.studentName}</h3>
+                  <h3 className="text-lg font-black text-white">{viewInquiry.studentName}</h3>
                 </div>
-                <button onClick={() => setViewInquiry(null)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400">
-                  <X className="w-5 h-5" />
+                <button type="button" onClick={() => setViewInquiry(null)} className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400">
+                  <X size={16} />
                 </button>
               </div>
 
               {/* Student Info */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Student Information</h4>
-                <div className="grid grid-cols-2 gap-3 text-xs bg-slate-950 p-4 rounded-xl border border-white/5">
-                  <p><span className="text-slate-400">Applying Class:</span> <b className="text-white">{viewInquiry.applyingClass}</b></p>
-                  <p><span className="text-slate-400">Academic Session:</span> <b className="text-white">{viewInquiry.academicSession}</b></p>
+                <div className="grid grid-cols-2 gap-2 text-xs bg-slate-950 p-3 rounded-xl border border-white/5">
+                  <p><span className="text-slate-400">Class:</span> <b className="text-white">{viewInquiry.applyingClass}</b></p>
+                  <p><span className="text-slate-400">Session:</span> <b className="text-white">{viewInquiry.academicSession}</b></p>
                   <p><span className="text-slate-400">Date of Birth:</span> <b className="text-white">{viewInquiry.dob || "N/A"}</b></p>
                   <p><span className="text-slate-400">Gender:</span> <b className="text-white">{viewInquiry.gender || "N/A"}</b></p>
                   <p className="col-span-2"><span className="text-slate-400">Previous School:</span> <b className="text-white">{viewInquiry.prevSchoolName || "None"}</b></p>
@@ -1116,59 +2033,61 @@ export default function AdminAdmissions() {
               </div>
 
               {/* Parent Info */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Parent / Guardian Information</h4>
-                <div className="grid grid-cols-2 gap-3 text-xs bg-slate-950 p-4 rounded-xl border border-white/5">
-                  <p><span className="text-slate-400">Parent Name:</span> <b className="text-white">{viewInquiry.parentName} ({viewInquiry.relationship})</b></p>
-                  <p><span className="text-slate-400">Mobile Number:</span> <b className="text-white">{viewInquiry.mobile}</b></p>
-                  <p><span className="text-slate-400">Email Address:</span> <b className="text-white">{viewInquiry.email}</b></p>
+                <div className="grid grid-cols-2 gap-2 text-xs bg-slate-950 p-3 rounded-xl border border-white/5">
+                  <p><span className="text-slate-400">Parent:</span> <b className="text-white">{viewInquiry.parentName} ({viewInquiry.relationship})</b></p>
+                  <p><span className="text-slate-400">Mobile:</span> <b className="text-white">{viewInquiry.mobile}</b></p>
+                  <p><span className="text-slate-400">Email:</span> <b className="text-white">{viewInquiry.email}</b></p>
                   <p><span className="text-slate-400">Alt Contact:</span> <b className="text-white">{viewInquiry.altContact || "N/A"}</b></p>
                 </div>
               </div>
 
               {/* Address */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Address Details</h4>
-                <div className="text-xs bg-slate-950 p-4 rounded-xl border border-white/5 space-y-1">
+                <div className="text-xs bg-slate-950 p-3 rounded-xl border border-white/5 space-y-1">
                   <p><span className="text-slate-400">Full Address:</span> <b className="text-white">{viewInquiry.fullAddress}</b></p>
                   <p><span className="text-slate-400">District / Province:</span> <b className="text-white">{viewInquiry.district}, {viewInquiry.province}</b></p>
                 </div>
               </div>
 
-              {/* Additional Notes */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Additional Facilities</h4>
-                <div className="flex gap-4 text-xs bg-slate-950 p-4 rounded-xl border border-white/5">
-                  <span className={`px-3 py-1 rounded-full font-bold ${viewInquiry.transportRequired ? "bg-emerald-500/20 text-emerald-300" : "bg-slate-800 text-slate-500"}`}>
-                    Bus Transport: {viewInquiry.transportRequired ? "Yes" : "No"}
+              {/* Additional Facilities */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Facilities Requested</h4>
+                <div className="flex gap-3 text-xs bg-slate-950 p-3 rounded-xl border border-white/5">
+                  <span className={`px-2.5 py-1 rounded-full font-bold ${viewInquiry.transportRequired ? "bg-emerald-500/20 text-emerald-300" : "bg-slate-800 text-slate-500"}`}>
+                    Bus: {viewInquiry.transportRequired ? "Yes" : "No"}
                   </span>
-                  <span className={`px-3 py-1 rounded-full font-bold ${viewInquiry.hostelRequired ? "bg-emerald-500/20 text-emerald-300" : "bg-slate-800 text-slate-500"}`}>
-                    Hostel Required: {viewInquiry.hostelRequired ? "Yes" : "No"}
+                  <span className={`px-2.5 py-1 rounded-full font-bold ${viewInquiry.hostelRequired ? "bg-emerald-500/20 text-emerald-300" : "bg-slate-800 text-slate-500"}`}>
+                    Hostel: {viewInquiry.hostelRequired ? "Yes" : "No"}
                   </span>
                 </div>
               </div>
 
               {viewInquiry.message && (
                 <div className="space-y-1 text-xs">
-                  <span className="text-slate-400 font-semibold">Additional Parent Message:</span>
-                  <p className="p-3 rounded-xl bg-slate-950 text-slate-200 border border-white/5">{viewInquiry.message}</p>
+                  <span className="text-slate-400 font-semibold">Parent Message:</span>
+                  <p className="p-2.5 rounded-xl bg-slate-950 text-slate-200 border border-white/5">{viewInquiry.message}</p>
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
                 <button
+                  type="button"
                   onClick={() => setViewInquiry(null)}
-                  className="px-5 py-2 rounded-xl bg-white/10 text-white font-bold text-xs hover:bg-white/20"
+                  className="px-4 py-1.5 rounded-xl bg-white/10 text-white font-bold text-xs hover:bg-white/20"
                 >
                   Close
                 </button>
                 {viewInquiry.status !== "Converted" && (
                   <button
+                    type="button"
                     onClick={() => {
                       handleConvertToStudent(viewInquiry.id);
                       setViewInquiry(null);
                     }}
-                    className="px-5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs hover:bg-emerald-400"
+                    className="px-4 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs hover:bg-emerald-400"
                   >
                     Convert to Active Student
                   </button>
