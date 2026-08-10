@@ -352,7 +352,7 @@
       {
         "id": "post-1",
         "title": "Annual Sports Day 2026: Celebrating Athletic Excellence & Team Spirit",
-        "slug": "annual-sports-day-2026",
+        "slug": "annual-sports-day-2026-celebrating-athletic-excellence-team-spirit-post-1",
         "category": "Sports",
         "date": "2026-07-28",
         "excerpt": "Our annual school sports meet brought together students, teachers, and parents for an unforgettable day of track and field competitions, inter-house matches, and sportsmanship awards.",
@@ -855,5 +855,417 @@
         ]
       }
     ]
+  },
+  "staff": {
+    "badgeText": "Faculty & Team",
+    "title": "Our Staff Members",
+    "highlightedWord": "Staff Members",
+    "subtitle": "Meet the dedicated educators, department heads, and leaders guiding students at Smriti Secondary English Boarding School.",
+    "stats": [
+      {
+        "id": "teachingStaff",
+        "value": "50+",
+        "label": "Teaching Staff",
+        "icon": "users"
+      },
+      {
+        "id": "expertFaculty",
+        "value": "240+",
+        "label": "Faculty Members",
+        "icon": "graduation"
+      },
+      {
+        "id": "yearsExcellence",
+        "value": "35+",
+        "label": "Years Excellence",
+        "icon": "award"
+      }
+    ],
+    "staff": [
+      {
+        "id": 1,
+        "name": "Binod Subedi",
+        "position": "Principal",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "qualification": "M.Ed in Educational Leadership",
+        "phone": "057-590144",
+        "email": "principal@smritischool.edu.np",
+        "description": "Mr. Binod Subedi has been leading Smriti Boarding School with vision and commitment for over a decade, driving academic rigor and holistic development.",
+        "visible": true,
+        "accentColor": ""
+      },
+      {
+        "id": 2,
+        "name": "Amul Shrestha",
+        "position": "Vice Principal",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "qualification": "M.Ed",
+        "phone": "057-590145",
+        "email": "viceprincipal@smritischool.edu.np",
+        "description": "Oversees daily academic administration, teacher development, and student welfare, maintaining high standards of discipline and achievement.",
+        "visible": true,
+        "accentColor": ""
+      },
+      {
+        "id": 3,
+        "name": "Prem Hamal",
+        "position": "Science Dept Head",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "qualification": "B.Sc, B.Ed",
+        "phone": "057-590146",
+        "email": "prem.science@smritischool.edu.np",
+        "description": "Passionate science educator bringing hands-on practical experiments in Physics, Chemistry, and Biology to secondary school students.",
+        "visible": true,
+        "accentColor": ""
+      },
+      {
+        "id": 4,
+        "name": "Saraswati Sharma",
+        "position": "English Dept Head",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "qualification": "M.A. English, B.Ed",
+        "phone": "057-590144",
+        "email": "saraswati.english@smritischool.edu.np",
+        "description": "Specializes in English literature and communication skills, fostering creative writing and debate programs across all grade levels.",
+        "visible": true,
+        "accentColor": ""
+      },
+      {
+        "id": 5,
+        "name": "Ramesh Karki",
+        "position": "Mathematics Dept Head",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "qualification": "M.Sc Mathematics",
+        "phone": "057-590145",
+        "email": "ramesh.math@smritischool.edu.np",
+        "description": "Dedicated to simplifying mathematics and encouraging logical thinking, problem-solving, and competitive Olympiad prep.",
+        "visible": true,
+        "accentColor": ""
+      },
+      {
+        "id": 6,
+        "name": "Anita Adhikari",
+        "position": "Primary Level Coordinator",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "qualification": "M.Ed in Child Psychology",
+        "phone": "057-590146",
+        "email": "anita.primary@smritischool.edu.np",
+        "description": "Guides primary educators to build a friendly, nurturing, activity-based foundation for young learners.",
+        "visible": true,
+        "accentColor": ""
+      }
+    ]
+  },
+  "facilities": {
+    "badgeText": "Our Campus",
+    "title": "Spaces Built For How Students Actually Learn",
+    "highlightedText": "Learn",
+    "subtitle": "Smriti Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
+    "learnMoreText": "Learn More",
+    "highlightsTitle": "Facility Highlights",
+    "facilities": [
+      {
+        "id": 1,
+        "title": "Digital Library",
+        "category": "Knowledge Hub",
+        "description": "A quiet, well-stocked reading room alongside e-books, journals, and research databases students can reach from any classroom.",
+        "details": "Students can browse physical shelves or sign into digital collections — e-books, academic journals, reference databases, and curated learning platforms — all from a single login.",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true,
+        "color": "#1E3A5F",
+        "busRoutes": []
+      },
+      {
+        "id": 2,
+        "title": "Tech Lab",
+        "category": "Innovation",
+        "description": "A 40-seat computer lab where students get hands-on with the software and skills their exams — and future jobs — will actually ask for.",
+        "details": "40+ networked computers, programming environments, office software, and multimedia tools, with a teacher-led session every week from Grade 6 upward.",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true,
+        "color": "#2D6A4F",
+        "busRoutes": []
+      },
+      {
+        "id": 3,
+        "title": "Science Center",
+        "category": "Discovery",
+        "description": "Separate Physics, Chemistry, and Biology labs where the textbook diagram finally becomes something a student can hold.",
+        "details": "Fully equipped, separately ventilated labs for each science stream, with safety gear, demonstration benches, and enough apparatus for every student to run their own experiment — not just watch one.",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true,
+        "color": "#F4A261",
+        "busRoutes": []
+      },
+      {
+        "id": 4,
+        "title": "School Transport",
+        "category": "Safety & Comfort",
+        "description": "Monitored bus routes across Hetauda, so getting to school safely isn't something a family has to solve on their own.",
+        "details": "Smriti Boarding School provides safe transportation with experienced drivers, route management, student safety monitoring, and comfortable buses for daily travel.",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true,
+        "color": "#8B5CF6",
+        "busRoutes": [
+          {
+            "id": 1,
+            "name": "Route 1",
+            "from": "Hetauda – New Bus Park",
+            "to": "School Campus",
+            "stops": [
+              "New Bus Park",
+              "Chandranagar",
+              "Bhanu Chowk",
+              "School Campus"
+            ]
+          },
+          {
+            "id": 2,
+            "name": "Route 2",
+            "from": "Hetauda – Old Bus Park",
+            "to": "School Campus",
+            "stops": [
+              "Old Bus Park",
+              "Milan Chowk",
+              "Bishnupur",
+              "School Campus"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Performance Hall",
+        "category": "Arts & Culture",
+        "description": "A full auditorium for assemblies, cultural programs, and the kind of stage time that builds confidence a classroom can't.",
+        "details": "Tiered seating, a proper sound and lighting rig, and a stage large enough for full-school assemblies, exhibitions, and end-of-year cultural programs.",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true,
+        "color": "#14B8A6",
+        "busRoutes": []
+      },
+      {
+        "id": 6,
+        "title": "Sports Complex",
+        "category": "Fitness & Wellness",
+        "description": "Open playgrounds and indoor courts where football, basketball, and volleyball teams train under proper coaching.",
+        "details": "A full-size outdoor ground plus an indoor court, used for daily PE periods, house tournaments, and after-school training ahead of zonal and district competitions.",
+        "imageUrl": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true,
+        "color": "#1E3A5F",
+        "busRoutes": []
+      }
+    ]
+  },
+  "gallery": {
+    "heroBadge": "INTERACTIVE GALLERY",
+    "heroTitle": "Smriti School",
+    "heroHighlightedText": "Smriti",
+    "heroSubtitle": "Moments that become memories",
+    "badge": "School Gallery",
+    "title": "Stories",
+    "highlightedText": "Stories",
+    "description": "Explore classroom learning, school events, certificates, achievements, and student life at Smriti Secondary English Boarding School.",
+    "categories": [
+      "Activity",
+      "Events",
+      "Certificate"
+    ],
+    "categoryDescriptions": {
+      "Activity": "Classroom moments show students learning, discussing, writing, presenting, and growing through daily academic activities.",
+      "Events": "School events highlight celebrations, programs, competitions, cultural activities, student participation, and community moments.",
+      "Certificate": "Certificates and awards recognize student achievement, participation, discipline, excellence, and school accomplishments."
+    },
+    "subcategories": {
+      "Activity": [],
+      "Events": [
+        {
+          "id": "annual-program",
+          "name": "Annual Program",
+          "description": "Photos from annual programs, performances, celebrations, and school-wide events.",
+          "visible": true
+        },
+        {
+          "id": "sports-events",
+          "name": "Sports Events",
+          "description": "Photos from sports competitions, games, student teamwork, and athletic participation.",
+          "visible": true
+        }
+      ],
+      "Certificate": [
+        {
+          "id": "student-certificates",
+          "name": "Student Certificates",
+          "description": "Certificates awarded to students for academic, creative, sports, and extracurricular achievements.",
+          "visible": true
+        },
+        {
+          "id": "school-awards",
+          "name": "School Awards",
+          "description": "Awards and recognitions received by the school, staff, and student groups.",
+          "visible": true
+        }
+      ]
+    },
+    "achievements": [
+      {
+        "id": "1",
+        "title": "Top School Award",
+        "year": "2024",
+        "icon": "Trophy"
+      },
+      {
+        "id": "2",
+        "title": "STEM Excellence",
+        "year": "2023",
+        "icon": "Award"
+      },
+      {
+        "id": "3",
+        "title": "Sports Champion",
+        "year": "2024",
+        "icon": "Trophy"
+      },
+      {
+        "id": "4",
+        "title": "Community Service",
+        "year": "2023",
+        "icon": "Star"
+      }
+    ],
+    "images": [
+      {
+        "id": "1786344660373-g5bdxk1nocr",
+        "title": "20260624 161357",
+        "category": "Certificate",
+        "subcategory": "",
+        "date": "School Activity",
+        "description": "",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344656473_20260624_161357_Elo7Ys_u_.jpg",
+        "images": [
+          "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344656473_20260624_161357_Elo7Ys_u_.jpg"
+        ],
+        "visible": true
+      },
+      {
+        "id": "1786344664603-9gu3t1b9xa5",
+        "title": "20260624 161346(1)",
+        "category": "Events",
+        "subcategory": "",
+        "date": "School Activity",
+        "description": "",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344660398_20260624_161346_1__LXLNl-Qef.jpg",
+        "images": [
+          "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344660398_20260624_161346_1__LXLNl-Qef.jpg"
+        ],
+        "visible": true
+      },
+      {
+        "id": "1786344667681-sm8vntr24dl",
+        "title": "20260624 161346",
+        "category": "Activity",
+        "subcategory": "",
+        "date": "School Activity",
+        "description": "",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344664631_20260624_161346_ty3aBwz_V.jpg",
+        "images": [
+          "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344664631_20260624_161346_ty3aBwz_V.jpg"
+        ],
+        "visible": true
+      },
+      {
+        "id": "1786344649697-ae16jd5sj5t",
+        "title": "20260624 161346",
+        "category": "Events",
+        "subcategory": "",
+        "date": "School Activity",
+        "description": "",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344644761_20260624_161346_Sm42o2a_c.jpg",
+        "images": [
+          "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344644761_20260624_161346_Sm42o2a_c.jpg"
+        ],
+        "visible": true
+      },
+      {
+        "id": "1786344169506-0-0qez7gdmmz5f",
+        "title": "School Logo",
+        "category": "Events",
+        "subcategory": "Annual Program",
+        "date": "School Activity",
+        "description": "",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344168027_unnamed_TdM9BnWuQ.png",
+        "images": [
+          "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344168027_unnamed_TdM9BnWuQ.png"
+        ],
+        "visible": true
+      },
+      {
+        "id": "1786344133133-0-rqahydvvz7g",
+        "title": "Images",
+        "category": "Events",
+        "subcategory": "Annual Program",
+        "date": "School Activity",
+        "description": "",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344131528_images_z-ZV4LJO0.jpeg",
+        "images": [
+          "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344131528_images_z-ZV4LJO0.jpeg"
+        ],
+        "visible": true
+      },
+      {
+        "id": "1786344133087-1-uy7y25t85uf",
+        "title": "Images (1)",
+        "category": "Certificate",
+        "subcategory": "Student Certificates",
+        "date": "School Activity",
+        "description": "",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344131542_images__1__LJkf1r2vd.jpeg",
+        "images": [
+          "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344131542_images__1__LJkf1r2vd.jpeg"
+        ],
+        "visible": true
+      }
+    ],
+    "bottomTitle": "Every picture tells a story.",
+    "bottomDescription": "Explore the moments, celebrate the achievements, and remember the journey.",
+    "bottomNote": "Gallery is managed by the school administration.",
+    "heroExploreText": "Explore Moments",
+    "heroAchievementText": "Celebrate Achievements"
   }
 }

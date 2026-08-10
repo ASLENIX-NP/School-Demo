@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "device": "Chrome / Windows 11",
+    "ip": "127.0.0.1",
+    "location": "Itahari, Nepal",
+    "time": "Just now",
+    "status": "Active Session"
+  },
+  {
+    "id": 2,
+    "device": "Safari / iPhone 15",
+    "ip": "110.44.112.5",
+    "location": "Kathmandu, Nepal",
+    "time": "2 hours ago",
+    "status": "Successful"
+  }
+]

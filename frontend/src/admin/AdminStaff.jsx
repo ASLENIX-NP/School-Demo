@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 
 import {
   Staff,
+  ACCENTS,
   defaultStaffContent,
   mergeStaffContent,
 } from "../pages/Staff";
@@ -34,7 +35,14 @@ const colors = {
   gold: "#FACC15",
 };
 
-const statColors = [colors.green, colors.purple, colors.red, colors.cyan];
+// Reuse the exact accent hexes the live Staff page rotates through, so the
+// admin preview's default color swatches always match what the public page
+// will actually render.
+const statColors = ACCENTS.map((accent) => accent.solid);
+
+function staffAccentFor(index) {
+  return ACCENTS[index % ACCENTS.length]?.solid || colors.purple;
+}
 
 function Field({ label, value, onChange, placeholder = "", type = "text" }) {
   return (
@@ -78,6 +86,35 @@ function TextArea({ label, value, onChange, placeholder = "", rows = 4 }) {
           color: colors.dark,
         }}
       />
+    </div>
+  );
+}
+
+// Simple, typo-proof picker for fields that must match a fixed set of values
+// (like icon names). Prevents an admin from saving "Graduation" instead of
+// "graduation" and silently losing the icon on the live page.
+function Select({ label, value, onChange, options }) {
+  return (
+    <div>
+      <label className="block text-sm font-black mb-2 text-slate-700">
+        {label}
+      </label>
+
+      <select
+        value={value || options[0]?.value || ""}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full px-4 py-3 rounded-2xl outline-none text-sm bg-white"
+        style={{
+          border: "1px solid rgba(75,46,131,0.16)",
+          color: colors.dark,
+        }}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -717,6 +754,12 @@ export default function AdminStaff() {
         email: member.email || "",
         description: member.description || "",
         visible: member.visible !== false,
+        // Accent color: if the member already has a custom color saved, the
+        // toggle starts on and the picker shows that color. Otherwise the
+        // toggle starts off and the picker just previews what the automatic
+        // rotation would use, so switching it on doesn't jump to black.
+        useCustomAccent: Boolean(member.accentColor),
+        accentColor: member.accentColor || staffAccentFor(target.index),
       });
     }
   };
@@ -864,6 +907,11 @@ export default function AdminStaff() {
                   email: modalForm.email || "",
                   description: modalForm.description || "",
                   visible: modalForm.visible !== false,
+                  // Only persist a custom color when the toggle is on;
+                  // otherwise store "" so the card falls back to the
+                  // auto-rotating palette (and stays in sync if cards
+                  // are reordered later).
+                  accentColor: modalForm.useCustomAccent ? (modalForm.accentColor || "") : "",
                 }
               : member
           ),
@@ -908,6 +956,7 @@ export default function AdminStaff() {
         email: "",
         description: "Write a short bio about this staff member.",
         visible: true,
+        accentColor: "",
       };
 
       const nextForm = mergeStaffContent({
@@ -1280,9 +1329,10 @@ export default function AdminStaff() {
                       />
 
                       <Field
-                        label="Green Highlight Word"
+                        label="Highlighted Word"
                         value={modalForm.highlightedWord}
                         onChange={(value) => updateModalField("highlightedWord", value)}
+                        placeholder="Must match a word/phrase inside Main Title exactly"
                       />
 
                       <TextArea
@@ -1308,11 +1358,15 @@ export default function AdminStaff() {
                         onChange={(value) => updateModalField("label", value)}
                       />
 
-                      <Field
-                        label="Icon Type"
+                      <Select
+                        label="Icon"
                         value={modalForm.icon}
                         onChange={(value) => updateModalField("icon", value)}
-                        placeholder="users / graduation / award"
+                        options={[
+                          { value: "users", label: "Users" },
+                          { value: "graduation", label: "Graduation Cap" },
+                          { value: "award", label: "Award" },
+                        ]}
                       />
 
                       <Field
@@ -1371,6 +1425,21 @@ export default function AdminStaff() {
                         checked={modalForm.visible !== false}
                         onChange={(value) => updateModalField("visible", value)}
                       />
+
+                      <Toggle
+                        label="Use a custom accent color for this card"
+                        checked={modalForm.useCustomAccent === true}
+                        onChange={(value) => updateModalField("useCustomAccent", value)}
+                      />
+
+                      {modalForm.useCustomAccent && (
+                        <Field
+                          label="Accent Color (glow ring, name dot, position label)"
+                          type="color"
+                          value={modalForm.accentColor}
+                          onChange={(value) => updateModalField("accentColor", value)}
+                        />
+                      )}
                     </>
                   )}
                 </div>

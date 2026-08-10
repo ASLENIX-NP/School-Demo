@@ -1,47 +1,61 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
   Save,
-  Plus,
+  Upload,
   Trash2,
-  CheckCircle2,
-  AlertCircle,
-  ExternalLink,
   Eye,
   EyeOff,
-  Camera,
+  CheckCircle2,
+  Plus,
   Image as ImageIcon,
-  Layers,
-  Sparkles,
-  Upload,
+  AlertTriangle,
+  Camera,
   Edit3,
   X,
+  Trophy,
+  Award,
+  Star,
+  BookOpen,
+  CalendarDays,
+  Grid3X3,
+  Sparkles,
+  Layers,
+  ExternalLink,
 } from "lucide-react";
 
-const colors = {
-  red: "#D71920",
-  green: "#168A3A",
-  purple: "#4B2E83",
-  softPurple: "#7C5CC4",
-  dark: "#0B1020",
-  cyan: "#38BDF8",
-  gold: "#FACC15",
-  cream: "#FFF8EE",
-};
+/*
+|--------------------------------------------------------------------------
+| ADMIN GALLERY - SINGLE PAGE
+|--------------------------------------------------------------------------
+| Everything is edited from this page:
+|
+| 1. Hero
+| 2. Achievements
+| 3. Gallery heading
+| 4. Categories
+| 5. Subcategories
+| 6. Upload images
+| 7. Replace images
+| 8. Move images between categories/subcategories
+| 9. Hide/show images
+| 10. Delete one/multiple images
+| 11. Bottom section
+|
+| IMPORTANT:
+| - The separate /admin/gallery-images page is no longer required.
+| - Images are managed directly below the gallery preview.
+| - Existing backend endpoints are preserved:
+|       GET /api/site-content/gallery
+|       PUT /api/site-content/gallery
+|       POST /api/upload
+|--------------------------------------------------------------------------
+*/
 
-const lightAdminPanelStyle = {
-  background:
-    "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
-  border: "1px solid rgba(75,46,131,0.12)",
-  boxShadow: "0 18px 44px rgba(15,23,42,0.08)",
-  backdropFilter: "blur(14px)",
-};
-
-const DEFAULT_GALLERY_CATEGORIES = ["Classroom", "Events", "Certificate"];
-// Subcategories are allowed for every saved category except the virtual "All" tab.
+const DEFAULT_CATEGORIES = ["Classroom", "Events", "Certificate"];
 
 const fallbackCategoryDescriptions = {
   Classroom:
@@ -87,684 +101,349 @@ const fallbackSubcategories = {
   ],
 };
 
-const defaultGalleryContent = {
-  badge: "Gallery",
-  title: "School in Action",
-  highlightedText: "in Action",
+const defaultAchievements = [
+  { id: "1", title: "Top School Award", year: "2024", icon: "Trophy" },
+  { id: "2", title: "STEM Excellence", year: "2023", icon: "Award" },
+  { id: "3", title: "Sports Champion", year: "2024", icon: "Trophy" },
+  { id: "4", title: "Community Service", year: "2023", icon: "Star" },
+];
+
+const defaultContent = {
+  heroBadge: "INTERACTIVE GALLERY",
+  heroTitle: "Smriti School",
+  heroHighlightedText: "Smriti",
+  heroSubtitle: "Moments that become memories",
+  heroExploreText: "Explore Moments",
+  heroAchievementText: "Celebrate Achievements",
+
+  badge: "School Gallery",
+  title: "Stories",
+  highlightedText: "Stories",
   description:
     "Explore classroom learning, school events, certificates, achievements, and student life at Smriti Secondary English Boarding School.",
-  categories: DEFAULT_GALLERY_CATEGORIES,
+
+  categories: DEFAULT_CATEGORIES,
   categoryDescriptions: fallbackCategoryDescriptions,
   subcategories: fallbackSubcategories,
+  achievements: defaultAchievements,
+
   images: [],
-  bottomTitle: "School Memories",
+
+  bottomTitle: "Every picture tells a story.",
   bottomDescription:
-    "Gallery images are updated by the school administration to highlight student life and school activities.",
-  bottomNote: "Click image to preview",
+    "Explore the moments, celebrate the achievements, and remember the journey.",
+  bottomNote: "Gallery is managed by the school administration.",
 };
 
-function normalizeCategories(categories = null) {
-  const hasSavedCategories = Array.isArray(categories);
+function normalizeCategories(value) {
+  const source = Array.isArray(value) ? value : DEFAULT_CATEGORIES;
 
-  const cleaned = (hasSavedCategories ? categories : DEFAULT_GALLERY_CATEGORIES)
-    .map((item) => String(item || "").trim())
-    .filter(Boolean)
-    .filter((item) => item.toLowerCase() !== "all");
+  const result = [
+    ...new Set(
+      source
+        .map((item) => String(item || "").trim())
+        .filter(Boolean)
+        .filter((item) => item.toLowerCase() !== "all")
+    ),
+  ];
 
-  const uniqueCategories = Array.from(new Set(cleaned));
-
-  return uniqueCategories.length > 0
-    ? uniqueCategories
-    : [...DEFAULT_GALLERY_CATEGORIES];
+  return result.length ? result : [...DEFAULT_CATEGORIES];
 }
 
-function safeCategoryId(value = "") {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "gallery-category";
-}
+function normalizeSubcategories(value, categories) {
+  const cats = normalizeCategories(categories);
 
-function normalizeImageCategory(category, categories = []) {
-  const clean = String(category || "").trim();
-  const validCategories = normalizeCategories(categories);
-
-  if (validCategories.includes(clean)) return clean;
-
-  const legacyMap = {
-    Sports: "Events",
-    ECA: "Events",
-    Facilities: "Classroom",
-  };
-
-  const normalizedCategories = normalizeCategories(categories);
-  return legacyMap[clean] || normalizedCategories[0] || "Classroom";
-}
-
-function normalizeCategoryDescriptions(descriptions = {}, categories = []) {
-  return normalizeCategories(categories).reduce((acc, category) => {
-    acc[category] =
-      descriptions?.[category] || fallbackCategoryDescriptions[category] || "";
-    return acc;
-  }, {});
-}
-
-function normalizeSubcategories(subcategories = {}, categories = null) {
-  const parentCategories = normalizeCategories(categories);
-
-  return parentCategories.reduce((acc, category) => {
-    const source = Array.isArray(subcategories?.[category])
-      ? subcategories[category]
+  return cats.reduce((output, category) => {
+    const source = Array.isArray(value?.[category])
+      ? value[category]
       : fallbackSubcategories[category] || [];
 
-    acc[category] = source
+    output[category] = source
       .map((item, index) => {
         const name =
-          typeof item === "string" ? item : String(item?.name || "").trim();
+          typeof item === "string"
+            ? item.trim()
+            : String(item?.name || "").trim();
 
         if (!name) return null;
 
         return {
           id:
             item?.id ||
-            `${category.toLowerCase()}-${index}-${name
+            `${category}-${index}-${name
               .toLowerCase()
               .replace(/[^a-z0-9]+/g, "-")}`,
           name,
           description:
             typeof item === "string"
               ? ""
-              : item?.description ||
-                `Photos and memories from ${name.toLowerCase()}.`,
+              : item?.description || "",
           visible: item?.visible !== false,
         };
       })
       .filter(Boolean);
 
-    return acc;
+    return output;
   }, {});
 }
 
-function mergeGalleryContent(saved = {}) {
+function normalizeImages(images, categories) {
+  const cats = normalizeCategories(categories);
+
+  if (!Array.isArray(images)) return [];
+
+  return images.map((item, index) => ({
+    ...item,
+    id: item?.id || `gallery-${index}`,
+    category: cats.includes(item?.category)
+      ? item.category
+      : cats[0],
+    subcategory: item?.subcategory || "",
+    visible: item?.visible !== false,
+    images:
+      Array.isArray(item?.images) && item.images.length
+        ? item.images.filter(Boolean)
+        : item?.image
+        ? [item.image]
+        : [],
+  }));
+}
+
+function mergeContent(saved = {}) {
   const categories = normalizeCategories(saved.categories);
-  const categoryDescriptions = normalizeCategoryDescriptions(
-    saved.categoryDescriptions,
-    categories
+
+  const categoryDescriptions = categories.reduce(
+    (output, category) => {
+      output[category] =
+        saved?.categoryDescriptions?.[category] ||
+        fallbackCategoryDescriptions[category] ||
+        "";
+      return output;
+    },
+    {}
   );
-  const subcategories = normalizeSubcategories(saved.subcategories, categories);
 
   return {
-    ...defaultGalleryContent,
+    ...defaultContent,
     ...saved,
     categories,
     categoryDescriptions,
-    subcategories,
-    images: Array.isArray(saved.images)
-      ? saved.images.map((image) => ({
-          ...image,
-          category: normalizeImageCategory(image.category, categories),
-          subcategory: image.subcategory || "",
-          images:
-            Array.isArray(image.images) && image.images.length > 0
-              ? image.images
-              : image.image
-              ? [image.image]
-              : [],
-        }))
-      : [],
+    subcategories: normalizeSubcategories(
+      saved.subcategories,
+      categories
+    ),
+    achievements: Array.isArray(saved.achievements)
+      ? saved.achievements
+      : defaultAchievements,
+    images: normalizeImages(saved.images, categories),
   };
 }
 
-function getImageUrls(item) {
-  if (Array.isArray(item.images) && item.images.length > 0) {
+function getUrls(item) {
+  if (Array.isArray(item?.images) && item.images.length) {
     return item.images.filter(Boolean);
   }
 
-  return item.image ? [item.image] : [];
+  return item?.image ? [item.image] : [];
 }
 
-function collectAlbumPhotos(items, fallbackCategory, fallbackTitle) {
-  const seen = new Set();
-  const photos = [];
-
-  items.forEach((item) => {
-    getImageUrls(item).forEach((url) => {
-      if (!url || seen.has(url)) return;
-
-      seen.add(url);
-
-      photos.push({
-        url,
-        title: item.title || fallbackTitle,
-        date: item.date || "School Activity",
-        category: fallbackCategory,
-        subcategory: item.subcategory || "",
-      });
-    });
-  });
-
-  return photos;
-}
-
-function buildSingleCategoryAlbum(content, category) {
+function buildAlbums(content, activeCategory) {
   const visibleImages = (content.images || []).filter(
     (item) => item.visible !== false
   );
 
-  const categoryItems = visibleImages.filter(
-    (item) =>
-      normalizeImageCategory(item.category, content.categories) === category
-  );
+  const categories = normalizeCategories(content.categories);
 
-  const photos = collectAlbumPhotos(categoryItems, category, category);
-  const cover =
-    categoryItems.find((item) => item.image)?.image || photos[0]?.url || "";
-
-  return {
-    category,
-    subcategory: "",
-    title: category,
-    date: categoryItems[0]?.date || "School Gallery",
-    description:
-      content.categoryDescriptions?.[category] ||
-      fallbackCategoryDescriptions[category] ||
-      "Explore school moments from this category.",
-    cover,
-    photos,
-    total: photos.length,
-  };
-}
-
-function buildMainCategoryAlbums(content) {
-  return normalizeCategories(content.categories).map((category) =>
-    buildSingleCategoryAlbum(content, category)
-  );
-}
-
-function buildSubcategoryAlbums(content, parentCategory) {
-  const visibleImages = (content.images || []).filter(
-    (item) => item.visible !== false
-  );
-
-  const parentItems = visibleImages.filter(
-    (item) =>
-      normalizeImageCategory(item.category, content.categories) === parentCategory
-  );
-
-  const subcategoryList =
-    normalizeSubcategories(content.subcategories, content.categories)[parentCategory] || [];
-
-  if (subcategoryList.length === 0) {
-    return [buildSingleCategoryAlbum(content, parentCategory)];
-  }
-
-  const albums = subcategoryList
-    .filter((sub) => sub.visible !== false)
-    .map((sub) => {
-      const subItems = parentItems.filter(
-        (item) => String(item.subcategory || "").trim() === sub.name
-      );
-
-      const photos = collectAlbumPhotos(subItems, parentCategory, sub.name);
-      const cover =
-        subItems.find((item) => item.image)?.image || photos[0]?.url || "";
-
-      return {
-        category: parentCategory,
-        subcategory: sub.name,
-        title: sub.name,
-        date: subItems[0]?.date || parentCategory,
-        description:
-          sub.description ||
-          `Photos and memories from ${sub.name.toLowerCase()}.`,
-        cover,
-        photos,
-        total: photos.length,
-      };
-    });
-
-  const uncategorizedItems = parentItems.filter(
-    (item) => !String(item.subcategory || "").trim()
-  );
-
-  if (uncategorizedItems.length > 0) {
-    const photos = collectAlbumPhotos(
-      uncategorizedItems,
-      parentCategory,
-      parentCategory
+  const makeAlbum = (category, subcategory = "") => {
+    const items = visibleImages.filter(
+      (item) =>
+        item.category === category &&
+        (!subcategory || item.subcategory === subcategory)
     );
 
-    albums.push({
-      category: parentCategory,
-      subcategory: "",
-      title: `General ${parentCategory}`,
-      date: uncategorizedItems[0]?.date || parentCategory,
-      description:
-        content.categoryDescriptions?.[parentCategory] ||
-        fallbackCategoryDescriptions[parentCategory],
-      cover:
-        uncategorizedItems.find((item) => item.image)?.image ||
-        photos[0]?.url ||
-        "",
-      photos,
-      total: photos.length,
+    const seen = new Set();
+    const photos = [];
+
+    items.forEach((item) => {
+      getUrls(item).forEach((url) => {
+        if (!url || seen.has(url)) return;
+        seen.add(url);
+
+        photos.push({
+          url,
+          title: item.title || subcategory || category,
+          date: item.date || "School Activity",
+        });
+      });
     });
+
+    const sub = content.subcategories?.[category]?.find(
+      (item) => item.name === subcategory
+    );
+
+    return {
+      category,
+      subcategory,
+      title: subcategory || category,
+      description: subcategory
+        ? sub?.description || ""
+        : content.categoryDescriptions?.[category] || "",
+      date: items[0]?.date || "School Gallery",
+      photos,
+      cover: photos[0]?.url || "",
+      total: photos.length,
+    };
+  };
+
+  if (activeCategory === "All") {
+    return categories.map((category) => makeAlbum(category));
   }
+
+  const subs = (content.subcategories?.[activeCategory] || []).filter(
+    (item) => item.visible !== false
+  );
+
+  if (!subs.length) return [makeAlbum(activeCategory)];
+
+  const albums = subs.map((sub) =>
+    makeAlbum(activeCategory, sub.name)
+  );
+
+  const hasGeneralImages = visibleImages.some(
+    (item) =>
+      item.category === activeCategory && !item.subcategory
+  );
+
+  if (hasGeneralImages) albums.push(makeAlbum(activeCategory));
 
   return albums;
 }
 
-function buildCategoryAlbums(content, activeCategory) {
-  if (activeCategory === "All") return buildMainCategoryAlbums(content);
-
-  const subcategoryList =
-    normalizeSubcategories(content.subcategories, content.categories)[activeCategory] || [];
-
-  if (subcategoryList.length > 0) {
-    return buildSubcategoryAlbums(content, activeCategory);
-  }
-
-  return [buildSingleCategoryAlbum(content, activeCategory)];
+function IconFor({ name, size = 22 }) {
+  const icons = { Trophy, Award, Star };
+  const Icon = icons[name] || Trophy;
+  return <Icon size={size} />;
 }
 
-function HighlightedTitle({ title, highlightedText }) {
-  if (!highlightedText || !title.includes(highlightedText)) return <>{title}</>;
-
-  const [before, after] = title.split(highlightedText);
-
-  return (
-    <>
-      {before}
-      <span className="italic" style={{ color: colors.red }}>
-        {highlightedText}
-      </span>
-      {after}
-    </>
-  );
-}
-
-function Field({ label, value, onChange, placeholder = "", type = "text", disabled = false }) {
-  return (
-    <div>
-      <label className="mb-2 block text-sm font-bold text-slate-700">
-        {label}
-      </label>
-
-      <input
-        type={type}
-        value={value || ""}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-2xl px-4 py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-60"
-        style={{
-          background: "rgba(255,255,255,0.92)",
-          border: "1px solid rgba(75,46,131,0.16)",
-          color: colors.dark,
-        }}
-      />
-    </div>
-  );
-}
-
-function TextArea({ label, value, onChange, placeholder = "", rows = 4 }) {
-  return (
-    <div>
-      <label className="mb-2 block text-sm font-bold text-slate-700">
-        {label}
-      </label>
-
-      <textarea
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={rows}
-        className="w-full resize-none rounded-2xl px-4 py-3 text-sm outline-none"
-        style={{
-          background: "rgba(255,255,255,0.92)",
-          border: "1px solid rgba(75,46,131,0.16)",
-          color: colors.dark,
-        }}
-      />
-    </div>
-  );
-}
-
-function IconButton({ icon: Icon, label, onClick, tone = "purple" }) {
-  const styles = {
-    purple: {
-      background: `linear-gradient(135deg, ${colors.purple}, ${colors.softPurple})`,
-      color: "#FFFFFF",
-    },
-    green: {
-      background: `linear-gradient(135deg, ${colors.green}, ${colors.cyan})`,
-      color: "#FFFFFF",
-    },
-    red: {
-      background: "rgba(215,25,32,0.95)",
-      color: "#FFFFFF",
-    },
-    dark: {
-      background: "rgba(11,16,32,0.94)",
-      color: "#FFFFFF",
-    },
+function Button({
+  children,
+  onClick,
+  tone = "dark",
+  icon: Icon,
+  disabled = false,
+}) {
+  const tones = {
+    dark: "bg-slate-900 text-white hover:bg-slate-800",
+    green: "bg-emerald-700 text-white hover:bg-emerald-800",
+    gold: "bg-amber-400 text-slate-900 hover:bg-amber-300",
+    red: "bg-red-600 text-white hover:bg-red-700",
+    white:
+      "bg-white text-slate-800 hover:bg-slate-50 border border-slate-200",
+    purple: "bg-violet-600 text-white hover:bg-violet-700",
   };
 
   return (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-      className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black shadow-xl transition-all hover:-translate-y-0.5 hover:scale-105"
-      style={styles[tone] || styles.purple}
+      disabled={disabled}
+      onClick={onClick}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-black shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone]}`}
     >
-      <Icon className="h-4 w-4" />
-      {label}
+      {Icon && <Icon size={16} />}
+      {children}
     </button>
   );
 }
 
-function ConfirmDialog({ target, onCancel, onConfirm }) {
-  if (!target) return null;
-
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder = "",
+  type = "text",
+}) {
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/70 p-5 backdrop-blur-sm"
-        onClick={onCancel}
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92, y: 18 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.92, y: 18 }}
-          className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-            <Trash2 className="h-6 w-6" />
-          </div>
-
-          <h3 className="text-2xl font-black text-slate-950">Are you sure?</h3>
-          <p className="mt-2 text-sm leading-relaxed text-slate-500">
-            {target.message || "This item will be removed from the gallery content."}
-          </p>
-
-          <div className="mt-6 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-2xl bg-slate-100 px-5 py-3 text-sm font-black text-slate-700"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              onClick={onConfirm}
-              className="rounded-2xl px-5 py-3 text-sm font-black text-white"
-              style={{ background: colors.red }}
-            >
-              Delete
-            </button>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+    <label className="block">
+      <span className="mb-2 block text-sm font-black text-slate-700">
+        {label}
+      </span>
+      <input
+        type={type}
+        value={value ?? ""}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+      />
+    </label>
   );
 }
 
-function EditModal({ target, modalForm, setModalForm, onClose, onSave, onRequestDeleteSubcategory }) {
-  if (!target) return null;
+function TextArea({ label, value, onChange, rows = 4 }) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm font-black text-slate-700">
+        {label}
+      </span>
+      <textarea
+        value={value ?? ""}
+        rows={rows}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+      />
+    </label>
+  );
+}
 
-  const isCategory = target.type === "category";
-  const canUseSubcategories = isCategory;
-
+function EditModal({
+  title,
+  children,
+  onClose,
+  onSave,
+}) {
   return (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/75 p-5 backdrop-blur-sm"
         onClick={onClose}
+        className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-md"
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 24 }}
+          initial={{ opacity: 0, scale: 0.94, y: 25 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 24 }}
-          className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[30px] bg-white shadow-2xl"
+          exit={{ opacity: 0, scale: 0.94, y: 25 }}
           onClick={(e) => e.stopPropagation()}
+          className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-white shadow-2xl"
         >
-          <div
-            className="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-5"
-            style={{
-              ...lightAdminPanelStyle,
-              borderLeft: "0",
-              borderRight: "0",
-              borderTop: "0",
-              borderRadius: "0",
-              boxShadow: "0 12px 30px rgba(15,23,42,0.08)",
-            }}
-          >
+          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 py-5 backdrop-blur">
             <div>
-              <div
-                className="text-xs font-black uppercase tracking-[0.18em]"
-                style={{ color: colors.softPurple }}
-              >
+              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">
                 Gallery Editor
               </div>
-              <h2 className="text-2xl font-black" style={{ color: colors.dark }}>
-                {target.label}
+              <h2 className="mt-1 text-2xl font-black text-slate-950">
+                {title}
               </h2>
             </div>
 
             <button
               type="button"
               onClick={onClose}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-600"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:rotate-90 hover:bg-red-50 hover:text-red-600"
             >
-              <X className="h-5 w-5" />
+              <X size={19} />
             </button>
           </div>
 
-          <div className="grid gap-5 p-6">
-            {target.type === "hero" && (
-              <>
-                <Field
-                  label="Badge Text"
-                  value={modalForm.badge}
-                  onChange={(value) => setModalForm((prev) => ({ ...prev, badge: value }))}
-                />
-                <Field
-                  label="Main Title"
-                  value={modalForm.title}
-                  onChange={(value) => setModalForm((prev) => ({ ...prev, title: value }))}
-                />
-                <Field
-                  label="Red Highlight Text"
-                  value={modalForm.highlightedText}
-                  onChange={(value) => setModalForm((prev) => ({ ...prev, highlightedText: value }))}
-                />
-                <TextArea
-                  label="Description"
-                  value={modalForm.description}
-                  onChange={(value) => setModalForm((prev) => ({ ...prev, description: value }))}
-                  rows={4}
-                />
-              </>
-            )}
+          <div className="space-y-5 p-6">{children}</div>
 
-            {target.type === "bottom" && (
-              <>
-                <Field
-                  label="Bottom Title"
-                  value={modalForm.bottomTitle}
-                  onChange={(value) => setModalForm((prev) => ({ ...prev, bottomTitle: value }))}
-                />
-                <TextArea
-                  label="Bottom Description"
-                  value={modalForm.bottomDescription}
-                  onChange={(value) => setModalForm((prev) => ({ ...prev, bottomDescription: value }))}
-                  rows={3}
-                />
-                <Field
-                  label="Bottom Note"
-                  value={modalForm.bottomNote}
-                  onChange={(value) => setModalForm((prev) => ({ ...prev, bottomNote: value }))}
-                />
-              </>
-            )}
-
-            {isCategory && (
-              <>
-                <Field
-                  label="Category Name"
-                  value={modalForm.name}
-                  onChange={(value) => setModalForm((prev) => ({ ...prev, name: value }))}
-                />
-
-                <TextArea
-                  label={`${target.category} Description`}
-                  value={modalForm.description}
-                  onChange={(value) => setModalForm((prev) => ({ ...prev, description: value }))}
-                  rows={4}
-                />
-
-                {canUseSubcategories && (
-                  <div className="rounded-[24px] bg-slate-50 p-5" style={{ border: "1px solid rgba(15,23,42,0.08)" }}>
-                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-black text-slate-950">
-                          {target.category} Subcategories
-                        </h3>
-                        <p className="text-sm text-slate-500">
-                          These appear when users open the {target.category} tab.
-                        </p>
-                      </div>
-
-                    </div>
-
-                    <div className="grid gap-4">
-                      {(modalForm.subcategories || []).map((sub, index) => (
-                        <div
-                          key={sub.id}
-                          className="rounded-2xl bg-white p-4"
-                          style={{ border: "1px solid rgba(75,46,131,0.12)" }}
-                        >
-                          <div className="mb-4 flex items-start justify-between gap-3">
-                            <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">
-                              Subcategory {index + 1}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => onRequestDeleteSubcategory(sub)}
-                              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-black"
-                              style={{
-                                background: "rgba(215,25,32,0.08)",
-                                color: colors.red,
-                              }}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                              Delete
-                            </button>
-                          </div>
-
-                          <div className="grid gap-4">
-                            <Field
-                              label="Subcategory Name"
-                              value={sub.name}
-                              onChange={(value) =>
-                                setModalForm((prev) => ({
-                                  ...prev,
-                                  subcategories: prev.subcategories.map((item) =>
-                                    item.id === sub.id ? { ...item, name: value } : item
-                                  ),
-                                }))
-                              }
-                            />
-                            <TextArea
-                              label="Subcategory Description"
-                              value={sub.description}
-                              rows={3}
-                              onChange={(value) =>
-                                setModalForm((prev) => ({
-                                  ...prev,
-                                  subcategories: prev.subcategories.map((item) =>
-                                    item.id === sub.id ? { ...item, description: value } : item
-                                  ),
-                                }))
-                              }
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setModalForm((prev) => ({
-                                  ...prev,
-                                  subcategories: prev.subcategories.map((item) =>
-                                    item.id === sub.id
-                                      ? { ...item, visible: item.visible === false }
-                                      : item
-                                  ),
-                                }))
-                              }
-                              className="inline-flex w-fit items-center gap-2 rounded-xl px-4 py-3 text-sm font-black"
-                              style={{
-                                background:
-                                  sub.visible !== false
-                                    ? "rgba(22,138,58,0.1)"
-                                    : "rgba(100,116,139,0.12)",
-                                color: sub.visible !== false ? colors.green : "#64748B",
-                              }}
-                            >
-                              {sub.visible !== false ? (
-                                <>
-                                  <Eye className="h-4 w-4" /> Visible
-                                </>
-                              ) : (
-                                <>
-                                  <EyeOff className="h-4 w-4" /> Hidden
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-
-                      {(modalForm.subcategories || []).length === 0 && (
-                        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm font-semibold text-slate-400">
-                          No subcategories added yet.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-2xl bg-slate-100 px-5 py-3 text-sm font-black text-slate-700"
-            >
+          <div className="sticky bottom-0 flex justify-end gap-3 border-t border-slate-100 bg-white/95 px-6 py-4 backdrop-blur">
+            <Button tone="white" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="button"
-              onClick={onSave}
-              className="rounded-2xl px-5 py-3 text-sm font-black text-white"
-              style={{ background: `linear-gradient(135deg, ${colors.purple}, ${colors.green})` }}
-            >
-              Save This Section
-            </button>
+            </Button>
+            <Button tone="green" onClick={onSave} icon={Save}>
+              Apply Changes
+            </Button>
           </div>
         </motion.div>
       </motion.div>
@@ -772,1111 +451,3366 @@ function EditModal({ target, modalForm, setModalForm, onClose, onSave, onRequest
   );
 }
 
-function GalleryAlbumCard({ album, index, onEdit, onDelete, onManageImages }) {
-  const canDelete = album.category !== "All";
+function ConfirmModal({ target, onClose, onConfirm }) {
+  if (!target) return null;
 
   return (
-    <motion.div
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 z-[100000] flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-md"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          onClick={(e) => e.stopPropagation()}
+          className="w-full max-w-md rounded-[28px] bg-white p-7 shadow-2xl"
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+            <AlertTriangle size={25} />
+          </div>
+
+          <h3 className="mt-5 text-2xl font-black text-slate-950">
+            {target.title || "Are you sure?"}
+          </h3>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            {target.message}
+          </p>
+
+          {target.name && (
+            <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm font-black text-slate-900">
+              {target.name}
+            </div>
+          )}
+
+          <div className="mt-7 flex justify-end gap-3">
+            <Button tone="white" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button tone="red" onClick={onConfirm} icon={Trash2}>
+              Delete
+            </Button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function AdminHero({ content, onEdit }) {
+  return (
+    <section className="relative min-h-[560px] overflow-hidden bg-[linear-gradient(135deg,#102B45,#1D4C6D_45%,#173C58)]">
+      <div className="absolute inset-0 opacity-30">
+        <motion.div
+          animate={{ x: [0, 45, 0], y: [0, -30, 0], scale: [1, 1.1, 1] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -left-20 top-20 h-80 w-80 rounded-full bg-amber-300/20 blur-3xl"
+        />
+        <motion.div
+          animate={{ x: [0, -40, 0], y: [0, 30, 0], scale: [1, 1.12, 1] }}
+          transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-emerald-400/20 blur-3xl"
+        />
+      </div>
+
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px)",
+          backgroundSize: "70px 70px",
+        }}
+      />
+
+      <button
+        type="button"
+        onClick={onEdit}
+        className="absolute right-5 top-5 z-30 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-black text-slate-800 shadow-xl transition hover:-translate-y-0.5"
+      >
+        <Edit3 size={16} />
+        Edit Hero
+      </button>
+
+      <div className="relative z-10 mx-auto flex min-h-[560px] max-w-5xl flex-col items-center justify-center px-6 py-24 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-amber-300/10 px-5 py-2.5 text-xs font-black tracking-[.15em] text-amber-300 backdrop-blur"
+        >
+          <Sparkles size={15} />
+          {content.heroBadge}
+        </motion.div>
+
+        <motion.h1
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mt-8 text-[clamp(58px,10vw,125px)] font-black leading-[.9] tracking-[-.07em] text-white"
+        >
+          <span className="text-amber-300">
+            {content.heroHighlightedText}
+          </span>
+          {content.heroTitle.replace(content.heroHighlightedText, "")}
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-7 max-w-2xl text-lg leading-8 text-white/65 md:text-2xl"
+        >
+          {content.heroSubtitle}
+        </motion.p>
+
+        <div className="mt-12 flex items-center gap-8 text-white">
+          <div>
+            <div className="text-2xl font-black">
+              {(content.images || []).reduce(
+                (total, item) => total + getUrls(item).length,
+                0
+              )}
+            </div>
+            <div className="text-[10px] uppercase tracking-[.15em] text-white/45">
+              Photos
+            </div>
+          </div>
+
+          <div className="h-9 w-px bg-white/15" />
+
+          <div>
+            <div className="text-2xl font-black">
+              {content.categories.length}
+            </div>
+            <div className="text-[10px] uppercase tracking-[.15em] text-white/45">
+              Collections
+            </div>
+          </div>
+
+          <div className="h-9 w-px bg-white/15" />
+
+          <div>
+            <div className="text-2xl font-black">
+              {content.achievements.length}
+            </div>
+            <div className="text-[10px] uppercase tracking-[.15em] text-white/45">
+              Achievements
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AchievementSection({ content, onAdd, onEdit, onDelete }) {
+  return (
+    <section className="bg-[#F7F8FA] px-5 py-20">
+      <div className="mx-auto max-w-[1400px]">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-black text-emerald-700">
+              <Trophy size={15} />
+              OUR ACHIEVEMENTS
+            </span>
+
+            <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
+              Celebrating{" "}
+              <span className="bg-gradient-to-r from-emerald-700 to-orange-400 bg-clip-text text-transparent">
+                Excellence
+              </span>
+            </h2>
+          </div>
+
+          <Button tone="green" icon={Plus} onClick={onAdd}>
+            Add Achievement
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {(content.achievements || []).map((item) => (
+            <motion.div
+              key={item.id}
+              whileHover={{ y: -7 }}
+              className="group relative overflow-hidden rounded-[24px] border border-slate-100 bg-white p-6 text-center shadow-sm transition hover:shadow-xl"
+            >
+              <div className="absolute right-3 top-3 flex gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
+                <button
+                  type="button"
+                  onClick={() => onEdit(item)}
+                  className="rounded-full bg-violet-600 p-2 text-white"
+                >
+                  <Edit3 size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(item)}
+                  className="rounded-full bg-red-600 p-2 text-white"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-amber-50 text-emerald-700 transition group-hover:scale-110">
+                <IconFor name={item.icon} size={27} />
+              </div>
+
+              <div className="mt-5 text-[10px] font-black uppercase tracking-[.16em] text-orange-500">
+                {item.year}
+              </div>
+
+              <h3 className="mt-2 text-base font-black text-slate-950">
+                {item.title}
+              </h3>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GalleryPreviewCard({
+  album,
+  index,
+  onManage,
+  onEditCategory,
+  onDeleteCategory,
+}) {
+  return (
+    <motion.article
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.18) }}
-      id={`gallery-category-${safeCategoryId(album.category)}${album.subcategory ? `-${safeCategoryId(album.subcategory)}` : ""}`}
-      className={`group relative grid items-center gap-6 lg:gap-12 rounded-[2rem] border border-dashed border-cyan-300/70 bg-white/30 p-4 lg:grid-cols-2 ${
-        index % 2 !== 0 ? "lg:[&>*:first-child]:order-2" : ""
-      }`}
+      transition={{ delay: Math.min(index * 0.05, 0.25) }}
+      whileHover={{ y: -7 }}
+      className="group relative overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm transition hover:shadow-2xl"
     >
-      <div className="absolute right-4 top-4 z-40 flex flex-wrap justify-end gap-2 opacity-100 md:opacity-0 md:transition-opacity md:duration-200 md:group-hover:opacity-100">
-        <IconButton
-          icon={Edit3}
-          label="Edit"
-          tone="purple"
-          onClick={() => onManageImages?.(album.category, album.subcategory)}
-        />
-        <IconButton
-          icon={Upload}
-          label="Upload"
-          tone="green"
-          onClick={() => onManageImages?.(album.category, album.subcategory)}
-        />
-        {canDelete && (
-          <IconButton icon={Trash2} label="Delete" tone="red" onClick={onDelete} />
-        )}
-      </div>
-
-      <div className="overflow-hidden rounded-[32px] bg-white shadow-2xl">
+      <div className="relative h-[300px] overflow-hidden bg-slate-100">
         {album.cover ? (
           <img
             src={album.cover}
             alt={album.title}
-            className="h-64 sm:h-80 lg:h-[450px] w-full object-cover transition duration-700 group-hover:scale-105"
+            className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
           />
         ) : (
-          <div className="flex h-64 sm:h-80 lg:h-[450px] w-full items-center justify-center bg-slate-100">
-            <ImageIcon className="h-16 w-16 text-slate-300" />
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-300">
+            <ImageIcon size={52} />
+            <span className="text-xs font-bold">No images yet</span>
           </div>
         )}
-      </div>
 
-      <div className="px-2 py-8">
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full bg-green-100 px-4 py-2 font-semibold text-green-700">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/70" />
+
+        <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+          <span className="rounded-full border border-white/15 bg-slate-950/45 px-3 py-1.5 text-[10px] font-black text-white backdrop-blur">
             {album.category}
           </span>
+
           {album.subcategory && (
-            <span className="rounded-full bg-purple-100 px-4 py-2 font-semibold text-purple-700">
+            <span className="rounded-full bg-amber-300 px-3 py-1.5 text-[10px] font-black text-slate-900">
               {album.subcategory}
             </span>
           )}
         </div>
 
-        <h2 className="mt-5 text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900">
-          {album.title}
-        </h2>
-        <p className="mt-3 text-slate-500">{album.date}</p>
-        <p className="mt-6 text-lg leading-relaxed text-slate-600">
-          {album.description}
-        </p>
+        <div className="absolute bottom-4 right-4 rounded-full bg-black/45 px-3 py-1.5 text-[10px] font-black text-white backdrop-blur">
+          {album.total} photos
+        </div>
+
+        <div className="absolute right-4 top-4 flex gap-2 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
+          {!album.subcategory && (
+            <>
+              <button
+                type="button"
+                onClick={() => onEditCategory(album.category)}
+                className="rounded-full bg-violet-600 p-2.5 text-white shadow-lg"
+              >
+                <Edit3 size={15} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onDeleteCategory(album.category)}
+                className="rounded-full bg-red-600 p-2.5 text-white shadow-lg"
+              >
+                <Trash2 size={15} />
+              </button>
+            </>
+          )}
+
+          <button
+            type="button"
+            onClick={() =>
+              onManage(album.category, album.subcategory)
+            }
+            className="rounded-full bg-emerald-600 p-2.5 text-white shadow-lg"
+          >
+            <Upload size={15} />
+          </button>
+        </div>
 
         <button
           type="button"
-          disabled={album.total === 0}
-          className="relative z-10 mt-8 rounded-xl px-6 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
-          style={{
-            background:
-              album.total > 0
-                ? `linear-gradient(135deg, ${colors.red}, ${colors.green})`
-                : "rgba(100,116,139,0.75)",
-          }}
+          onClick={() =>
+            onManage(album.category, album.subcategory)
+          }
+          className="absolute bottom-1/2 left-1/2 flex translate-x-[-50%] translate-y-1/2 items-center gap-2 rounded-xl bg-white/95 px-4 py-3 text-xs font-black text-slate-900 opacity-0 shadow-xl transition group-hover:opacity-100"
         >
-          {album.total > 0 ? `View Album (${album.total})` : "No Images Added"}
+          <Camera size={15} />
+          Manage Photos
         </button>
       </div>
-    </motion.div>
+
+      <div className="p-5">
+        <div className="text-[10px] font-black uppercase tracking-[.12em] text-slate-400">
+          {album.date}
+        </div>
+
+        <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-950">
+          {album.title}
+        </h3>
+
+        <p className="mt-2 line-clamp-3 min-h-[63px] text-sm leading-6 text-slate-500">
+          {album.description || "No description added yet."}
+        </p>
+
+        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+          <span className="text-xs font-black text-slate-400">
+            {album.total} {album.total === 1 ? "memory" : "memories"}
+          </span>
+
+          <button
+            type="button"
+            onClick={() =>
+              onManage(album.category, album.subcategory)
+            }
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white transition hover:rotate-6 hover:bg-emerald-700"
+          >
+            <ExternalLink size={17} />
+          </button>
+        </div>
+      </div>
+    </motion.article>
   );
 }
 
-function GalleryVisualEditor({ form, activeCategory, setActiveCategory, onEditHero, onEditCategory, onEditBottom, onAddCategory, onDeleteCategory, onDeleteSubcategory, onManageImages }) {
-  const categories = ["All", ...normalizeCategories(form.categories)];
-  const filteredAlbums = useMemo(
-    () => buildCategoryAlbums(form, activeCategory),
-    [form, activeCategory]
+function GalleryPreview({
+  content,
+  activeCategory,
+  setActiveCategory,
+  onEditHeading,
+  onManage,
+  onEditCategory,
+  onDeleteCategory,
+}) {
+  const categories = ["All", ...normalizeCategories(content.categories)];
+
+  const albums = useMemo(
+    () => buildAlbums(content, activeCategory),
+    [content, activeCategory]
   );
 
+  const iconFor = (category) => {
+    if (category === "All") return Grid3X3;
+    if (category === "Classroom") return BookOpen;
+    if (category === "Events") return CalendarDays;
+    if (category === "Certificate") return Award;
+    return Camera;
+  };
+
   return (
-    <>
-      <style>
-        {`
-          @media (max-width: 767px) {
-            #gallery-admin-preview .group .opacity-0,
-            #gallery-admin-preview .group [class*="opacity-0"],
-            #gallery-admin-preview .group .md\\:opacity-0,
-            #gallery-admin-preview .group [class*="md:opacity-0"],
-            #gallery-admin-preview .group [class*="group-hover:opacity"],
-            #gallery-admin-preview [class*="group-hover:opacity"] {
-              opacity: 1 !important;
-              visibility: visible !important;
-              pointer-events: auto !important;
-            }
+    <section className="bg-white px-5 py-20">
+      <div className="mx-auto max-w-[1400px]">
+        <div className="mb-10 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-black text-emerald-700">
+            <Camera size={15} />
+            {content.badge}
+          </span>
 
-            #gallery-admin-preview .group .pointer-events-none,
-            #gallery-admin-preview .group [class*="pointer-events-none"] {
-              pointer-events: auto !important;
-            }
+          <h2 className="mt-5 text-5xl font-black tracking-[-.05em] text-slate-950 md:text-6xl">
+            {content.title}
+          </h2>
 
-            #gallery-admin-preview .group button[class*="opacity-0"],
-            #gallery-admin-preview button[class*="group-hover:opacity"],
-            #gallery-admin-preview button[class*="opacity-0"] {
-              opacity: 1 !important;
-              visibility: visible !important;
-              pointer-events: auto !important;
-            }
+          <p className="mx-auto mt-5 max-w-3xl text-sm leading-7 text-slate-500">
+            {content.description}
+          </p>
 
-            #gallery-admin-preview [class*="absolute"] button,
-            #gallery-admin-preview button[class*="rounded-full"] {
-              min-width: 2.25rem !important;
-              min-height: 2.25rem !important;
-              max-width: calc(100vw - 2rem) !important;
-              white-space: nowrap !important;
-              z-index: 30 !important;
-              pointer-events: auto !important;
-            }
-
-            #gallery-admin-preview [class*="z-50"],
-            #gallery-admin-preview [class*="z-[50]"],
-            #gallery-admin-preview [class*="z-[60]"],
-            #gallery-admin-preview [class*="z-[70]"],
-            #gallery-admin-preview [class*="z-[80]"],
-            #gallery-admin-preview [class*="z-[90]"],
-            #gallery-admin-preview [class*="z-[999]"] {
-              z-index: 30 !important;
-            }
-          }
-        `}
-      </style>
-
-      <section
-        id="gallery-admin-preview"
-      className="relative min-h-screen overflow-hidden pb-24 pt-10"
-      style={{
-        background: `
-          radial-gradient(circle at top right, rgba(124,92,196,0.18), transparent 34%),
-          radial-gradient(circle at bottom left, rgba(22,138,58,0.14), transparent 32%),
-          linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)
-        `,
-      }}
-    >
-      <div className="pointer-events-none absolute right-0 top-0 h-[280px] w-[280px] sm:h-[520px] sm:w-[520px] rounded-full bg-purple-500/10 blur-2xl" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-[260px] w-[260px] sm:h-[420px] sm:w-[420px] rounded-full bg-green-500/10 blur-2xl" />
-
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-        <div
-          className="mb-6 sm:mb-8 rounded-[28px] p-4 sm:p-5"
-          style={lightAdminPanelStyle}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div
-                className="text-xs font-black uppercase tracking-[0.22em]"
-                style={{ color: colors.softPurple }}
-              >
-                Admin Gallery Editor Active
-              </div>
-              <p className="mt-1 text-sm font-semibold text-slate-600">
-                Use Edit or Upload to open the Gallery Image Manager. Add subcategories inside Gallery Image Manager.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <IconButton icon={Plus} label="Add Category" tone="green" onClick={onAddCategory} />
-              <IconButton icon={Upload} label="Manage Images" tone="purple" onClick={() => onManageImages?.(activeCategory === "All" ? "" : activeCategory)} />
-            </div>
+          <div className="mt-5">
+            <Button tone="white" icon={Edit3} onClick={onEditHeading}>
+              Edit Gallery Heading
+            </Button>
           </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55 }}
-          className="group relative mb-8 sm:mb-12 rounded-[32px] border border-dashed border-cyan-300/80 p-5 sm:p-8 text-center"
-        >
-          <div className="absolute right-5 top-5 z-30 opacity-100 md:opacity-0 md:transition-opacity md:duration-200 md:group-hover:opacity-100">
-            <IconButton icon={Edit3} label="Edit Heading" tone="purple" onClick={onEditHero} />
-          </div>
-
-          <span
-            className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold"
-            style={{
-              background: "rgba(75,46,131,0.09)",
-              color: colors.purple,
-              border: "1px solid rgba(75,46,131,0.16)",
-            }}
-          >
-            <Camera className="h-4 w-4" />
-            {form.badge}
-          </span>
-
-          <h1
-            className="mb-4 text-4xl text-slate-950 md:text-6xl"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 850,
-              letterSpacing: "-0.045em",
-            }}
-          >
-            <HighlightedTitle title={form.title} highlightedText={form.highlightedText} />
-          </h1>
-
-          <p className="mx-auto max-w-3xl text-base leading-relaxed text-slate-500 md:text-lg">
-            {form.description}
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.08 }}
-          className="mb-8 sm:mb-12 flex flex-wrap justify-center gap-3"
-        >
+        <div className="mb-10 flex justify-center gap-2 overflow-x-auto pb-2">
           {categories.map((category) => {
-            const active = activeCategory === category;
+            const Icon = iconFor(category);
+            const active = category === activeCategory;
+
             return (
               <button
                 key={category}
                 type="button"
                 onClick={() => setActiveCategory(category)}
-                className="rounded-2xl px-5 py-3 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
-                style={{
-                  color: active ? "#FFFFFF" : colors.dark,
-                  background: active
-                    ? `linear-gradient(135deg, ${colors.red}, ${colors.green})`
-                    : "linear-gradient(145deg, rgba(255,255,255,0.92), rgba(255,255,255,0.68))",
-                  border: active
-                    ? "1px solid rgba(255,255,255,0.2)"
-                    : "1px solid rgba(11,16,32,0.08)",
-                  boxShadow: active
-                    ? "0 16px 38px rgba(22,138,58,0.22)"
-                    : "0 10px 28px rgba(11,16,32,0.06)",
-                  backdropFilter: "blur(14px)",
-                }}
+                className={`inline-flex flex-none items-center gap-2 rounded-2xl px-5 py-3 text-xs font-black transition ${
+                  active
+                    ? "bg-[linear-gradient(135deg,#173B5F,#2D6A4F)] text-white shadow-xl"
+                    : "border border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md"
+                }`}
               >
+                <Icon size={16} />
                 {category}
               </button>
             );
           })}
-        </motion.div>
-
-        <div
-          className="rounded-[2rem] p-4 md:p-5"
-          style={{
-            background:
-              "linear-gradient(145deg, rgba(255,255,255,0.38), rgba(255,255,255,0.16))",
-            border: "1px solid rgba(255,255,255,0.45)",
-            boxShadow:
-              "0 24px 80px rgba(11,16,32,0.1), inset 0 1px 0 rgba(255,255,255,0.72)",
-            backdropFilter: "blur(18px)",
-          }}
-        >
-          {filteredAlbums.length > 0 ? (
-            <div className="space-y-10 sm:space-y-16 lg:space-y-24">
-              {filteredAlbums.map((album, index) => (
-                <GalleryAlbumCard
-                  key={`${album.category}-${album.subcategory || album.title}`}
-                  album={album}
-                  index={index}
-                  onEdit={() => onManageImages?.(album.category, album.subcategory)}
-                  onDelete={() =>
-                    album.subcategory
-                      ? onDeleteSubcategory(album.category, album.subcategory)
-                      : onDeleteCategory(album.category)
-                  }
-                  onManageImages={onManageImages}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-3xl bg-white p-10 text-center">
-              <ImageIcon className="mx-auto mb-4 h-14 w-14 text-slate-300" />
-              <div className="font-bold text-slate-800">No gallery images found.</div>
-              <div className="mt-1 text-sm text-slate-500">Please check another category.</div>
-            </div>
-          )}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45 }}
-          className="group relative mt-10 flex flex-col gap-4 rounded-3xl border border-dashed border-cyan-300/70 p-6 md:flex-row md:items-center md:justify-between"
-          style={lightAdminPanelStyle}
-        >
-          <div className="absolute right-4 top-4 z-30 opacity-100 md:opacity-0 md:transition-opacity md:duration-200 md:group-hover:opacity-100">
-            <IconButton icon={Edit3} label="Edit Bottom" tone="green" onClick={onEditBottom} />
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-2xl"
-              style={{
-                background: "rgba(75,46,131,0.1)",
-                color: colors.purple,
-              }}
-            >
-              <Layers className="h-6 w-6" />
-            </div>
-            <div>
-              <div className="font-black text-slate-950">{form.bottomTitle}</div>
-              <div className="text-sm text-slate-500">{form.bottomDescription}</div>
-            </div>
-          </div>
-
-          <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
-            <Sparkles className="h-4 w-4" style={{ color: colors.gold }} />
-            {form.bottomNote}
-          </div>
-        </motion.div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {albums.map((album, index) => (
+            <GalleryPreviewCard
+              key={`${album.category}-${album.subcategory || album.title}`}
+              album={album}
+              index={index}
+              onManage={onManage}
+              onEditCategory={onEditCategory}
+              onDeleteCategory={onDeleteCategory}
+            />
+          ))}
+        </div>
       </div>
-      </section>
-    </>
+    </section>
+  );
+}
+
+function BottomPreview({ content, onEdit }) {
+  return (
+    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#112F49,#1D536F)] px-5 py-20 text-center text-white">
+      <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300/10 blur-3xl" />
+
+      <div className="relative mx-auto max-w-2xl">
+        <button
+          type="button"
+          onClick={onEdit}
+          className="absolute -right-2 -top-2 rounded-full bg-white px-4 py-2 text-xs font-black text-slate-900 shadow-xl"
+        >
+          <Edit3 size={14} className="mr-1 inline" />
+          Edit
+        </button>
+
+        <Sparkles size={24} className="mx-auto text-amber-300" />
+
+        <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
+          {content.bottomTitle}
+        </h2>
+
+        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-white/60">
+          {content.bottomDescription}
+        </p>
+
+        <div className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/55">
+          <Sparkles size={14} className="text-amber-300" />
+          {content.bottomNote}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ImageManager({
+  content,
+  selectedCategory,
+  setSelectedCategory,
+  selectedSubcategory,
+  setSelectedSubcategory,
+  selectedIds,
+  setSelectedIds,
+  onUpload,
+  onReplace,
+  onDeleteOne,
+  onDeleteSelected,
+  onUpdateImage,
+  onMoveImage,
+  onAddSubcategory,
+  onUpdateSubcategory,
+  onDeleteSubcategory,
+  onCategoryName,
+  onCategoryDescription,
+  uploading,
+  onAddCategory,
+  onEditCategory,
+  onDeleteCategory,
+}) {
+  const categories = normalizeCategories(content.categories);
+
+  const subcategories =
+    normalizeSubcategories(
+      content.subcategories,
+      content.categories
+    )[selectedCategory] || [];
+
+  const categoryImages = (content.images || []).filter(
+    (item) => item.category === selectedCategory
+  );
+
+  const allSelected =
+    categoryImages.length > 0 &&
+    categoryImages.every((item) =>
+      selectedIds.includes(item.id)
+    );
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds((prev) =>
+        prev.filter(
+          (id) =>
+            !categoryImages.some(
+              (item) => item.id === id
+            )
+        )
+      );
+      return;
+    }
+
+    setSelectedIds((prev) => [
+      ...new Set([
+        ...prev,
+        ...categoryImages.map(
+          (item) => item.id
+        ),
+      ]),
+    ]);
+  };
+
+  return (
+    <section
+      id="image-manager"
+      className="scroll-mt-24 bg-[#F7F8FA] px-5 py-20"
+    >
+      <div className="mx-auto max-w-[1400px]">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-4 py-2 text-xs font-black text-violet-700">
+              <Layers size={15} />
+              EDIT IMAGES HERE
+            </span>
+
+            <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
+              Gallery Images
+            </h2>
+
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+              Upload, replace, move, hide, or delete images without opening
+              another admin page.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              tone="white"
+              icon={Plus}
+              onClick={onAddCategory}
+            >
+              Add Category
+            </Button>
+
+            <Button
+              tone="white"
+              icon={Edit3}
+              onClick={() =>
+                onEditCategory(selectedCategory)
+              }
+            >
+              Edit Category
+            </Button>
+          </div>
+        </div>
+
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="grid gap-5 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
+            <label className="block">
+              <span className="mb-2 block text-sm font-black text-slate-700">
+                Category
+              </span>
+
+              <select
+                value={selectedCategory}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value);
+                  const nextSubs =
+                    normalizeSubcategories(
+                      content.subcategories,
+                      content.categories
+                    )[e.target.value] || [];
+                  setSelectedSubcategory(
+                    nextSubs[0]?.name || ""
+                  );
+                  setSelectedIds([]);
+                }}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
+              >
+                {categories.map(
+                  (category) => (
+                    <option
+                      key={category}
+                      value={category}
+                    >
+                      {category}
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-black text-slate-700">
+                Subcategory
+              </span>
+
+              <select
+                value={selectedSubcategory}
+                onChange={(e) =>
+                  setSelectedSubcategory(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
+              >
+                <option value="">
+                  General {selectedCategory}
+                </option>
+
+                {subcategories.map(
+                  (sub) => (
+                    <option
+                      key={sub.id}
+                      value={sub.name}
+                    >
+                      {sub.name}
+                      {sub.visible ===
+                      false
+                        ? " (Hidden)"
+                        : ""}
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
+
+            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 text-sm font-black text-white transition hover:bg-emerald-800">
+              <Upload size={17} />
+              {uploading
+                ? "Uploading..."
+                : "Upload Images"}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={uploading}
+                className="hidden"
+                onChange={(e) => {
+                  onUpload(
+                    e.target.files
+                  );
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+
+          <div className="mt-5 grid gap-5 md:grid-cols-2">
+            <Field
+              label="Category Name"
+              value={selectedCategory}
+              onChange={onCategoryName}
+            />
+
+            <TextArea
+              label="Category Description"
+              value={
+                content
+                  .categoryDescriptions?.[
+                  selectedCategory
+                ] || ""
+              }
+              onChange={
+                onCategoryDescription
+              }
+              rows={3}
+            />
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="font-black text-slate-900">
+                  Subcategories
+                </h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  Manage collections for{" "}
+                  {selectedCategory}.
+                </p>
+              </div>
+
+              <Button
+                tone="purple"
+                icon={Plus}
+                onClick={onAddSubcategory}
+              >
+                Add Subcategory
+              </Button>
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              {subcategories.map(
+                (sub) => (
+                  <div
+                    key={sub.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-4"
+                  >
+                    <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end">
+                      <Field
+                        label="Name"
+                        value={sub.name}
+                        onChange={(value) =>
+                          onUpdateSubcategory(
+                            sub.id,
+                            "name",
+                            value
+                          )
+                        }
+                      />
+
+                      <Field
+                        label="Description"
+                        value={
+                          sub.description
+                        }
+                        onChange={(value) =>
+                          onUpdateSubcategory(
+                            sub.id,
+                            "description",
+                            value
+                          )
+                        }
+                      />
+
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onUpdateSubcategory(
+                              sub.id,
+                              "visible",
+                              !sub.visible
+                            )
+                          }
+                          className="rounded-xl bg-slate-100 p-3 text-slate-700"
+                          title={
+                            sub.visible
+                              ? "Hide"
+                              : "Show"
+                          }
+                        >
+                          {sub.visible ? (
+                            <Eye size={17} />
+                          ) : (
+                            <EyeOff
+                              size={17}
+                            />
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onDeleteSubcategory(
+                              sub
+                            )
+                          }
+                          className="rounded-xl bg-red-50 p-3 text-red-600"
+                          title="Delete"
+                        >
+                          <Trash2
+                            size={17}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              )}
+
+              {!subcategories.length && (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-center text-xs font-bold text-slate-400">
+                  No subcategories. Click
+                  "Add Subcategory".
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h3 className="text-2xl font-black text-slate-950">
+              {selectedCategory} Images
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              {categoryImages.length} images •{" "}
+              {selectedIds.length} selected
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              tone="white"
+              onClick={toggleSelectAll}
+            >
+              {allSelected
+                ? "Unselect All"
+                : "Select All"}
+            </Button>
+
+            <Button
+              tone="red"
+              icon={Trash2}
+              disabled={!selectedIds.length}
+              onClick={onDeleteSelected}
+            >
+              Delete Selected
+            </Button>
+          </div>
+        </div>
+
+        {!categoryImages.length ? (
+          <div className="mt-6 rounded-[28px] border-2 border-dashed border-slate-200 bg-white p-16 text-center">
+            <ImageIcon
+              size={50}
+              className="mx-auto text-slate-300"
+            />
+
+            <h3 className="mt-4 text-xl font-black text-slate-800">
+              No images yet
+            </h3>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Upload images using the button
+              above.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-6 grid gap-5 xl:grid-cols-2">
+            {categoryImages.map(
+              (item) => {
+                const image =
+                  item.image ||
+                  item.images?.[0];
+
+                const selected =
+                  selectedIds.includes(
+                    item.id
+                  );
+
+                const itemSubs =
+                  normalizeSubcategories(
+                    content.subcategories,
+                    content.categories
+                  )[item.category] ||
+                  [];
+
+                return (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    className={`rounded-[26px] border bg-white p-5 shadow-sm transition ${
+                      selected
+                        ? "border-emerald-400 ring-4 ring-emerald-500/10"
+                        : "border-slate-200"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <label className="flex min-w-0 items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={
+                            selected
+                          }
+                          onChange={() =>
+                            setSelectedIds(
+                              (prev) =>
+                                selected
+                                  ? prev.filter(
+                                      (id) =>
+                                        id !==
+                                        item.id
+                                    )
+                                  : [
+                                      ...prev,
+                                      item.id,
+                                    ]
+                            )
+                          }
+                          className="h-5 w-5"
+                        />
+
+                        <span className="truncate text-sm font-black text-slate-900">
+                          {item.title ||
+                            "Untitled Image"}
+                        </span>
+                      </label>
+
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onUpdateImage(
+                              item.id,
+                              "visible",
+                              !item.visible
+                            )
+                          }
+                          className="rounded-xl bg-slate-100 p-2.5 text-slate-700"
+                          title={
+                            item.visible
+                              ? "Hide"
+                              : "Show"
+                          }
+                        >
+                          {item.visible ? (
+                            <Eye
+                              size={16}
+                            />
+                          ) : (
+                            <EyeOff
+                              size={16}
+                            />
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onDeleteOne(
+                              item.id
+                            )
+                          }
+                          className="rounded-xl bg-red-50 p-2.5 text-red-600"
+                          title="Delete"
+                        >
+                          <Trash2
+                            size={16}
+                          />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-5 md:grid-cols-[220px_1fr]">
+                      <div>
+                        <div className="h-44 overflow-hidden rounded-2xl bg-slate-100">
+                          {image ? (
+                            <img
+                              src={image}
+                              alt={
+                                item.title ||
+                                "Gallery image"
+                              }
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center">
+                              <ImageIcon
+                                size={42}
+                                className="text-slate-300"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-black text-white transition hover:bg-emerald-700">
+                          <Upload
+                            size={15}
+                          />
+                          Replace Image
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={
+                              uploading
+                            }
+                            onChange={(
+                              e
+                            ) => {
+                              onReplace(
+                                item.id,
+                                e.target
+                                  .files?.[0]
+                              );
+                              e.target.value =
+                                "";
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      <div className="grid gap-4">
+                        <Field
+                          label="Image Title"
+                          value={
+                            item.title
+                          }
+                          onChange={(
+                            value
+                          ) =>
+                            onUpdateImage(
+                              item.id,
+                              "title",
+                              value
+                            )
+                          }
+                        />
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-black text-slate-700">
+                            Category
+                          </span>
+
+                          <select
+                            value={
+                              item.category
+                            }
+                            onChange={(
+                              e
+                            ) =>
+                              onMoveImage(
+                                item.id,
+                                e.target
+                                  .value
+                              )
+                            }
+                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
+                          >
+                            {categories.map(
+                              (
+                                category
+                              ) => (
+                                <option
+                                  key={
+                                    category
+                                  }
+                                  value={
+                                    category
+                                  }
+                                >
+                                  {
+                                    category
+                                  }
+                                </option>
+                              )
+                            )}
+                          </select>
+                        </label>
+
+                        {itemSubs.length >
+                          0 && (
+                          <label className="block">
+                            <span className="mb-2 block text-sm font-black text-slate-700">
+                              Subcategory
+                            </span>
+
+                            <select
+                              value={
+                                item.subcategory ||
+                                ""
+                              }
+                              onChange={(
+                                e
+                              ) =>
+                                onUpdateImage(
+                                  item.id,
+                                  "subcategory",
+                                  e
+                                    .target
+                                    .value
+                                )
+                              }
+                              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
+                            >
+                              <option value="">
+                                General
+                              </option>
+
+                              {itemSubs.map(
+                                (
+                                  sub
+                                ) => (
+                                  <option
+                                    key={
+                                      sub.id
+                                    }
+                                    value={
+                                      sub.name
+                                    }
+                                  >
+                                    {
+                                      sub.name
+                                    }
+                                  </option>
+                                )
+                              )}
+                            </select>
+                          </label>
+                        )}
+
+                        <Field
+                          label="Date / Label"
+                          value={
+                            item.date
+                          }
+                          onChange={(
+                            value
+                          ) =>
+                            onUpdateImage(
+                              item.id,
+                              "date",
+                              value
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              }
+            )}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
 export default function AdminGallery() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState(defaultGalleryContent);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [editingTarget, setEditingTarget] = useState(null);
-  const [modalForm, setModalForm] = useState({});
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [busyOverlayText, setBusyOverlayText] = useState("");
+  const [content, setContent] =
+    useState(defaultContent);
 
-  const token = localStorage.getItem("adminToken");
+  const [activeCategory, setActiveCategory] =
+    useState("All");
+
+  const [selectedCategory, setSelectedCategory] =
+    useState("Classroom");
+
+  const [selectedSubcategory, setSelectedSubcategory] =
+    useState("");
+
+  const [selectedIds, setSelectedIds] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [uploading, setUploading] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState({
+      type: "",
+      text: "",
+    });
+
+  const [modal, setModal] =
+    useState(null);
+
+  const [draft, setDraft] =
+    useState({});
+
+  const [confirmTarget, setConfirmTarget] =
+    useState(null);
+
+  const token =
+    localStorage.getItem("adminToken");
 
   useEffect(() => {
-    let alive = true;
+    let mounted = true;
 
-    const loadGalleryContent = async () => {
+    const load = async () => {
       try {
-        const res = await api.get(
-          "/api/site-content/gallery",
-          { timeout: 20000 }
+        const response =
+          await api.get(
+            "/api/site-content/gallery",
+            { timeout: 15000 }
+          );
+
+        if (!mounted) return;
+
+        const merged = mergeContent(
+          response.data?.data?.content || {}
         );
 
-        if (!alive) return;
+        setContent(merged);
 
-        const savedContent = res.data?.data?.content || {};
-        const mergedContent = mergeGalleryContent(savedContent);
+        const firstCategory =
+          merged.categories[0] ||
+          "Classroom";
 
-        setForm(mergedContent);
-        setError("");
-      } catch (err) {
-        console.error("Load gallery content error:", err);
-
-        if (!alive) return;
-
-        setForm(defaultGalleryContent);
-        setError(
-          "Gallery content took too long to load. Default editor is shown. Check backend if saved content is missing."
+        setSelectedCategory(
+          firstCategory
         );
+
+        const firstSub =
+          merged.subcategories?.[
+            firstCategory
+          ]?.find(
+            (item) =>
+              item.visible !== false
+          );
+
+        setSelectedSubcategory(
+          firstSub?.name || ""
+        );
+      } catch (error) {
+        console.error(
+          "Gallery load error:",
+          error
+        );
+
+        if (mounted) {
+          setMessage({
+            type: "error",
+            text: "Could not load saved gallery. Default content is being shown.",
+          });
+        }
       } finally {
-        if (alive) setLoading(false);
+        if (mounted)
+          setLoading(false);
       }
     };
 
-    loadGalleryContent();
+    load();
 
     return () => {
-      alive = false;
+      mounted = false;
     };
   }, []);
 
-  const openHeroEditor = () => {
-    setEditingTarget({ type: "hero", label: "Edit Gallery Heading" });
-    setModalForm({
-      badge: form.badge,
-      title: form.title,
-      highlightedText: form.highlightedText,
-      description: form.description,
+  const showMessage = (
+    type,
+    text
+  ) => {
+    setMessage({
+      type,
+      text,
     });
   };
 
-  const openBottomEditor = () => {
-    setEditingTarget({ type: "bottom", label: "Edit Bottom Info Card" });
-    setModalForm({
-      bottomTitle: form.bottomTitle,
-      bottomDescription: form.bottomDescription,
-      bottomNote: form.bottomNote,
-    });
-  };
-
-  const openCategoryEditor = (category) => {
-    const normalizedSubcategories = normalizeSubcategories(form.subcategories, form.categories);
-
-    setEditingTarget({
-      type: "category",
-      label: `Edit ${category}`,
-      category,
-    });
-
-    setModalForm({
-      name: category,
-      description:
-        form.categoryDescriptions?.[category] ||
-        fallbackCategoryDescriptions[category] ||
-        "",
-      subcategories: (normalizedSubcategories[category] || []).map((sub) => ({
-        ...sub,
-        originalName: sub.name,
-      })),
-    });
-  };
-
-  const closeModal = () => {
-    setEditingTarget(null);
-    setModalForm({});
-  };
-
-  const addCategory = async () => {
-    setSuccess("");
-    setError("");
-    setBusyOverlayText("Adding New Category");
-
-    try {
-      const categories = normalizeCategories(form.categories);
-      let newName = "New Category";
-      let counter = 1;
-
-      while (categories.includes(newName)) {
-        counter += 1;
-        newName = `New Category ${counter}`;
-      }
-
-      const nextForm = {
-        ...form,
-        categories: [...categories, newName],
-        categoryDescriptions: {
-          ...(form.categoryDescriptions || {}),
-          [newName]: "",
-        },
-        subcategories: {
-          ...normalizeSubcategories(form.subcategories, form.categories),
-          [newName]: [],
-        },
-      };
-
-      const saved = await persistGalleryContent(
-        nextForm,
-        `Category "${newName}" added and saved.`
-      );
-
-      if (!saved) return;
-
-      setActiveCategory(newName);
-
-      window.setTimeout(() => {
-        const target = document.getElementById(
-          `gallery-category-${safeCategoryId(newName)}`
-        );
-
-        if (target) {
-          target.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 250);
-    } finally {
-      setBusyOverlayText("");
-    }
-  };
-
-  const requestDeleteCategory = (categoryToDelete) => {
-    if (categoryToDelete === "All") return;
-
-    const categories = normalizeCategories(form.categories);
-
-    if (categories.length <= 1) {
-      setError("At least one gallery category is required.");
-      return;
-    }
-
-    const fallbackCategory = categories.find(
-      (category) => category !== categoryToDelete
-    );
-
-    setDeleteTarget({
-      type: "category",
-      category: categoryToDelete,
-      message: `Delete category \"${categoryToDelete}\"? Images inside it will be moved to ${fallbackCategory || "the remaining category"}.`,
-    });
-  };
-
-  const cleanGalleryForm = (draftForm) => {
-    const cleanedCategories = normalizeCategories(draftForm.categories);
-    const cleanedDescriptions = normalizeCategoryDescriptions(
-      draftForm.categoryDescriptions,
-      cleanedCategories
-    );
-    const cleanedSubcategories = normalizeSubcategories(
-      draftForm.subcategories,
-      cleanedCategories
-    );
-
-    const cleanedImages = (draftForm.images || []).map((image) => {
-      const category = normalizeImageCategory(image.category, cleanedCategories);
-      const subcategoryOptions = cleanedSubcategories[category] || [];
-
-      const validSubcategory = subcategoryOptions.some(
-        (item) => item.name === image.subcategory
-      );
-
-      return {
-        ...image,
-        category,
-        subcategory:
-          subcategoryOptions.length > 0
-            ? validSubcategory
-              ? image.subcategory
-              : subcategoryOptions[0]?.name || ""
-            : "",
-        images:
-          Array.isArray(image.images) && image.images.length > 0
-            ? image.images
-            : image.image
-            ? [image.image]
-            : [],
-      };
-    });
-
-    return {
-      ...draftForm,
-      categories: cleanedCategories,
-      categoryDescriptions: cleanedDescriptions,
-      subcategories: cleanedSubcategories,
-      images: cleanedImages,
-    };
-  };
-
-  const persistGalleryContent = async (draftForm, successMessage) => {
-    const cleanedForm = cleanGalleryForm(draftForm);
-
+  const save = async (
+    nextContent = content,
+    successText = "Gallery changes saved successfully."
+  ) => {
     setSaving(true);
-    setError("");
+    setMessage({
+      type: "",
+      text: "",
+    });
+
+    const categories =
+      normalizeCategories(
+        nextContent.categories
+      );
+
+    const cleaned = {
+      ...nextContent,
+      categories,
+      categoryDescriptions:
+        categories.reduce(
+          (output, category) => {
+            output[category] =
+              nextContent
+                .categoryDescriptions?.[
+                category
+              ] || "";
+            return output;
+          },
+          {}
+        ),
+      subcategories:
+        normalizeSubcategories(
+          nextContent.subcategories,
+          categories
+        ),
+      images:
+        normalizeImages(
+          nextContent.images,
+          categories
+        ),
+    };
 
     try {
       await api.put(
         "/api/site-content/gallery",
-        { content: cleanedForm },
+        { content: cleaned },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           timeout: 30000,
         }
       );
 
-      setForm(cleanedForm);
-      setSuccess(successMessage || "Gallery page content saved successfully.");
-      return true;
-    } catch (err) {
-      console.error("Save gallery content error:", err);
-      setError(
-        err.response?.data?.message ||
-          JSON.stringify(err.response?.data) ||
-          "Could not save gallery content."
+      setContent(
+        mergeContent(cleaned)
       );
-      return false;
+
+      showMessage(
+        "success",
+        successText
+      );
+    } catch (error) {
+      console.error(
+        "Gallery save error:",
+        error
+      );
+
+      showMessage(
+        "error",
+        error.response?.data
+          ?.message ||
+          "Could not save gallery changes."
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  const buildCategoryDeleteForm = (sourceForm, categoryToDelete) => {
-    const categoriesBeforeDelete = normalizeCategories(sourceForm.categories);
-    const categories = categoriesBeforeDelete.filter(
-      (category) => category !== categoryToDelete
-    );
-    const fallbackCategory = categories[0] || categoriesBeforeDelete[0] || "Gallery";
+  const openHeroEditor =
+    () => {
+      setDraft({
+        heroBadge:
+          content.heroBadge,
+        heroTitle:
+          content.heroTitle,
+        heroHighlightedText:
+          content.heroHighlightedText,
+        heroSubtitle:
+          content.heroSubtitle,
+        heroExploreText:
+          content.heroExploreText,
+        heroAchievementText:
+          content.heroAchievementText,
+      });
 
-    const nextDescriptions = { ...(sourceForm.categoryDescriptions || {}) };
-    delete nextDescriptions[categoryToDelete];
-
-    const normalizedSubcategories = normalizeSubcategories(
-      sourceForm.subcategories,
-      sourceForm.categories
-    );
-    const nextSubcategories = { ...normalizedSubcategories };
-    delete nextSubcategories[categoryToDelete];
-
-    return {
-      ...sourceForm,
-      categories,
-      categoryDescriptions: nextDescriptions,
-      subcategories: nextSubcategories,
-      images: (sourceForm.images || []).map((image) =>
-        image.category === categoryToDelete
-          ? { ...image, category: fallbackCategory, subcategory: "" }
-          : image
-      ),
+      setModal("hero");
     };
-  };
 
-  const deleteCategoryNow = async (categoryToDelete) => {
-    const categories = normalizeCategories(form.categories);
+  const openMainEditor =
+    () => {
+      setDraft({
+        badge: content.badge,
+        title: content.title,
+        highlightedText:
+          content.highlightedText,
+        description:
+          content.description,
+      });
 
-    if (categories.length <= 1) {
-      setError("At least one gallery category is required.");
-      return;
-    }
+      setModal("main");
+    };
 
-    const nextForm = buildCategoryDeleteForm(form, categoryToDelete);
-    setActiveCategory("All");
-    await persistGalleryContent(
-      nextForm,
-      `Category "${categoryToDelete}" deleted and saved.`
-    );
-  };
+  const openBottomEditor =
+    () => {
+      setDraft({
+        bottomTitle:
+          content.bottomTitle,
+        bottomDescription:
+          content.bottomDescription,
+        bottomNote:
+          content.bottomNote,
+      });
 
-  const requestDeleteSubcategoryFromBlock = (category, subcategoryName) => {
-    if (!category || !subcategoryName) return;
+      setModal("bottom");
+    };
 
-    setDeleteTarget({
-      type: "subcategoryBlock",
-      category,
-      subcategoryName,
-      message: `Delete subcategory "${subcategoryName}" from ${category}? Images using it will move to the general ${category} album.`,
-    });
-  };
+  const openAchievement =
+    (item = null) => {
+      setDraft(
+        item || {
+          id: String(Date.now()),
+          title: "",
+          year:
+            new Date()
+              .getFullYear()
+              .toString(),
+          icon: "Trophy",
+        }
+      );
 
-  const deleteSubcategoryNow = (category, subcategoryName) => {
-    setForm((prev) => {
-      const normalizedSubcategories = normalizeSubcategories(prev.subcategories, prev.categories);
-      const currentList = normalizedSubcategories[category] || [];
+      setModal(
+        item
+          ? "achievement-edit"
+          : "achievement-add"
+      );
+    };
 
-      return {
-        ...prev,
-        subcategories: {
-          ...normalizedSubcategories,
-          [category]: currentList.filter((item) => item.name !== subcategoryName),
-        },
-        images: prev.images.map((image) =>
-          image.category === category && image.subcategory === subcategoryName
-            ? { ...image, subcategory: "" }
-            : image
-        ),
+  const openCategory =
+    (category) => {
+      setDraft({
+        oldName: category,
+        name: category,
+        description:
+          content
+            .categoryDescriptions?.[
+            category
+          ] || "",
+        subcategories: (
+          content
+            .subcategories?.[
+            category
+          ] || []
+        ).map((item) => ({
+          ...item,
+        })),
+      });
+
+      setModal("category");
+    };
+
+  const applyModal =
+    () => {
+      let next = {
+        ...content,
       };
-    });
 
-    setSuccess("Subcategory deleted. Click Save Changes to publish.");
-    setError("");
-  };
-
-  const addSubcategoryToCategory = (category) => {
-    if (!category || category === "All") return;
-
-    setForm((prev) => {
-      const normalizedSubcategories = normalizeSubcategories(prev.subcategories, prev.categories);
-      const currentList = normalizedSubcategories[category] || [];
-
-      let newName = `New ${category} Subcategory`;
-      let counter = 1;
-      const existingNames = new Set(currentList.map((item) => item.name));
-
-      while (existingNames.has(newName)) {
-        counter += 1;
-        newName = `New ${category} Subcategory ${counter}`;
+      if (
+        modal === "hero" ||
+        modal === "main" ||
+        modal === "bottom"
+      ) {
+        next = {
+          ...next,
+          ...draft,
+        };
       }
 
-      const newSubcategory = {
-        id: `${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
-        name: newName,
+      if (
+        modal ===
+          "achievement-add" ||
+        modal ===
+          "achievement-edit"
+      ) {
+        const list = [
+          ...(next.achievements || []),
+        ];
+
+        const index =
+          list.findIndex(
+            (item) =>
+              item.id === draft.id
+          );
+
+        if (index >= 0)
+          list[index] = draft;
+        else list.push(draft);
+
+        next.achievements = list;
+      }
+
+      if (modal === "category") {
+        const oldName =
+          draft.oldName;
+
+        const newName =
+          String(
+            draft.name || ""
+          ).trim();
+
+        if (!newName) {
+          showMessage(
+            "error",
+            "Category name cannot be empty."
+          );
+          return;
+        }
+
+        const categories =
+          normalizeCategories(
+            next.categories
+          ).map(
+            (category) =>
+              category ===
+              oldName
+                ? newName
+                : category
+          );
+
+        const descriptions = {
+          ...next.categoryDescriptions,
+        };
+
+        delete descriptions[
+          oldName
+        ];
+
+        descriptions[newName] =
+          draft.description || "";
+
+        const subcategories = {
+          ...next.subcategories,
+        };
+
+        delete subcategories[
+          oldName
+        ];
+
+        subcategories[newName] =
+          (
+            draft.subcategories ||
+            []
+          ).filter((item) =>
+            String(
+              item.name || ""
+            ).trim()
+          );
+
+        const images = (
+          next.images || []
+        ).map((item) => ({
+          ...item,
+          category:
+            item.category ===
+            oldName
+              ? newName
+              : item.category,
+        }));
+
+        next = {
+          ...next,
+          categories: [
+            ...new Set(categories),
+          ],
+          categoryDescriptions:
+            descriptions,
+          subcategories,
+          images,
+        };
+
+        if (
+          selectedCategory ===
+          oldName
+        ) {
+          setSelectedCategory(
+            newName
+          );
+        }
+      }
+
+      setContent(
+        mergeContent(next)
+      );
+
+      setModal(null);
+
+      showMessage(
+        "success",
+        "Changes applied. Click Save Changes to publish them."
+      );
+    };
+
+  const addCategory =
+    () => {
+      let name = "New Category";
+      let count = 1;
+
+      while (
+        content.categories.includes(
+          name
+        )
+      ) {
+        count += 1;
+        name = `New Category ${count}`;
+      }
+
+      const next = {
+        ...content,
+        categories: [
+          ...content.categories,
+          name,
+        ],
+        categoryDescriptions: {
+          ...content.categoryDescriptions,
+          [name]: "",
+        },
+        subcategories: {
+          ...content.subcategories,
+          [name]: [],
+        },
+      };
+
+      setContent(
+        mergeContent(next)
+      );
+
+      setActiveCategory(
+        name
+      );
+      setSelectedCategory(
+        name
+      );
+      setSelectedSubcategory(
+        ""
+      );
+
+      showMessage(
+        "success",
+        `"${name}" added. Click Save Changes to publish.`
+      );
+    };
+
+  const requestDeleteCategory =
+    (category) => {
+      if (
+        content.categories
+          .length <= 1
+      ) {
+        showMessage(
+          "error",
+          "At least one gallery category is required."
+        );
+        return;
+      }
+
+      const fallback =
+        content.categories.find(
+          (item) =>
+            item !== category
+        );
+
+      setConfirmTarget({
+        type: "category",
+        category,
+        title:
+          "Delete category?",
+        name: category,
+        message: `Its images will be moved to "${fallback}".`,
+      });
+    };
+
+  const deleteCategory =
+    () => {
+      const category =
+        confirmTarget?.category;
+
+      if (!category) return;
+
+      const categories =
+        content.categories.filter(
+          (item) =>
+            item !== category
+        );
+
+      const fallback =
+        categories[0];
+
+      const descriptions = {
+        ...content.categoryDescriptions,
+      };
+
+      delete descriptions[
+        category
+      ];
+
+      const subcategories = {
+        ...content.subcategories,
+      };
+
+      delete subcategories[
+        category
+      ];
+
+      const images = (
+        content.images || []
+      ).map((item) =>
+        item.category === category
+          ? {
+              ...item,
+              category: fallback,
+              subcategory: "",
+            }
+          : item
+      );
+
+      const next = {
+        ...content,
+        categories,
+        categoryDescriptions:
+          descriptions,
+        subcategories,
+        images,
+      };
+
+      setContent(
+        mergeContent(next)
+      );
+
+      setActiveCategory(
+        "All"
+      );
+      setSelectedCategory(
+        fallback
+      );
+      setSelectedSubcategory(
+        ""
+      );
+
+      setConfirmTarget(null);
+
+      showMessage(
+        "success",
+        `"${category}" deleted. Click Save Changes to publish.`
+      );
+    };
+
+  const deleteAchievement =
+    () => {
+      const id =
+        confirmTarget?.id;
+
+      if (!id) return;
+
+      setContent(
+        (previous) => ({
+          ...previous,
+          achievements: (
+            previous.achievements ||
+            []
+          ).filter(
+            (item) =>
+              item.id !== id
+          ),
+        })
+      );
+
+      setConfirmTarget(null);
+
+      showMessage(
+        "success",
+        "Achievement deleted. Click Save Changes to publish."
+      );
+    };
+
+  const uploadImage = async (
+    file
+  ) => {
+    const formData =
+      new FormData();
+
+    formData.append(
+      "file",
+      file
+    );
+
+    const uploadToken =
+      localStorage.getItem(
+        "adminToken"
+      );
+
+    const response =
+      await api.post(
+        "/api/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+            ...(uploadToken
+              ? {
+                  Authorization: `Bearer ${uploadToken}`,
+                }
+              : {}),
+          },
+          timeout: 20000,
+        }
+      );
+
+    const url =
+      response.data?.url ||
+      response.data
+        ?.imageUrl ||
+      response.data?.fileUrl ||
+      response.data?.data?.url ||
+      response.data?.data
+        ?.imageUrl ||
+      response.data?.data
+        ?.fileUrl;
+
+    if (!url) {
+      throw new Error(
+        "Image uploaded but backend did not return an image URL."
+      );
+    }
+
+    return url;
+  };
+
+  const cleanFileName =
+    (fileName = "") =>
+      fileName
+        .replace(
+          /\.[^/.]+$/,
+          ""
+        )
+        .replace(
+          /[-_]+/g,
+          " "
+        )
+        .replace(
+          /\s+/g,
+          " "
+        )
+        .trim()
+        .replace(
+          /\b\w/g,
+          (char) =>
+            char.toUpperCase()
+        );
+
+  const validateImage =
+    (file) => {
+      if (
+        !file.type.startsWith(
+          "image/"
+        )
+      ) {
+        return "Please upload only image files.";
+      }
+
+      if (
+        file.size >
+        6 * 1024 * 1024
+      ) {
+        return "Image is too large. Please use an image under 6 MB.";
+      }
+
+      return "";
+    };
+
+  const handleUpload =
+    async (files) => {
+      const selectedFiles =
+        Array.from(
+          files || []
+        );
+
+      if (!selectedFiles.length)
+        return;
+
+      const validation =
+        selectedFiles
+          .map(validateImage)
+          .find(Boolean);
+
+      if (validation) {
+        showMessage(
+          "error",
+          validation
+        );
+        return;
+      }
+
+      setUploading(true);
+      setMessage({
+        type: "",
+        text: "",
+      });
+
+      try {
+        const selectedSub =
+          selectedSubcategory &&
+          (
+            content
+              .subcategories?.[
+              selectedCategory
+            ] || []
+          ).some(
+            (item) =>
+              item.name ===
+              selectedSubcategory
+          )
+            ? selectedSubcategory
+            : "";
+
+        const uploaded =
+          await Promise.all(
+            selectedFiles.map(
+              async (
+                file,
+                index
+              ) => {
+                const url =
+                  await uploadImage(
+                    file
+                  );
+
+                return {
+                  id: `${Date.now()}-${index}-${Math.random()
+                    .toString(36)
+                    .slice(2)}`,
+                  title:
+                    cleanFileName(
+                      file.name
+                    ) ||
+                    `Gallery Image ${
+                      index + 1
+                    }`,
+                  category:
+                    selectedCategory,
+                  subcategory:
+                    selectedSub,
+                  date: "School Activity",
+                  description:
+                    "",
+                  image: url,
+                  images: [url],
+                  visible: true,
+                };
+              }
+            )
+          );
+
+        setContent(
+          (previous) => ({
+            ...previous,
+            images: [
+              ...uploaded,
+              ...previous.images,
+            ],
+          })
+        );
+
+        showMessage(
+          "success",
+          `${uploaded.length} image${
+            uploaded.length ===
+            1
+              ? ""
+              : "s"
+          } uploaded. Click Save Changes to publish.`
+        );
+      } catch (error) {
+        console.error(
+          "Gallery upload error:",
+          error
+        );
+
+        showMessage(
+          "error",
+          error.response?.data
+            ?.message ||
+            error.message ||
+            "Could not upload images. Check that the backend is running."
+        );
+      } finally {
+        setUploading(false);
+      }
+    };
+
+  const replaceImage =
+    async (
+      id,
+      file
+    ) => {
+      if (!file) return;
+
+      const validation =
+        validateImage(file);
+
+      if (validation) {
+        showMessage(
+          "error",
+          validation
+        );
+        return;
+      }
+
+      setUploading(true);
+
+      try {
+        const url =
+          await uploadImage(
+            file
+          );
+
+        setContent(
+          (previous) => ({
+            ...previous,
+            images:
+              previous.images.map(
+                (item) =>
+                  item.id === id
+                    ? {
+                        ...item,
+                        image: url,
+                        images: [url],
+                      }
+                    : item
+              ),
+          })
+        );
+
+        showMessage(
+          "success",
+          "Image replaced. Click Save Changes to publish."
+        );
+      } catch (error) {
+        console.error(
+          "Replace image error:",
+          error
+        );
+
+        showMessage(
+          "error",
+          error.response?.data
+            ?.message ||
+            error.message ||
+            "Could not replace image."
+        );
+      } finally {
+        setUploading(false);
+      }
+    };
+
+  const updateImage =
+    (
+      id,
+      field,
+      value
+    ) => {
+      setContent(
+        (previous) => ({
+          ...previous,
+          images:
+            previous.images.map(
+              (item) =>
+                item.id === id
+                  ? {
+                      ...item,
+                      [field]:
+                        value,
+                    }
+                  : item
+            ),
+        })
+      );
+    };
+
+  const moveImage =
+    (
+      id,
+      category
+    ) => {
+      const subcategories =
+        content.subcategories?.[
+          category
+        ] || [];
+
+      setContent(
+        (previous) => ({
+          ...previous,
+          images:
+            previous.images.map(
+              (item) =>
+                item.id === id
+                  ? {
+                      ...item,
+                      category,
+                      subcategory:
+                        subcategories[0]
+                          ?.name ||
+                        "",
+                    }
+                  : item
+            ),
+        })
+      );
+    };
+
+  const deleteOne =
+    (id) => {
+      const image =
+        content.images.find(
+          (item) =>
+            item.id === id
+        );
+
+      setConfirmTarget({
+        type: "image",
+        id,
+        title:
+          "Delete image?",
+        name:
+          image?.title ||
+          "This image",
+        message:
+          "The image will be removed from the gallery. Click Save Changes to publish.",
+      });
+    };
+
+  const deleteSelected =
+    () => {
+      if (
+        !selectedIds.length
+      ) {
+        showMessage(
+          "error",
+          "Select at least one image first."
+        );
+        return;
+      }
+
+      setConfirmTarget({
+        type: "images",
+        title:
+          "Delete selected images?",
+        name: `${selectedIds.length} selected image${
+          selectedIds.length ===
+          1
+            ? ""
+            : "s"
+        }`,
+        message:
+          "The selected images will be removed from the gallery. Click Save Changes to publish.",
+      });
+    };
+
+  const confirmDelete =
+    () => {
+      if (
+        confirmTarget?.type ===
+        "category"
+      ) {
+        deleteCategory();
+        return;
+      }
+
+      if (
+        confirmTarget?.type ===
+        "achievement"
+      ) {
+        deleteAchievement();
+        return;
+      }
+
+      if (
+        confirmTarget?.type ===
+        "image"
+      ) {
+        const id =
+          confirmTarget.id;
+
+        setContent(
+          (previous) => ({
+            ...previous,
+            images:
+              previous.images.filter(
+                (item) =>
+                  item.id !== id
+              ),
+          })
+        );
+
+        setSelectedIds(
+          (previous) =>
+            previous.filter(
+              (item) =>
+                item !== id
+            )
+        );
+
+        setConfirmTarget(null);
+
+        showMessage(
+          "success",
+          "Image deleted. Click Save Changes to publish."
+        );
+        return;
+      }
+
+      if (
+        confirmTarget?.type ===
+        "images"
+      ) {
+        setContent(
+          (previous) => ({
+            ...previous,
+            images:
+              previous.images.filter(
+                (item) =>
+                  !selectedIds.includes(
+                    item.id
+                  )
+              ),
+          })
+        );
+
+        setSelectedIds([]);
+        setConfirmTarget(null);
+
+        showMessage(
+          "success",
+          "Selected images deleted. Click Save Changes to publish."
+        );
+      }
+    };
+
+  const addSubcategory =
+    () => {
+      const current =
+        content.subcategories?.[
+          selectedCategory
+        ] || [];
+
+      const names = new Set(
+        current.map(
+          (item) =>
+            item.name
+        )
+      );
+
+      let name = `New ${selectedCategory} Subcategory`;
+      let count = 1;
+
+      while (
+        names.has(name)
+      ) {
+        count += 1;
+        name = `New ${selectedCategory} Subcategory ${count}`;
+      }
+
+      const newSub = {
+        id: `${selectedCategory}-${Date.now()}`,
+        name,
         description: "",
         visible: true,
       };
 
-      return {
-        ...prev,
-        subcategories: {
-          ...normalizedSubcategories,
-          [category]: [...currentList, newSubcategory],
-        },
-      };
-    });
+      setContent(
+        (previous) => ({
+          ...previous,
+          subcategories: {
+            ...previous.subcategories,
+            [selectedCategory]: [
+              ...(previous
+                .subcategories?.[
+                selectedCategory
+              ] || []),
+              newSub,
+            ],
+          },
+        })
+      );
 
-    setActiveCategory(category);
-    setSuccess(`Subcategory added inside ${category}. Click Save Changes to publish.`);
-    setError("");
-  };
+      setSelectedSubcategory(
+        name
+      );
 
-  const addSubcategoryInModal = () => {
-    if (!editingTarget?.category) return;
+      showMessage(
+        "success",
+        `Subcategory "${name}" added. Click Save Changes to publish.`
+      );
+    };
 
-    setModalForm((prev) => ({
-      ...prev,
-      subcategories: [
-        ...(prev.subcategories || []),
-        {
-          id: `${editingTarget.category.toLowerCase()}-${Date.now()}`,
-          name: `New ${editingTarget.category} Subcategory`,
-          originalName: "",
-          description: "",
-          visible: true,
-        },
-      ],
-    }));
-  };
+  const updateSubcategory =
+    (
+      id,
+      field,
+      value
+    ) => {
+      setContent(
+        (previous) => {
+          const current =
+            previous
+              .subcategories?.[
+              selectedCategory
+            ] || [];
 
-  const requestDeleteSubcategory = (subcategory) => {
-    setDeleteTarget({
-      type: "subcategory",
-      subcategory,
-      message: `Delete subcategory \"${subcategory.name}\"? Images using it will move to the general category.`,
-    });
-  };
+          const old =
+            current.find(
+              (item) =>
+                item.id === id
+            );
 
-  const deleteSubcategoryInModal = (subcategoryId) => {
-    setModalForm((prev) => ({
-      ...prev,
-      subcategories: (prev.subcategories || []).filter(
-        (item) => item.id !== subcategoryId
-      ),
-    }));
-  };
+          const updated =
+            current.map(
+              (item) =>
+                item.id === id
+                  ? {
+                      ...item,
+                      [field]:
+                        value,
+                    }
+                  : item
+            );
 
-  const saveEditingSection = () => {
-    if (!editingTarget) return;
+          const images =
+            field === "name" &&
+            old
+              ? previous.images.map(
+                  (image) =>
+                    image.category ===
+                      selectedCategory &&
+                    image.subcategory ===
+                      old.name
+                      ? {
+                          ...image,
+                          subcategory:
+                            value,
+                        }
+                      : image
+                )
+              : previous.images;
 
-    if (editingTarget.type === "hero") {
-      setForm((prev) => ({
-        ...prev,
-        badge: modalForm.badge,
-        title: modalForm.title,
-        highlightedText: modalForm.highlightedText,
-        description: modalForm.description,
-      }));
-      closeModal();
-      setSuccess("Heading updated. Click Save Changes to publish.");
-      return;
-    }
+          return {
+            ...previous,
+            subcategories: {
+              ...previous.subcategories,
+              [selectedCategory]:
+                updated,
+            },
+            images,
+          };
+        }
+      );
 
-    if (editingTarget.type === "bottom") {
-      setForm((prev) => ({
-        ...prev,
-        bottomTitle: modalForm.bottomTitle,
-        bottomDescription: modalForm.bottomDescription,
-        bottomNote: modalForm.bottomNote,
-      }));
-      closeModal();
-      setSuccess("Bottom card updated. Click Save Changes to publish.");
-      return;
-    }
+      if (
+        field === "name" &&
+        selectedSubcategory ===
+          content.subcategories?.[
+            selectedCategory
+          ]?.find(
+            (item) =>
+              item.id === id
+          )?.name
+      ) {
+        setSelectedSubcategory(
+          value
+        );
+      }
+    };
 
-    if (editingTarget.type === "category") {
-      const oldCategory = editingTarget.category;
-      const newCategory = String(modalForm.name || "").trim();
+  const deleteSubcategory =
+    (subcategory) => {
+      setConfirmTarget({
+        type: "subcategory",
+        subcategory,
+        title:
+          "Delete subcategory?",
+        name:
+          subcategory.name,
+        message:
+          "Images inside this subcategory will move to the general category.",
+      });
+    };
 
-      if (!newCategory) {
-        setError("Category name cannot be empty.");
+  const confirmDeleteSubcategory =
+    () => {
+      const sub =
+        confirmTarget?.subcategory;
+
+      if (!sub) return;
+
+      setContent(
+        (previous) => ({
+          ...previous,
+          subcategories: {
+            ...previous.subcategories,
+            [selectedCategory]: (
+              previous
+                .subcategories?.[
+                selectedCategory
+              ] || []
+            ).filter(
+              (item) =>
+                item.id !==
+                sub.id
+            ),
+          },
+          images:
+            previous.images.map(
+              (image) =>
+                image.category ===
+                  selectedCategory &&
+                image.subcategory ===
+                  sub.name
+                  ? {
+                      ...image,
+                      subcategory:
+                        "",
+                    }
+                  : image
+            ),
+        })
+      );
+
+      if (
+        selectedSubcategory ===
+        sub.name
+      ) {
+        setSelectedSubcategory(
+          ""
+        );
+      }
+
+      setConfirmTarget(null);
+
+      showMessage(
+        "success",
+        "Subcategory deleted. Click Save Changes to publish."
+      );
+    };
+
+  const updateCategoryName =
+    (value) => {
+      const newName =
+        String(
+          value || ""
+        ).trimStart();
+
+      if (!newName) return;
+
+      if (
+        content.categories.some(
+          (category) =>
+            category !==
+              selectedCategory &&
+            category ===
+              newName
+        )
+      ) {
+        showMessage(
+          "error",
+          `Category "${newName}" already exists.`
+        );
         return;
       }
 
-      setForm((prev) => {
-        const categories = normalizeCategories(prev.categories);
-        const nextCategories = categories.map((category) =>
-          category === oldCategory ? newCategory : category
-        );
+      const oldName =
+        selectedCategory;
 
-        const nextDescriptions = { ...(prev.categoryDescriptions || {}) };
-        delete nextDescriptions[oldCategory];
-        nextDescriptions[newCategory] = modalForm.description || "";
+      setContent(
+        (previous) => {
+          const categories =
+            previous.categories.map(
+              (category) =>
+                category ===
+                oldName
+                  ? newName
+                  : category
+            );
 
-        const normalizedSubcategories = normalizeSubcategories(prev.subcategories, prev.categories);
-        const nextSubcategories = { ...normalizedSubcategories };
+          const descriptions =
+            {
+              ...previous.categoryDescriptions,
+            };
 
-        nextSubcategories[newCategory] = (modalForm.subcategories || [])
-          .map((sub) => ({
-            id: sub.id || `${newCategory.toLowerCase()}-${Date.now()}`,
-            name: String(sub.name || "").trim(),
-            description: sub.description || "",
-            visible: sub.visible !== false,
-            originalName: sub.originalName || "",
-          }))
-          .filter((sub) => sub.name);
+          descriptions[
+            newName
+          ] =
+            descriptions[
+              oldName
+            ] || "";
 
-        if (oldCategory !== newCategory) {
-          delete nextSubcategories[oldCategory];
+          delete descriptions[
+            oldName
+          ];
+
+          const subcategories =
+            {
+              ...previous.subcategories,
+            };
+
+          subcategories[
+            newName
+          ] =
+            subcategories[
+              oldName
+            ] || [];
+
+          delete subcategories[
+            oldName
+          ];
+
+          return {
+            ...previous,
+            categories,
+            categoryDescriptions:
+              descriptions,
+            subcategories,
+            images:
+              previous.images.map(
+                (image) =>
+                  image.category ===
+                  oldName
+                    ? {
+                        ...image,
+                        category:
+                          newName,
+                      }
+                    : image
+              ),
+          };
         }
+      );
 
-        let nextImages = prev.images.map((image) =>
-          image.category === oldCategory
-            ? { ...image, category: newCategory }
-            : image
-        );
+      setSelectedCategory(
+        newName
+      );
 
-        const newSubNames = new Set(
-          (nextSubcategories[newCategory] || []).map((sub) => sub.name)
-        );
+      showMessage(
+        "success",
+        "Category renamed. Click Save Changes to publish."
+      );
+    };
 
-        nextImages = nextImages.map((image) => {
-          if (image.category !== oldCategory && image.category !== newCategory) {
-            return image;
-          }
-
-          const renamedSub = (modalForm.subcategories || []).find(
-            (sub) =>
-              sub.originalName &&
-              image.subcategory === sub.originalName &&
-              sub.name
-          );
-
-          if (renamedSub) {
-            return { ...image, subcategory: renamedSub.name };
-          }
-
-          if (image.subcategory && !newSubNames.has(image.subcategory)) {
-            return { ...image, subcategory: "" };
-          }
-
-          return image;
-        });
-
-        return {
-          ...prev,
-          categories: Array.from(new Set(nextCategories)),
-          categoryDescriptions: nextDescriptions,
-          subcategories: nextSubcategories,
-          images: nextImages,
-        };
-      });
-
-      closeModal();
-      setSuccess("Category updated. Click Save Changes to publish.");
-    }
-  };
-
-  async function saveGalleryContent() {
-    setSuccess("");
-    setError("");
-
-    const saved = await persistGalleryContent(
-      form,
-      "Gallery page content saved successfully."
-    );
-
-    if (saved) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }
-
-  const confirmDelete = () => {
-    if (!deleteTarget) return;
-
-    if (deleteTarget.type === "category") {
-      deleteCategoryNow(deleteTarget.category);
-      setDeleteTarget(null);
-      return;
-    }
-
-    if (deleteTarget.type === "subcategory") {
-      deleteSubcategoryInModal(deleteTarget.subcategory.id);
-      setDeleteTarget(null);
-      return;
-    }
-
-    if (deleteTarget.type === "subcategoryBlock") {
-      deleteSubcategoryNow(deleteTarget.category, deleteTarget.subcategoryName);
-      setDeleteTarget(null);
-    }
-  };
-
-  const openGalleryImageManager = (category = "", subcategory = "") => {
-    const params = new URLSearchParams();
-
-    if (category && category !== "All") {
-      params.set("category", category);
-    }
-
-    if (subcategory) {
-      params.set("subcategory", subcategory);
-    }
-
-    const query = params.toString();
-    navigate(`/admin/gallery-images${query ? `?${query}` : ""}`, {
-      state: {
-        fromAdminGalleryEditor: true,
-      },
-    });
-  };
+  const updateCategoryDescription =
+    (value) => {
+      setContent(
+        (previous) => ({
+          ...previous,
+          categoryDescriptions:
+            {
+              ...previous.categoryDescriptions,
+              [selectedCategory]:
+                value,
+            },
+        })
+      );
+    };
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ background: "#FFF8EE" }}>
-        <div className="font-semibold text-slate-600">Loading gallery editor...</div>
+      <div
+        className="flex min-h-screen items-center justify-center"
+        style={{
+          background:
+            "radial-gradient(circle at 10% 15%, rgba(45,106,79,0.10), transparent 28%), radial-gradient(circle at 90% 75%, rgba(233,196,106,0.12), transparent 28%), #F5F8F6",
+        }}
+      >
+        <div className="rounded-2xl bg-white px-6 py-4 font-black text-slate-700 shadow-xl">
+          Loading Gallery Editor...
+        </div>
       </div>
     );
   }
 
   return (
-    <section className="min-h-screen bg-[#FFF8EE] overflow-x-hidden">
-      <AnimatePresence>
-        {busyOverlayText && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999999] flex items-center justify-center px-6"
-            style={{
-              background: "rgba(2,6,23,0.52)",
-              backdropFilter: "blur(14px)",
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 18 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 18 }}
-              className="w-full max-w-sm rounded-[32px] p-8 text-center shadow-2xl"
-              style={lightAdminPanelStyle}
-            >
-              <div
-                className="mx-auto mb-5 h-14 w-14 animate-spin rounded-full"
-                style={{
-                  border: "4px solid rgba(75,46,131,0.14)",
-                  borderTopColor: colors.gold,
-                }}
-              />
-
-              <div className="text-2xl font-black text-slate-950">
-                {busyOverlayText}
-              </div>
-
-              <p className="mt-2 text-sm font-semibold text-slate-500">
-                Please wait. Saving it first so it will not disappear after reload.
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <header
-        className="relative z-0"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,244,255,0.95), rgba(238,247,255,0.95))",
-          borderBottom: "1px solid rgba(75,46,131,0.12)",
-          boxShadow: "0 14px 36px rgba(15,23,42,0.08)",
-          backdropFilter: "blur(18px)",
-        }}
-      >
-        <div className="mx-auto flex min-h-20 max-w-[1600px] flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <div
+      className="min-h-screen overflow-x-hidden"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle at 8% 12%, rgba(45,106,79,0.10), transparent 25%), radial-gradient(circle at 92% 45%, rgba(233,196,106,0.12), transparent 28%), radial-gradient(circle at 50% 95%, rgba(126,155,190,0.08), transparent 30%), radial-gradient(rgba(45,106,79,0.08) 1px, transparent 1px), linear-gradient(180deg, #F7FAF8 0%, #F1F7F4 100%)",
+        backgroundSize:
+          "auto, auto, auto, 30px 30px, auto",
+      }}
+    >
+      {/* TOP ADMIN BAR */}
+      <header className="sticky top-0 z-[100] border-b border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => navigate("/admin/dashboard")}
-            className="inline-flex items-center gap-2 font-black transition-all hover:-translate-x-1"
-            style={{ color: colors.dark }}
+            onClick={() =>
+              navigate(
+                "/admin/dashboard"
+              )
+            }
+            className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-black text-slate-800 transition hover:bg-slate-100"
           >
-            <ArrowLeft className="h-5 w-5" />
-            Back to Dashboard
+            <ArrowLeft size={18} />
+            Dashboard
           </button>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => openGalleryImageManager()}
-              className="hidden items-center gap-2 rounded-2xl px-4 py-3 font-black transition-all hover:scale-105 md:inline-flex"
-              style={{
-                color: colors.dark,
-                background: "rgba(255,255,255,0.72)",
-                border: "1px solid rgba(75,46,131,0.12)",
-                boxShadow: "0 10px 26px rgba(15,23,42,0.06)",
-              }}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              tone="white"
+              icon={Upload}
+              onClick={() =>
+                document
+                  .getElementById(
+                    "image-manager"
+                  )
+                  ?.scrollIntoView({
+                    behavior:
+                      "smooth",
+                  })
+              }
             >
-              <Upload className="h-4 w-4" />
               Manage Images
-            </button>
+            </Button>
 
             <a
               href="/gallery"
               target="_blank"
               rel="noreferrer"
-              className="hidden items-center gap-2 rounded-2xl px-4 py-3 font-black transition-all hover:scale-105 md:inline-flex"
-              style={{
-                color: colors.dark,
-                background: "rgba(255,255,255,0.72)",
-                border: "1px solid rgba(75,46,131,0.12)",
-                boxShadow: "0 10px 26px rgba(15,23,42,0.06)",
-              }}
+              className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:inline-flex"
             >
-              <ExternalLink className="h-4 w-4" />
-              View Gallery Page
+              <ExternalLink size={16} />
+              View Gallery
             </a>
 
-            <button
-              type="button"
-              onClick={saveGalleryContent}
-              disabled={saving}
-              className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 font-bold transition-all hover:scale-105 disabled:opacity-60"
-              style={{
-                color: "#020617",
-                background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                boxShadow:
-                  "0 18px 42px rgba(56,189,248,0.28), inset 0 1px 0 rgba(255,255,255,0.45)",
-              }}
+            <Button
+              tone="green"
+              icon={Save}
+              disabled={saving || uploading}
+              onClick={() =>
+                save()
+              }
             >
-              <Save className="h-4 w-4" />
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
+              {saving
+                ? "Saving..."
+                : "Save Changes"}
+            </Button>
           </div>
         </div>
       </header>
 
-      <main>
-        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 pt-6 sm:pt-8">
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
-            <span
-              className="mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold"
-              style={{
-                background: "rgba(75,46,131,0.1)",
-                color: colors.purple,
-                border: "1px solid rgba(75,46,131,0.2)",
-              }}
-            >
-              <Camera className="h-4 w-4" />
-              Manage Gallery Page
+      {/* PAGE INTRO */}
+      <div className="mx-auto max-w-[1500px] px-4 py-7">
+        <div className="flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-black text-emerald-700">
+              <Sparkles size={14} />
+              ONE PAGE GALLERY ADMIN
             </span>
 
-            <h1
-              className="mb-2 text-4xl md:text-6xl"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 850,
-                color: colors.dark,
-                letterSpacing: "-0.045em",
-              }}
-            >
-              Edit Gallery Page
+            <h1 className="mt-4 text-4xl font-black tracking-[-.05em] text-slate-950 md:text-6xl">
+              Edit Gallery
             </h1>
 
-            <p className="max-w-3xl text-lg text-slate-500">
-              Visual editor mode. Hover the real gallery sections and click pencil/edit buttons. Use Manage Images for uploading and removing photos.
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+              You no longer need to open a separate
+              Image Manager page. Edit the complete
+              gallery from this one page.
             </p>
-          </motion.div>
+          </div>
 
-          {success && (
-            <div
-              className="mt-6 flex items-center gap-3 rounded-2xl px-5 py-4 font-semibold"
-              style={{
-                background: "rgba(22,138,58,0.1)",
-                color: colors.green,
-                border: "1px solid rgba(22,138,58,0.2)",
-              }}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              tone="white"
+              icon={Edit3}
+              onClick={
+                openMainEditor
+              }
             >
-              <CheckCircle2 className="h-5 w-5" />
-              {success}
-            </div>
-          )}
+              Edit Heading
+            </Button>
 
-          {error && (
-            <div
-              className="mt-6 flex items-center gap-3 rounded-2xl px-5 py-4 font-semibold"
-              style={{
-                background: "rgba(215,25,32,0.1)",
-                color: colors.red,
-                border: "1px solid rgba(215,25,32,0.2)",
-              }}
+            <Button
+              tone="white"
+              icon={Plus}
+              onClick={
+                addCategory
+              }
             >
-              <AlertCircle className="h-5 w-5" />
-              {error}
-            </div>
-          )}
+              Add Category
+            </Button>
+
+            <Button
+              tone="white"
+              icon={Layers}
+              onClick={
+                openBottomEditor
+              }
+            >
+              Edit Bottom
+            </Button>
+          </div>
         </div>
 
-        <GalleryVisualEditor
-          form={form}
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
-          onEditHero={openHeroEditor}
-          onEditCategory={openCategoryEditor}
-          onEditBottom={openBottomEditor}
-          onAddCategory={addCategory}
-          onDeleteCategory={requestDeleteCategory}
-          onDeleteSubcategory={requestDeleteSubcategoryFromBlock}
-          onManageImages={openGalleryImageManager}
+        {message.text && (
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: -10,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            className={`mt-5 flex items-center gap-2 rounded-2xl px-5 py-4 text-sm font-black ${
+              message.type ===
+              "error"
+                ? "bg-red-50 text-red-700"
+                : "bg-emerald-50 text-emerald-700"
+            }`}
+          >
+            {message.type ===
+            "error" ? (
+              <AlertTriangle
+                size={18}
+              />
+            ) : (
+              <CheckCircle2
+                size={18}
+              />
+            )}
+
+            {message.text}
+          </motion.div>
+        )}
+      </div>
+
+      {/* HERO */}
+      <AdminHero
+        content={content}
+        onEdit={
+          openHeroEditor
+        }
+      />
+
+      {/* ACHIEVEMENTS */}
+      <AchievementSection
+        content={content}
+        onAdd={() =>
+          openAchievement()
+        }
+        onEdit={
+          openAchievement
+        }
+        onDelete={(item) =>
+          setConfirmTarget({
+            type: "achievement",
+            id: item.id,
+            title:
+              "Delete achievement?",
+            name: item.title,
+            message:
+              "This achievement will be removed from the gallery page.",
+          })
+        }
+      />
+
+      {/* GALLERY PREVIEW */}
+      <GalleryPreview
+        content={content}
+        activeCategory={
+          activeCategory
+        }
+        setActiveCategory={
+          setActiveCategory
+        }
+        onEditHeading={
+          openMainEditor
+        }
+        onManage={(
+          category,
+          subcategory
+        ) => {
+          setSelectedCategory(
+            category
+          );
+          setSelectedSubcategory(
+            subcategory || ""
+          );
+
+          setTimeout(() => {
+            document
+              .getElementById(
+                "image-manager"
+              )
+              ?.scrollIntoView({
+                behavior:
+                  "smooth",
+              });
+          }, 50);
+        }}
+        onEditCategory={
+          openCategory
+        }
+        onDeleteCategory={
+          requestDeleteCategory
+        }
+      />
+
+      {/* IMAGE MANAGEMENT - SAME PAGE */}
+      <ImageManager
+        content={content}
+        selectedCategory={
+          selectedCategory
+        }
+        setSelectedCategory={
+          setSelectedCategory
+        }
+        selectedSubcategory={
+          selectedSubcategory
+        }
+        setSelectedSubcategory={
+          setSelectedSubcategory
+        }
+        selectedIds={selectedIds}
+        setSelectedIds={
+          setSelectedIds
+        }
+        onUpload={
+          handleUpload
+        }
+        onReplace={
+          replaceImage
+        }
+        onDeleteOne={
+          deleteOne
+        }
+        onDeleteSelected={
+          deleteSelected
+        }
+        onUpdateImage={
+          updateImage
+        }
+        onMoveImage={
+          moveImage
+        }
+        onAddSubcategory={
+          addSubcategory
+        }
+        onUpdateSubcategory={
+          updateSubcategory
+        }
+        onDeleteSubcategory={
+          deleteSubcategory
+        }
+        onCategoryName={
+          updateCategoryName
+        }
+        onCategoryDescription={
+          updateCategoryDescription
+        }
+        uploading={uploading}
+        onAddCategory={
+          addCategory
+        }
+        onEditCategory={
+          openCategory
+        }
+        onDeleteCategory={
+          requestDeleteCategory
+        }
+      />
+
+      {/* BOTTOM PREVIEW */}
+      <BottomPreview
+        content={content}
+        onEdit={
+          openBottomEditor
+        }
+      />
+
+      {/* HERO MODAL */}
+      {modal === "hero" && (
+        <EditModal
+          title="Edit Gallery Hero"
+          onClose={() =>
+            setModal(null)
+          }
+          onSave={
+            applyModal
+          }
+        >
+          <Field
+            label="Hero Badge"
+            value={
+              draft.heroBadge
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                heroBadge:
+                  value,
+              })
+            }
+          />
+
+          <Field
+            label="Hero Title"
+            value={
+              draft.heroTitle
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                heroTitle:
+                  value,
+              })
+            }
+          />
+
+          <Field
+            label="Highlighted Text"
+            value={
+              draft.heroHighlightedText
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                heroHighlightedText:
+                  value,
+              })
+            }
+          />
+
+          <TextArea
+            label="Hero Subtitle"
+            value={
+              draft.heroSubtitle
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                heroSubtitle:
+                  value,
+              })
+            }
+          />
+
+          <Field
+            label="Explore Button Text"
+            value={
+              draft.heroExploreText
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                heroExploreText:
+                  value,
+              })
+            }
+          />
+
+          <Field
+            label="Achievement Button Text"
+            value={
+              draft.heroAchievementText
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                heroAchievementText:
+                  value,
+              })
+            }
+          />
+        </EditModal>
+      )}
+
+      {/* MAIN HEADING MODAL */}
+      {modal === "main" && (
+        <EditModal
+          title="Edit Gallery Heading"
+          onClose={() =>
+            setModal(null)
+          }
+          onSave={
+            applyModal
+          }
+        >
+          <Field
+            label="Badge"
+            value={draft.badge}
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                badge: value,
+              })
+            }
+          />
+
+          <Field
+            label="Title"
+            value={draft.title}
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                title: value,
+              })
+            }
+          />
+
+          <Field
+            label="Highlighted Text"
+            value={
+              draft.highlightedText
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                highlightedText:
+                  value,
+              })
+            }
+          />
+
+          <TextArea
+            label="Description"
+            value={
+              draft.description
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                description:
+                  value,
+              })
+            }
+            rows={5}
+          />
+        </EditModal>
+      )}
+
+      {/* BOTTOM MODAL */}
+      {modal === "bottom" && (
+        <EditModal
+          title="Edit Bottom Section"
+          onClose={() =>
+            setModal(null)
+          }
+          onSave={
+            applyModal
+          }
+        >
+          <Field
+            label="Bottom Title"
+            value={
+              draft.bottomTitle
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                bottomTitle:
+                  value,
+              })
+            }
+          />
+
+          <TextArea
+            label="Bottom Description"
+            value={
+              draft.bottomDescription
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                bottomDescription:
+                  value,
+              })
+            }
+          />
+
+          <Field
+            label="Bottom Note"
+            value={
+              draft.bottomNote
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                bottomNote:
+                  value,
+              })
+            }
+          />
+        </EditModal>
+      )}
+
+      {/* ACHIEVEMENT MODAL */}
+      {(modal ===
+        "achievement-add" ||
+        modal ===
+          "achievement-edit") && (
+        <EditModal
+          title={
+            modal ===
+            "achievement-add"
+              ? "Add Achievement"
+              : "Edit Achievement"
+          }
+          onClose={() =>
+            setModal(null)
+          }
+          onSave={
+            applyModal
+          }
+        >
+          <Field
+            label="Achievement Title"
+            value={
+              draft.title
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                title: value,
+              })
+            }
+          />
+
+          <Field
+            label="Year"
+            value={draft.year}
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                year: value,
+              })
+            }
+          />
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-black text-slate-700">
+              Icon
+            </span>
+
+            <select
+              value={
+                draft.icon ||
+                "Trophy"
+              }
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  icon: e.target
+                    .value,
+                })
+              }
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
+            >
+              <option value="Trophy">
+                Trophy
+              </option>
+              <option value="Award">
+                Award
+              </option>
+              <option value="Star">
+                Star
+              </option>
+            </select>
+          </label>
+        </EditModal>
+      )}
+
+      {/* CATEGORY MODAL */}
+      {modal ===
+        "category" && (
+        <EditModal
+          title={`Edit ${draft.oldName}`}
+          onClose={() =>
+            setModal(null)
+          }
+          onSave={
+            applyModal
+          }
+        >
+          <Field
+            label="Category Name"
+            value={draft.name}
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                name: value,
+              })
+            }
+          />
+
+          <TextArea
+            label="Category Description"
+            value={
+              draft.description
+            }
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                description:
+                  value,
+              })
+            }
+          />
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="font-black text-slate-900">
+                  Subcategories
+                </h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  These appear as collections
+                  in the public gallery.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setDraft({
+                    ...draft,
+                    subcategories: [
+                      ...(draft.subcategories ||
+                        []),
+                      {
+                        id: String(
+                          Date.now()
+                        ),
+                        name: "New Subcategory",
+                        description:
+                          "",
+                        visible: true,
+                      },
+                    ],
+                  })
+                }
+                className="inline-flex items-center gap-1 rounded-xl bg-emerald-700 px-3 py-2 text-xs font-black text-white"
+              >
+                <Plus size={14} />
+                Add
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {(
+                draft.subcategories ||
+                []
+              ).map(
+                (
+                  sub,
+                  index
+                ) => (
+                  <div
+                    key={
+                      sub.id
+                    }
+                    className="rounded-2xl border border-slate-200 bg-white p-4"
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-[.12em] text-slate-400">
+                        Subcategory{" "}
+                        {index +
+                          1}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDraft({
+                            ...draft,
+                            subcategories:
+                              draft.subcategories.filter(
+                                (
+                                  item
+                                ) =>
+                                  item.id !==
+                                  sub.id
+                              ),
+                          })
+                        }
+                        className="rounded-full p-2 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2
+                          size={15}
+                        />
+                      </button>
+                    </div>
+
+                    <Field
+                      label="Name"
+                      value={
+                        sub.name
+                      }
+                      onChange={(
+                        value
+                      ) =>
+                        setDraft({
+                          ...draft,
+                          subcategories:
+                            draft.subcategories.map(
+                              (
+                                item
+                              ) =>
+                                item.id ===
+                                sub.id
+                                  ? {
+                                      ...item,
+                                      name: value,
+                                    }
+                                  : item
+                            ),
+                        })
+                      }
+                    />
+
+                    <div className="mt-3">
+                      <TextArea
+                        label="Description"
+                        value={
+                          sub.description
+                        }
+                        onChange={(
+                          value
+                        ) =>
+                          setDraft({
+                            ...draft,
+                            subcategories:
+                              draft.subcategories.map(
+                                (
+                                  item
+                                ) =>
+                                  item.id ===
+                                  sub.id
+                                    ? {
+                                        ...item,
+                                        description:
+                                          value,
+                                      }
+                                    : item
+                              ),
+                          })
+                        }
+                        rows={
+                          3
+                        }
+                      />
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </EditModal>
+      )}
+
+      {/* CONFIRM DELETE */}
+      {confirmTarget && (
+        <ConfirmModal
+          target={
+            confirmTarget
+          }
+          onClose={() =>
+            setConfirmTarget(
+              null
+            )
+          }
+          onConfirm={() => {
+            if (
+              confirmTarget.type ===
+              "subcategory"
+            ) {
+              confirmDeleteSubcategory();
+            } else {
+              confirmDelete();
+            }
+          }}
         />
-      </main>
-
-      <EditModal
-        target={editingTarget}
-        modalForm={modalForm}
-        setModalForm={setModalForm}
-        onClose={closeModal}
-        onSave={saveEditingSection}
-        onRequestDeleteSubcategory={requestDeleteSubcategory}
-      />
-
-      <ConfirmDialog
-        target={deleteTarget}
-        onCancel={() => setDeleteTarget(null)}
-        onConfirm={confirmDelete}
-      />
-    </section>
+      )}
+    </div>
   );
 }
