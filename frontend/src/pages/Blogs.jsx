@@ -30,17 +30,21 @@ export {
   normalizeBlogPost,
 };
 
-const colors = {
-  navy: "#0A1628",
-  primary: "#1E3A5F",
-  secondary: "#2D6A4F",
-  gold: "#C9A84C",
-  red: "#D71920",
-  green: "#168A3A",
-  cyan: "#38BDF8",
+/* Gallery-aligned design tokens */
+const palette = {
+  navy: "#123A63",
+  blue: "#2387C9",
+  sky: "#63C7E8",
+  gold: "#F2C14E",
+  coral: "#F28C6B",
+  mint: "#6FCF97",
+  cream: "#FFF9E9",
+  paper: "#F7FBFF",
+  ink: "#14253D",
+  muted: "#62748A",
+  white: "#FFFFFF",
+  border: "#DCE8F2",
 };
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 function getPlainExcerpt(post = {}) {
   const text = String(post.excerpt || post.content || "")
@@ -58,14 +62,14 @@ function BlogImage({ post, className = "" }) {
       <img
         src={post.imageUrl}
         alt={post.imageAlt || post.title}
-        className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${className}`}
+        className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-[0.7deg] ${className}`}
       />
     );
   }
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-300">
-      <ImageIcon className="h-12 w-12" />
+      <ImageIcon className="h-12 w-12 text-[#9AA7B5]" />
     </div>
   );
 }
@@ -80,14 +84,14 @@ function FeaturedPostCard({ post }) {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="group relative mb-14 overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/40 transition-all duration-300 hover:shadow-2xl"
+      className="group relative mb-14 overflow-hidden rounded-[32px] border border-white/80 bg-white/85 backdrop-blur-xl shadow-[0_25px_70px_rgba(18,58,99,0.12)] transition-all duration-500 hover:-translate-y-2 hover:[transform:rotateX(1deg)_rotateY(-1deg)] hover:shadow-[0_35px_90px_rgba(18,58,99,0.20)]"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
         {/* Left Featured Image */}
-        <div className="relative lg:col-span-6 min-h-[300px] sm:min-h-[380px] lg:min-h-[440px] overflow-hidden bg-slate-100">
+        <div className="relative lg:col-span-6 min-h-[300px] sm:min-h-[380px] lg:min-h-[440px] overflow-hidden bg-[#EAF7FD] [transform:translateZ(0)]">
           <div className="absolute top-4 left-4 z-20">
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#0A1628]/90 text-white backdrop-blur-md px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider shadow-lg border border-white/10">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-[#123A63]/90 text-white backdrop-blur-md px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider shadow-lg border border-white/15">
+              <Sparkles className="w-3.5 h-3.5 text-[#E9C46A]" />
               Featured
             </span>
           </div>
@@ -96,39 +100,39 @@ function FeaturedPostCard({ post }) {
         </div>
 
         {/* Right Featured Content */}
-        <div className="lg:col-span-6 p-7 sm:p-10 lg:p-12 flex flex-col justify-between bg-white">
+        <div className="lg:col-span-6 p-7 sm:p-10 lg:p-12 flex flex-col justify-between bg-gradient-to-br from-white via-white to-[#FFF9E9]/70">
           <div>
-            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-sky-600 mb-3">
-              <Tag className="w-3.5 h-3.5 text-sky-500" />
+            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-[#2D6A4F] mb-3">
+              <Tag className="w-3.5 h-3.5 text-[#2D6A4F]" />
               <span>{post.category}</span>
             </div>
 
             <Link to={`/blogs/${post.slug}`}>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0A1628] leading-tight tracking-tight hover:text-blue-600 transition-colors line-clamp-2">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#173B5F] leading-tight tracking-tight hover:text-[#2D6A4F] transition-colors line-clamp-2">
                 {post.title}
               </h2>
             </Link>
 
-            <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed line-clamp-3">
+            <p className="mt-4 text-[#667085] text-sm sm:text-base leading-relaxed line-clamp-3">
               {getPlainExcerpt(post)}
             </p>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+          <div className="mt-8 pt-6 border-t border-[#E9EDF1] flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#1E3A5F] text-white font-bold text-sm flex items-center justify-center shadow-inner">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#173B5F] to-[#2D6A4F] text-white font-bold text-sm flex items-center justify-center shadow-inner">
                 {initial}
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-800 leading-none">{authorName}</p>
-                <div className="flex items-center gap-3 text-xs text-slate-500 mt-1 font-medium">
+                <p className="text-sm font-bold text-[#111827] leading-none">{authorName}</p>
+                <div className="flex items-center gap-3 text-xs text-[#667085] mt-1 font-medium">
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    <Calendar className="w-3.5 h-3.5 text-[#9AA7B5]" />
                     {formatBlogDate(post.date)}
                   </span>
                   <span>•</span>
                   <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <Clock className="w-3.5 h-3.5 text-[#9AA7B5]" />
                     {readTime}
                   </span>
                 </div>
@@ -137,7 +141,7 @@ function FeaturedPostCard({ post }) {
 
             <Link
               to={`/blogs/${post.slug}`}
-              className="inline-flex items-center gap-2 text-sm font-extrabold text-[#1E3A5F] hover:text-blue-600 transition-all group/btn"
+              className="inline-flex items-center gap-2 text-sm font-extrabold text-[#173B5F] hover:text-[#2D6A4F] transition-all group/btn"
             >
               <span>Read Article</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
@@ -159,13 +163,13 @@ function BlogCard({ post, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="group relative rounded-2xl bg-white border border-slate-200/80 shadow-md shadow-slate-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col justify-between"
+      className="group relative rounded-[26px] bg-white/90 backdrop-blur-xl border border-white shadow-[0_14px_35px_rgba(18,58,99,0.09)] hover:shadow-[0_28px_55px_rgba(18,58,99,0.18)] hover:-translate-y-3 hover:[transform:rotateX(2deg)_rotateY(-2deg)_translateZ(8px)] transition-all duration-500 overflow-hidden flex flex-col justify-between"
     >
       <Link to={`/blogs/${post.slug}`} className="block flex-1 flex flex-col">
         {/* Category Overlay Badge on top of Image */}
         <div className="relative h-52 sm:h-56 overflow-hidden bg-slate-100">
           <div className="absolute top-3.5 left-3.5 z-10">
-            <span className="rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-slate-800 shadow-sm border border-slate-200/60">
+            <span className="rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#173B5F] shadow-sm border border-[#E9EDF1]">
               {post.category}
             </span>
           </div>
@@ -176,39 +180,39 @@ function BlogCard({ post, index }) {
         {/* Card Content Body */}
         <div className="p-6 flex-1 flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 text-xs text-slate-400 font-medium mb-2.5">
+            <div className="flex items-center gap-2 text-xs text-[#667085] font-medium mb-2.5">
               <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <Calendar className="w-3.5 h-3.5 text-[#9AA7B5]" />
                 {formatBlogDate(post.date)}
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                <Clock className="w-3.5 h-3.5 text-[#9AA7B5]" />
                 {readTime}
               </span>
             </div>
 
-            <h3 className="text-lg font-extrabold text-[#0A1628] leading-snug hover:text-blue-600 transition-colors line-clamp-2">
+            <h3 className="text-lg font-extrabold text-[#173B5F] leading-snug hover:text-[#2D6A4F] transition-colors line-clamp-2">
               {post.title}
             </h3>
 
-            <p className="mt-3 text-slate-600 text-sm line-clamp-3 leading-relaxed">
+            <p className="mt-3 text-[#667085] text-sm line-clamp-3 leading-relaxed">
               {getPlainExcerpt(post)}
             </p>
           </div>
 
           {/* Footer Metadata */}
-          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div className="mt-6 pt-4 border-t border-[#E9EDF1] flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-[#1E3A5F] text-white font-bold text-xs flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#173B5F] to-[#2D6A4F] text-white font-bold text-xs flex items-center justify-center shrink-0">
                 {initial}
               </div>
-              <span className="text-xs font-semibold text-slate-700 truncate max-w-[130px]">
+              <span className="text-xs font-semibold text-[#334155] truncate max-w-[130px]">
                 {authorName}
               </span>
             </div>
 
-            <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#1E3A5F] hover:text-blue-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0">
+            <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#173B5F] hover:text-[#2D6A4F] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0">
               Read <ArrowUpRight className="w-3.5 h-3.5" />
             </span>
           </div>
@@ -217,8 +221,6 @@ function BlogCard({ post, index }) {
     </motion.article>
   );
 }
-
-const BENCHES_BG_IMAGE = "http://localhost:5000/api/blogs"
 
 export default function Blogs() {
   const [content, setContent] = useState(() => mergeBlogContent(defaultBlogContent));
@@ -233,10 +235,6 @@ export default function Blogs() {
         const res = await api.get("/api/site-content/blogs");
         if (!alive) return;
         setContent(mergeBlogContent(res.data?.data?.content || {}));
-
-        console.log("API Response:", res.data);
-        console.log("Posts:", res.data?.data?.content?.posts);
-
       } catch (error) {
         console.error("Blog content load error:", error);
         if (alive) setContent(mergeBlogContent(defaultBlogContent));
@@ -271,31 +269,23 @@ export default function Blogs() {
   const gridPosts = visiblePosts.length > 0 ? visiblePosts.slice(1) : [];
 
   return (
-    <section className="min-h-screen relative pt-28 pb-24 overflow-hidden bg-slate-100">
-      {/* Light Classroom Benches Background Image */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <img
-          src={content.heroBackgroundImage}
-          alt="Classroom Benches Background"
-          className="w-full h-full object-cover"
-          style={{
-            filter: "brightness(0.92) contrast(0.92) saturate(0.95)",
-          }}
-        />
-        {/* Light Glassy Gradient Overlay over the Benches image */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `
-              linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(248,250,252,0.88) 50%, rgba(241,245,249,0.92) 100%),
-              radial-gradient(circle at 50% 20%, rgba(201,168,76,0.12) 0%, transparent 60%)
-            `,
-            backdropFilter: "blur(14px)",
-          }}
-        />
-      </div>
+    <section
+      className="min-h-screen relative pt-28 pb-24 overflow-hidden"
+      style={{
+        perspective: "1400px",
+        background: `
+  radial-gradient(circle at 5% 10%, rgba(238, 194, 67, 0.13), transparent 28%),
+  radial-gradient(circle at 95% 12%, rgba(72, 169, 213, 0.13), transparent 28%),
+  radial-gradient(circle at 50% 100%, rgba(238, 194, 67, 0.08), transparent 32%),
+  linear-gradient(180deg, #FFFFFF 0%, #FCFCFA 52%, #F7FAFC 100%)
+`,
+      }}
+    >
+      <div className="pointer-events-none absolute -top-16 -left-20 h-64 w-64 rounded-full bg-[#63C7E8]/15 blur-3xl" />
+      <div className="pointer-events-none absolute top-24 -right-24 h-72 w-72 rounded-full bg-[#F2C14E]/18 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-16 left-1/3 h-48 w-48 rounded-full bg-[#F28C6B]/10 blur-3xl" />
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 relative z-10">
-        {/* Header / Hero Section matching Image 1 */}
+        {/* Header / Hero Section matching Gallery styling */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -304,19 +294,19 @@ export default function Blogs() {
         >
           {/* Top Badge */}
           <div className="mb-4">
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest bg-sky-50 text-sky-700 border border-sky-200/80 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-extrabold uppercase tracking-widest bg-white/85 text-[#123A63] border border-[#F2C14E]/45 shadow-[0_8px_25px_rgba(18,58,99,0.08)] backdrop-blur-md">
+              <Sparkles className="w-3.5 h-3.5 text-[#E9C46A]" />
               {content.pageBadge || "Knowledge Hub"}
             </span>
           </div>
 
           {/* Main Title */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#0A1628] tracking-tight leading-[1.08]">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#123A63] tracking-tight leading-[1.04] drop-shadow-[0_3px_0_rgba(242,193,78,0.16)]">
             {content.pageTitle || "School Blog & Insights"}
           </h1>
 
           {/* Subtitle */}
-          <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-3xl leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-[#667085] max-w-3xl leading-relaxed">
             {content.pageDescription ||
               "Explore school activities, academic excellence, student achievements, competitions, and important educational updates."}
           </p>
@@ -325,25 +315,25 @@ export default function Blogs() {
           <div className="mt-8 flex flex-col gap-6">
             {/* Search Input Box */}
             <div className="relative max-w-md w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9AA7B5] pointer-events-none" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search articles..."
-                className="w-full rounded-xl border border-slate-200/90 bg-white py-3.5 pl-11 pr-10 text-sm text-slate-800 placeholder-slate-400 outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className="w-full rounded-xl border border-[#DCE8F2] bg-white/90 backdrop-blur-md py-3.5 shadow-[0_10px_30px_rgba(18,58,99,0.07)] pl-11 pr-10 text-sm text-[#111827] placeholder-[#9AA7B5] outline-none shadow-xs focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/20 transition-all"
               />
               {query && (
                 <button
                   onClick={() => setQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold bg-slate-100 rounded-full w-5 h-5 flex items-center justify-center cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9AA7B5] hover:text-[#173B5F] text-xs font-bold bg-slate-100 rounded-full w-5 h-5 flex items-center justify-center cursor-pointer"
                 >
                   ✕
                 </button>
               )}
             </div>
 
-            {/* Category Filter Pills Row */}
+            {/* Category Filter Pills Row (matching gallery tabs) */}
             <div className="flex flex-wrap items-center gap-2.5 pt-1">
               {(content.categories || ["All"]).map((cat) => {
                 const isActive = category === cat;
@@ -351,12 +341,15 @@ export default function Blogs() {
                   <button
                     key={cat}
                     onClick={() => setCategory(cat)}
-                    className={`rounded-full px-5 py-2 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${isActive
-                      ? "bg-[#0A1628] text-white shadow-md shadow-slate-900/10 border border-[#0A1628]"
-                      : "bg-white text-slate-600 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300"
+                    className={`relative rounded-xl px-5 py-2.5 text-xs sm:text-sm font-extrabold transition-all duration-200 cursor-pointer ${isActive
+                      ? "bg-gradient-to-r from-[#123A63] via-[#2387C9] to-[#63C7E8] text-white shadow-[0_10px_28px_rgba(35,135,201,0.30)] border border-transparent"
+                      : "bg-white text-[#263244] border border-[#E7EBEF] hover:border-[#2D6A4F]/30 hover:text-[#173B5F] hover:shadow-xs"
                       }`}
                   >
                     {cat}
+                    {isActive && (
+                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#E9C46A]" />
+                    )}
                   </button>
                 );
               })}
@@ -364,10 +357,10 @@ export default function Blogs() {
           </div>
         </motion.div>
 
-        {/* Featured Post Card (Image 2 design) */}
+        {/* Featured Post Card */}
         {featuredPost && <FeaturedPostCard post={featuredPost} />}
 
-        {/* Blog Cards Grid (Image 3 design) */}
+        {/* Blog Cards Grid */}
         {gridPosts.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {gridPosts.map((post, index) => (
@@ -378,12 +371,12 @@ export default function Blogs() {
 
         {/* Empty State when no posts match */}
         {visiblePosts.length === 0 && (
-          <div className="rounded-3xl bg-white p-12 text-center shadow-lg border border-slate-200/70 max-w-lg mx-auto my-12">
-            <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
-              <Calendar className="h-7 w-7 text-slate-400" />
+          <div className="rounded-[30px] bg-white/90 backdrop-blur-xl p-12 text-center shadow-[0_20px_55px_rgba(18,58,99,0.10)] border border-white max-w-lg mx-auto my-12">
+            <div className="w-14 h-14 rounded-2xl bg-[#F6F8FA] text-[#9AA7B5] flex items-center justify-center mx-auto mb-4">
+              <Calendar className="h-7 w-7 text-[#9AA7B5]" />
             </div>
-            <h2 className="text-xl font-extrabold text-[#0A1628]">No articles found</h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <h2 className="text-xl font-black text-[#173B5F]">No articles found</h2>
+            <p className="mt-2 text-sm text-[#667085]">
               {query
                 ? `No articles match "${query}". Try searching with different keywords.`
                 : "School news and blog posts will appear here once published."}
@@ -391,7 +384,7 @@ export default function Blogs() {
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="mt-5 rounded-full bg-[#0A1628] px-6 py-2.5 text-xs font-bold text-white hover:bg-blue-900 transition-colors"
+                className="mt-5 rounded-full bg-gradient-to-r from-[#173B5F] to-[#2D6A4F] px-6 py-2.5 text-xs font-extrabold text-white hover:opacity-95 transition-opacity shadow-md"
               >
                 Clear Search
               </button>
@@ -402,4 +395,3 @@ export default function Blogs() {
     </section>
   );
 }
-
