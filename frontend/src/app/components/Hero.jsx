@@ -9,6 +9,7 @@ import {
   MapPin,
   Pencil,
   Sparkles,
+  Play,
 } from "lucide-react";
 import api from "../../lib/api";
 
@@ -35,7 +36,7 @@ const COLORS = {
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=2000&q=90";
 
-export const defaultHeroData = {
+const defaultHeroData = {
   badge: "WISDOM IS DIVINE",
 
   schoolName: "RED ROSE SCHOOL",
@@ -65,11 +66,11 @@ export const defaultHeroData = {
    MERGE DATA
 ========================================================= */
 
-export function mergeHeroData(data = {}) {
+function mergeHeroData(data = {}) {
   const images = Array.isArray(data.images)
     ? data.images
-      .map((item) => String(item || "").trim())
-      .filter(Boolean)
+        .map((item) => String(item || "").trim())
+        .filter(Boolean)
     : [];
 
   const finalImages =
@@ -182,7 +183,7 @@ function Editable({
 export function Hero({
   editMode = false,
   contentOverride = null,
-  onEditTarget = () => { },
+  onEditTarget = () => {},
 }) {
   const [heroData, setHeroData] = useState(() =>
     mergeHeroData(contentOverride || defaultHeroData)
@@ -208,7 +209,8 @@ export function Hero({
 
         if (!mounted) return;
 
-        const hero = response?.data?.data?.content?.hero;
+        const hero =
+          response?.data?.data?.content?.hero;
 
         if (hero) {
           setHeroData(mergeHeroData(hero));
@@ -217,7 +219,9 @@ export function Hero({
         console.error("Hero loading error:", error);
 
         if (mounted) {
-          setHeroData(mergeHeroData(defaultHeroData));
+          setHeroData(
+            mergeHeroData(defaultHeroData)
+          );
         }
       }
     }
@@ -248,7 +252,9 @@ export function Hero({
 
     const interval = setInterval(() => {
       setCurrentImage(
-        (previous) => (previous + 1) % heroData.images.length
+        (previous) =>
+          (previous + 1) %
+          heroData.images.length
       );
     }, 5500);
 
@@ -256,10 +262,13 @@ export function Hero({
   }, [heroData.images]);
 
   const images =
-    heroData.images?.length > 0 ? heroData.images : [DEFAULT_IMAGE];
+    heroData.images?.length > 0
+      ? heroData.images
+      : [DEFAULT_IMAGE];
 
   const image =
-    images[currentImage % images.length] || DEFAULT_IMAGE;
+    images[currentImage % images.length] ||
+    DEFAULT_IMAGE;
 
   /* =======================================================
      IMAGE CONTROLS
@@ -267,13 +276,16 @@ export function Hero({
 
   const previousImage = () => {
     setCurrentImage((previous) =>
-      previous === 0 ? images.length - 1 : previous - 1
+      previous === 0
+        ? images.length - 1
+        : previous - 1
     );
   };
 
   const nextImage = () => {
     setCurrentImage(
-      (previous) => (previous + 1) % images.length
+      (previous) =>
+        (previous + 1) % images.length
     );
   };
 
@@ -309,12 +321,11 @@ export function Hero({
             blur-3xl
           "
           style={{
-            background: "rgba(244,215,126,0.18)",
+            background: "rgba(255,215,0,0.12)",
           }}
         />
 
-        {/* Blue glow */}
-
+        {/* Gold glow */}
         <div
           className="
             absolute
@@ -326,12 +337,11 @@ export function Hero({
             blur-3xl
           "
           style={{
-            background: "rgba(221,239,243,0.65)",
+            background: "rgba(255,215,0,0.18)",
           }}
         />
 
-        {/* Subtle grid */}
-
+        {/* Subtle pattern */}
         <div
           className="
             absolute
@@ -343,44 +353,37 @@ export function Hero({
               radial-gradient(circle at 20% 50%, rgba(255,215,0,0.08) 0%, transparent 50%),
               radial-gradient(circle at 80% 50%, rgba(255,215,0,0.08) 0%, transparent 50%)
             `,
-            backgroundSize: "70px 70px",
-            maskImage:
-              "linear-gradient(to bottom, black 0%, transparent 75%)",
+          }}
+        />
+
+        {/* Decorative gold oval */}
+        <motion.div
+          className="
+            absolute
+            -right-36
+            top-12
+            hidden
+            h-[240px]
+            w-[470px]
+            rounded-[50%]
+            lg:block
+          "
+          animate={{
+            rotate: [-8, -4, -8],
+            y: [0, 8, 0],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          style={{
+            border: "1px solid rgba(217,170,50,0.15)",
+            background: "rgba(217,170,50,0.04)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5)",
           }}
         />
       </div>
-
-      {/* ===================================================
-          DECORATIVE GOLD OVAL
-      =================================================== */}
-
-      <motion.div
-        className="
-          absolute
-          -right-36
-          top-12
-          hidden
-          h-[240px]
-          w-[470px]
-          rounded-[50%]
-          lg:block
-        "
-        animate={{
-          rotate: [-8, -4, -8],
-          y: [0, 8, 0],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        style={{
-          border: "1px solid rgba(217,170,50,0.18)",
-          background: "rgba(244,215,126,0.08)",
-          boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.8)",
-        }}
-      />
 
       {/* ===================================================
           MAIN CONTAINER
@@ -448,7 +451,7 @@ export function Hero({
                 className="
                   inline-flex
                   items-center
-                  gap-1.5
+                  gap-3
                   rounded-full
                   border
                   bg-white/80
@@ -456,14 +459,18 @@ export function Hero({
                   py-3
                   shadow-sm
                   backdrop-blur-xl
-                  mt-3
-                  sm:mt-4
-                  lg:mt-5
                 "
                 style={{
                   borderColor: COLORS.border,
                 }}
               >
+                <Sparkles
+                  className="h-5 w-5"
+                  style={{
+                    color: COLORS.gold,
+                  }}
+                />
+
                 <span
                   className="
                     text-sm
@@ -542,10 +549,15 @@ export function Hero({
                 transition={{
                   duration: 0.9,
                   delay: 0.12,
-                  ease: [0.22, 1, 0.36, 1],
+                  ease: [
+                    0.22,
+                    1,
+                    0.36,
+                    1,
+                  ],
                 }}
                 className="
-                  mt-2
+                  mt-3
                   max-w-2xl
                   text-5xl
                   font-black
@@ -756,10 +768,8 @@ export function Hero({
                   "
                   style={{
                     color: COLORS.navy,
-                    background:
-                      "linear-gradient(135deg,#D9AA32,#F4D77E)",
-                    boxShadow:
-                      "0 14px 30px rgba(217,170,50,0.22)",
+                    background: "linear-gradient(135deg,#D9AA32,#F4D77E)",
+                    boxShadow: "0 14px 30px rgba(217,170,50,0.22)",
                   }}
                 >
                   {heroData.primaryButtonText}
@@ -922,7 +932,7 @@ export function Hero({
               className="
                 absolute
                 right-[-4%]
-                top-[0%]
+                top-[4%]
                 h-[82%]
                 w-[82%]
                 rounded-[48%]
@@ -937,12 +947,9 @@ export function Hero({
                 ease: "easeInOut",
               }}
               style={{
-                border:
-                  "2px solid rgba(217,170,50,0.30)",
-                background:
-                  "rgba(244,215,126,0.12)",
-                boxShadow:
-                  "0 30px 70px rgba(217,170,50,0.12)",
+                border: "2px solid rgba(217,170,50,0.30)",
+                background: "rgba(244,215,126,0.12)",
+                boxShadow: "0 30px 70px rgba(217,170,50,0.12)",
               }}
             />
 
@@ -961,10 +968,8 @@ export function Hero({
                 blur-[1px]
               "
               style={{
-                background:
-                  "rgba(221,239,243,0.85)",
-                transform:
-                  "rotate(-18deg)",
+                background: "rgba(244,215,126,0.55)",
+                transform: "rotate(-18deg)",
               }}
             />
 
@@ -989,14 +994,16 @@ export function Hero({
               transition={{
                 duration: 1,
                 delay: 0.2,
-                ease: [0.22, 1, 0.36, 1],
+                ease: [
+                  0.22,
+                  1,
+                  0.36,
+                  1,
+                ],
               }}
               className="
                 absolute
-                top-0
-                bottom-14
-                left-[9%]
-                right-[6%]
+                inset-0
                 overflow-hidden
               "
               style={{
@@ -1012,7 +1019,7 @@ export function Hero({
                 <motion.img
                   key={image}
                   src={image}
-                  alt="Red Rose School campus"
+                  alt={`${heroData.schoolName} campus`}
                   className="
                     absolute
                     inset-0
@@ -1069,13 +1076,10 @@ export function Hero({
                   rounded-full
                 "
                 style={{
-                  background:
-                    "rgba(255,255,255,0.76)",
+                  background: "rgba(255,255,255,0.76)",
                   color: COLORS.navy,
-                  backdropFilter:
-                    "blur(14px)",
-                  boxShadow:
-                    "0 8px 20px rgba(0,0,0,0.10)",
+                  backdropFilter: "blur(14px)",
+                  boxShadow: "0 8px 20px rgba(0,0,0,0.10)",
                 }}
               >
                 <Camera className="h-5 w-5" />
@@ -1142,7 +1146,7 @@ export function Hero({
                     text-white
                   "
                 >
-                  RED ROSE SCHOOL
+                  {heroData.schoolName}
                 </p>
 
                 <p
@@ -1235,34 +1239,41 @@ export function Hero({
                       backdrop-blur-md
                     "
                   >
-                    {images.map((_, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() =>
-                          setCurrentImage(index)
-                        }
-                        aria-label={`Show image ${index + 1
+                    {images.map(
+                      (_, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() =>
+                            setCurrentImage(
+                              index
+                            )
+                          }
+                          aria-label={`Show image ${
+                            index + 1
                           }`}
-                        className="
-                          h-1.5
-                          rounded-full
-                          transition-all
-                          duration-300
-                        "
-                        style={{
-                          width:
-                            currentImage === index
-                              ? "25px"
-                              : "7px",
+                          className="
+                            h-1.5
+                            rounded-full
+                            transition-all
+                            duration-300
+                          "
+                          style={{
+                            width:
+                              currentImage ===
+                              index
+                                ? "25px"
+                                : "7px",
 
-                          background:
-                            currentImage === index
-                              ? COLORS.goldLight
-                              : "rgba(255,255,255,0.70)",
-                        }}
-                      />
-                    ))}
+                            background:
+                              currentImage ===
+                              index
+                                ? COLORS.goldLight
+                                : "rgba(255,255,255,0.70)",
+                          }}
+                        />
+                      )
+                    )}
                   </div>
                 </>
               )}
@@ -1298,7 +1309,7 @@ export function Hero({
                 bottom-[5%]
                 left-0
                 z-40
-                rounded-[20px]
+                rounded-[22px]
                 border
                 bg-white/90
                 px-5
@@ -1310,6 +1321,7 @@ export function Hero({
               "
               style={{
                 borderColor: COLORS.border,
+                boxShadow: "0 24px 48px rgba(21,36,56,0.16)",
               }}
             >
               <div
@@ -1329,10 +1341,8 @@ export function Hero({
                     rounded-full
                   "
                   style={{
-                    background:
-                      COLORS.creamDark,
-                    color:
-                      COLORS.gold,
+                    background: COLORS.creamDark,
+                    color: COLORS.gold,
                   }}
                 >
                   <Sparkles className="h-5 w-5" />
@@ -1419,7 +1429,7 @@ export function Hero({
             color: COLORS.navySoft,
           }}
         >
-          Discover Red Rose
+          Discover {heroData.schoolName.split(" ")[0]}
         </span>
 
         <div
@@ -1437,3 +1447,4 @@ export function Hero({
 }
 
 export default Hero;
+export { defaultHeroData, mergeHeroData };
