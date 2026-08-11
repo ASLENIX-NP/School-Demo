@@ -683,6 +683,20 @@ export default function AdminCalendar() {
 
             <button
               type="button"
+              onClick={() => openNewEvent("workingDay")}
+              className="calendar-admin-button inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
+              style={{
+                background: "rgba(249,115,22,0.10)",
+                color: colors.orange,
+                border: "1px solid rgba(249,115,22,0.22)",
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Working Day
+            </button>
+
+            <button
+              type="button"
               onClick={() => setShowEventsPanel(true)}
               className="calendar-admin-button inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all hover:-translate-y-0.5"
               style={{

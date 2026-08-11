@@ -1,3 +1,4 @@
+import "dotenv/config";
 import nodemailer from "nodemailer";
 
 import { supabase } from "../config/supabase.js";
@@ -12,25 +13,21 @@ import {
 // =====================================================
 
 const MAIL_USER =
-  process.env.MAIL_USER ||
-  "edutaskcalendar@gmail.com";
+  process.env.MAIL_USER || "edutaskcalendar@gmail.com";
 
-const MAIL_PASS =
-  process.env.MAIL_PASS;
+const MAIL_PASS = process.env.MAIL_PASS;
 
 // =====================================================
 // NODEMAILER
 // =====================================================
 
-const transporter =
-  nodemailer.createTransport({
-    service: "gmail",
-
-    auth: {
-      user: MAIL_USER,
-      pass: MAIL_PASS,
-    },
-  });
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: MAIL_USER,
+    pass: MAIL_PASS,
+  },
+});
 
 // =====================================================
 // PASSWORD RECOVERY EMAILS
@@ -53,43 +50,49 @@ const otpStore = new Map();
 
 const DEFAULT_ADMIN_SETTINGS = {
   id: 1,
-<<<<<<< HEAD
-  school_name: "Red Rose Secondary English Boarding School",
-  institution_name: "Red Rose Secondary English Boarding School",
-  campus_location: "Basudev Marga, Hetauda-2, Makwanpur",
-  address: "Basudev Marga, Hetauda-2, Makwanpur",
-  academic_session: "2081 / 2082 B.S.",
-  timezone: "Asia/Kathmandu (UTC +05:45)",
-  school_email: "admin@redroseschool.edu.np",
-  phone: "+977 057-590146",
-  logo: "",
-  lock_account: true,
-=======
 
   school_name:
-    "Red Rose English Boarding School",
+    "Red Rose Secondary English Boarding School",
+
+  institution_name:
+    "Red Rose Secondary English Boarding School",
+
+  campus_location:
+    "Basudev Marga, Hetauda-2, Makwanpur",
+
+  address:
+    "Basudev Marga, Hetauda-2, Makwanpur",
+
+  academic_session:
+    "2081 / 2082 B.S.",
+
+  timezone:
+    "Asia/Kathmandu (UTC +05:45)",
 
   school_email:
     "admin@school.com",
 
-  phone:
-    "+977 9800000000",
+  admin_email:
+    "admin@school.com",
 
-  address:
-    "Itahari, Sunsari, Nepal",
+  phone:
+    "+977 057-590146",
 
   logo: "",
 
-  lock_account: false,
+  profile_photo: "",
 
->>>>>>> 1abc8cf (Update admin password recovery and settings)
+  lock_account: true,
+
   two_factor: false,
 
   session_timeout: "30",
 
   max_login_attempts: "5",
 
-  // DEFAULT PASSWORD
+  // Default password.
+  // This is used by adminAuthController when
+  // no saved password exists yet.
   admin_password: "admin123",
 };
 
@@ -100,58 +103,24 @@ const DEFAULT_ADMIN_SETTINGS = {
 const DEFAULT_LOGIN_ACTIVITY = [
   {
     id: 1,
-<<<<<<< HEAD
     device: "Chrome / Windows 11",
     browser: "Chrome",
     ip: "127.0.0.1",
     location: "Hetauda, Nepal",
     login_time: new Date().toISOString(),
     status: "Active Session",
-=======
-
-    device:
-      "Chrome / Windows 11",
-
-    ip:
-      "127.0.0.1",
-
-    location:
-      "Itahari, Nepal",
-
-    time:
-      "Just now",
-
-    status:
-      "Active Session",
->>>>>>> 1abc8cf (Update admin password recovery and settings)
   },
 
   {
     id: 2,
-<<<<<<< HEAD
-    device: "Safari / iPhone 16",
+    device: "Safari / iPhone 15",
     browser: "Safari",
     ip: "110.44.112.5",
     location: "Kathmandu, Nepal",
-    login_time: new Date(Date.now() - 7200000).toISOString(),
+    login_time: new Date(
+      Date.now() - 7200000
+    ).toISOString(),
     status: "Successful",
-=======
-
-    device:
-      "Safari / iPhone 15",
-
-    ip:
-      "110.44.112.5",
-
-    location:
-      "Kathmandu, Nepal",
-
-    time:
-      "2 hours ago",
-
-    status:
-      "Successful",
->>>>>>> 1abc8cf (Update admin password recovery and settings)
   },
 ];
 
@@ -159,106 +128,102 @@ const DEFAULT_LOGIN_ACTIVITY = [
 // GET ADMIN SETTINGS
 // =====================================================
 
-export const getAdminSettings =
-  async (req, res) => {
-    try {
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("admin_settings")
-        .select("*")
-        .eq("id", 1)
-        .maybeSingle();
+export const getAdminSettings = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("admin_settings")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
 
-      if (!error && data) {
-        return res.json({
-          success: true,
-          data,
-        });
-      }
-    } catch (error) {
+    if (!error && data) {
+      return res.json({
+        success: true,
+        data,
+      });
+    }
+
+    if (error) {
       console.warn(
         "Supabase admin settings fetch error:",
         error.message
       );
     }
+  } catch (error) {
+    console.warn(
+      "Admin settings fetch error:",
+      error.message
+    );
+  }
 
-    const settings =
-      getFallbackData(
-        "admin_settings",
-        DEFAULT_ADMIN_SETTINGS
-      );
+  const settings = getFallbackData(
+    "admin_settings",
+    DEFAULT_ADMIN_SETTINGS
+  );
 
-    return res.json({
-      success: true,
-      data: settings,
-    });
-  };
+  return res.json({
+    success: true,
+    data: settings,
+  });
+};
 
 // =====================================================
 // UPDATE ADMIN SETTINGS
 // =====================================================
 
-export const updateAdminSettings =
-  async (req, res) => {
-    const updates =
-      req.body || {};
+export const updateAdminSettings = async (req, res) => {
+  const updates = req.body || {};
 
-    try {
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("admin_settings")
-        .upsert({
-          id: 1,
-          ...updates,
-        })
-        .select();
+  try {
+    const currentSettings = getFallbackData(
+      "admin_settings",
+      DEFAULT_ADMIN_SETTINGS
+    );
 
-      if (!error) {
-        const currentSettings =
-          getFallbackData(
-            "admin_settings",
-            DEFAULT_ADMIN_SETTINGS
-          );
+    const merged = {
+      ...currentSettings,
+      ...updates,
+    };
 
-        const merged = {
-          ...currentSettings,
-          ...updates,
-        };
+    // Always save locally first.
+    setFallbackData(
+      "admin_settings",
+      merged
+    );
 
-        setFallbackData(
-          "admin_settings",
-          merged
-        );
+    // Try Supabase.
+    const { data, error } = await supabase
+      .from("admin_settings")
+      .upsert({
+        id: 1,
+        ...updates,
+      })
+      .select();
 
-        return res.json({
-          success: true,
-
-          message:
-            "Admin settings updated successfully.",
-
-          data:
-            data?.[0] ||
-            merged,
-        });
-      }
-    } catch (error) {
+    if (error) {
       console.warn(
         "Supabase update admin settings error:",
         error.message
       );
     }
 
-    // Fallback storage
+    return res.json({
+      success: true,
+      message:
+        "Admin settings updated successfully.",
+      data:
+        data?.[0] || merged,
+    });
+  } catch (error) {
+    console.error(
+      "Update admin settings error:",
+      error
+    );
 
-    const settings =
-      getFallbackData(
-        "admin_settings",
-        DEFAULT_ADMIN_SETTINGS
-      );
+    const settings = getFallbackData(
+      "admin_settings",
+      DEFAULT_ADMIN_SETTINGS
+    );
 
     const merged = {
       ...settings,
@@ -272,514 +237,484 @@ export const updateAdminSettings =
 
     return res.json({
       success: true,
-
       message:
         "Admin settings updated successfully.",
-
       data: merged,
     });
-  };
+  }
+};
 
 // =====================================================
 // GET LOGIN ACTIVITY
 // =====================================================
 
-export const getLoginActivity =
-  async (req, res) => {
-    const activity =
-      getFallbackData(
-        "login_activity",
-        DEFAULT_LOGIN_ACTIVITY
-      );
+export const getLoginActivity = async (req, res) => {
+  const activity = getFallbackData(
+    "login_activity",
+    DEFAULT_LOGIN_ACTIVITY
+  );
 
-    return res.json({
-      success: true,
-      data: activity,
-    });
-  };
+  return res.json({
+    success: true,
+    data: activity,
+  });
+};
 
 // =====================================================
 // UPLOAD ADMIN PHOTO
 // =====================================================
 
-export const uploadAdminPhoto =
-  async (req, res) => {
-    try {
-      const {
-        photo_url,
-      } = req.body;
+export const uploadAdminPhoto = async (req, res) => {
+  try {
+    const {
+      photo_url,
+      image,
+    } = req.body;
 
-      const settings =
-        getFallbackData(
-          "admin_settings",
-          DEFAULT_ADMIN_SETTINGS
-        );
+    const url = photo_url || image;
 
-      const updated = {
-        ...settings,
+    const settings = getFallbackData(
+      "admin_settings",
+      DEFAULT_ADMIN_SETTINGS
+    );
 
-        logo:
-          photo_url ||
-          settings.logo,
-      };
+    const updated = {
+      ...settings,
 
-      setFallbackData(
-        "admin_settings",
-        updated
-      );
+      profile_photo:
+        url || settings.profile_photo || "",
 
-      return res.json({
-        success: true,
+      logo:
+        url || settings.logo || "",
+    };
 
-        message:
-          "Admin photo updated successfully.",
+    setFallbackData(
+      "admin_settings",
+      updated
+    );
 
-        data: updated,
-      });
-    } catch (error) {
-      console.error(
-        "Upload admin photo error:",
-        error
-      );
+    return res.json({
+      success: true,
+      message:
+        "Admin photo updated successfully.",
+      data: updated,
+    });
+  } catch (error) {
+    console.error(
+      "Upload admin photo error:",
+      error
+    );
 
-      return res.status(500).json({
-        success: false,
-
-        message:
-          "Unable to update admin photo.",
-      });
-    }
-  };
+    return res.status(500).json({
+      success: false,
+      message:
+        "Unable to update admin photo.",
+    });
+  }
+};
 
 // =====================================================
 // UPDATE ADMIN EMAIL
 // =====================================================
 
-export const updateAdminEmail =
-  async (req, res) => {
-    try {
-      const {
-        school_email,
-        email,
-      } = req.body;
+export const updateAdminEmail = async (req, res) => {
+  try {
+    const {
+      school_email,
+      email,
+    } = req.body;
 
-      const newEmail =
-        email ||
-        school_email;
+    const newEmail = (
+      email ||
+      school_email ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
 
-<<<<<<< HEAD
-export const uploadAdminPhoto = async (req, res) => {
-  const { photo_url, image } = req.body;
-  const url = photo_url || image;
-  const settings = getFallbackData("admin_settings", DEFAULT_ADMIN_SETTINGS);
-  const updated = { ...settings, profile_photo: url || settings.profile_photo, logo: url || settings.logo };
-  setFallbackData("admin_settings", updated);
-=======
-      if (!newEmail) {
-        return res.status(400).json({
-          success: false,
->>>>>>> 1abc8cf (Update admin password recovery and settings)
-
-          message:
-            "Email is required.",
-        });
-      }
-
-      const settings =
-        getFallbackData(
-          "admin_settings",
-          DEFAULT_ADMIN_SETTINGS
-        );
-
-<<<<<<< HEAD
-  const settings = getFallbackData("admin_settings", DEFAULT_ADMIN_SETTINGS);
-  const updated = { ...settings, school_email: newEmail, admin_email: newEmail };
-  setFallbackData("admin_settings", updated);
-=======
-      const updated = {
-        ...settings,
->>>>>>> 1abc8cf (Update admin password recovery and settings)
-
-        school_email:
-          newEmail,
-      };
-
-      setFallbackData(
-        "admin_settings",
-        updated
-      );
-
-      return res.json({
-        success: true,
-
-        message:
-          "Email updated successfully.",
-
-        data: updated,
-      });
-    } catch (error) {
-      console.error(
-        "Update admin email error:",
-        error
-      );
-
-      return res.status(500).json({
+    if (!newEmail) {
+      return res.status(400).json({
         success: false,
-
         message:
-          "Unable to update email.",
+          "Email is required.",
       });
     }
-  };
+
+    const settings = getFallbackData(
+      "admin_settings",
+      DEFAULT_ADMIN_SETTINGS
+    );
+
+    const updated = {
+      ...settings,
+
+      school_email: newEmail,
+
+      admin_email: newEmail,
+    };
+
+    setFallbackData(
+      "admin_settings",
+      updated
+    );
+
+    // Try saving email to Supabase.
+    try {
+      const { error } = await supabase
+        .from("admin_settings")
+        .upsert({
+          id: 1,
+          school_email: newEmail,
+        });
+
+      if (error) {
+        console.warn(
+          "Could not save admin email to Supabase:",
+          error.message
+        );
+      }
+    } catch (error) {
+      console.warn(
+        "Admin email Supabase error:",
+        error.message
+      );
+    }
+
+    return res.json({
+      success: true,
+      message:
+        "Email updated successfully.",
+      data: updated,
+    });
+  } catch (error) {
+    console.error(
+      "Update admin email error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Unable to update email.",
+    });
+  }
+};
 
 // =====================================================
 // NORMAL CHANGE PASSWORD
 // =====================================================
 
-export const changeAdminPassword =
-  async (req, res) => {
-    try {
-      const {
-        password,
-      } = req.body;
+export const changeAdminPassword = async (
+  req,
+  res
+) => {
+  try {
+    const {
+      password,
+    } = req.body;
 
-      if (!password) {
-        return res.status(400).json({
-          success: false,
-
-          message:
-            "New password is required.",
-        });
-      }
-
-      if (password.length < 8) {
-        return res.status(400).json({
-          success: false,
-
-          message:
-            "Password must be at least 8 characters long.",
-        });
-      }
-
-      const settings =
-        getFallbackData(
-          "admin_settings",
-          DEFAULT_ADMIN_SETTINGS
-        );
-
-      const updated = {
-        ...settings,
-
-        admin_password:
-          password,
-      };
-
-      // Save fallback
-      setFallbackData(
-        "admin_settings",
-        updated
-      );
-
-      // Save Supabase
-      try {
-        await supabase
-          .from("admin_settings")
-          .upsert({
-            id: 1,
-
-            admin_password:
-              password,
-          });
-      } catch (supabaseError) {
-        console.warn(
-          "Could not save password to Supabase:",
-          supabaseError.message
-        );
-      }
-
-      return res.json({
-        success: true,
-
-        message:
-          "Password changed successfully.",
-      });
-    } catch (error) {
-      console.error(
-        "Change password error:",
-        error
-      );
-
-      return res.status(500).json({
+    if (!password) {
+      return res.status(400).json({
         success: false,
-
         message:
-          "Unable to change password.",
+          "New password is required.",
       });
     }
-  };
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be at least 8 characters long.",
+      });
+    }
+
+    const settings = getFallbackData(
+      "admin_settings",
+      DEFAULT_ADMIN_SETTINGS
+    );
+
+    const updated = {
+      ...settings,
+
+      admin_password: password,
+    };
+
+    // IMPORTANT:
+    // Save password in fallback storage.
+    // adminAuthController must read the same value.
+    setFallbackData(
+      "admin_settings",
+      updated
+    );
+
+    // Try saving to Supabase if the column exists.
+    try {
+      const {
+        error,
+      } = await supabase
+        .from("admin_settings")
+        .update({
+          admin_password: password,
+        })
+        .eq("id", 1);
+
+      if (error) {
+        console.warn(
+          "Could not save password to Supabase:",
+          error.message
+        );
+      }
+    } catch (supabaseError) {
+      console.warn(
+        "Supabase password update error:",
+        supabaseError.message
+      );
+    }
+
+    return res.json({
+      success: true,
+      message:
+        "Password changed successfully.",
+    });
+  } catch (error) {
+    console.error(
+      "Change password error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Unable to change password.",
+    });
+  }
+};
 
 // =====================================================
 // FORGOT PASSWORD
 // SEND OTP
 // =====================================================
 
-export const forgotPassword =
-  async (req, res) => {
-    try {
-      const {
-        email,
-      } = req.body;
+export const forgotPassword = async (
+  req,
+  res
+) => {
+  try {
+    const {
+      email,
+    } = req.body;
 
-      // -------------------------------------------------
-      // Validate email
-      // -------------------------------------------------
-
-      if (!email) {
-        return res.status(400).json({
-          success: false,
-
-          message:
-            "Admin email address is required.",
-        });
-      }
-
-      const submittedEmail =
-        email
-          .trim()
-          .toLowerCase();
-
-      // -------------------------------------------------
-      // Check allowed email
-      // -------------------------------------------------
-
-      if (
-        !ALLOWED_PASSWORD_RESET_EMAILS.includes(
-          submittedEmail
-        )
-      ) {
-        return res.status(400).json({
-          success: false,
-
-          message:
-            "This email is not registered for password recovery.",
-        });
-      }
-
-      // -------------------------------------------------
-      // Check mail configuration
-      // -------------------------------------------------
-
-      if (
-        !MAIL_USER ||
-        !MAIL_PASS
-      ) {
-        console.error(
-          "MAIL_USER or MAIL_PASS is missing."
-        );
-
-        return res.status(500).json({
-          success: false,
-
-          message:
-            "Email service is not configured. Check MAIL_USER and MAIL_PASS.",
-        });
-      }
-
-      // -------------------------------------------------
-      // Generate OTP
-      // -------------------------------------------------
-
-      const otp =
-        Math.floor(
-          100000 +
-            Math.random() *
-              900000
-        ).toString();
-
-      // -------------------------------------------------
-      // Expire after 10 minutes
-      // -------------------------------------------------
-
-      const expiresAt =
-        Date.now() +
-        10 * 60 * 1000;
-
-      // -------------------------------------------------
-      // Save OTP
-      // -------------------------------------------------
-
-      otpStore.set(
-        submittedEmail,
-        {
-          otp,
-
-          expiresAt,
-
-          verified: false,
-        }
-      );
-
-      console.log(
-        `OTP generated for ${submittedEmail}: ${otp}`
-      );
-
-      // -------------------------------------------------
-      // Send email
-      // -------------------------------------------------
-
-      await transporter.sendMail({
-        from:
-          `"Red Rose School" <${MAIL_USER}>`,
-
-        to:
-          submittedEmail,
-
-        subject:
-          "Red Rose School - Password Reset OTP",
-
-        html: `
-          <div style="
-            margin:0;
-            padding:40px 20px;
-            background:#f1f5f9;
-            font-family:Arial,Helvetica,sans-serif;
-          ">
-
-            <div style="
-              max-width:600px;
-              margin:auto;
-              background:#ffffff;
-              border-radius:20px;
-              overflow:hidden;
-              box-shadow:0 10px 30px rgba(0,0,0,0.08);
-            ">
-
-              <div style="
-                padding:30px;
-                text-align:center;
-                color:white;
-                background:linear-gradient(
-                  135deg,
-                  #2563eb,
-                  #38bdf8
-                );
-              ">
-
-                <h1 style="
-                  margin:0;
-                  font-size:28px;
-                ">
-                  Red Rose School
-                </h1>
-
-                <p style="
-                  margin:8px 0 0;
-                  opacity:0.9;
-                ">
-                  School Management Portal
-                </p>
-
-              </div>
-
-              <div style="
-                padding:35px;
-              ">
-
-                <h2 style="
-                  color:#0f172a;
-                  margin-top:0;
-                ">
-                  Password Reset
-                </h2>
-
-                <p style="
-                  color:#475569;
-                  line-height:1.7;
-                ">
-                  We received a request to reset
-                  your administrator password.
-                </p>
-
-                <p style="
-                  color:#475569;
-                ">
-                  Your verification OTP is:
-                </p>
-
-                <div style="
-                  margin:25px 0;
-                  padding:20px;
-                  text-align:center;
-                  background:#eff6ff;
-                  border-radius:15px;
-                  border:1px solid #bfdbfe;
-                ">
-
-                  <span style="
-                    font-size:38px;
-                    font-weight:bold;
-                    letter-spacing:10px;
-                    color:#2563eb;
-                  ">
-                    ${otp}
-                  </span>
-
-                </div>
-
-                <p style="
-                  color:#64748b;
-                  line-height:1.6;
-                ">
-                  This OTP will expire in
-                  <strong>10 minutes</strong>.
-                </p>
-
-                <p style="
-                  color:#64748b;
-                  line-height:1.6;
-                ">
-                  If you did not request this,
-                  you can safely ignore this email.
-                </p>
-
-              </div>
-
-              <div style="
-                padding:20px;
-                text-align:center;
-                background:#f8fafc;
-                color:#94a3b8;
-                font-size:13px;
-              ">
-                © 2026 Red Rose School.
-                All Rights Reserved.
-              </div>
-
-            </div>
-          </div>
-        `,
-      });
-
-      return res.json({
-        success: true,
-
+    if (!email) {
+      return res.status(400).json({
+        success: false,
         message:
-          `OTP has been sent to ${submittedEmail}.`,
+          "Admin email address is required.",
       });
-    } catch (error) {
+    }
+
+    const submittedEmail = email
+      .trim()
+      .toLowerCase();
+
+    if (
+      !ALLOWED_PASSWORD_RESET_EMAILS.includes(
+        submittedEmail
+      )
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "This email is not registered for password recovery.",
+      });
+    }
+
+    if (!MAIL_USER || !MAIL_PASS) {
       console.error(
-        "Forgot password error:",
-        error
+        "MAIL_USER or MAIL_PASS is missing."
       );
 
       return res.status(500).json({
         success: false,
-
         message:
-          "Unable to send OTP. Please check your email configuration.",
+          "Email service is not configured. Check MAIL_USER and MAIL_PASS.",
       });
     }
-  };
+
+    // Generate 6 digit OTP.
+    const otp = Math.floor(
+      100000 +
+        Math.random() * 900000
+    ).toString();
+
+    const expiresAt =
+      Date.now() +
+      10 * 60 * 1000;
+
+    otpStore.set(
+      submittedEmail,
+      {
+        otp,
+        expiresAt,
+        verified: false,
+      }
+    );
+
+    console.log(
+      `OTP generated for ${submittedEmail}: ${otp}`
+    );
+
+    await transporter.sendMail({
+      from:
+        `"Red Rose School" <${MAIL_USER}>`,
+
+      to:
+        submittedEmail,
+
+      subject:
+        "Red Rose School - Password Reset OTP",
+
+      html: `
+        <div style="
+          margin:0;
+          padding:40px 20px;
+          background:#f1f5f9;
+          font-family:Arial,Helvetica,sans-serif;
+        ">
+
+          <div style="
+            max-width:600px;
+            margin:auto;
+            background:#ffffff;
+            border-radius:20px;
+            overflow:hidden;
+            box-shadow:0 10px 30px rgba(0,0,0,0.08);
+          ">
+
+            <div style="
+              padding:30px;
+              text-align:center;
+              color:white;
+              background:linear-gradient(
+                135deg,
+                #2563eb,
+                #38bdf8
+              );
+            ">
+
+              <h1 style="
+                margin:0;
+                font-size:28px;
+              ">
+                Red Rose School
+              </h1>
+
+              <p style="
+                margin:8px 0 0;
+                opacity:0.9;
+              ">
+                School Management Portal
+              </p>
+
+            </div>
+
+            <div style="
+              padding:35px;
+            ">
+
+              <h2 style="
+                color:#0f172a;
+                margin-top:0;
+              ">
+                Password Reset
+              </h2>
+
+              <p style="
+                color:#475569;
+                line-height:1.7;
+              ">
+                We received a request to reset
+                your administrator password.
+              </p>
+
+              <p style="
+                color:#475569;
+              ">
+                Your verification OTP is:
+              </p>
+
+              <div style="
+                margin:25px 0;
+                padding:20px;
+                text-align:center;
+                background:#eff6ff;
+                border-radius:15px;
+                border:1px solid #bfdbfe;
+              ">
+
+                <span style="
+                  font-size:38px;
+                  font-weight:bold;
+                  letter-spacing:10px;
+                  color:#2563eb;
+                ">
+                  ${otp}
+                </span>
+
+              </div>
+
+              <p style="
+                color:#64748b;
+                line-height:1.6;
+              ">
+                This OTP will expire in
+                <strong>10 minutes</strong>.
+              </p>
+
+              <p style="
+                color:#64748b;
+                line-height:1.6;
+              ">
+                If you did not request this,
+                you can safely ignore this email.
+              </p>
+
+            </div>
+
+            <div style="
+              padding:20px;
+              text-align:center;
+              background:#f8fafc;
+              color:#94a3b8;
+              font-size:13px;
+            ">
+              © 2026 Red Rose School.
+              All Rights Reserved.
+            </div>
+
+          </div>
+        </div>
+      `,
+    });
+
+    return res.json({
+      success: true,
+      message:
+        `OTP has been sent to ${submittedEmail}.`,
+    });
+  } catch (error) {
+    console.error(
+      "Forgot password error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Unable to send OTP. Please check your email configuration.",
+    });
+  }
+};
 
 // =====================================================
 // VERIFY OTP
@@ -793,14 +728,9 @@ export const verifyForgotPasswordOtp =
         otp,
       } = req.body;
 
-      // -------------------------------------------------
-      // Validate
-      // -------------------------------------------------
-
       if (!email || !otp) {
         return res.status(400).json({
           success: false,
-
           message:
             "Email and OTP are required.",
         });
@@ -812,11 +742,7 @@ export const verifyForgotPasswordOtp =
           .toLowerCase();
 
       const submittedOtp =
-        otp.trim();
-
-      // -------------------------------------------------
-      // Check allowed email
-      // -------------------------------------------------
+        otp.toString().trim();
 
       if (
         !ALLOWED_PASSWORD_RESET_EMAILS.includes(
@@ -825,15 +751,10 @@ export const verifyForgotPasswordOtp =
       ) {
         return res.status(400).json({
           success: false,
-
           message:
             "This email is not registered for password recovery.",
         });
       }
-
-      // -------------------------------------------------
-      // Get OTP
-      // -------------------------------------------------
 
       const storedData =
         otpStore.get(
@@ -843,15 +764,10 @@ export const verifyForgotPasswordOtp =
       if (!storedData) {
         return res.status(400).json({
           success: false,
-
           message:
             "OTP not found. Please request a new OTP.",
         });
       }
-
-      // -------------------------------------------------
-      // Check expiry
-      // -------------------------------------------------
 
       if (
         Date.now() >
@@ -863,15 +779,10 @@ export const verifyForgotPasswordOtp =
 
         return res.status(400).json({
           success: false,
-
           message:
             "OTP has expired. Please request a new OTP.",
         });
       }
-
-      // -------------------------------------------------
-      // Check OTP
-      // -------------------------------------------------
 
       if (
         storedData.otp !==
@@ -879,18 +790,12 @@ export const verifyForgotPasswordOtp =
       ) {
         return res.status(400).json({
           success: false,
-
           message:
             "Invalid OTP.",
         });
       }
 
-      // -------------------------------------------------
-      // Mark verified
-      // -------------------------------------------------
-
-      storedData.verified =
-        true;
+      storedData.verified = true;
 
       otpStore.set(
         submittedEmail,
@@ -899,7 +804,6 @@ export const verifyForgotPasswordOtp =
 
       return res.json({
         success: true,
-
         message:
           "OTP verified successfully.",
       });
@@ -911,7 +815,6 @@ export const verifyForgotPasswordOtp =
 
       return res.status(500).json({
         success: false,
-
         message:
           "Unable to verify OTP.",
       });
@@ -922,164 +825,130 @@ export const verifyForgotPasswordOtp =
 // RESET PASSWORD
 // =====================================================
 
-export const resetPassword =
-  async (req, res) => {
-    try {
-      const {
-        email,
-        password,
-      } = req.body;
+export const resetPassword = async (
+  req,
+  res
+) => {
+  try {
+    const {
+      email,
+      password,
+    } = req.body;
 
-      // -------------------------------------------------
-      // Validate
-      // -------------------------------------------------
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Email and new password are required.",
+      });
+    }
 
-      if (!email || !password) {
-        return res.status(400).json({
-          success: false,
+    const submittedEmail = email
+      .trim()
+      .toLowerCase();
 
-          message:
-            "Email and new password are required.",
-        });
-      }
+    if (
+      !ALLOWED_PASSWORD_RESET_EMAILS.includes(
+        submittedEmail
+      )
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "This email is not registered for password recovery.",
+      });
+    }
 
-      const submittedEmail =
-        email
-          .trim()
-          .toLowerCase();
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be at least 8 characters long.",
+      });
+    }
 
-      // -------------------------------------------------
-      // Check allowed email
-      // -------------------------------------------------
-
-      if (
-        !ALLOWED_PASSWORD_RESET_EMAILS.includes(
-          submittedEmail
-        )
-      ) {
-        return res.status(400).json({
-          success: false,
-
-          message:
-            "This email is not registered for password recovery.",
-        });
-      }
-
-      // -------------------------------------------------
-      // Password length
-      // -------------------------------------------------
-
-      if (password.length < 8) {
-        return res.status(400).json({
-          success: false,
-
-          message:
-            "Password must be at least 8 characters long.",
-        });
-      }
-
-      // -------------------------------------------------
-      // Get OTP session
-      // -------------------------------------------------
-
-      const storedData =
-        otpStore.get(
-          submittedEmail
-        );
-
-      if (!storedData) {
-        return res.status(400).json({
-          success: false,
-
-          message:
-            "Password reset session not found. Please request a new OTP.",
-        });
-      }
-
-      // -------------------------------------------------
-      // OTP must be verified
-      // -------------------------------------------------
-
-      if (
-        !storedData.verified
-      ) {
-        return res.status(400).json({
-          success: false,
-
-          message:
-            "Please verify the OTP before resetting your password.",
-        });
-      }
-
-      // -------------------------------------------------
-      // Check expiry
-      // -------------------------------------------------
-
-      if (
-        Date.now() >
-        storedData.expiresAt
-      ) {
-        otpStore.delete(
-          submittedEmail
-        );
-
-        return res.status(400).json({
-          success: false,
-
-          message:
-            "OTP session has expired. Please request a new OTP.",
-        });
-      }
-
-      // =================================================
-      // GET CURRENT SETTINGS
-      // =================================================
-
-      const settings =
-        getFallbackData(
-          "admin_settings",
-          DEFAULT_ADMIN_SETTINGS
-        );
-
-      // =================================================
-      // CREATE UPDATED SETTINGS
-      // =================================================
-
-      const updatedSettings = {
-        ...settings,
-
-        // THIS IS THE NEW PASSWORD
-        admin_password:
-          password,
-      };
-
-      // =================================================
-      // SAVE TO FALLBACK STORAGE
-      // =================================================
-
-      setFallbackData(
-        "admin_settings",
-        updatedSettings
+    const storedData =
+      otpStore.get(
+        submittedEmail
       );
 
-      // =================================================
-      // SAVE TO SUPABASE
-      // =================================================
-      //
-      // This is important so that the password is not
-      // only stored temporarily in the Node process.
-      // =================================================
+    if (!storedData) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password reset session not found. Please request a new OTP.",
+      });
+    }
 
+    if (!storedData.verified) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please verify the OTP before resetting your password.",
+      });
+    }
+
+    if (
+      Date.now() >
+      storedData.expiresAt
+    ) {
+      otpStore.delete(
+        submittedEmail
+      );
+
+      return res.status(400).json({
+        success: false,
+        message:
+          "OTP session has expired. Please request a new OTP.",
+      });
+    }
+
+    // =================================================
+    // GET CURRENT SETTINGS
+    // =================================================
+
+    const settings =
+      getFallbackData(
+        "admin_settings",
+        DEFAULT_ADMIN_SETTINGS
+      );
+
+    // =================================================
+    // SAVE NEW PASSWORD
+    // =================================================
+
+    const updatedSettings = {
+      ...settings,
+
+      admin_password:
+        password,
+    };
+
+    // This is the important part.
+    // The password is persisted in fallback storage.
+    setFallbackData(
+      "admin_settings",
+      updatedSettings
+    );
+
+    console.log(
+      `Password successfully changed for ${submittedEmail}`
+    );
+
+    // =================================================
+    // TRY SUPABASE
+    // =================================================
+
+    try {
       const {
         error: supabaseError,
       } = await supabase
         .from("admin_settings")
-        .upsert({
-          id: 1,
-
+        .update({
           admin_password:
             password,
-        });
+        })
+        .eq("id", 1);
 
       if (supabaseError) {
         console.warn(
@@ -1087,40 +956,36 @@ export const resetPassword =
           supabaseError.message
         );
       }
-
-      // =================================================
-      // REMOVE OTP
-      // =================================================
-
-      otpStore.delete(
-        submittedEmail
+    } catch (supabaseError) {
+      console.warn(
+        "Supabase password update failed:",
+        supabaseError.message
       );
-
-      console.log(
-        `Password successfully changed for ${submittedEmail}`
-      );
-
-      // =================================================
-      // SUCCESS
-      // =================================================
-
-      return res.json({
-        success: true,
-
-        message:
-          "Password reset successful. You can now log in with your new password.",
-      });
-    } catch (error) {
-      console.error(
-        "Reset password error:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-
-        message:
-          "Unable to reset password. Please try again.",
-      });
     }
-  };
+
+    // =================================================
+    // REMOVE OTP
+    // =================================================
+
+    otpStore.delete(
+      submittedEmail
+    );
+
+    return res.json({
+      success: true,
+      message:
+        "Password reset successful. You can now log in with your new password.",
+    });
+  } catch (error) {
+    console.error(
+      "Reset password error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Unable to reset password. Please try again.",
+    });
+  }
+};
