@@ -73,7 +73,7 @@ export const defaultContactContent = {
     address: "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
     buttonText: "Open in Google Maps",
     mapUrl:
-      "https://www.google.com/maps/place/Bal+Jagriti+Boarding+School/@27.4312792,85.0379093,19z/data=!4m6!3m5!1s0x39eb4991159e4289:0x8707a51c9add8d8e!8m2!3d27.4312792!4d85.0379093!16s%2Fg%2F11bw3f8rbl",
+      "https://www.google.com/maps/place/Red+Rose+English+Boarding+School/@27.3787422,85.0771236,983m/data=!3m1!1e3!4m14!1m7!3m6!1s0x39eb48cf3ad13d91:0x7905f4bf995fafde!2sRed+Rose+English+Boarding+School!8m2!3d27.3787422!4d85.0796985!16s%2Fg%2F11hc_dz_zg!3m5!1s0x39eb48cf3ad13d91:0x7905f4bf995fafde!8m2!3d27.3787422!4d85.0796985!16s%2Fg%2F11hc_dz_zg?entry=ttu",
   },
   form: {
     title: "Send Us a Message",
@@ -352,10 +352,25 @@ export default function Contact({
     }
   };
 
-  const mapQuery = encodeURIComponent(
-    content.mapCard?.address || content.mapCard?.title || "Bal Jagriti Boarding School Hetauda Nepal"
-  );
-  const MAP_EMBED_URL = `https://maps.google.com/maps?q=${mapQuery}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+  // EXACT RED ROSE ENGLISH BOARDING SCHOOL LOCATION
+  // Do not use the old Bal Jagriti address/coordinates.
+  const RED_ROSE_MAP_URL =
+    "https://www.google.com/maps/place/Red+Rose+English+Boarding+School/@27.3787422,85.0771236,983m/data=!3m1!1e3!4m14!1m7!3m6!1s0x39eb48cf3ad13d91:0x7905f4bf995fafde!2sRed+Rose+English+Boarding+School!8m2!3d27.3787422!4d85.0796985!16s%2Fg%2F11hc_dz_zg!3m5!1s0x39eb48cf3ad13d91:0x7905f4bf995fafde!8m2!3d27.3787422!4d85.0796985!16s%2Fg%2F11hc_dz_zg?entry=ttu";
+
+  const RED_ROSE_EMBED_URL =
+    "https://maps.google.com/maps?q=Red%20Rose%20English%20Boarding%20School%2C%20Hetauda%2C%20Nepal&ll=27.3787422%2C85.0796985&z=17&hl=en&output=embed";
+
+  // If an old saved value still contains Bal Jagriti, ignore it and use
+  // the correct Red Rose location.
+  const savedMapUrl = String(content.mapCard?.mapUrl || "").trim();
+  const isOldBalJagritiUrl =
+    /bal[+%20_-]*jagriti|27\.4312792|85\.0379093/i.test(savedMapUrl);
+
+  const DISPLAY_MAP_URL = isOldBalJagritiUrl || !savedMapUrl
+    ? RED_ROSE_MAP_URL
+    : savedMapUrl;
+
+  const MAP_EMBED_URL = RED_ROSE_EMBED_URL;
 
   return (
     <section className={`min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-slate-50 ${editMode ? "pt-8 pb-16" : "pt-28 pb-24"}`}>
@@ -666,12 +681,14 @@ export default function Contact({
                 </div>
                 {!editMode && (
                   <a
-                    href={normalizeExternalUrl(content.mapCard?.mapUrl)}
+                    href={DISPLAY_MAP_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                    onClick={editMode ? (e) => e.stopPropagation() : undefined}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
                   >
-                    <span>Open Maps</span>
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>Open in Maps</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 )}
@@ -697,14 +714,15 @@ export default function Contact({
                   <p className="text-xs text-slate-500 mt-0.5">{content.mapCard?.address || "Basudev Marga, Hetauda-2, Makawanpur, Nepal"}</p>
                 </div>
                 <a
-                  href={normalizeExternalUrl(content.mapCard?.mapUrl)}
+                  href={DISPLAY_MAP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={editMode ? (e) => e.stopPropagation() : undefined}
-                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition-colors shadow-md shrink-0 inline-flex items-center justify-center gap-1.5"
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-blue-700 text-white text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 shrink-0 inline-flex items-center justify-center gap-2"
                 >
                   <Compass className="w-3.5 h-3.5" />
-                  <span>{content.mapCard?.buttonText || "Directions ↗"}</span>
+                  <span>{content.mapCard?.buttonText || "Open in Google Maps"}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>
             </div>
