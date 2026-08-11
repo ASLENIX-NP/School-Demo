@@ -1,23 +1,28 @@
 {
   "home": {
     "hero": {
-      "badge": "Wisdom is Divine",
+      "badge": "WISDOM IS DIVINE",
       "schoolName": "RED ROSE SCHOOL",
-      "titleLine1": "Red Rose School",
+      "titleLine1": "Learning Today.",
+      "titleLine2": "Leading Tomorrow.",
       "establishedYear": "ESTABLISHED 2046 BS",
       "subtitle": "Basudev Marga, Hetauda-2",
-      "description": "Red Rose School blends academic discipline, digital learning, creativity, sports, and values for students from Play Group to Grade 10.",
-      "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099978884_images_1UYiY_juR.jpeg",
+      "description": "A welcoming learning community where curiosity, creativity, discipline and values help every student grow with confidence.",
+      "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786449642373_images_9Ko2PaVGY.png",
       "images": [
-        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099978884_images_1UYiY_juR.jpeg",
-        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099995606_images_RtIsg5c3F.jpeg",
-        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786099997161_images__1__To7ygfTRi.jpeg"
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786449642373_images_9Ko2PaVGY.png"
       ],
-      "imageAdjustments": {},
       "primaryButtonText": "Start Admission",
       "primaryButtonLink": "/admissions",
-      "secondaryButtonText": "Explore Facilities",
-      "secondaryButtonLink": "/facilities"
+      "secondaryButtonText": "Explore School",
+      "secondaryButtonLink": "/about",
+      "imageAdjustments": {
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786449642373_images_9Ko2PaVGY.png": {
+          "imageZoom": 1,
+          "imageOffsetX": 0,
+          "imageOffsetY": 0
+        }
+      }
     },
     "statsSection": {
       "eyebrow": "Our Impact",
@@ -62,7 +67,7 @@
           "Established with a vision to provide quality education in Makawanpur, Red Rose Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
           "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
         ],
-        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786100017954_images_vwqcFhKbY.jpeg",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786449653995_images_nGFkbELaa.png",
         "buttonText": "Read Our Story",
         "imageZoom": 1,
         "imageOffsetX": 0,
@@ -427,7 +432,7 @@
     ]
   },
   "footer": {
-    "logoUrl": "",
+    "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786448654957_images_KFuQ3AEa6.png",
     "schoolName": "Red Rose",
     "schoolSubtitle": "Secondary English Boarding School",
     "admissionBadgeText": "Admissions Open 2026",
@@ -469,55 +474,13 @@
         "id": 1,
         "label": "Facebook",
         "type": "facebook",
-        "href": "#",
-        "visible": true
-      },
-      {
-        "id": 1786094349033,
-        "label": "Website",
-        "type": "website",
-        "href": "#",
-        "visible": true
-      },
-      {
-        "id": 1786345692100,
-        "label": "youtube",
-        "type": "youtube",
-        "href": "#",
-        "visible": true
-      },
-      {
-        "id": 1786345735383,
-        "label": "linkdin",
-        "type": "linkedin",
-        "href": "#",
+        "href": "https://www.facebook.com/profile.php?id=100063101626111",
         "visible": true
       },
       {
         "id": 1786345776163,
         "label": "tiktok",
         "type": "tiktok",
-        "href": "#",
-        "visible": true
-      },
-      {
-        "id": 1786345805000,
-        "label": "Website",
-        "type": "website",
-        "href": "#",
-        "visible": true
-      },
-      {
-        "id": 1786345805198,
-        "label": "twitter",
-        "type": "twitter",
-        "href": "#",
-        "visible": true
-      },
-      {
-        "id": 1786346173730,
-        "label": "Snapchat",
-        "type": "snapchat",
         "href": "#",
         "visible": true
       }
@@ -1603,28 +1566,28 @@
     "ctaClosedButtonText": "Contact Us for Future Cycles"
   },
   "calendar": {
-    "page_badge": "School Calendar",
+    "page_badge": " Calendar",
     "page_title": "Academic Calendar",
     "page_description": "View school holidays, exam schedules, programs, sports week, admission dates, results, and other important academic events.",
     "saturday_holiday": true,
     "show_notice_dates": true,
     "events": [
       {
-        "id": 1786438331601,
+        "id": 1786446113961,
         "title": "New School Event",
         "type": "holiday",
-        "start_bs": "2083-04-20",
-        "end_bs": "2083-04-20",
+        "start_bs": "2083-04-29",
+        "end_bs": "2083-04-29",
         "description": "",
         "visible": true
       },
       {
-        "id": 1786438356766,
+        "id": 1786447384887,
         "title": "New School Event",
-        "type": "holiday",
-        "start_bs": "2083-04-20",
-        "end_bs": "2083-04-20",
-        "description": "holiday",
+        "type": "event",
+        "start_bs": "2083-04-26",
+        "end_bs": "2083-04-26",
+        "description": "",
         "visible": true
       }
     ]
