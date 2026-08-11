@@ -1,22 +1,80 @@
 [
   {
-    "id": 1786438398424,
-    "title": "Final Examination",
-    "description": "asxjkn",
-    "date": "2026-08-11",
-    "category": "General",
-    "image_url": "",
+    "id": 12,
+    "title": "First Terminal Examination",
+    "description": "The first terminal examination will begin from September 10.",
+    "date": "2026-09-10",
+    "notice_date": "2026-09-10",
+    "category": "General Knowledge",
+    "pdf_url": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786438061492_IS_Audit_8_9_Marks_Answers_Spring_2026_5N3xvEXN9.pdf",
+    "file_url": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786438061492_IS_Audit_8_9_Marks_Answers_Spring_2026_5N3xvEXN9.pdf",
     "is_important": false,
-    "created_at": "2026-08-11T08:53:18.424Z"
+    "pinned": false,
+    "created_at": "2026-08-11T09:08:26.742133"
   },
   {
-    "id": 1,
+    "id": 13,
+    "title": "Parent Teacher Meeting (PTM)",
+    "description": "Parent teacher meeting will be held on August 20 from 10:00 AM to 2:00 PM.",
+    "date": "2026-08-20",
+    "notice_date": "2026-08-20",
+    "category": "Meeting",
+    "pdf_url": "",
+    "file_url": "",
+    "is_important": false,
+    "pinned": false,
+    "created_at": "2026-08-11T09:08:26.939404"
+  },
+  {
+    "id": 8,
+    "title": "final exmas",
+    "description": "hihi",
+    "date": "2026-08-11",
+    "notice_date": "2026-08-11",
+    "category": "General",
+    "pdf_url": "",
+    "file_url": "",
+    "is_important": false,
+    "pinned": false,
+    "created_at": "2026-08-11T09:08:25.94689"
+  },
+  {
+    "id": 9,
+    "title": "heyy",
+    "description": "nkasxks/ksm",
+    "date": "2026-08-11",
+    "notice_date": "2026-08-11",
+    "category": "General",
+    "pdf_url": "",
+    "file_url": "",
+    "is_important": false,
+    "pinned": false,
+    "created_at": "2026-08-11T09:08:26.141478"
+  },
+  {
+    "id": 15,
+    "title": "final year exam of eec",
+    "description": "give exmas too",
+    "date": "2026-08-11",
+    "notice_date": "2026-08-11",
+    "category": "General",
+    "pdf_url": "",
+    "file_url": "",
+    "is_important": false,
+    "pinned": false,
+    "created_at": "2026-08-11T09:10:21.502384"
+  },
+  {
+    "id": 11,
     "title": "Admission Open 2026",
     "description": "Admissions are now open for the academic year 2026 from Nursery to Class 9.",
     "date": "2026-08-01",
+    "notice_date": "2026-08-01",
     "category": "General",
-    "image_url": "",
+    "pdf_url": "",
+    "file_url": "",
     "is_important": true,
-    "created_at": "2026-08-06T07:29:31.027Z"
+    "pinned": true,
+    "created_at": "2026-08-11T09:08:26.546971"
   }
 ]

@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   getAdminSettings,
   updateAdminSettings,
@@ -14,93 +13,40 @@ import {
 
 const router = express.Router();
 
-<<<<<<< HEAD
-router.get("/", getAdminSettings);
-router.post("/", updateAdminSettings);
-router.put("/", updateAdminSettings);
-router.get("/login-activity", getLoginActivity);
-router.post("/upload-photo", uploadAdminPhoto);
-router.post("/email", updateAdminEmail);
-router.put("/email", updateAdminEmail);
-router.post("/change-password", changeAdminPassword);
-router.put("/change-password", changeAdminPassword);
-=======
 // =====================================================
 // ADMIN SETTINGS
 // =====================================================
->>>>>>> 1abc8cf (Update admin password recovery and settings)
-
-router.get(
-  "/",
-  getAdminSettings
-);
-
-router.post(
-  "/",
-  updateAdminSettings
-);
-
-router.put(
-  "/",
-  updateAdminSettings
-);
+router.get("/", getAdminSettings);
+router.post("/", updateAdminSettings);
+router.put("/", updateAdminSettings);
 
 // =====================================================
 // LOGIN ACTIVITY
 // =====================================================
-
-router.get(
-  "/login-activity",
-  getLoginActivity
-);
+router.get("/login-activity", getLoginActivity);
 
 // =====================================================
 // ADMIN PHOTO
 // =====================================================
-
-router.post(
-  "/upload-photo",
-  uploadAdminPhoto
-);
+router.post("/upload-photo", uploadAdminPhoto);
 
 // =====================================================
 // ADMIN EMAIL
 // =====================================================
-
-router.post(
-  "/email",
-  updateAdminEmail
-);
+router.post("/email", updateAdminEmail);
+router.put("/email", updateAdminEmail);
 
 // =====================================================
-// NORMAL CHANGE PASSWORD
+// CHANGE PASSWORD
 // =====================================================
-
-router.post(
-  "/change-password",
-  changeAdminPassword
-);
+router.post("/change-password", changeAdminPassword);
+router.put("/change-password", changeAdminPassword);
 
 // =====================================================
-// FORGOT PASSWORD
+// FORGOT PASSWORD / OTP RECOVERY
 // =====================================================
-
-// Send OTP
-router.post(
-  "/forgot-password",
-  forgotPassword
-);
-
-// Verify OTP
-router.post(
-  "/verify-otp",
-  verifyForgotPasswordOtp
-);
-
-// Reset password
-router.post(
-  "/reset-password",
-  resetPassword
-);
+router.post("/forgot-password", forgotPassword);
+router.post("/verify-otp", verifyForgotPasswordOtp);
+router.post("/reset-password", resetPassword);
 
 export default router;
