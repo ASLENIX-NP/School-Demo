@@ -1034,64 +1034,6 @@ export default function AdminStaff() {
 
   return (
     <div className="space-y-6">
-
-      <style>
-        {`
-          @media (max-width: 767px) {
-            .admin-staff-preview-frame .group .opacity-0,
-            .admin-staff-preview-frame .group [class*="opacity-0"],
-            .admin-staff-preview-frame .group .md\\:opacity-0,
-            .admin-staff-preview-frame .group [class*="md:opacity-0"],
-            .admin-staff-preview-frame .group [class*="group-hover:opacity"],
-            .admin-staff-preview-frame [class*="group-hover:opacity"] {
-              opacity: 1 !important;
-              visibility: visible !important;
-              pointer-events: auto !important;
-            }
-
-            .admin-staff-preview-frame .group .pointer-events-none,
-            .admin-staff-preview-frame .group [class*="pointer-events-none"] {
-              pointer-events: auto !important;
-            }
-
-            .admin-staff-preview-frame .group button[class*="opacity-0"],
-            .admin-staff-preview-frame button[class*="group-hover:opacity"],
-            .admin-staff-preview-frame button[class*="opacity-0"] {
-              opacity: 1 !important;
-              visibility: visible !important;
-              pointer-events: auto !important;
-            }
-
-            .admin-staff-preview-frame img[class*="object-cover"],
-            .admin-staff-preview-frame img[class*="object-contain"] {
-              width: 100% !important;
-              height: 100% !important;
-              display: block !important;
-            }
-
-            .admin-staff-preview-frame [class*="absolute"] button,
-            .admin-staff-preview-frame button[class*="rounded-full"] {
-              min-width: 2.25rem !important;
-              min-height: 2.25rem !important;
-              max-width: calc(100vw - 2rem) !important;
-              white-space: nowrap !important;
-              z-index: 30 !important;
-              pointer-events: auto !important;
-            }
-
-            .admin-staff-preview-frame [class*="absolute"][class*="z-50"],
-            .admin-staff-preview-frame [class*="absolute"][class*="z-[50]"],
-            .admin-staff-preview-frame [class*="absolute"][class*="z-[60]"],
-            .admin-staff-preview-frame [class*="absolute"][class*="z-[70]"],
-            .admin-staff-preview-frame [class*="absolute"][class*="z-[80]"],
-            .admin-staff-preview-frame [class*="absolute"][class*="z-[90]"],
-            .admin-staff-preview-frame [class*="absolute"][class*="z-[999]"] {
-              z-index: 30 !important;
-            }
-          }
-        `}
-      </style>
-
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1162,7 +1104,7 @@ export default function AdminStaff() {
         )}
 
         <div
-          className="admin-staff-preview-frame rounded-[2rem] overflow-x-auto"
+          className="admin-staff-preview-frame rounded-[2rem] overflow-hidden"
           style={{
             background:
               "radial-gradient(circle at top left, rgba(56,189,248,0.14), transparent 34%), linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)",

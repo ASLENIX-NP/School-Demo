@@ -48,6 +48,7 @@ const useTilt = (max = 15) => {
   const handleMouseMove = useCallback((e) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
     x.set((e.clientX - rect.left) / rect.width);
     y.set((e.clientY - rect.top) / rect.height);
   }, [x, y]);
@@ -327,11 +328,15 @@ function ActionButtons({
   canDelete = false,
   label = "Edit",
   icon: Icon = Pencil,
+  className = "absolute -top-2 -right-2 z-50",
 }) {
   if (!editMode) return null;
 
   return (
-    <div className="absolute -top-2 -right-2 z-50 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300">
+    <div
+      className={`${className} flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 pointer-events-auto`}
+      style={{ transform: "translateZ(60px)" }}
+    >
       <button
         type="button"
         onClick={(event) => {
@@ -339,7 +344,7 @@ function ActionButtons({
           event.stopPropagation();
           onEditTarget(target);
         }}
-        className="rounded-full w-8 h-8 flex items-center justify-center bg-white text-slate-900 shadow-lg border border-slate-200 hover:scale-110 transition-transform"
+        className="rounded-full w-8 h-8 flex items-center justify-center bg-white text-slate-900 shadow-lg border border-slate-200 hover:scale-110 transition-transform cursor-pointer"
         title={label}
       >
         <Icon className="w-3.5 h-3.5" />
@@ -353,7 +358,7 @@ function ActionButtons({
             event.stopPropagation();
             onDeleteTarget(target);
           }}
-          className="rounded-full w-8 h-8 flex items-center justify-center bg-white text-red-600 shadow-lg border border-slate-200 hover:scale-110 hover:bg-red-50 transition-all"
+          className="rounded-full w-8 h-8 flex items-center justify-center bg-white text-red-600 shadow-lg border border-slate-200 hover:scale-110 hover:bg-red-50 transition-all cursor-pointer"
           title="Delete"
         >
           <Trash2 className="w-3.5 h-3.5" />
@@ -618,14 +623,11 @@ export function Staff({
   }, [contentOverride]);
 
   useEffect(() => {
-    if (editMode) return;
-    if (selectedStaff) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
+    if (editMode || !selectedStaff) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = previousOverflow;
     };
   }, [selectedStaff, editMode]);
 
@@ -769,6 +771,7 @@ export function Staff({
                     onDeleteTarget={onDeleteTarget}
                     canDelete
                     label="Edit staff member"
+                    className="absolute top-3 right-3 z-30"
                   />
 
                   {/* Framed photo with rotating glow ring */}
@@ -786,7 +789,8 @@ export function Staff({
                               event.stopPropagation();
                               onEditTarget({ type: "staffImage", index: realIndex });
                             }}
-                            className="absolute top-3 left-3 z-20 h-9 w-9 rounded-full bg-white text-slate-800 flex items-center justify-center shadow-md border border-slate-200 hover:scale-105 transition-transform"
+                            className="absolute top-3 left-3 z-30 h-9 w-9 rounded-full bg-white text-slate-800 flex items-center justify-center shadow-md border border-slate-200 hover:scale-105 transition-transform opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer pointer-events-auto"
+                            style={{ transform: "translateZ(60px)" }}
                             title="Change photo"
                           >
                             <Camera className="w-4 h-4" />

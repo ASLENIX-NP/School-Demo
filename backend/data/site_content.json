@@ -908,7 +908,7 @@
         "id": 1,
         "name": "Binod Subedi",
         "position": "Principal",
-        "imageUrl": "",
+        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786426343883_licensed-image__1__csCnd1cca.jpg",
         "imageZoom": 1,
         "imageOffsetX": 0,
         "imageOffsetY": 0,
@@ -998,11 +998,11 @@
   },
   "facilities": {
     "badgeText": "Our Campus",
-    "title": "Spaces Built For How Students Actually Learn",
-    "highlightedText": "Learn",
-    "subtitle": "Red Rose Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
-    "learnMoreText": "Learn More",
-    "highlightsTitle": "Facility Highlights",
+    "title": "Spaces Built For How Students Actually Learn smriti",
+    "highlightedText": "Learn from sonicaa",
+    "subtitle": "Red Rose Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student. smriti",
+    "learnMoreText": "Learn More aboutus ",
+    "highlightsTitle": "Facility Highlights heyyeye",
     "facilities": [
       {
         "id": 1,
@@ -1010,10 +1010,10 @@
         "category": "Knowledge Hub",
         "description": "A quiet, well-stocked reading room alongside e-books, journals, and research databases students can reach from any classroom.",
         "details": "Students can browse physical shelves or sign into digital collections — e-books, academic journals, reference databases, and curated learning platforms — all from a single login.",
-        "imageUrl": "",
-        "imageZoom": 1,
-        "imageOffsetX": 0,
-        "imageOffsetY": 0,
+        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425954108_Screenshot__5__CyYwJdNjm.png",
+        "imageZoom": 1.08,
+        "imageOffsetX": 3.4603963513153895,
+        "imageOffsetY": -11.269717692369229,
         "visible": true,
         "color": "#1E3A5F",
         "busRoutes": []
@@ -1024,7 +1024,7 @@
         "category": "Innovation",
         "description": "A 40-seat computer lab where students get hands-on with the software and skills their exams — and future jobs — will actually ask for.",
         "details": "40+ networked computers, programming environments, office software, and multimedia tools, with a teacher-led session every week from Grade 6 upward.",
-        "imageUrl": "",
+        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786426007258_Screenshot_2026-07-10_234100_IO843eGhs.png",
         "imageZoom": 1,
         "imageOffsetX": 0,
         "imageOffsetY": 0,
@@ -1038,9 +1038,9 @@
         "category": "Discovery",
         "description": "Separate Physics, Chemistry, and Biology labs where the textbook diagram finally becomes something a student can hold.",
         "details": "Fully equipped, separately ventilated labs for each science stream, with safety gear, demonstration benches, and enough apparatus for every student to run their own experiment — not just watch one.",
-        "imageUrl": "",
+        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786426051586_Brown_White_and_Gold_Delicious_Chicken_Tikka_Masala_Resealable_Pouch_iUXXPrRGP.png",
         "imageZoom": 1,
-        "imageOffsetX": 0,
+        "imageOffsetX": -60,
         "imageOffsetY": 0,
         "visible": true,
         "color": "#F4A261",
@@ -1052,7 +1052,7 @@
         "category": "Safety & Comfort",
         "description": "Monitored bus routes across Hetauda, so getting to school safely isn't something a family has to solve on their own.",
         "details": "Red Rose Boarding School provides safe transportation with experienced drivers, route management, student safety monitoring, and comfortable buses for daily travel.",
-        "imageUrl": "",
+        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786426087436_Screenshot_2026-05-22_121547_IVgHvpIla.png",
         "imageZoom": 1,
         "imageOffsetX": 0,
         "imageOffsetY": 0,
@@ -1112,6 +1112,21 @@
         "visible": true,
         "color": "#1E3A5F",
         "busRoutes": []
+      },
+      {
+        "id": 1786426100293,
+        "emoji": "🏫",
+        "title": "Aslenix Tech and Solution",
+        "category": "tech",
+        "description": "Short facility description.",
+        "details": "Detailed facility highlights.",
+        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786426153190_Screenshot__100__Qx7165xnz.png",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "color": "#14B8A6",
+        "visible": true,
+        "busRoutes": []
       }
     ]
   },
@@ -1120,6 +1135,8 @@
     "heroTitle": "Red Rose School",
     "heroHighlightedText": "Red Rose",
     "heroSubtitle": "Moments that become memories",
+    "heroExploreText": "Explore Moments",
+    "heroAchievementText": "Celebrate Achievements",
     "badge": "School Gallery",
     "title": "Stories",
     "highlightedText": "Stories",
@@ -1193,6 +1210,32 @@
     ],
     "images": [
       {
+        "id": "1786425525155-0-qn50bbi5xjo",
+        "title": "Screenshot 2026 01 31 222824",
+        "category": "Activity",
+        "subcategory": "",
+        "date": "School Activity",
+        "description": "",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425523678_Screenshot_2026-01-31_222824_ydbIFfcoI.png",
+        "images": [
+          "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425523678_Screenshot_2026-01-31_222824_ydbIFfcoI.png"
+        ],
+        "visible": true
+      },
+      {
+        "id": "1786425495798-0-8qqow8i5kvp",
+        "title": "Screenshot 2026 08 10 131136",
+        "category": "Certificate",
+        "subcategory": "Student Certificates",
+        "date": "School Activity",
+        "description": "",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425493922_Screenshot_2026-08-10_131136_furQXS-dh.png",
+        "images": [
+          "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425493922_Screenshot_2026-08-10_131136_furQXS-dh.png"
+        ],
+        "visible": true
+      },
+      {
         "id": "1786344660373-g5bdxk1nocr",
         "title": "20260624 161357",
         "category": "Certificate",
@@ -1209,7 +1252,7 @@
         "id": "1786344664603-9gu3t1b9xa5",
         "title": "20260624 161346(1)",
         "category": "Events",
-        "subcategory": "",
+        "subcategory": "Annual Program",
         "date": "School Activity",
         "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344660398_20260624_161346_1__LXLNl-Qef.jpg",
@@ -1234,7 +1277,7 @@
       {
         "id": "1786344649697-ae16jd5sj5t",
         "title": "20260624 161346",
-        "category": "Events",
+        "category": "Activity",
         "subcategory": "",
         "date": "School Activity",
         "description": "",
@@ -1247,8 +1290,8 @@
       {
         "id": "1786344169506-0-0qez7gdmmz5f",
         "title": "School Logo",
-        "category": "Events",
-        "subcategory": "Annual Program",
+        "category": "Certificate",
+        "subcategory": "Student Certificates",
         "date": "School Activity",
         "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344168027_unnamed_TdM9BnWuQ.png",
@@ -1260,8 +1303,8 @@
       {
         "id": "1786344133133-0-rqahydvvz7g",
         "title": "Images",
-        "category": "Events",
-        "subcategory": "Annual Program",
+        "category": "Activity",
+        "subcategory": "",
         "date": "School Activity",
         "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344131528_images_z-ZV4LJO0.jpeg",
@@ -1286,9 +1329,7 @@
     ],
     "bottomTitle": "Every picture tells a story.",
     "bottomDescription": "Explore the moments, celebrate the achievements, and remember the journey.",
-    "bottomNote": "Gallery is managed by the school administration.",
-    "heroExploreText": "Explore Moments",
-    "heroAchievementText": "Celebrate Achievements"
+    "bottomNote": "Gallery is managed by the school administration."
   },
   "admissions": {
     "isOpen": true,
