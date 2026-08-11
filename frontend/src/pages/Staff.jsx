@@ -18,7 +18,7 @@ import {
   MapPin,
   Calendar,
 } from "lucide-react";
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ─── ACCENT PALETTE ───
 // A small rotating set of accent colors used across icons, glow rings and blobs
@@ -36,50 +36,56 @@ export function accentFor(index = 0) {
   return ACCENTS[index % ACCENTS.length];
 }
 
-// ─── 1. ADVANCED 3D TILT HOOK ───
-const useTilt = (max = 15) => {
+// ─── 1. ULTRA-SMOOTH, LIGHTWEIGHT TILT CARD COMPONENT ───
+// Uses direct hardware-accelerated CSS transforms instead of heavy React spring hooks.
+// Disables on touch devices to ensure 100% native, lag-free mobile scrolling.
+function TiltCard({ children, className = "", style = {}, max = 6, editMode = false, ...props }) {
   const ref = useRef(null);
-  const x = useMotionValue(0.5);
-  const y = useMotionValue(0.5);
 
-  const rotateX = useSpring(useTransform(y, [0, 1], [max, -max]), { stiffness: 300, damping: 30 });
-  const rotateY = useSpring(useTransform(x, [0, 1], [-max, max]), { stiffness: 300, damping: 30 });
+  const handleMove = useCallback((e) => {
+    if (editMode) return;
+    const el = ref.current;
+    if (!el || typeof window === "undefined") return;
+    if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) return;
 
-  const handleMouseMove = useCallback((e) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
-    x.set((e.clientX - rect.left) / rect.width);
-    y.set((e.clientY - rect.top) / rect.height);
-  }, [x, y]);
 
-  const handleMouseLeave = useCallback(() => {
-    x.set(0.5);
-    y.set(0.5);
-  }, [x, y]);
+    const px = (e.clientX - rect.left) / rect.width;
+    const py = (e.clientY - rect.top) / rect.height;
+    const rotY = (px - 0.5) * max * 2;
+    const rotX = (0.5 - py) * max * 2;
 
-  return { ref, style: { rotateX, rotateY, transformStyle: "preserve-3d" }, handlers: { onMouseMove: handleMouseMove, onMouseLeave: handleMouseLeave } };
-};
+    el.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateZ(0)`;
+  }, [editMode, max]);
 
-// ─── 2. 3D TILT CARD COMPONENT ───
-function TiltCard({ children, className = "", style = {}, ...props }) {
-  const { ref, style: tiltStyle, handlers } = useTilt(15);
+  const handleLeave = useCallback(() => {
+    if (editMode) return;
+    const el = ref.current;
+    if (el) {
+      el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)";
+    }
+  }, [editMode]);
+
   return (
-    <motion.div
+    <div
       ref={ref}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
       className={`relative ${className}`}
-      style={{ ...style, ...tiltStyle, perspective: 1000 }}
-      {...handlers}
+      style={{
+        transition: editMode ? "none" : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease",
+        willChange: editMode ? "auto" : "transform",
+        ...style,
+      }}
       {...props}
     >
-      {/* Glass glare — brighter, top-right sourced, to sell the 3D glass reflection */}
-      <div className="absolute inset-0 rounded-[inherit] pointer-events-none bg-gradient-to-br from-white/50 via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
-      <div
-        className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-70 transition-opacity duration-500 z-10"
-        style={{ background: "radial-gradient(circle, rgba(255,255,255,0.9), transparent 70%)" }}
-      />
+      {/* Subtle glass glare reflection on hover for desktop */}
+      {!editMode && (
+        <div className="absolute inset-0 rounded-[inherit] pointer-events-none bg-gradient-to-br from-white/35 via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+      )}
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -263,8 +269,6 @@ function normalizeStaff(staff) {
       email: member.email || "",
       description: member.description || "",
       visible: member.visible !== false,
-      // Optional hex override (e.g. "#F59E0B"). Empty string means "auto-assign
-      // from the rotating ACCENTS palette based on the member's position".
       accentColor: typeof member.accentColor === "string" ? member.accentColor.trim() : "",
     };
   });
@@ -307,8 +311,9 @@ function StaffImage({ staff }) {
       <img
         src={src}
         alt={name}
-        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         style={getStaffImageStyle(staff)}
+        loading="lazy"
       />
     );
   }
@@ -372,7 +377,7 @@ function EditableWrap({
   editMode,
   target,
   onEditTarget,
-  onDeleteTarget = () => {},
+  onDeleteTarget = () => { },
   canDelete = false,
   label = "Edit",
   icon = Pencil,
@@ -408,7 +413,7 @@ function AddStaffButton({ editMode, onAddTarget }) {
         event.stopPropagation();
         onAddTarget("staffMember");
       }}
-      className="mt-12 mx-auto flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold bg-white/80 backdrop-blur-md text-slate-900 border border-white shadow-[0_8px_24px_rgba(99,102,241,0.15)] hover:shadow-[0_12px_32px_rgba(99,102,241,0.25)] hover:-translate-y-1 transition-all"
+      className="mt-10 sm:mt-12 mx-auto flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold bg-white text-slate-900 border border-slate-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
     >
       <Plus className="w-4 h-4 text-indigo-500" />
       Add Staff Member
@@ -416,15 +421,15 @@ function AddStaffButton({ editMode, onAddTarget }) {
   );
 }
 
-// ─── BACKGROUND: layered dot-matrix + floating glow blobs ───
-function GridBlobBackground() {
+// ─── BACKGROUND: layered dot-matrix + smooth optimized ambient glows ───
+function GridBlobBackground({ editMode = false }) {
   return (
-    <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none select-none">
       <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50" />
 
-      {/* Dot matrix — a quiet 3D depth cue */}
+      {/* Dot matrix — quiet depth cue */}
       <div
-        className="absolute inset-0 opacity-[0.4]"
+        className="absolute inset-0 opacity-[0.35]"
         style={{
           backgroundImage: "radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px)",
           backgroundSize: "26px 26px",
@@ -433,56 +438,68 @@ function GridBlobBackground() {
         }}
       />
 
-      <motion.div
-        className="absolute -top-32 -left-24 w-[440px] h-[440px] rounded-full blur-3xl"
-        style={{ background: `radial-gradient(circle, ${ACCENTS[0].soft.replace("0.16", "0.5")}, transparent 70%)` }}
-        animate={{ y: [0, 34, 0], x: [0, 22, 0] }}
-        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute top-1/4 -right-36 w-[500px] h-[500px] rounded-full blur-3xl"
-        style={{ background: `radial-gradient(circle, ${ACCENTS[2].soft.replace("0.16", "0.45")}, transparent 70%)` }}
-        animate={{ y: [0, -26, 0], x: [0, -18, 0] }}
-        transition={{ duration: 17, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-0 left-1/4 w-[380px] h-[380px] rounded-full blur-3xl"
-        style={{ background: `radial-gradient(circle, ${ACCENTS[3].soft.replace("0.16", "0.4")}, transparent 70%)` }}
-        animate={{ y: [0, 22, 0], x: [0, 26, 0] }}
-        transition={{ duration: 19, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute top-6 right-1/3 w-[280px] h-[280px] rounded-full blur-3xl"
-        style={{ background: `radial-gradient(circle, ${ACCENTS[1].soft.replace("0.16", "0.4")}, transparent 70%)` }}
-        animate={{ y: [0, 16, 0] }}
-        transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
-      />
+      {/* Lightweight CSS ambient glows - no heavy JS physics loops */}
+      {!editMode && (
+        <>
+          <div
+            className="absolute -top-32 -left-24 w-[420px] h-[420px] rounded-full blur-3xl opacity-60 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${ACCENTS[0].soft.replace("0.16", "0.4")}, transparent 70%)`,
+            }}
+          />
+          <div
+            className="absolute top-1/4 -right-36 w-[480px] h-[480px] rounded-full blur-3xl opacity-50 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${ACCENTS[2].soft.replace("0.16", "0.35")}, transparent 70%)`,
+            }}
+          />
+          <div
+            className="absolute bottom-0 left-1/4 w-[360px] h-[360px] rounded-full blur-3xl opacity-45 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${ACCENTS[3].soft.replace("0.16", "0.35")}, transparent 70%)`,
+            }}
+          />
+          <div
+            className="absolute top-6 right-1/3 w-[260px] h-[260px] rounded-full blur-3xl opacity-40 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${ACCENTS[1].soft.replace("0.16", "0.35")}, transparent 70%)`,
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }
 
-// ─── Rotating glow ring behind a framed staff photo ───
-function AvatarGlowFrame({ accent, children }) {
+// ─── Clean, vibrant glowing frame behind staff photo ───
+function AvatarGlowFrame({ accent, editMode = false, children }) {
   return (
-    <div className="relative p-[3px] rounded-[26px] overflow-hidden">
-      <div
-        className="absolute inset-[-40%] staff-ring-spin"
-        style={{
-          background: `conic-gradient(from 0deg, ${accent.solid}, transparent 35%, transparent 65%, ${accent.solid})`,
-        }}
-      />
-      <div className="relative rounded-[23px] overflow-hidden bg-white h-full w-full">{children}</div>
+    <div
+      className="relative p-[2.5px] rounded-[26px] overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(99,102,241,0.22)]"
+      style={{
+        background: `linear-gradient(135deg, ${accent.solid}, ${accent.soft || "rgba(99,102,241,0.25)"})`,
+      }}
+    >
+      <div className="relative rounded-[23.5px] overflow-hidden bg-white h-full w-full">{children}</div>
     </div>
   );
 }
 
 function StaffPopup({ staff, onClose, accent }) {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return (
     <AnimatePresence>
       {staff && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
-          style={{ background: "rgba(10, 22, 40, 0.7)", backdropFilter: "blur(10px)" }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+          style={{ background: "rgba(10, 22, 40, 0.75)", backdropFilter: "blur(12px)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -490,27 +507,28 @@ function StaffPopup({ staff, onClose, accent }) {
         >
           <motion.div
             onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 30 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="relative w-full max-w-3xl bg-white/90 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl border border-white/80"
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ type: "spring", stiffness: 280, damping: 24 }}
+            className="relative w-full max-w-3xl my-auto bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col"
           >
             <div
-              className="absolute inset-x-0 top-0 h-1.5"
+              className="h-1.5 w-full shrink-0"
               style={{ background: `linear-gradient(90deg, ${ACCENTS[0].solid}, ${ACCENTS[2].solid}, ${ACCENTS[3].solid})` }}
             />
+
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-5 right-5 z-50 w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm"
+              className="absolute top-4 right-4 z-50 w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 min-h-[400px]">
+            <div className="grid grid-cols-1 md:grid-cols-12 min-h-[380px] overflow-y-auto">
               {/* Image Area */}
-              <div className="md:col-span-5 relative h-72 md:h-full bg-gradient-to-br from-slate-100 to-slate-200">
+              <div className="md:col-span-5 relative h-64 md:h-auto bg-gradient-to-br from-slate-100 to-slate-200 shrink-0">
                 {staff.imageUrl ? (
                   <img
                     src={staff.imageUrl}
@@ -519,16 +537,16 @@ function StaffPopup({ staff, onClose, accent }) {
                     style={getStaffImageStyle(staff)}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-full h-full flex items-center justify-center min-h-[220px]">
                     <UserRound className="w-20 h-20 text-slate-400" />
                   </div>
                 )}
               </div>
 
               {/* Content Area */}
-              <div className="md:col-span-7 p-8 md:p-10 flex flex-col justify-between">
+              <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
                 <div>
-                  <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <div className="flex flex-wrap items-center gap-2.5 mb-2">
                     <span
                       className="inline-block px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm"
                       style={{ backgroundColor: accent?.solid || "#1E293B" }}
@@ -539,7 +557,7 @@ function StaffPopup({ staff, onClose, accent }) {
                       <span className="text-xs font-medium text-slate-500">{staff.qualification}</span>
                     )}
                   </div>
-                  <h2 className="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">{staff.name}</h2>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">{staff.name}</h2>
 
                   {staff.description && (
                     <p className="text-sm text-slate-600 leading-relaxed mb-6">
@@ -548,11 +566,11 @@ function StaffPopup({ staff, onClose, accent }) {
                   )}
                 </div>
 
-                <div className="pt-6 border-t border-slate-100 flex flex-wrap gap-6">
+                <div className="pt-5 border-t border-slate-100 flex flex-wrap gap-4 sm:gap-6">
                   {staff.phone && (
                     <a
                       href={`tel:${staff.phone}`}
-                      className="flex items-center gap-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
+                      className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
                         <Phone className="w-4 h-4 text-slate-500" />
@@ -564,7 +582,7 @@ function StaffPopup({ staff, onClose, accent }) {
                   {staff.email && (
                     <a
                       href={`mailto:${staff.email}`}
-                      className="flex items-center gap-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors break-all"
+                      className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors break-all"
                     >
                       <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
                         <Mail className="w-4 h-4 text-slate-500" />
@@ -585,9 +603,9 @@ function StaffPopup({ staff, onClose, accent }) {
 export function Staff({
   editMode = false,
   contentOverride = null,
-  onEditTarget = () => {},
-  onDeleteTarget = () => {},
-  onAddTarget = () => {},
+  onEditTarget = () => { },
+  onDeleteTarget = () => { },
+  onAddTarget = () => { },
 }) {
   const [content, setContent] = useState(() =>
     mergeStaffContent(contentOverride || defaultStaffContent)
@@ -641,21 +659,10 @@ export function Staff({
   const [titleBefore, titleAfter] = highlight ? title.split(highlight) : [title, ""];
 
   return (
-    <section className="min-h-screen pt-28 pb-24 relative overflow-hidden">
-      {/* Keyframes for the rotating avatar glow ring */}
-      <style>{`
-        @keyframes staffRingSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .staff-ring-spin {
-          animation: staffRingSpin 5s linear infinite;
-        }
-      `}</style>
+    <section className={`relative overflow-hidden w-full ${editMode ? "py-8 px-3 sm:px-6" : "min-h-screen pt-28 pb-24"}`}>
+      <GridBlobBackground editMode={editMode} />
 
-      <GridBlobBackground />
-
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 relative z-10">
 
         {/* ─── HEADER ─── */}
         <EditableWrap
@@ -664,45 +671,95 @@ export function Staff({
           onEditTarget={onEditTarget}
           label="Edit staff heading"
         >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto mb-16"
-          >
-            <span
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-md mb-6"
-              style={{ background: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[1].solid})` }}
+          {editMode ? (
+            <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+              <span
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-md mb-6"
+                style={{ background: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[1].solid})` }}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                {content.badgeText || "Faculty & Team"}
+              </span>
+
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
+                {titleBefore}
+                {highlight && (
+                  <span
+                    className="bg-clip-text text-transparent"
+                    style={{ backgroundImage: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[3].solid})` }}
+                  >
+                    {highlight}
+                  </span>
+                )}
+                {titleAfter}
+              </h1>
+
+              <p className="mt-4 text-sm sm:text-base md:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-light">
+                {content.subtitle ||
+                  "Meet the dedicated educators, department heads, and leaders guiding students at Red Rose Secondary English Boarding School."}
+              </p>
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center max-w-3xl mx-auto mb-16"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              {content.badgeText || "Faculty & Team"}
-            </span>
+              <span
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-md mb-6"
+                style={{ background: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[1].solid})` }}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                {content.badgeText || "Faculty & Team"}
+              </span>
 
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
-              {titleBefore}
-              {highlight && (
-                <span
-                  className="bg-clip-text text-transparent"
-                  style={{ backgroundImage: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[3].solid})` }}
-                >
-                  {highlight}
-                </span>
-              )}
-              {titleAfter}
-            </h1>
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
+                {titleBefore}
+                {highlight && (
+                  <span
+                    className="bg-clip-text text-transparent"
+                    style={{ backgroundImage: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[3].solid})` }}
+                  >
+                    {highlight}
+                  </span>
+                )}
+                {titleAfter}
+              </h1>
 
-            <p className="mt-4 text-base sm:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-light">
-              {content.subtitle ||
-                "Meet the dedicated educators, department heads, and leaders guiding students at Red Rose Secondary English Boarding School."}
-            </p>
-          </motion.div>
+              <p className="mt-4 text-base sm:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-light">
+                {content.subtitle ||
+                  "Meet the dedicated educators, department heads, and leaders guiding students at Red Rose Secondary English Boarding School."}
+              </p>
+            </motion.div>
+          )}
         </EditableWrap>
 
         {/* ─── STATS ─── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-14 sm:mb-20">
           {content.stats.map((stat, index) => {
             const Icon = getStatIcon(stat.icon);
             const accent = { solid: stat.color || accentFor(index).solid };
+
+            const statCardContent = (
+              <div className="relative rounded-2xl p-6 md:p-8 text-center bg-white/80 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] hover:shadow-[0_16px_40px_rgba(15,23,42,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center overflow-hidden">
+                <div
+                  className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-60 pointer-events-none"
+                  style={{ background: accent.solid }}
+                />
+                <div
+                  className="relative w-12 h-12 rounded-2xl text-white flex items-center justify-center mb-4 shadow-md"
+                  style={{ background: `linear-gradient(135deg, ${accent.solid}, ${accentFor(index + 1).solid})` }}
+                >
+                  <Icon className="w-6 h-6" />
+                </div>
+                <h3 className="relative text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                  {stat.value}
+                </h3>
+                <p className="relative text-sm font-medium text-slate-500 mt-1">{stat.label}</p>
+              </div>
+            );
+
             return (
               <EditableWrap
                 key={stat.id || index}
@@ -711,142 +768,144 @@ export function Staff({
                 onEditTarget={onEditTarget}
                 label="Edit number card"
               >
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  whileHover={{ y: -6 }}
-                  className="relative rounded-2xl p-6 md:p-8 text-center bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] hover:shadow-[0_16px_40px_rgba(15,23,42,0.1)] transition-all flex flex-col items-center justify-center overflow-hidden"
-                >
-                  <div
-                    className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-60"
-                    style={{ background: accent.solid }}
-                  />
-                  <div
-                    className="relative w-12 h-12 rounded-2xl text-white flex items-center justify-center mb-4 shadow-md"
-                    style={{ background: `linear-gradient(135deg, ${accent.solid}, ${accentFor(index + 1).solid})` }}
+                {editMode ? (
+                  statCardContent
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.08 }}
                   >
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="relative text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                    {stat.value}
-                  </h3>
-                  <p className="relative text-sm font-medium text-slate-500 mt-1">{stat.label}</p>
-                </motion.div>
+                    {statCardContent}
+                  </motion.div>
+                )}
               </EditableWrap>
             );
           })}
         </div>
 
-        {/* ─── 3D STAFF GRID ─── */}
+        {/* ─── STAFF GRID ─── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {visibleStaff.map((staff, index) => {
             const realIndex = content.staff.findIndex((m) => m.id === staff.id);
             const accent = { solid: staff.accentColor || accentFor(realIndex).solid };
 
+            const cardInner = (
+              <TiltCard
+                editMode={editMode}
+                className="relative bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)] hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col h-full"
+              >
+                <ActionButtons
+                  editMode={editMode}
+                  target={{ type: "staffCard", index: realIndex }}
+                  onEditTarget={onEditTarget}
+                  onDeleteTarget={onDeleteTarget}
+                  canDelete
+                  label="Edit staff member"
+                  className="absolute top-3 right-3 z-30"
+                />
+
+                {/* Framed photo with glowing accent frame */}
+                <div className="p-5 pb-0">
+                  <AvatarGlowFrame accent={accent} editMode={editMode}>
+                    <div className="relative h-56 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+                      <StaffImage staff={staff} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none" />
+
+                      {editMode && (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            onEditTarget({ type: "staffImage", index: realIndex });
+                          }}
+                          className="absolute top-3 left-3 z-30 h-9 w-9 rounded-full bg-white text-slate-800 flex items-center justify-center shadow-md border border-slate-200 hover:scale-105 transition-transform opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer pointer-events-auto"
+                          style={{ transform: "translateZ(60px)" }}
+                          title="Change photo"
+                        >
+                          <Camera className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </AvatarGlowFrame>
+                </div>
+
+                {/* Content Area */}
+                <div className="p-6 flex-1 flex flex-col justify-between relative z-20">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: accent.solid }}
+                      />
+                      <span
+                        className="text-[11px] font-bold uppercase tracking-wider"
+                        style={{ color: accent.solid }}
+                      >
+                        {staff.position}
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight leading-snug group-hover:text-slate-800 transition-colors">
+                      {staff.name}
+                    </h3>
+
+                    {staff.qualification && (
+                      <p className="mt-1 text-xs font-medium text-slate-400">
+                        {staff.qualification}
+                      </p>
+                    )}
+
+                    {staff.description && (
+                      <p className="mt-3 text-sm text-slate-500 leading-relaxed line-clamp-3">
+                        {staff.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Footer Action */}
+                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-sm font-semibold">
+                    <span className="flex items-center gap-2 text-slate-500">
+                      <Mail className="w-4 h-4" /> Contact
+                    </span>
+                    <span
+                      className="flex items-center gap-1 group-hover:translate-x-1 transition-transform"
+                      style={{ color: accent.solid }}
+                    >
+                      View Profile <span className="text-lg">↗</span>
+                    </span>
+                  </div>
+                </div>
+              </TiltCard>
+            );
+
+            if (editMode) {
+              return (
+                <div
+                  key={staff.id}
+                  className="group relative"
+                >
+                  {cardInner}
+                </div>
+              );
+            }
+
             return (
               <motion.div
                 key={staff.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                whileHover={{ y: -8 }}
-                transition={{ duration: 0.5, delay: index * 0.08, type: "spring", bounce: 0.2 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.06 }}
                 onClick={() => {
-                  if (!editMode) {
-                    setSelectedAccent(accent);
-                    setSelectedStaff(staff);
-                  }
+                  setSelectedAccent(accent);
+                  setSelectedStaff(staff);
                 }}
                 className="group cursor-pointer"
               >
-                <TiltCard
-                  className="relative bg-white/70 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] hover:shadow-[0_24px_60px_rgba(15,23,42,0.14)] transition-shadow duration-300 overflow-hidden flex flex-col h-full"
-                >
-                  <ActionButtons
-                    editMode={editMode}
-                    target={{ type: "staffCard", index: realIndex }}
-                    onEditTarget={onEditTarget}
-                    onDeleteTarget={onDeleteTarget}
-                    canDelete
-                    label="Edit staff member"
-                    className="absolute top-3 right-3 z-30"
-                  />
-
-                  {/* Framed photo with rotating glow ring */}
-                  <div className="p-5 pb-0">
-                    <AvatarGlowFrame accent={accent}>
-                      <div className="relative h-56 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
-                        <StaffImage staff={staff} />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
-
-                        {editMode && (
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              onEditTarget({ type: "staffImage", index: realIndex });
-                            }}
-                            className="absolute top-3 left-3 z-30 h-9 w-9 rounded-full bg-white text-slate-800 flex items-center justify-center shadow-md border border-slate-200 hover:scale-105 transition-transform opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer pointer-events-auto"
-                            style={{ transform: "translateZ(60px)" }}
-                            title="Change photo"
-                          >
-                            <Camera className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </AvatarGlowFrame>
-                  </div>
-
-                  {/* Content Area (3D pop-out effect applied) */}
-                  <div className="p-6 flex-1 flex flex-col justify-between relative z-20" style={{ transform: "translateZ(40px)" }}>
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ backgroundColor: accent.solid }}
-                        />
-                        <span
-                          className="text-[11px] font-bold uppercase tracking-wider"
-                          style={{ color: accent.solid }}
-                        >
-                          {staff.position}
-                        </span>
-                      </div>
-
-                      <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight leading-snug group-hover:text-slate-800 transition-colors">
-                        {staff.name}
-                      </h3>
-
-                      {staff.qualification && (
-                        <p className="mt-1 text-xs font-medium text-slate-400">
-                          {staff.qualification}
-                        </p>
-                      )}
-
-                      {staff.description && (
-                        <p className="mt-3 text-sm text-slate-500 leading-relaxed line-clamp-3">
-                          {staff.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Footer Action */}
-                    <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-sm font-semibold">
-                      <span className="flex items-center gap-2 text-slate-500">
-                        <Mail className="w-4 h-4" /> Contact
-                      </span>
-                      <span
-                        className="flex items-center gap-1 group-hover:translate-x-1 transition-transform"
-                        style={{ color: accent.solid }}
-                      >
-                        View Profile <span className="text-lg">↗</span>
-                      </span>
-                    </div>
-                  </div>
-                </TiltCard>
+                {cardInner}
               </motion.div>
             );
           })}

@@ -878,12 +878,12 @@ export default function AdminStaff() {
           stats: nextForm.stats.map((stat, index) =>
             index === editingTarget.index
               ? {
-                  ...stat,
-                  value: modalForm.value || "",
-                  label: modalForm.label || "",
-                  icon: modalForm.icon || "users",
-                  color: modalForm.color || statColors[index % statColors.length],
-                }
+                ...stat,
+                value: modalForm.value || "",
+                label: modalForm.label || "",
+                icon: modalForm.icon || "users",
+                color: modalForm.color || statColors[index % statColors.length],
+              }
               : stat
           ),
         };
@@ -895,24 +895,24 @@ export default function AdminStaff() {
           staff: nextForm.staff.map((member, index) =>
             index === editingTarget.index
               ? {
-                  ...member,
-                  name: modalForm.name || "",
-                  position: modalForm.position || "",
-                  imageUrl: modalForm.imageUrl || "",
-                  imageZoom: clampImageZoom(modalForm.imageZoom),
-                  imageOffsetX: clampImageOffset(modalForm.imageOffsetX),
-                  imageOffsetY: clampImageOffset(modalForm.imageOffsetY),
-                  qualification: modalForm.qualification || "",
-                  phone: modalForm.phone || "",
-                  email: modalForm.email || "",
-                  description: modalForm.description || "",
-                  visible: modalForm.visible !== false,
-                  // Only persist a custom color when the toggle is on;
-                  // otherwise store "" so the card falls back to the
-                  // auto-rotating palette (and stays in sync if cards
-                  // are reordered later).
-                  accentColor: modalForm.useCustomAccent ? (modalForm.accentColor || "") : "",
-                }
+                ...member,
+                name: modalForm.name || "",
+                position: modalForm.position || "",
+                imageUrl: modalForm.imageUrl || "",
+                imageZoom: clampImageZoom(modalForm.imageZoom),
+                imageOffsetX: clampImageOffset(modalForm.imageOffsetX),
+                imageOffsetY: clampImageOffset(modalForm.imageOffsetY),
+                qualification: modalForm.qualification || "",
+                phone: modalForm.phone || "",
+                email: modalForm.email || "",
+                description: modalForm.description || "",
+                visible: modalForm.visible !== false,
+                // Only persist a custom color when the toggle is on;
+                // otherwise store "" so the card falls back to the
+                // auto-rotating palette (and stays in sync if cards
+                // are reordered later).
+                accentColor: modalForm.useCustomAccent ? (modalForm.accentColor || "") : "",
+              }
               : member
           ),
         };
@@ -1322,68 +1322,68 @@ export default function AdminStaff() {
 
                   {(editingTarget.type === "staffCard" ||
                     editingTarget.type === "staffImage") && (
-                    <>
-                      <Field
-                        label="Name"
-                        value={modalForm.name}
-                        onChange={(value) => updateModalField("name", value)}
-                      />
-
-                      <Field
-                        label="Position"
-                        value={modalForm.position}
-                        onChange={(value) => updateModalField("position", value)}
-                      />
-
-                      <Field
-                        label="Qualification"
-                        value={modalForm.qualification}
-                        onChange={(value) => updateModalField("qualification", value)}
-                      />
-
-                      <Field
-                        label="Phone"
-                        value={modalForm.phone}
-                        onChange={(value) => updateModalField("phone", value)}
-                        placeholder="+977-98XXXXXXXX"
-                      />
-
-                      <Field
-                        label="Email"
-                        value={modalForm.email}
-                        onChange={(value) => updateModalField("email", value)}
-                        placeholder="Optional"
-                      />
-
-                      <TextArea
-                        label="Description / About"
-                        value={modalForm.description}
-                        onChange={(value) => updateModalField("description", value)}
-                        rows={5}
-                      />
-
-                      <Toggle
-                        label="Show this staff member on website"
-                        checked={modalForm.visible !== false}
-                        onChange={(value) => updateModalField("visible", value)}
-                      />
-
-                      <Toggle
-                        label="Use a custom accent color for this card"
-                        checked={modalForm.useCustomAccent === true}
-                        onChange={(value) => updateModalField("useCustomAccent", value)}
-                      />
-
-                      {modalForm.useCustomAccent && (
+                      <>
                         <Field
-                          label="Accent Color (glow ring, name dot, position label)"
-                          type="color"
-                          value={modalForm.accentColor}
-                          onChange={(value) => updateModalField("accentColor", value)}
+                          label="Name"
+                          value={modalForm.name}
+                          onChange={(value) => updateModalField("name", value)}
                         />
-                      )}
-                    </>
-                  )}
+
+                        <Field
+                          label="Position"
+                          value={modalForm.position}
+                          onChange={(value) => updateModalField("position", value)}
+                        />
+
+                        <Field
+                          label="Qualification"
+                          value={modalForm.qualification}
+                          onChange={(value) => updateModalField("qualification", value)}
+                        />
+
+                        <Field
+                          label="Phone"
+                          value={modalForm.phone}
+                          onChange={(value) => updateModalField("phone", value)}
+                          placeholder="+977-98XXXXXXXX"
+                        />
+
+                        <Field
+                          label="Email"
+                          value={modalForm.email}
+                          onChange={(value) => updateModalField("email", value)}
+                          placeholder="Optional"
+                        />
+
+                        <TextArea
+                          label="Description / About"
+                          value={modalForm.description}
+                          onChange={(value) => updateModalField("description", value)}
+                          rows={5}
+                        />
+
+                        <Toggle
+                          label="Show this staff member on website"
+                          checked={modalForm.visible !== false}
+                          onChange={(value) => updateModalField("visible", value)}
+                        />
+
+                        <Toggle
+                          label="Use a custom accent color for this card"
+                          checked={modalForm.useCustomAccent === true}
+                          onChange={(value) => updateModalField("useCustomAccent", value)}
+                        />
+
+                        {modalForm.useCustomAccent && (
+                          <Field
+                            label="Accent Color (glow ring, name dot, position label)"
+                            type="color"
+                            value={modalForm.accentColor}
+                            onChange={(value) => updateModalField("accentColor", value)}
+                          />
+                        )}
+                      </>
+                    )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 mt-7">

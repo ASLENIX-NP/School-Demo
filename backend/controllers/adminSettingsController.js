@@ -3,12 +3,16 @@ import { getFallbackData, setFallbackData } from "../utils/storageHelper.js";
 
 const DEFAULT_ADMIN_SETTINGS = {
   id: 1,
-  school_name: "Bal Jagriti Secondary English Boarding School",
-  school_email: "admin@Red Rose.edu.np",
-  phone: "+977 9800000000",
-  address: "Itahari, Sunsari, Nepal",
+  school_name: "Red Rose Secondary English Boarding School",
+  institution_name: "Red Rose Secondary English Boarding School",
+  campus_location: "Basudev Marga, Hetauda-2, Makwanpur",
+  address: "Basudev Marga, Hetauda-2, Makwanpur",
+  academic_session: "2081 / 2082 B.S.",
+  timezone: "Asia/Kathmandu (UTC +05:45)",
+  school_email: "admin@redroseschool.edu.np",
+  phone: "+977 057-590146",
   logo: "",
-  lock_account: false,
+  lock_account: true,
   two_factor: false,
   session_timeout: "30",
   max_login_attempts: "5",
@@ -18,17 +22,19 @@ const DEFAULT_LOGIN_ACTIVITY = [
   {
     id: 1,
     device: "Chrome / Windows 11",
+    browser: "Chrome",
     ip: "127.0.0.1",
-    location: "Itahari, Nepal",
-    time: "Just now",
+    location: "Hetauda, Nepal",
+    login_time: new Date().toISOString(),
     status: "Active Session",
   },
   {
     id: 2,
-    device: "Safari / iPhone 15",
+    device: "Safari / iPhone 16",
+    browser: "Safari",
     ip: "110.44.112.5",
     location: "Kathmandu, Nepal",
-    time: "2 hours ago",
+    login_time: new Date(Date.now() - 7200000).toISOString(),
     status: "Successful",
   },
 ];
@@ -102,9 +108,10 @@ export const getLoginActivity = async (req, res) => {
 };
 
 export const uploadAdminPhoto = async (req, res) => {
-  const { photo_url } = req.body;
+  const { photo_url, image } = req.body;
+  const url = photo_url || image;
   const settings = getFallbackData("admin_settings", DEFAULT_ADMIN_SETTINGS);
-  const updated = { ...settings, logo: photo_url || settings.logo };
+  const updated = { ...settings, profile_photo: url || settings.profile_photo, logo: url || settings.logo };
   setFallbackData("admin_settings", updated);
 
   return res.json({
@@ -119,7 +126,7 @@ export const updateAdminEmail = async (req, res) => {
   const newEmail = email || school_email;
 
   const settings = getFallbackData("admin_settings", DEFAULT_ADMIN_SETTINGS);
-  const updated = { ...settings, school_email: newEmail };
+  const updated = { ...settings, school_email: newEmail, admin_email: newEmail };
   setFallbackData("admin_settings", updated);
 
   return res.json({

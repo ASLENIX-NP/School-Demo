@@ -765,17 +765,6 @@ export default function AdminHome() {
 
   return (
     <div className="space-y-6">
-      <style>{`
-        .group .opacity-0 { transition: opacity 0.2s ease; }
-        .group:hover .opacity-0 { opacity: 1 !important; }
-        @media (max-width: 767px) {
-          .admin-home-preview-frame .group .opacity-0, .admin-home-preview-frame .group [class*="opacity-0"], .admin-home-preview-frame .group [class*="group-hover:opacity"], .admin-home-preview-frame [class*="group-hover:opacity"] { opacity: 1 !important; pointer-events: auto !important; }
-          .admin-home-preview-frame .group .pointer-events-none { pointer-events: auto !important; }
-          .admin-home-preview-frame .group button[class*="opacity-0"], .admin-home-preview-frame button[class*="group-hover:opacity"], .admin-home-preview-frame button[class*="opacity-0"] { opacity: 1 !important; pointer-events: auto !important; visibility: visible !important; }
-          .admin-home-preview-frame [class*="absolute"] button, .admin-home-preview-frame button[class*="rounded-full"] { min-width: 2.25rem !important; min-height: 2.25rem !important; z-index: 30 !important; }
-        }
-      `}</style>
-
       <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="rounded-[24px] p-4 sm:p-5 md:p-6" style={{ background: "linear-gradient(135deg, #E8EDF5 0%, #DCE3EF 50%, #E8E0F0 100%)", border: "1px solid rgba(15,23,42,0.06)", boxShadow: "0 4px 20px rgba(0,0,0,0.04)" }}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
           <div>
@@ -788,8 +777,8 @@ export default function AdminHome() {
         {success && <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-green-50 text-green-700 border border-green-100"><CheckCircle2 className="w-4 h-4" />{success}</div>}
         {error && <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-red-50 text-red-700 border border-red-100"><AlertCircle className="w-4 h-4" />{error}</div>}
 
-        <div className="admin-home-preview-frame rounded-[2rem] overflow-hidden" style={{ background: "#0B0E14", border: "1px solid rgba(255,255,255,0.08)" }}>
-          <div className="w-full min-w-0">
+        <div className="admin-home-preview-frame rounded-[2rem] overflow-hidden w-full max-w-full" style={{ background: "#FFFFFF", border: "1px solid rgba(15,23,42,0.08)" }}>
+          <div className="w-full min-w-0 max-w-full overflow-hidden">
             <Hero editMode contentOverride={form.hero} onEditTarget={openEditor} />
             <Stats 
               editMode 
