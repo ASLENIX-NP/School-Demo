@@ -37,8 +37,8 @@ const palette = {
   secondary: "#0F172A",
   accent: "#38BDF8",
   accent2: "#F59E0B",
-  light: "#F1F5F9",
-  dark: "#0F172A",
+  light: "#EAF6FF",
+  dark: "#102A43",
   gray: "#64748B",
   lightGray: "#E2E8F0",
   white: "#FFFFFF",
@@ -47,15 +47,24 @@ const palette = {
   gradient3: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
 };
 
+// Rotating accent themes used to give each staff member their own identity
+// across the leadership cards and the message popup.
+const STAFF_ACCENTS = [
+  { solid: "#2563EB", soft: "rgba(37,99,235,0.10)", ring: "rgba(37,99,235,0.35)", grad: "linear-gradient(135deg, #2563EB 0%, #4F46E5 55%, #7C3AED 100%)" },
+  { solid: "#F59E0B", soft: "rgba(245,158,11,0.10)", ring: "rgba(245,158,11,0.35)", grad: "linear-gradient(135deg, #F59E0B 0%, #F97316 100%)" },
+  { solid: "#8B5CF6", soft: "rgba(139,92,246,0.10)", ring: "rgba(139,92,246,0.35)", grad: "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 55%, #38BDF8 100%)" },
+  { solid: "#0EA5E9", soft: "rgba(14,165,233,0.10)", ring: "rgba(14,165,233,0.35)", grad: "linear-gradient(135deg, #0EA5E9 0%, #38BDF8 100%)" },
+];
+
 const API_URL = "http://localhost:5000";
 // ──────────────────────────────────────────────
 // Default content
 // ──────────────────────────────────────────────
 export const defaultAboutContent = {
   pageBadge: "About Our School",
-  pageTitle: "Building a Brighter Future, One Student at a Time",
+  pageTitle: "Growing Curious Minds, Inspiring Bright Futures",
   pageSubtitle:
-    "Rooted in tradition, driven by innovation. We are a community dedicated to nurturing confident, compassionate, and capable learners ready for tomorrow's world.",
+    "At Red Rose School, learning goes beyond the classroom. We nurture confident, creative, and compassionate students through meaningful experiences, strong values, and a love for discovery.",
 
   stats: [
     { id: 1, icon: "users", value: 2500, suffix: "+", label: "Students Enrolled" },
@@ -482,75 +491,192 @@ function DecorativeBackdrop() {
 // ──────────────────────────────────────────────
 // SINGLE STAFF POPUP COMPONENT
 // ──────────────────────────────────────────────
-function StaffPopup({ isOpen, onClose, staff }) {
+function StaffPopup({ isOpen, onClose, staff, accent }) {
   if (!isOpen || !staff) return null;
+  const theme = accent || STAFF_ACCENTS[0];
 
   return (
     <AnimatePresence>
       <motion.div
+        key="staff-popup-backdrop"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        transition={{ duration: 0.25 }}
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
+        style={{ background: "rgba(8,12,24,0.72)", backdropFilter: "blur(10px)" }}
         onClick={onClose}
       >
         <motion.div
-          initial={{ scale: 0.9, y: 20, opacity: 0 }}
-          animate={{ scale: 1, y: 0, opacity: 1 }}
-          exit={{ scale: 0.95, y: 10, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
+          initial={{ scale: 0.85, y: 50, opacity: 0, rotateX: 8 }}
+          animate={{ scale: 1, y: 0, opacity: 1, rotateX: 0 }}
+          exit={{ scale: 0.92, y: 24, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 24 }}
+          className="relative w-full max-w-4xl max-h-[94vh] overflow-y-auto rounded-[2.25rem] bg-white"
+          style={{
+            boxShadow: `0 50px 110px -25px ${theme.solid}66, 0 25px 55px rgba(15,23,42,0.4), inset 0 1px 0 rgba(255,255,255,0.6)`,
+            border: "1px solid rgba(255,255,255,0.6)",
+          }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header / Image Area */}
-          <div className="relative h-56 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-            <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-              <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200">
-                {staff.image ? (
-                  <img
-                    src={staff.image}
-                    alt={staff.name}
-                    className="w-full h-full object-cover"
-                    style={getAdjustedImageStyle(staff)}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
-                    <UserRound className="w-10 h-10" />
-                  </div>
-                )}
-              </div>
-            </div>
+          {/* ── Header banner with staff photo on the blue side ── */}
+          <div
+            className="relative min-h-[300px] md:min-h-[330px] overflow-hidden"
+            style={{ background: theme.grad }}
+          >
+            <div className="absolute inset-0 opacity-[0.14] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #fff 1.5px, transparent 1.8px)", backgroundSize: "20px 20px" }} />
+            <motion.div
+              animate={{ y: [0, -10, 0], x: [0, 6, 0] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-16 -left-10 w-56 h-56 rounded-full pointer-events-none"
+              style={{ background: "rgba(255,255,255,0.16)", filter: "blur(55px)" }}
+            />
+            <motion.div
+              animate={{ y: [0, 12, 0], x: [0, -8, 0] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -bottom-24 -right-16 w-72 h-72 rounded-full pointer-events-none"
+              style={{ background: "rgba(255,255,255,0.13)", filter: "blur(65px)" }}
+            />
+
+            <Quote className="absolute top-7 left-7 w-16 h-16 md:w-20 md:h-20 text-white/15" strokeWidth={1.5} />
 
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-full bg-white/20 text-white hover:bg-white/40 transition-colors backdrop-blur-sm"
+              className="absolute top-5 right-5 z-30 w-11 h-11 flex items-center justify-center rounded-full text-white transition-all duration-300 hover:scale-110 hover:rotate-90"
+              style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.35)" }}
+              title="Close"
             >
               <X className="w-5 h-5" />
             </button>
+
+            {/* Staff photo sits inside the blue banner on the right */}
+            <div className="relative z-10 grid md:grid-cols-[1fr_0.8fr] min-h-[300px] md:min-h-[330px] items-center">
+              <div className="px-8 md:px-12 pt-10 pb-20 md:py-12 text-white">
+                <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-5 text-sm font-bold"
+                  style={{
+                    background: "rgba(255,255,255,0.16)",
+                    border: "1px solid rgba(255,255,255,0.28)",
+                    backdropFilter: "blur(10px)",
+                  }}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Message From Our Staff
+                </div>
+                <h4 className="text-3xl md:text-4xl font-extrabold leading-tight max-w-md">
+                  A message from {staff.role}
+                </h4>
+                <p className="mt-3 text-sm md:text-base text-white/80 max-w-md leading-relaxed">
+                  Words, guidance, and inspiration from the people who help shape our school community.
+                </p>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 35, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ delay: 0.15, type: "spring", stiffness: 220, damping: 20 }}
+                className="relative h-[230px] md:h-[280px] mx-8 md:mx-10 mb-12 md:mb-0"
+                style={{ perspective: "1000px" }}
+              >
+                <motion.div
+                  animate={{ y: [0, -7, 0], rotateY: [0, 2, 0] }}
+                  transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative h-full w-full rounded-[2rem] overflow-hidden"
+                  style={{
+                    border: "5px solid rgba(255,255,255,0.9)",
+                    background: "rgba(255,255,255,0.16)",
+                    boxShadow: `0 24px 50px ${theme.solid}55, 0 12px 28px rgba(15,23,42,0.28)`,
+                    transformStyle: "preserve-3d",
+                  }}
+                >
+                  {staff.image ? (
+                    <img
+                      src={staff.image}
+                      alt={staff.name}
+                      className="w-full h-full object-cover"
+                      style={getAdjustedImageStyle(staff)}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-white/10 text-white/70">
+                      <UserRound className="w-20 h-20" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/10 pointer-events-none" />
+                </motion.div>
+
+                <div
+                  className="absolute -bottom-5 -left-4 md:-left-7 rounded-2xl px-4 py-3 bg-white shadow-xl"
+                  style={{ border: `1px solid ${theme.solid}25` }}
+                >
+                  <div className="text-sm font-extrabold" style={{ color: theme.solid }}>
+                    {staff.name}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">
+                    {staff.role}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
           </div>
 
-          {/* Info Body */}
-          <div className="pt-16 pb-8 px-8 text-center">
-            <div className="mb-4">
-              <h3 className="text-2xl font-bold text-slate-900">{staff.name}</h3>
-              <span className="inline-block mt-1 text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                {staff.role}
-              </span>
-            </div>
+          {/* ── Body ── */}
+          <div className="pt-20 pb-10 px-8 md:px-14 text-center">
+            <motion.h3
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="text-2xl md:text-3xl font-bold"
+              style={{ color: palette.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}
+            >
+              {staff.name}
+            </motion.h3>
+            <motion.span
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.32 }}
+              className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold px-4 py-1.5 rounded-full"
+              style={{ color: theme.solid, background: theme.soft, border: `1px solid ${theme.solid}30` }}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              {staff.role}
+            </motion.span>
 
-            <div className="text-left bg-slate-50 p-6 rounded-xl border border-slate-100 mb-6">
-              <h4 className="font-bold text-slate-800 text-base mb-2">{staff.title}</h4>
-              <p className="text-slate-600 text-sm leading-relaxed">
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+              className="relative mt-8 text-left rounded-2xl p-7 md:p-10"
+              style={{
+                background: `linear-gradient(145deg, ${theme.soft}, #FFFFFF 72%)`,
+                border: `1px solid ${theme.solid}25`,
+                boxShadow: `0 14px 32px ${theme.solid}12, inset 0 1px 0 rgba(255,255,255,0.9)`,
+              }}
+            >
+              <div
+                className="absolute -top-5 left-7 w-11 h-11 rounded-2xl flex items-center justify-center"
+                style={{ background: theme.grad, boxShadow: `0 10px 22px ${theme.solid}55` }}
+              >
+                <Quote className="w-5 h-5 text-white" strokeWidth={2.2} />
+              </div>
+              <h4 className="font-bold text-lg md:text-xl mb-3" style={{ color: palette.dark }}>
+                {staff.title}
+              </h4>
+              <p className="text-slate-600 text-[15px] md:text-base leading-relaxed">
                 {staff.message}
               </p>
-            </div>
+            </motion.div>
 
-            <button
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onClose}
-              className="w-full py-3 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors border border-slate-200"
+              className="mt-10 inline-flex items-center gap-2 px-10 py-4 rounded-2xl text-base font-bold text-white transition-all duration-300 hover:-translate-y-1"
+              style={{ background: theme.grad, boxShadow: `0 14px 30px ${theme.solid}45` }}
             >
               Close Message
-            </button>
+            </motion.button>
           </div>
         </motion.div>
       </motion.div>
@@ -603,7 +729,13 @@ export default function About({
   const visibleJourney = (content.journey || []).filter((j) => j.visible !== false);
 
   return (
-    <section className="relative overflow-hidden py-16 md:py-24" style={{ background: palette.light }}>
+    <section
+      className="relative overflow-hidden py-12 md:py-16"
+      style={{
+        background:
+          "linear-gradient(180deg, #EAF6FF 0%, #F5FAFF 45%, #EAF6FF 100%)",
+      }}
+    >
       <DecorativeBackdrop />
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8">
@@ -618,15 +750,15 @@ export default function About({
             className="mb-16 md:mb-20"
           >
             <TiltCard
-              max={5}
+              max={4}
               glare={true}
-              className="relative rounded-3xl p-8 md:p-12 overflow-hidden"
+              className="relative rounded-[2rem] p-7 md:p-10 lg:p-12 overflow-hidden"
               style={{
-                background:
-                  "linear-gradient(135deg, #2563EB 0%, #4F46E5 42%, #7C3AED 72%, #F59E0B 135%)",
-                border: "1px solid rgba(255,255,255,0.35)",
+                background: "#B9E1F5",
+                border: "1px solid #8CC7E8",
                 boxShadow:
-                  "0 25px 60px rgba(37,99,235,0.25), 0 8px 30px rgba(124,58,237,0.18), inset 0 1px 0 rgba(255,255,255,0.3)",
+                  "0 24px 52px rgba(30,85,120,0.20), inset 0 1px 0 rgba(255,255,255,0.75)",
+                minHeight: "470px",
               }}
             >
               {/* Bright decorative glow effects inside the header */}
@@ -652,59 +784,74 @@ export default function About({
                 }}
               />
 
-              <div className="relative z-10 max-w-2xl">
-              <motion.span
-  initial={{ scale: 0.9, opacity: 0 }}
-  whileInView={{ scale: 1, opacity: 1 }}
-  viewport={{ once: true }}
-  whileHover={{ scale: 1.04, y: -2 }}
-  transition={{ duration: 0.35 }}
-  className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold tracking-wide mb-5 text-white cursor-default"
-  style={{
-    background:
-      "linear-gradient(135deg, #2563EB 0%, #7C3AED 55%, #F59E0B 100%)",
-    boxShadow:
-      "0 8px 22px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255,255,255,0.35)",
-    border: "1px solid rgba(255,255,255,0.45)",
-  }}
->
-  <span
-    className="flex items-center justify-center w-6 h-6 rounded-full"
-    style={{
-      background: "rgba(255,255,255,0.2)",
-      boxShadow: "inset 0 1px 2px rgba(255,255,255,0.3)",
-    }}
-  >
-    <Sparkles className="w-3.5 h-3.5" />
-  </span>
+              {/* Soft 3D decorative shapes */}
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-24 -right-24 w-72 h-72 rounded-full pointer-events-none"
+                style={{
+                  background: "rgba(255,255,255,0.28)",
+                  filter: "blur(20px)",
+                }}
+              />
 
-  {content.pageBadge}
-</motion.span>
-                <h1
-                  className="text-4xl md:text-5xl lg:text-6xl font-bold mb-5"
-                  style={{
-                    color: palette.white,
-                    fontFamily: "var(--font-display)",
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.08,
-                    textShadow: "0 3px 18px rgba(15,23,42,0.18)",
-                  }}
-                >
-                  {content.pageTitle}
-                </h1>
-                <p
-                  className="text-lg leading-relaxed"
-                  style={{ color: "rgba(255,255,255,0.88)" }}
-                >
-                  {content.pageSubtitle}
-                </p>
-                <div
-                  className="w-16 h-1 rounded-full mt-6"
-                  style={{
-                    background: "linear-gradient(90deg, #FDE047, #F59E0B)",
-                    boxShadow: "0 4px 14px rgba(245,158,11,0.45)",
-                  }}
-                />
+              <div className="relative z-10 flex items-center min-h-[400px]">
+                <div className="max-w-4xl">
+                  <motion.span
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 1 }}
+                    viewport={{ once: true }}
+                    whileHover={{ scale: 1.04, y: -2 }}
+                    transition={{ duration: 0.35 }}
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold tracking-wide mb-5 text-sky-900 cursor-default"
+                    style={{
+                      background: "rgba(255,255,255,0.78)",
+                      boxShadow:
+                        "0 8px 20px rgba(8,47,73,0.08), inset 0 1px 0 rgba(255,255,255,0.95)",
+                      border: "1px solid rgba(255,255,255,0.95)",
+                    }}
+                  >
+                    <span
+                      className="flex items-center justify-center w-6 h-6 rounded-full"
+                      style={{
+                        background: "#3B82F6",
+                        color: "#fff",
+                      }}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                    </span>
+                    {content.pageBadge}
+                  </motion.span>
+
+                  <h1
+                    className="text-4xl md:text-5xl lg:text-[4rem] font-bold mb-5"
+                    style={{
+                      color: "#0B3552",
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "-0.035em",
+                      lineHeight: 1.02,
+                      textShadow: "0 3px 12px rgba(255,255,255,0.25)",
+                    }}
+                  >
+                    {content.pageTitle}
+                  </h1>
+
+                  <p
+                    className="text-base md:text-lg lg:text-xl leading-relaxed max-w-2xl"
+                    style={{ color: "#244B66", fontWeight: 500 }}
+                  >
+                    {content.pageSubtitle}
+                  </p>
+
+                  <div
+                    className="w-20 h-1.5 rounded-full mt-7"
+                    style={{
+                      background: "#3B82F6",
+                      boxShadow: "0 4px 12px rgba(59,130,246,0.22)",
+                    }}
+                  />
+                </div>
+
               </div>
             </TiltCard>
           </motion.div>
@@ -879,9 +1026,14 @@ export default function About({
             <SectionAddButton editMode={editMode} label="Add Staff" type="message" onAddTarget={onAddTarget} />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-7 md:gap-9">
             {visibleStaff.map((person, i) => {
               const realIndex = content.messages.findIndex((m) => m.id === person.id);
+              const theme = STAFF_ACCENTS[i % STAFF_ACCENTS.length];
+              const preview =
+                person.message && person.message.length > 118
+                  ? `${person.message.slice(0, 118).trim()}…`
+                  : person.message;
 
               return (
                 <EditableWrap
@@ -894,28 +1046,53 @@ export default function About({
                   label="Edit staff profile"
                 >
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.5, delay: i * 0.12 }}
                   >
                     <button
-                      onClick={() => setSelectedStaff(person)}
+                      onClick={() => setSelectedStaff({ ...person, __accentIndex: i })}
                       className="w-full text-left group"
                     >
                       <TiltCard
-                        max={4}
-                        className="rounded-2xl p-6 backdrop-blur-md border transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                        max={5}
+                        className="relative rounded-[1.75rem] p-7 md:p-8 h-full overflow-hidden backdrop-blur-md border transition-shadow duration-300 group-hover:shadow-2xl"
                         style={{
-                          background: "linear-gradient(145deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))",
-                          borderColor: "rgba(255,255,255,0.6)",
-                          boxShadow: "0 10px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.8)"
+                          background: `linear-gradient(145deg, ${theme.soft}, rgba(255,255,255,0.94) 48%, rgba(255,255,255,0.72) 100%)`,
+                          borderColor: `${theme.solid}35`,
+                          boxShadow: `0 18px 40px ${theme.solid}18, inset 0 1px 0 rgba(255,255,255,0.95)`,
                         }}
                       >
-                        <div className="flex items-center gap-5">
-                          {/* Photo */}
-                          <div className="flex-shrink-0">
-                            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-sm bg-gray-200 transition-transform group-hover:scale-105">
+                        {/* Accent top bar */}
+                        <div className="absolute top-0 left-0 right-0 h-1.5" style={{ background: theme.grad }} />
+                        <div
+                          className="absolute -top-20 -right-20 w-44 h-44 rounded-full pointer-events-none"
+                          style={{ background: theme.solid, opacity: 0.08, filter: "blur(28px)" }}
+                        />
+                        <div
+                          className="absolute -bottom-24 -left-20 w-52 h-52 rounded-full pointer-events-none"
+                          style={{ background: i % 2 === 0 ? "#38BDF8" : "#F59E0B", opacity: 0.07, filter: "blur(32px)" }}
+                        />
+
+                        {/* Watermark quote mark */}
+                        <Quote
+                          className="absolute -top-2 -right-2 w-28 h-28 pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6"
+                          style={{ color: theme.solid, opacity: 0.07 }}
+                          strokeWidth={1.2}
+                        />
+
+                        <div className="relative flex items-start gap-5">
+                          {/* Photo with glowing ring */}
+                          <div className="flex-shrink-0 relative" style={{ transform: "translateZ(30px)" }}>
+                            <div
+                              className="absolute -inset-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                              style={{ background: theme.grad, filter: "blur(6px)" }}
+                            />
+                            <div
+                              className="relative w-20 h-20 rounded-full overflow-hidden bg-slate-100 transition-transform duration-300 group-hover:scale-105"
+                              style={{ border: "3px solid white", boxShadow: `0 10px 22px ${theme.solid}30` }}
+                            >
                               {person.image ? (
                                 <img
                                   src={person.image}
@@ -924,29 +1101,55 @@ export default function About({
                                   style={getAdjustedImageStyle(person)}
                                 />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
-                                  <UserRound className="w-6 h-6" />
+                                <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400">
+                                  <UserRound className="w-8 h-8" />
                                 </div>
                               )}
+                            </div>
+                            <div
+                              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center border-2 border-white"
+                              style={{ background: theme.solid, boxShadow: `0 4px 10px ${theme.solid}55` }}
+                            >
+                              <Mail className="w-3 h-3 text-white" />
                             </div>
                           </div>
 
                           {/* Info */}
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0" style={{ transform: "translateZ(18px)" }}>
                             <div className="flex items-center gap-2 flex-wrap">
                               <h3 className="font-bold text-slate-900 text-lg">{person.name}</h3>
-                              <span className="text-xs text-blue-600 font-medium px-2 py-0.5 bg-blue-50 rounded-full">
-                                {person.role}
-                              </span>
                             </div>
-                            <p className="text-sm text-slate-500 mt-1">{person.title}</p>
+                            <span
+                              className="inline-block mt-1 text-xs font-bold px-2.5 py-1 rounded-full"
+                              style={{ color: theme.solid, background: theme.soft }}
+                            >
+                              {person.role}
+                            </span>
 
-                            <div className="mt-3 flex items-center gap-2 text-sm font-medium text-blue-600 group-hover:text-blue-700 transition-colors">
-                              <Mail className="w-4 h-4" />
-                              <span>Read Message</span>
-                              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </div>
+                            <p className="text-sm italic leading-relaxed mt-3" style={{ color: palette.gray }}>
+                              “{preview}”
+                            </p>
                           </div>
+                        </div>
+
+                        <div
+                          className="relative mt-6 pt-5 flex items-center justify-between"
+                          style={{ borderTop: "1px dashed rgba(100,116,139,0.25)" }}
+                        >
+                          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: palette.gray }}>
+                            {person.title}
+                          </span>
+                          <span
+                            className="inline-flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-full transition-all duration-300 hover:-translate-y-0.5"
+                            style={{
+                              color: "#fff",
+                              background: theme.grad,
+                              boxShadow: `0 8px 18px ${theme.solid}35`,
+                            }}
+                          >
+                            Read Message
+                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </span>
                         </div>
                       </TiltCard>
                     </button>
@@ -1148,6 +1351,7 @@ export default function About({
         isOpen={selectedStaff !== null}
         onClose={() => setSelectedStaff(null)}
         staff={selectedStaff}
+        accent={STAFF_ACCENTS[(selectedStaff?.__accentIndex ?? 0) % STAFF_ACCENTS.length]}
       />
     </section>
   );
