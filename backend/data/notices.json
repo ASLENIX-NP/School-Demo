@@ -1,5 +1,15 @@
 [
   {
+    "id": 1786438398424,
+    "title": "Final Examination",
+    "description": "asxjkn",
+    "date": "2026-08-11",
+    "category": "General",
+    "image_url": "",
+    "is_important": false,
+    "created_at": "2026-08-11T08:53:18.424Z"
+  },
+  {
     "id": 1,
     "title": "Admission Open 2026",
     "description": "Admissions are now open for the academic year 2026 from Nursery to Class 9.",
@@ -8,25 +18,5 @@
     "image_url": "",
     "is_important": true,
     "created_at": "2026-08-06T07:29:31.027Z"
-  },
-  {
-    "id": 2,
-    "title": "First Terminal Examination Schedule",
-    "description": "The first terminal examination for all classes will begin from September 10.",
-    "date": "2026-09-10",
-    "category": "Exam",
-    "image_url": "",
-    "is_important": false,
-    "created_at": "2026-08-06T07:29:31.028Z"
-  },
-  {
-    "id": 3,
-    "title": "Parent Teacher Meeting (PTM)",
-    "description": "Parent teacher meeting will be held on August 20 from 10:00 AM to 2:00 PM.",
-    "date": "2026-08-20",
-    "category": "Meeting",
-    "image_url": "",
-    "is_important": false,
-    "created_at": "2026-08-06T07:29:31.028Z"
   }
 ]
