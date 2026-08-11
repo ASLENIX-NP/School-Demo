@@ -7,9 +7,12 @@ const DEFAULT_NOTICES = [
     title: "Admission Open 2026",
     description: "Admissions are now open for the academic year 2026 from Nursery to Class 9.",
     date: "2026-08-01",
+    notice_date: "2026-08-01",
     category: "General",
-    image_url: "",
+    pdf_url: "",
+    file_url: "",
     is_important: true,
+    pinned: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -17,9 +20,12 @@ const DEFAULT_NOTICES = [
     title: "First Terminal Examination Schedule",
     description: "The first terminal examination for all classes will begin from September 10.",
     date: "2026-09-10",
+    notice_date: "2026-09-10",
     category: "Exam",
-    image_url: "",
+    pdf_url: "",
+    file_url: "",
     is_important: false,
+    pinned: false,
     created_at: new Date().toISOString(),
   },
   {
@@ -27,9 +33,12 @@ const DEFAULT_NOTICES = [
     title: "Parent Teacher Meeting (PTM)",
     description: "Parent teacher meeting will be held on August 20 from 10:00 AM to 2:00 PM.",
     date: "2026-08-20",
+    notice_date: "2026-08-20",
     category: "Meeting",
-    image_url: "",
+    pdf_url: "",
+    file_url: "",
     is_important: false,
+    pinned: false,
     created_at: new Date().toISOString(),
   },
 ];
@@ -41,6 +50,70 @@ const DEFAULT_NOTICE_SETTINGS = {
   max_notices_display: 5,
 };
 
+function serializeDescription({ text = "", category = "General", pdf_url = "", pinned = false, is_important = false }) {
+  const isPinned = Boolean(pinned || is_important);
+  const meta = {
+    category: String(category || "General").trim(),
+    pdf_url: String(pdf_url || "").trim(),
+    pinned: isPinned,
+    is_important: isPinned,
+  };
+  return `<!--meta:${JSON.stringify(meta)}-->${text || ""}`;
+}
+
+export function parseNoticeRow(row) {
+  if (!row) return null;
+
+  let category = row.category || "General";
+  let description = row.description || "";
+  let pdf_url = row.pdf_url || row.file_url || row.image_url || "";
+  let is_important = Boolean(row.is_important || row.pinned);
+  let pinned = Boolean(row.pinned || row.is_important);
+
+  if (typeof row.description === "string" && row.description) {
+    try {
+      if (row.description.includes("<!--meta:")) {
+        const match = row.description.match(/<!--meta:(.*?)-->/);
+        if (match && match[1]) {
+          const meta = JSON.parse(match[1]);
+          category = meta.category || category;
+          pdf_url = meta.pdf_url || meta.file_url || pdf_url;
+          is_important = Boolean(meta.is_important || meta.pinned);
+          pinned = Boolean(meta.pinned || meta.is_important);
+          description = row.description.replace(/<!--meta:.*?-->/, "").trim();
+        }
+      } else if (row.description.trim().startsWith("{") && row.description.trim().endsWith("}")) {
+        const parsed = JSON.parse(row.description);
+        if (parsed && typeof parsed === "object") {
+          description = parsed.text !== undefined ? parsed.text : (parsed.description || "");
+          category = parsed.category || category;
+          pdf_url = parsed.pdf_url || parsed.file_url || pdf_url;
+          is_important = Boolean(parsed.is_important || parsed.pinned);
+          pinned = Boolean(parsed.pinned || parsed.is_important);
+        }
+      }
+    } catch (e) {
+      // Keep description as string
+    }
+  }
+
+  const noticeDate = row.date || row.notice_date || (row.created_at ? row.created_at.split("T")[0] : new Date().toISOString().split("T")[0]);
+
+  return {
+    id: row.id,
+    title: row.title || "",
+    description,
+    date: noticeDate,
+    notice_date: noticeDate,
+    category,
+    pdf_url,
+    file_url: pdf_url,
+    is_important,
+    pinned,
+    created_at: row.created_at || new Date().toISOString(),
+  };
+}
+
 export const getNotices = async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -49,24 +122,25 @@ export const getNotices = async (req, res) => {
       .order("date", { ascending: false });
 
     if (!error && Array.isArray(data)) {
+      const parsed = data.map(parseNoticeRow);
+      // Sync to fallback storage for offline redundancy
+      setFallbackData("notices", parsed);
+
       return res.json({
         success: true,
-        data,
+        data: parsed,
       });
     }
-
-    const notices = getFallbackData("notices", DEFAULT_NOTICES);
-    return res.json({
-      success: true,
-      data: notices,
-    });
   } catch (err) {
-    const notices = getFallbackData("notices", DEFAULT_NOTICES);
-    return res.json({
-      success: true,
-      data: notices,
-    });
+    console.warn("Supabase fetch notices error:", err.message);
   }
+
+  const notices = getFallbackData("notices", DEFAULT_NOTICES);
+  const normalized = notices.map(parseNoticeRow);
+  return res.json({
+    success: true,
+    data: normalized,
+  });
 };
 
 export const getNoticeById = async (req, res) => {
@@ -77,12 +151,12 @@ export const getNoticeById = async (req, res) => {
       .from("notices")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
     if (!error && data) {
       return res.json({
         success: true,
-        data,
+        data: parseNoticeRow(data),
       });
     }
   } catch (err) {
@@ -101,88 +175,195 @@ export const getNoticeById = async (req, res) => {
 
   return res.json({
     success: true,
-    data: notice,
+    data: parseNoticeRow(notice),
   });
 };
 
 export const createNotice = async (req, res) => {
-  const { title, description, date, category, image_url, is_important } = req.body;
+  const {
+    title,
+    description,
+    date,
+    notice_date,
+    category,
+    pdf_url,
+    file_url,
+    image_url,
+    is_important,
+    pinned,
+  } = req.body;
 
-  const newNotice = {
-    id: Date.now(),
-    title: title || "Untitled Notice",
-    description: description || "",
-    date: date || new Date().toISOString().split("T")[0],
-    category: category || "General",
-    image_url: image_url || "",
-    is_important: is_important !== undefined ? Boolean(is_important) : false,
-    created_at: new Date().toISOString(),
+  if (!title || !String(title).trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "Notice title is required",
+    });
+  }
+
+  const cleanTitle = String(title).trim();
+  const cleanDescription = String(description || "").trim();
+  const cleanDate = String(notice_date || date || new Date().toISOString().split("T")[0]).trim();
+  const cleanCategory = String(category || "General").trim();
+  const cleanPdfUrl = String(pdf_url || file_url || image_url || "").trim();
+  const isPinned = Boolean(pinned || is_important);
+
+  const serializedDesc = serializeDescription({
+    text: cleanDescription,
+    category: cleanCategory,
+    pdf_url: cleanPdfUrl,
+    pinned: isPinned,
+    is_important: isPinned,
+  });
+
+  const supabaseRecord = {
+    title: cleanTitle,
+    description: serializedDesc,
+    date: cleanDate,
   };
 
   try {
     const { data, error } = await supabase
       .from("notices")
-      .insert([newNotice])
+      .insert([supabaseRecord])
       .select();
 
     if (!error && data && data.length > 0) {
+      const createdNotice = parseNoticeRow(data[0]);
+
+      // Update fallback storage
       const notices = getFallbackData("notices", DEFAULT_NOTICES);
-      setFallbackData("notices", [data[0], ...notices]);
+      setFallbackData("notices", [createdNotice, ...notices.filter((n) => String(n.id) !== String(createdNotice.id))]);
 
       return res.status(201).json({
         success: true,
         message: "Notice created successfully",
-        data: data[0],
+        data: createdNotice,
       });
+    }
+
+    if (error) {
+      console.error("Supabase create notice insert error:", error);
     }
   } catch (err) {
     console.warn("Supabase create notice error:", err.message);
   }
 
+  // Local fallback if Supabase is unavailable
+  const fallbackNotice = {
+    id: Date.now(),
+    title: cleanTitle,
+    description: cleanDescription,
+    date: cleanDate,
+    notice_date: cleanDate,
+    category: cleanCategory,
+    pdf_url: cleanPdfUrl,
+    file_url: cleanPdfUrl,
+    is_important: isPinned,
+    pinned: isPinned,
+    created_at: new Date().toISOString(),
+  };
+
   const notices = getFallbackData("notices", DEFAULT_NOTICES);
-  setFallbackData("notices", [newNotice, ...notices]);
+  setFallbackData("notices", [fallbackNotice, ...notices]);
 
   return res.status(201).json({
     success: true,
     message: "Notice created successfully",
-    data: newNotice,
+    data: fallbackNotice,
   });
 };
 
 export const updateNotice = async (req, res) => {
   const { id } = req.params;
-  const updates = req.body;
+  const {
+    title,
+    description,
+    date,
+    notice_date,
+    category,
+    pdf_url,
+    file_url,
+    image_url,
+    is_important,
+    pinned,
+  } = req.body;
+
+  const cleanTitle = title !== undefined ? String(title).trim() : undefined;
+  const cleanDescription = description !== undefined ? String(description).trim() : undefined;
+  const cleanDate = (notice_date || date) !== undefined ? String(notice_date || date).trim() : undefined;
+  const cleanCategory = category !== undefined ? String(category).trim() : undefined;
+  const cleanPdfUrl = (pdf_url || file_url || image_url) !== undefined ? String(pdf_url || file_url || image_url).trim() : undefined;
+  const isPinned = pinned !== undefined || is_important !== undefined ? Boolean(pinned || is_important) : undefined;
+
+  // Retrieve current notice to merge fields if needed
+  const notices = getFallbackData("notices", DEFAULT_NOTICES);
+  const current = notices.find((n) => String(n.id) === String(id)) || {};
+
+  const finalTitle = cleanTitle !== undefined ? cleanTitle : (current.title || "");
+  const finalText = cleanDescription !== undefined ? cleanDescription : (current.description || "");
+  const finalCategory = cleanCategory !== undefined ? cleanCategory : (current.category || "General");
+  const finalPdfUrl = cleanPdfUrl !== undefined ? cleanPdfUrl : (current.pdf_url || current.file_url || "");
+  const finalPinned = isPinned !== undefined ? isPinned : Boolean(current.pinned || current.is_important);
+  const finalDate = cleanDate !== undefined ? cleanDate : (current.date || current.notice_date || new Date().toISOString().split("T")[0]);
+
+  const serializedDesc = serializeDescription({
+    text: finalText,
+    category: finalCategory,
+    pdf_url: finalPdfUrl,
+    pinned: finalPinned,
+    is_important: finalPinned,
+  });
+
+  const updateFields = {
+    title: finalTitle,
+    description: serializedDesc,
+    date: finalDate,
+  };
 
   try {
     const { data, error } = await supabase
       .from("notices")
-      .update(updates)
+      .update(updateFields)
       .eq("id", id)
       .select();
 
-    if (!error) {
-      const notices = getFallbackData("notices", DEFAULT_NOTICES);
-      const updated = notices.map((n) => (String(n.id) === String(id) ? { ...n, ...updates } : n));
-      setFallbackData("notices", updated);
+    if (!error && data && data.length > 0) {
+      const updatedNotice = parseNoticeRow(data[0]);
+
+      const updatedList = notices.map((n) => (String(n.id) === String(id) ? updatedNotice : n));
+      setFallbackData("notices", updatedList);
 
       return res.json({
         success: true,
         message: "Notice updated successfully",
-        data: data?.[0] || { id, ...updates },
+        data: updatedNotice,
       });
     }
   } catch (err) {
     console.warn("Supabase update notice error:", err.message);
   }
 
-  const notices = getFallbackData("notices", DEFAULT_NOTICES);
-  const updated = notices.map((n) => (String(n.id) === String(id) ? { ...n, ...updates } : n));
-  setFallbackData("notices", updated);
+  const updatedFallback = {
+    id: isNaN(Number(id)) ? id : Number(id),
+    title: finalTitle,
+    description: finalText,
+    date: finalDate,
+    notice_date: finalDate,
+    category: finalCategory,
+    pdf_url: finalPdfUrl,
+    file_url: finalPdfUrl,
+    is_important: finalPinned,
+    pinned: finalPinned,
+    created_at: current.created_at || new Date().toISOString(),
+  };
+
+  const updatedList = notices.map((n) => (String(n.id) === String(id) ? updatedFallback : n));
+  setFallbackData("notices", updatedList);
 
   return res.json({
     success: true,
     message: "Notice updated successfully",
-    data: { id, ...updates },
+    data: updatedFallback,
   });
 };
 
@@ -195,15 +376,8 @@ export const deleteNotice = async (req, res) => {
       .delete()
       .eq("id", id);
 
-    if (!error) {
-      const notices = getFallbackData("notices", DEFAULT_NOTICES);
-      const filtered = notices.filter((n) => String(n.id) !== String(id));
-      setFallbackData("notices", filtered);
-
-      return res.json({
-        success: true,
-        message: "Notice deleted successfully",
-      });
+    if (error) {
+      console.warn("Supabase delete notice warning:", error.message);
     }
   } catch (err) {
     console.warn("Supabase delete notice error:", err.message);
@@ -222,15 +396,16 @@ export const deleteNotice = async (req, res) => {
 export const getNoticeSettings = async (req, res) => {
   try {
     const { data, error } = await supabase
-      .from("notice_settings")
+      .from("site_content")
       .select("*")
-      .limit(1)
+      .eq("section", "notice_settings")
       .maybeSingle();
 
-    if (!error && data) {
+    if (!error && data?.content) {
+      const content = typeof data.content === "string" ? JSON.parse(data.content) : data.content;
       return res.json({
         success: true,
-        data,
+        data: { ...DEFAULT_NOTICE_SETTINGS, ...content },
       });
     }
   } catch (err) {
@@ -249,8 +424,15 @@ export const updateNoticeSettings = async (req, res) => {
 
   try {
     const { data, error } = await supabase
-      .from("notice_settings")
-      .upsert({ id: 1, ...newSettings })
+      .from("site_content")
+      .upsert(
+        {
+          section: "notice_settings",
+          content: JSON.stringify(newSettings),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "section" }
+      )
       .select();
 
     if (!error) {
@@ -261,7 +443,7 @@ export const updateNoticeSettings = async (req, res) => {
       return res.json({
         success: true,
         message: "Notice settings updated successfully",
-        data: data?.[0] || merged,
+        data: merged,
       });
     }
   } catch (err) {
