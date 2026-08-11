@@ -1,0 +1,13 @@
+{
+  "id": 1,
+  "school_name": "Bal Jagriti Secondary English Boarding School",
+  "school_email": "admin@Red Rose.edu.np",
+  "phone": "+977 9800000000",
+  "address": "Itahari, Sunsari, Nepal",
+  "logo": "",
+  "lock_account": false,
+  "two_factor": false,
+  "session_timeout": "30",
+  "max_login_attempts": "5",
+  "admin_password": "admin12345"
+}

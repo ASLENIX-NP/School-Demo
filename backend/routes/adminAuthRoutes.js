@@ -1,16 +1,22 @@
 import express from "express";
+
 import {
   adminLogin,
   adminLogout,
-  forgotPassword,
-  resetPassword,
 } from "../controllers/adminAuthController.js";
 
 const router = express.Router();
 
+// =====================================================
+// ADMIN LOGIN
+// =====================================================
+
 router.post("/login", adminLogin);
+
+// =====================================================
+// ADMIN LOGOUT
+// =====================================================
+
 router.post("/logout", adminLogout);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
 
 export default router;

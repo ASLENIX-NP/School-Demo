@@ -1601,5 +1601,32 @@
     "ctaDescription": "Take the first step towards a bright academic future with Red Rose Secondary English Boarding School.",
     "ctaButtonText": "Start Admission Inquiry Now",
     "ctaClosedButtonText": "Contact Us for Future Cycles"
+  },
+  "calendar": {
+    "page_badge": "School Calendar",
+    "page_title": "Academic Calendar",
+    "page_description": "View school holidays, exam schedules, programs, sports week, admission dates, results, and other important academic events.",
+    "saturday_holiday": true,
+    "show_notice_dates": true,
+    "events": [
+      {
+        "id": 1786438331601,
+        "title": "New School Event",
+        "type": "holiday",
+        "start_bs": "2083-04-20",
+        "end_bs": "2083-04-20",
+        "description": "",
+        "visible": true
+      },
+      {
+        "id": 1786438356766,
+        "title": "New School Event",
+        "type": "holiday",
+        "start_bs": "2083-04-20",
+        "end_bs": "2083-04-20",
+        "description": "holiday",
+        "visible": true
+      }
+    ]
   }
 }
