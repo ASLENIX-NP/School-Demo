@@ -79,8 +79,7 @@ export const defaultAboutContent = {
     "Founded with a vision to redefine local education, our school has quickly become a cornerstone of academic excellence in our community. We believe that education is not just about textbooks, but about building character, resilience, and a lifelong love for learning.",
     "Our approach is simple yet profound: provide world-class facilities, encourage creative thinking, and foster an environment where every student feels seen, heard, and empowered to reach their full potential. We prepare students not just for exams, but for life.",
   ],
-  storyImageUrl:
-    "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1000&h=800&fit=crop&auto=format",
+  storyImageUrl: "",
   storyImageZoom: 1,
   storyImageOffsetX: 0,
   storyImageOffsetY: 0,
@@ -129,7 +128,7 @@ export const defaultAboutContent = {
       title: "Creating Opportunities for Every Child",
       message:
         "Our mission is to provide a safe, nurturing, and academically rigorous environment where every child discovers their unique potential. We are committed to not just teaching lessons, but inspiring a generation of thinkers, leaders, and dreamers.",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&auto=format",
+      image: "",
       imageZoom: 1,
       imageOffsetX: 0,
       imageOffsetY: 0,
@@ -142,7 +141,7 @@ export const defaultAboutContent = {
       title: "A Commitment to Excellence",
       message:
         "Behind every great school is a dedicated team. Our educators are our greatest asset, working tirelessly to ensure that no child is left behind. Through innovation, compassion, and unwavering dedication, we are making a real difference in the community.",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&auto=format",
+      image: "",
       imageZoom: 1,
       imageOffsetX: 0,
       imageOffsetY: 0,
@@ -694,8 +693,20 @@ export default function About({
   onDeleteTarget = () => { },
   onAddTarget = () => { },
 }) {
-  const [content, setContent] = useState(() => mergeAboutContent(contentOverride || defaultAboutContent));
+  const [content, setContent] = useState(() =>
+    contentOverride
+      ? mergeAboutContent(contentOverride)
+      : mergeAboutContent({
+          ...defaultAboutContent,
+          storyImageUrl: "",
+          messages: defaultAboutContent.messages.map((message) => ({
+            ...message,
+            image: "",
+          })),
+        })
+  );
   const [selectedStaff, setSelectedStaff] = useState(null);
+  const [isLoading, setIsLoading] = useState(!contentOverride);
 
   useEffect(() => {
     if (contentOverride) {
@@ -705,16 +716,30 @@ export default function About({
     let alive = true;
     const loadAboutContent = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/site-content/about`, { timeout: 10000 });
+        setIsLoading(true);
+
+        const res = await axios.get(
+          `${API_URL}/api/site-content/about`,
+          {
+            timeout: 10000,
+          }
+        );
+
         if (!alive) return;
-        const saved = res.data?.data?.content || {};
 
-        console.log("API DATA:", saved);
+        const saved = res.data?.data?.content;
 
-        setContent(mergeAboutContent(saved));
+        console.log("ABOUT API DATA:", saved);
+
+        if (saved) {
+          setContent(mergeAboutContent(saved));
+        }
       } catch (error) {
         console.error("About content load error:", error);
-        if (alive) setContent(mergeAboutContent(defaultAboutContent));
+      } finally {
+        if (alive) {
+          setIsLoading(false);
+        }
       }
     };
     loadAboutContent();
@@ -722,6 +747,25 @@ export default function About({
       alive = false;
     };
   }, [contentOverride]);
+
+  if (isLoading) {
+    return (
+      <section
+        className="min-h-[70vh] flex items-center justify-center"
+        style={{
+          background:
+            "linear-gradient(180deg, #EAF6FF 0%, #F5FAFF 45%, #EAF6FF 100%)",
+        }}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin" />
+          <p className="text-sm font-semibold text-slate-500">
+            Loading About page...
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   const visiblePillars = (content.pillars || []).filter((p) => p.visible !== false);
   const visibleStaff = (content.messages || []).filter((m) => m.visible !== false);

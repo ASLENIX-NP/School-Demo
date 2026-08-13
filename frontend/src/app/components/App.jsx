@@ -3,7 +3,10 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import ScrollToTop from "./ScrollToTop";
 import ProtectedAdminRoute from "../../admin/ProtectedAdminRoute";
 
-// --- Lazy loaded public components ---
+// =========================================================
+// PUBLIC COMPONENTS
+// =========================================================
+
 const Navbar = lazy(() => import("./Navbar"));
 const Hero = lazy(() => import("./Hero"));
 const Stats = lazy(() => import("./Stats"));
@@ -15,7 +18,18 @@ const Gallery = lazy(() => import("./Gallery"));
 const Contact = lazy(() => import("./Contact"));
 const Footer = lazy(() => import("./Footer"));
 
-// --- Lazy loaded public pages ---
+// =========================================================
+// HOME ANNOUNCEMENT POPUP
+// =========================================================
+
+const HomeAnnouncementPopup = lazy(
+  () => import("./HomeAnnouncementPopup")
+);
+
+// =========================================================
+// PUBLIC PAGES
+// =========================================================
+
 const Notices = lazy(() => import("../../pages/Notices"));
 const Calendar = lazy(() => import("../../pages/Calendar"));
 const Blogs = lazy(() => import("../../pages/Blogs"));
@@ -25,28 +39,53 @@ const Staff = lazy(() => import("../../pages/Staff.jsx"));
 const TeacherProfile = lazy(() => import("../../pages/TeacherProfile"));
 const Facilities = lazy(() => import("../../pages/Facilities"));
 
-// --- Lazy loaded admin pages ---
+// =========================================================
+// ADMIN PAGES
+// =========================================================
+
 const AdminAbout = lazy(() => import("../../admin/AdminAbout"));
 const AdminLogin = lazy(() => import("../../admin/AdminLogin"));
-const AdminForgotPassword = lazy(() => import("../../admin/AdminForgotPassword"));
-const AdminResetPassword = lazy(() => import("../../admin/AdminResetPassword"));
+const AdminForgotPassword = lazy(
+  () => import("../../admin/AdminForgotPassword")
+);
+const AdminResetPassword = lazy(
+  () => import("../../admin/AdminResetPassword")
+);
 const AdminDashboard = lazy(() => import("../../admin/AdminDashboard"));
 const AdminHome = lazy(() => import("../../admin/AdminHome"));
 const AdminNotices = lazy(() => import("../../admin/AdminNotices"));
-const AdminFacilities = lazy(() => import("../../admin/AdminFacilities"));
+const AdminFacilities = lazy(
+  () => import("../../admin/AdminFacilities")
+);
 const AdminNavbar = lazy(() => import("../../admin/AdminNavbar"));
 const AdminStaff = lazy(() => import("../../admin/AdminStaff"));
-const AdminAcademics = lazy(() => import("../../admin/AdminAcademics"));
-const AdminAdmissions = lazy(() => import("../../admin/AdminAdmissions"));
+const AdminAcademics = lazy(
+  () => import("../../admin/AdminAcademics")
+);
+const AdminAdmissions = lazy(
+  () => import("../../admin/AdminAdmissions")
+);
 const AdminFooter = lazy(() => import("../../admin/AdminFooter"));
 const AdminGallery = lazy(() => import("../../admin/AdminGallery"));
 const AdminSettings = lazy(() => import("../../admin/AdminSettings"));
 const AdminContact = lazy(() => import("../../admin/AdminContact"));
-const AdminContactMessages = lazy(() => import("../../admin/AdminContactMessages"));
-const AdminAddNotice = lazy(() => import("../../admin/AdminAddNotice"));
-const AdminAnnouncements = lazy(() => import("../../admin/AdminAnnouncements"));
-const AdminCalendar = lazy(() => import("../../admin/AdminCalendar"));
+const AdminContactMessages = lazy(
+  () => import("../../admin/AdminContactMessages")
+);
+const AdminAddNotice = lazy(
+  () => import("../../admin/AdminAddNotice")
+);
+const AdminAnnouncements = lazy(
+  () => import("../../admin/AdminAnnouncements")
+);
+const AdminCalendar = lazy(
+  () => import("../../admin/AdminCalendar")
+);
 const AdminBlog = lazy(() => import("../../admin/AdminBlog"));
+
+// =========================================================
+// PAGE LOADER
+// =========================================================
 
 function PageLoader() {
   return (
@@ -64,14 +103,28 @@ function PageLoader() {
   );
 }
 
+// =========================================================
+// HOME PAGE
+// =========================================================
+
 function HomePage() {
   return (
     <>
+      {/* Announcement popup */}
+      <Suspense fallback={null}>
+        <HomeAnnouncementPopup />
+      </Suspense>
+
+      {/* Main home content */}
       <Hero />
       <Stats />
     </>
   );
 }
+
+// =========================================================
+// PUBLIC PAGE WRAPPERS
+// =========================================================
 
 function AboutPage() {
   return <About />;
@@ -109,17 +162,41 @@ function BlogsPage() {
   return <Blogs />;
 }
 
+// =========================================================
+// PROTECTED ADMIN PAGE
+// =========================================================
+
 function ProtectedPage({ children }) {
-  return <ProtectedAdminRoute>{children}</ProtectedAdminRoute>;
+  return (
+    <ProtectedAdminRoute>
+      {children}
+    </ProtectedAdminRoute>
+  );
 }
+
+// =========================================================
+// MAIN APPLICATION
+// =========================================================
 
 function SchoolApp() {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith("/admin");
+
+  const isAdminRoute =
+    location.pathname.startsWith("/admin");
 
   return (
-    <div className="min-h-screen" style={{ fontFamily: "var(--font-body)" }}>
+    <div
+      className="min-h-screen"
+      style={{
+        fontFamily: "var(--font-body)",
+      }}
+    >
+      {/* Scroll to top on route change */}
       <ScrollToTop />
+
+      {/* =====================================================
+          PUBLIC NAVBAR
+      ===================================================== */}
 
       {!isAdminRoute && (
         <Suspense fallback={null}>
@@ -127,35 +204,125 @@ function SchoolApp() {
         </Suspense>
       )}
 
+      {/* =====================================================
+          ROUTES
+      ===================================================== */}
+
       <main>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            {/* Public Website Routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/facilities" element={<FacilitiesPage />} />
-            <Route path="/academics" element={<AcademicsPage />} />
-            <Route path="/admissions" element={<AdmissionsPage />} />
-            <Route path="/notices" element={<Notices />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/blogs" element={<BlogsPage />} />
-            <Route path="/blogs/:slug" element={<BlogDetail />} />
-            <Route path="/notices/:id" element={<NoticeDetail />} />
-            <Route path="/staff" element={<Staff />} />
-            <Route path="/staff/:id" element={<TeacherProfile />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/gallery" element={<GalleryPage />} />
-            <Route path="/contact" element={<ContactPage />} />
 
-            {/* Admin Auth */}
+            {/* =================================================
+                PUBLIC WEBSITE
+            ================================================= */}
+
             <Route
-              path="/admin"
-              element={<Navigate to="/admin/dashboard" replace />}
+              path="/"
+              element={<HomePage />}
             />
 
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
-            <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+            <Route
+              path="/about"
+              element={<AboutPage />}
+            />
+
+            <Route
+              path="/facilities"
+              element={<FacilitiesPage />}
+            />
+
+            <Route
+              path="/academics"
+              element={<AcademicsPage />}
+            />
+
+            <Route
+              path="/admissions"
+              element={<AdmissionsPage />}
+            />
+
+            <Route
+              path="/notices"
+              element={<Notices />}
+            />
+
+            <Route
+              path="/calendar"
+              element={<CalendarPage />}
+            />
+
+            <Route
+              path="/blogs"
+              element={<BlogsPage />}
+            />
+
+            <Route
+              path="/blogs/:slug"
+              element={<BlogDetail />}
+            />
+
+            <Route
+              path="/notices/:id"
+              element={<NoticeDetail />}
+            />
+
+            <Route
+              path="/staff"
+              element={<Staff />}
+            />
+
+            <Route
+              path="/staff/:id"
+              element={<TeacherProfile />}
+            />
+
+            <Route
+              path="/events"
+              element={<EventsPage />}
+            />
+
+            <Route
+              path="/gallery"
+              element={<GalleryPage />}
+            />
+
+            <Route
+              path="/contact"
+              element={<ContactPage />}
+            />
+
+            {/* =================================================
+                ADMIN AUTH
+            ================================================= */}
+
+            <Route
+              path="/admin"
+              element={
+                <Navigate
+                  to="/admin/dashboard"
+                  replace
+                />
+              }
+            />
+
+            <Route
+              path="/admin/login"
+              element={<AdminLogin />}
+            />
+
+            <Route
+              path="/admin/forgot-password"
+              element={<AdminForgotPassword />}
+            />
+
+            <Route
+              path="/admin/reset-password"
+              element={<AdminResetPassword />}
+            />
+
+            {/* =================================================
+                ADMIN DASHBOARD
+            ================================================= */}
 
             <Route
               path="/admin/dashboard"
@@ -166,7 +333,10 @@ function SchoolApp() {
               }
             />
 
-            {/* Built Admin Editors */}
+            {/* =================================================
+                ADMIN HOME
+            ================================================= */}
+
             <Route
               path="/admin/home"
               element={
@@ -175,6 +345,10 @@ function SchoolApp() {
                 </ProtectedPage>
               }
             />
+
+            {/* =================================================
+                ADMIN NAVBAR
+            ================================================= */}
 
             <Route
               path="/admin/navbar"
@@ -185,6 +359,10 @@ function SchoolApp() {
               }
             />
 
+            {/* =================================================
+                ADMIN SETTINGS
+            ================================================= */}
+
             <Route
               path="/admin/settings"
               element={
@@ -193,6 +371,10 @@ function SchoolApp() {
                 </ProtectedPage>
               }
             />
+
+            {/* =================================================
+                ADMIN STAFF
+            ================================================= */}
 
             <Route
               path="/admin/staff"
@@ -203,6 +385,10 @@ function SchoolApp() {
               }
             />
 
+            {/* =================================================
+                ADMIN FACILITIES
+            ================================================= */}
+
             <Route
               path="/admin/facilities"
               element={
@@ -211,6 +397,10 @@ function SchoolApp() {
                 </ProtectedPage>
               }
             />
+
+            {/* =================================================
+                ADMIN NOTICES
+            ================================================= */}
 
             <Route
               path="/admin/notices"
@@ -221,6 +411,10 @@ function SchoolApp() {
               }
             />
 
+            {/* =================================================
+                ADMIN CALENDAR
+            ================================================= */}
+
             <Route
               path="/admin/calendar"
               element={
@@ -229,6 +423,10 @@ function SchoolApp() {
                 </ProtectedPage>
               }
             />
+
+            {/* =================================================
+                ADMIN BLOGS
+            ================================================= */}
 
             <Route
               path="/admin/blogs"
@@ -239,6 +437,10 @@ function SchoolApp() {
               }
             />
 
+            {/* =================================================
+                ADMIN ADD NOTICE
+            ================================================= */}
+
             <Route
               path="/admin/notices/new"
               element={
@@ -247,6 +449,10 @@ function SchoolApp() {
                 </ProtectedPage>
               }
             />
+
+            {/* =================================================
+                ADMIN CONTACT
+            ================================================= */}
 
             <Route
               path="/admin/contact"
@@ -257,6 +463,10 @@ function SchoolApp() {
               }
             />
 
+            {/* =================================================
+                ADMIN ABOUT
+            ================================================= */}
+
             <Route
               path="/admin/about"
               element={
@@ -265,6 +475,10 @@ function SchoolApp() {
                 </ProtectedPage>
               }
             />
+
+            {/* =================================================
+                ADMIN ACADEMICS
+            ================================================= */}
 
             <Route
               path="/admin/academics"
@@ -275,6 +489,10 @@ function SchoolApp() {
               }
             />
 
+            {/* =================================================
+                ADMIN ADMISSIONS
+            ================================================= */}
+
             <Route
               path="/admin/admissions"
               element={
@@ -283,6 +501,10 @@ function SchoolApp() {
                 </ProtectedPage>
               }
             />
+
+            {/* =================================================
+                ADMIN CONTACT MESSAGES
+            ================================================= */}
 
             <Route
               path="/admin/contact-messages"
@@ -293,6 +515,10 @@ function SchoolApp() {
               }
             />
 
+            {/* =================================================
+                ADMIN GALLERY
+            ================================================= */}
+
             <Route
               path="/admin/gallery"
               element={
@@ -301,6 +527,10 @@ function SchoolApp() {
                 </ProtectedPage>
               }
             />
+
+            {/* =================================================
+                ADMIN ANNOUNCEMENTS
+            ================================================= */}
 
             <Route
               path="/admin/announcements"
@@ -311,6 +541,10 @@ function SchoolApp() {
               }
             />
 
+            {/* =================================================
+                ADMIN FOOTER
+            ================================================= */}
+
             <Route
               path="/admin/footer"
               element={
@@ -320,20 +554,31 @@ function SchoolApp() {
               }
             />
 
-            {/* Fallback */}
+            {/* =================================================
+                FALLBACK
+            ================================================= */}
+
             <Route
               path="*"
               element={
                 isAdminRoute ? (
-                  <Navigate to="/admin/dashboard" replace />
+                  <Navigate
+                    to="/admin/dashboard"
+                    replace
+                  />
                 ) : (
                   <HomePage />
                 )
               }
             />
+
           </Routes>
         </Suspense>
       </main>
+
+      {/* =====================================================
+          PUBLIC FOOTER
+      ===================================================== */}
 
       {!isAdminRoute && (
         <Suspense fallback={null}>
