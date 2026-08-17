@@ -16,10 +16,7 @@ import {
   ShieldCheck,
   Award,
   Users,
-  BookOpen,
   GraduationCap,
-  Bus,
-  Home,
   Check,
   AlertCircle,
   HelpCircle,
@@ -146,109 +143,9 @@ export const defaultSettings = {
       requirements: "Passed entrance test, character certificate, grade report card."
     }
   ],
-  documentsBadge: "Checklist",
-  documentsTitle: "Required Documents",
-  documentsDescription: "Documents to be presented during the final verification stage.",
-  requiredDocuments: [
-    {
-      id: "doc-1",
-      name: "Birth Certificate",
-      desc: "Official copy issued by local municipality",
-      mandatory: true
-    },
-    {
-      id: "doc-2",
-      name: "Transfer Certificate (TC)",
-      desc: "Original TC from previous school",
-      mandatory: true
-    },
-    {
-      id: "doc-3",
-      name: "Previous Grade Marksheet",
-      desc: "Copy of last annual examination progress report",
-      mandatory: true
-    },
-    {
-      id: "doc-4",
-      name: "Passport Size Photographs",
-      desc: "4 recent color photographs of student & 2 of parents",
-      mandatory: true
-    },
-    {
-      id: "doc-5",
-      name: "Parent Citizenship / ID Proof",
-      desc: "Copy of Citizenship or Passport",
-      mandatory: true
-    },
-    {
-      id: "doc-6",
-      name: "Character Certificate",
-      desc: "For Grade 6 and above",
-      mandatory: false
-    }
-  ],
-  importantDatesEnabled: true,
-  datesBadge: "Schedule",
-  datesTitle: "Important Dates & Deadlines",
-  datesDescription: "Keep track of key milestones for academic session.",
-  importantDates: [
-    {
-      id: "date-1",
-      title: "Admissions Open",
-      date: "2027-01-01",
-      desc: "Online inquiry submission portal opens."
-    },
-    {
-      id: "date-2",
-      title: "Application Deadline",
-      date: "2027-04-30",
-      desc: "Last date to submit inquiry & register."
-    },
-    {
-      id: "date-3",
-      title: "Entrance Assessment",
-      date: "Scheduled upon Inquiry",
-      desc: "Interactive student evaluation sessions."
-    },
-    {
-      id: "date-4",
-      title: "Academic Session Starts",
-      date: "May 2027",
-      desc: "Official orientation and session commencement."
-    }
-  ],
   feeBadge: "Transparent Pricing",
   feeTitle: "Fee Structure & Scholarship Policy",
   feeDescription: "We provide transparent fee schedules with no hidden charges. Merit scholarships and need-based financial aid options are available for eligible candidates.",
-  facilitiesBadge: "Campus Infrastructure",
-  facilitiesTitle: "Facilities for Comprehensive Growth",
-  facilitiesDescription: "Equipped with modern amenities to ensure safety, comfort, and interactive learning.",
-  facilitiesList: [
-    {
-      id: "fac-1",
-      icon: "BookOpen",
-      title: "Smart Classrooms",
-      desc: "Interactive digital displays & multimedia learning."
-    },
-    {
-      id: "fac-2",
-      icon: "School",
-      title: "Science & Computer Labs",
-      desc: "Advanced hands-on practical learning environments."
-    },
-    {
-      id: "fac-3",
-      icon: "Bus",
-      title: "School Transport",
-      desc: "Safe GPS-tracked buses across major city routes."
-    },
-    {
-      id: "fac-4",
-      icon: "Home",
-      title: "Student Hostel",
-      desc: "Comfortable residential boarding with round-the-clock security."
-    }
-  ],
   faqsBadge: "Parent Assistance",
   faqsTitle: "Frequently Asked Questions",
   faqsDescription: "Got questions regarding admissions? We have answers.",
@@ -277,10 +174,10 @@ export const defaultSettings = {
   contactBadge: "Direct Assistance",
   contactTitle: "Contact Admission Office",
   contactDescription: "Have questions? Reach out directly to our friendly admission counselors.",
-  contactPhone: "+977 1-4567890 / +977 9851012345",
-  contactEmail: "admissions@redroseschool.edu.np",
+  contactPhone: "057-590144, 057-590145",
+  contactEmail: "inforedroseschool@gmail.com",
   contactHours: "Sun - Fri: 8:00 AM - 4:00 PM",
-  contactAddress: "Kathmandu, Nepal",
+  contactAddress: "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
   ctaTitle: "Give Your Child the Gift of World-Class Education",
   ctaDescription: "Take the first step towards a bright academic future with Red Rose Secondary English Boarding School.",
   ctaButtonText: "Start Admission Inquiry Now",
@@ -298,9 +195,6 @@ const ICON_MAP = {
   Users,
   School,
   ShieldCheck,
-  BookOpen,
-  Bus,
-  Home,
   Star: Sparkles,
   Sparkles,
   Trophy: Award,
@@ -463,9 +357,6 @@ export default function AdmissionsPage({ previewData = null }) {
   const whyUsList = settings.whyUs && settings.whyUs.length > 0 ? settings.whyUs : defaultSettings.whyUs;
   const timelineList = settings.timelineSteps && settings.timelineSteps.length > 0 ? settings.timelineSteps : defaultSettings.timelineSteps;
   const eligibilityList = settings.eligibilityCriteria && settings.eligibilityCriteria.length > 0 ? settings.eligibilityCriteria : defaultSettings.eligibilityCriteria;
-  const documentsList = settings.requiredDocuments && settings.requiredDocuments.length > 0 ? settings.requiredDocuments : defaultSettings.requiredDocuments;
-  const datesList = settings.importantDates && settings.importantDates.length > 0 ? settings.importantDates : defaultSettings.importantDates;
-  const facilities = settings.facilitiesList && settings.facilitiesList.length > 0 ? settings.facilitiesList : defaultSettings.facilitiesList;
   const faqsList = settings.faqs && settings.faqs.length > 0 ? settings.faqs : defaultSettings.faqs;
 
   return (
@@ -698,78 +589,7 @@ export default function AdmissionsPage({ previewData = null }) {
         </section>
       )}
 
-      {/* ================= 5. REQUIRED DOCUMENTS ================= */}
-      {documentsList.length > 0 && (
-        <section className="py-24 px-4 sm:px-6 bg-blue-950/5 border-y border-blue-100">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-              <span className="text-xs uppercase tracking-widest text-blue-900 font-extrabold bg-blue-100 px-3.5 py-1 rounded-full border border-blue-200">
-                {settings.documentsBadge || "Checklist"}
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
-                {settings.documentsTitle || "Required Documents"}
-              </h2>
-              <p className="text-slate-600 text-base">
-                {settings.documentsDescription || "Documents to be presented during the final verification stage."}
-              </p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {documentsList.map((doc, idx) => (
-                <div
-                  key={doc.id || idx}
-                  className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-300 transition-all flex items-start gap-4"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-1">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-base font-bold text-blue-950">{doc.name}</h3>
-                      {doc.mandatory && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700 uppercase">
-                          Mandatory
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">{doc.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ================= 6. IMPORTANT DATES ================= */}
-      {settings.importantDatesEnabled !== false && datesList.length > 0 && (
-        <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-            <span className="text-xs uppercase tracking-widest text-amber-600 font-extrabold bg-amber-100 px-3.5 py-1 rounded-full border border-amber-200">
-              {settings.datesBadge || "Schedule"}
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
-              {settings.datesTitle || "Important Dates & Deadlines"}
-            </h2>
-            <p className="text-slate-600 text-base">
-              {settings.datesDescription || `Keep track of key milestones for academic session ${settings.academicSession}.`}
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {datesList.map((item, idx) => (
-              <div key={item.id || idx} className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm text-center space-y-3 hover:border-amber-400 hover:shadow-md transition-all">
-                <Calendar className="w-8 h-8 text-amber-500 mx-auto" />
-                <h3 className="text-lg font-bold text-blue-950">{item.title}</h3>
-                <p className="text-amber-600 font-bold text-sm">{item.date}</p>
-                <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ================= 7. FEE STRUCTURE ================= */}
+      {/* ================= 5. FEE STRUCTURE ================= */}
       <section className="py-24 px-4 sm:px-6 bg-slate-100/70 border-y border-slate-200">
         <div className="max-w-5xl mx-auto text-center space-y-8 p-10 sm:p-16 rounded-3xl bg-gradient-to-br from-blue-950 via-slate-900 to-blue-900 text-white shadow-2xl border border-blue-900">
           <div className="w-16 h-16 rounded-2xl bg-amber-400/15 text-amber-400 flex items-center justify-center mx-auto border border-amber-400/30 shadow-md">
@@ -809,36 +629,7 @@ export default function AdmissionsPage({ previewData = null }) {
         </div>
       </section>
 
-      {/* ================= 8. SCHOOL FACILITIES ================= */}
-      {facilities.length > 0 && (
-        <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-            <span className="text-xs uppercase tracking-widest text-blue-900 font-extrabold bg-blue-100 px-3.5 py-1 rounded-full border border-blue-200">
-              {settings.facilitiesBadge || "Campus Infrastructure"}
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
-              {settings.facilitiesTitle || "Facilities for Comprehensive Growth"}
-            </h2>
-            <p className="text-slate-600 text-base">
-              {settings.facilitiesDescription || "Equipped with modern amenities to ensure safety, comfort, and interactive learning."}
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {facilities.map((fac, idx) => (
-              <div key={fac.id || idx} className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3 hover:border-blue-300 transition-all">
-                <div className="w-12 h-12 rounded-xl bg-blue-900/10 text-blue-900 flex items-center justify-center">
-                  <DynamicIcon name={fac.icon} className="w-6 h-6" defaultIcon={School} />
-                </div>
-                <h3 className="text-lg font-bold text-blue-950">{fac.title}</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">{fac.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ================= 9. FREQUENTLY ASKED QUESTIONS ================= */}
+      {/* ================= 6. FREQUENTLY ASKED QUESTIONS ================= */}
       {faqsList.length > 0 && (
         <section className="py-24 px-4 sm:px-6 bg-slate-100/60 border-y border-slate-200">
           <div className="max-w-4xl mx-auto">
@@ -885,48 +676,122 @@ export default function AdmissionsPage({ previewData = null }) {
         </section>
       )}
 
-      {/* ================= 10. CONTACT ADMISSIONS ================= */}
-      <section id="contact-admissions" className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-          <span className="text-xs uppercase tracking-widest text-blue-900 font-extrabold bg-blue-100 px-3.5 py-1 rounded-full border border-blue-200">
-            {settings.contactBadge || "Direct Assistance"}
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
-            {settings.contactTitle || "Contact Admission Office"}
-          </h2>
-          <p className="text-slate-600 text-base">
-            {settings.contactDescription || "Have questions? Reach out directly to our friendly admission counselors."}
-          </p>
-        </div>
+      {/* ================= 7. CONTACT ADMISSIONS ================= */}
+      <section id="contact-admissions" className="py-24 px-4 sm:px-6 bg-white border-t border-slate-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
+            <span className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-amber-700 font-extrabold bg-amber-100 px-4 py-2 rounded-full border border-amber-200">
+              <Phone className="w-3.5 h-3.5" />
+              {settings.contactBadge || "Direct Assistance"}
+            </span>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-3">
-            <Phone className="w-8 h-8 text-blue-900" />
-            <h3 className="text-lg font-bold text-blue-950">Phone Support</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">{settings.contactPhone}</p>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950 tracking-tight">
+              {settings.contactTitle || "Talk to Our Admission Team"}
+            </h2>
+
+            <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+              {settings.contactDescription ||
+                "Have questions about admission? Contact Red Rose School directly and our team will be happy to help."}
+            </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-3">
-            <Mail className="w-8 h-8 text-blue-900" />
-            <h3 className="text-lg font-bold text-blue-950">Email Address</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">{settings.contactEmail}</p>
-          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-3">
-            <Clock className="w-8 h-8 text-blue-900" />
-            <h3 className="text-lg font-bold text-blue-950">Office Hours</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">{settings.contactHours}</p>
-          </div>
+            {/* PHONE - CLICK TO CALL */}
+            <a
+              href="tel:+97757590144"
+              className="group p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <Phone className="w-6 h-6" />
+              </div>
 
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-3">
-            <MapPin className="w-8 h-8 text-blue-900" />
-            <h3 className="text-lg font-bold text-blue-950">Campus Location</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">{settings.contactAddress}</p>
+              <h3 className="text-lg font-bold text-blue-950 mb-2">
+                Call the School
+              </h3>
+
+              <p className="text-sm text-slate-600 leading-relaxed">
+                057-590144
+              </p>
+
+              <p className="text-sm text-slate-600 leading-relaxed">
+                057-590145
+              </p>
+
+              <span className="inline-flex items-center gap-1 mt-4 text-xs font-bold text-emerald-700">
+                Tap to call <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </a>
+
+            {/* EMAIL - CLICK TO OPEN EMAIL */}
+            <a
+              href={`mailto:${settings.contactEmail || "inforedroseschool@gmail.com"}`}
+              className="group p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-violet-50 hover:border-violet-300 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <Mail className="w-6 h-6" />
+              </div>
+
+              <h3 className="text-lg font-bold text-blue-950 mb-2">
+                Email Admissions
+              </h3>
+
+              <p className="text-sm text-slate-600 leading-relaxed break-all">
+                {settings.contactEmail || "inforedroseschool@gmail.com"}
+              </p>
+
+              <span className="inline-flex items-center gap-1 mt-4 text-xs font-bold text-violet-700">
+                Tap to email <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </a>
+
+            {/* OFFICE HOURS */}
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm">
+              <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-5">
+                <Clock className="w-6 h-6" />
+              </div>
+
+              <h3 className="text-lg font-bold text-blue-950 mb-2">
+                Office Hours
+              </h3>
+
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {settings.contactHours || "Sun - Fri: 8:00 AM - 4:00 PM"}
+              </p>
+
+              <span className="inline-flex items-center gap-1 mt-4 text-xs font-bold text-amber-700">
+                Admission support available
+              </span>
+            </div>
+
+            {/* SCHOOL LOCATION - CLICK TO OPEN GOOGLE MAPS */}
+            <a              href="https://www.google.com/maps/place/Red+Rose+English+Boarding+School/data=!4m2!3m1!1s0x0:0x7905f4bf995fafde?sa=X&ved=1t:2428&ictx=111"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-blue-50 hover:border-blue-300 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <MapPin className="w-6 h-6" />
+              </div>
+
+              <h3 className="text-lg font-bold text-blue-950 mb-2">
+                School Location
+              </h3>
+
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Basudev Marga, Hetauda-2, Makawanpur, Nepal
+              </p>
+
+              <span className="inline-flex items-center gap-1 mt-4 text-xs font-bold text-blue-700">
+                Open in Google Maps <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </a>
+
           </div>
         </div>
       </section>
 
-      {/* ================= 11. FINAL CALL TO ACTION BANNER ================= */}
+      {/* ================= 8. FINAL CALL TO ACTION BANNER ================= */}
       <section className="py-20 px-4 sm:px-6 bg-gradient-to-br from-amber-50/80 via-white to-blue-50/80 text-slate-900 border-t border-slate-200">
         <div className="max-w-4xl mx-auto text-center space-y-6">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-blue-950">
@@ -1268,4 +1133,3 @@ export default function AdmissionsPage({ previewData = null }) {
       </AnimatePresence>
     </div>
   );
-}

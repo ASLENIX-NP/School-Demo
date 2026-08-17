@@ -52,7 +52,7 @@ const defaultSettings = {
       id: "why-4",
       icon: "ShieldCheck",
       title: "Safe & Nurturing Environment",
-      desc: "CCTV-monitored campus, strict safety protocols, and caring staff ensuring student well-being."
+      desc: "CCTV-monitored School, strict safety protocols, and caring staff ensuring student well-being."
     }
   ],
   processBadge: "Step-By-Step Workflow",
@@ -68,8 +68,8 @@ const defaultSettings = {
     {
       id: "step-2",
       number: "02",
-      title: "Campus Interaction",
-      desc: "Visit our campus to meet counselors and explore our learning environment."
+      title: "School Interaction",
+      desc: "Visit our School to meet counselors and explore our learning environment."
     },
     {
       id: "step-3",
@@ -193,7 +193,7 @@ const defaultSettings = {
   feeBadge: "Transparent Pricing",
   feeTitle: "Fee Structure & Scholarship Policy",
   feeDescription: "We provide transparent fee schedules with no hidden charges. Merit scholarships and need-based financial aid options are available for eligible candidates.",
-  facilitiesBadge: "Campus Infrastructure",
+  facilitiesBadge: "School Infrastructure",
   facilitiesTitle: "Facilities for Comprehensive Growth",
   facilitiesDescription: "Equipped with modern amenities to ensure safety, comfort, and interactive learning.",
   facilitiesList: [
@@ -229,7 +229,7 @@ const defaultSettings = {
     {
       id: "faq-1",
       question: "What is the admission procedure?",
-      answer: "Fill out the online inquiry form or visit our campus. After submission, our admissions team will schedule an assessment and parent interaction session."
+      answer: "Fill out the online inquiry form or visit our School. After submission, our admissions team will schedule an assessment and parent interaction session."
     },
     {
       id: "faq-2",

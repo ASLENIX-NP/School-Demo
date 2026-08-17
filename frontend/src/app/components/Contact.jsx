@@ -685,7 +685,7 @@ export default function Contact({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={editMode ? (e) => e.stopPropagation() : undefined}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black text-[#173E2D] bg-[#FFF8E1] hover:bg-[#FFF0B8] border border-[#E5C35A] shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
                   >
                     <MapPin className="w-3.5 h-3.5" />
                     <span>Open in Maps</span>
@@ -718,7 +718,7 @@ export default function Contact({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={editMode ? (e) => e.stopPropagation() : undefined}
-                  className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-blue-700 text-white text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 shrink-0 inline-flex items-center justify-center gap-2"
+                  className="px-5 py-2.5 rounded-xl bg-[#F4C95D] hover:bg-[#FFD66F] text-[#173E2D] text-xs font-black transition-all duration-200 shadow-[0_8px_20px_rgba(244,201,93,0.28)] hover:shadow-[0_12px_26px_rgba(244,201,93,0.38)] hover:-translate-y-0.5 shrink-0 inline-flex items-center justify-center gap-2 border border-[#E5B83E]"
                 >
                   <Compass className="w-3.5 h-3.5" />
                   <span>{content.mapCard?.buttonText || "Open in Google Maps"}</span>

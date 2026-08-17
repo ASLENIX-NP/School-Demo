@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
   AlertCircle,
   ArrowUpRight,
@@ -111,13 +111,15 @@ async function fetchJson(url) {
 function getCategoryColor(category) {
   const value = String(category || "").toLowerCase();
 
-  if (value.includes("exam")) return "#E85D5D";
-  if (value.includes("admission")) return "#C58B2B";
-  if (value.includes("holiday")) return "#3D8B72";
-  if (value.includes("event")) return "#4B79A1";
-  if (value.includes("result")) return "#7A63A8";
+  if (value.includes("exam")) return "#C2414B";
+  if (value.includes("admission")) return "#B7791F";
+  if (value.includes("holiday")) return "#2F7D5B";
+  if (value.includes("event")) return "#2F6F8F";
+  if (value.includes("result")) return "#7056A3";
+  if (value.includes("meeting")) return "#8B5E34";
+  if (value.includes("general knowledge")) return "#39736A";
 
-  return "#2D6A4F";
+  return "#1F6B4F";
 }
 
 function EditBadge({
@@ -147,76 +149,55 @@ function NoticeCard({
   onClick,
 }) {
   const color = getCategoryColor(notice.category);
-
-  const hasPdf = Boolean(
-    notice.pdf_url || notice.file_url
-  );
+  const hasPdf = Boolean(notice.pdf_url || notice.file_url);
 
   return (
     <motion.article
-      initial={{
-        opacity: 0,
-        y: 30,
-      }}
-      whileInView={{
-        opacity: 1,
-        y: 0,
-      }}
-      viewport={{
-        once: true,
-        amount: 0.15,
-      }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
       transition={{
         duration: 0.45,
         delay: Math.min(index * 0.05, 0.25),
       }}
-      whileHover={{
-        y: -7,
-        rotateX: 1,
-        rotateY: -1,
-      }}
+      whileHover={{ y: -6 }}
       className="group relative"
-      style={{
-        perspective: "1200px",
-      }}
     >
       <div
-        className="relative h-full overflow-hidden rounded-[28px] bg-white p-6 sm:p-7"
+        className="relative h-full overflow-hidden rounded-[30px] bg-white p-6 sm:p-7"
         style={{
-          border: `1px solid ${color}22`,
+          border: `1px solid ${color}30`,
           boxShadow:
-            "0 18px 45px rgba(15,23,42,.08), 0 3px 10px rgba(15,23,42,.04)",
-          transformStyle: "preserve-3d",
+            "0 20px 55px rgba(15,23,42,.08), 0 4px 14px rgba(15,23,42,.04)",
         }}
         onClick={() => {
-          if (!editMode) {
-            onClick?.();
-          }
+          if (!editMode) onClick?.();
         }}
       >
-        {/* TOP COLOR LINE */}
         <div
           className="absolute inset-x-0 top-0 h-1.5"
           style={{
             background:
-              `linear-gradient(90deg, ${color}, #D9A441, #4E9AA8)`,
+              `linear-gradient(90deg, ${color} 0%, #D9A441 52%, #4E9AA8 100%)`,
           }}
         />
 
-        {/* ADMIN ACTIONS */}
+        <div
+          className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full blur-3xl"
+          style={{ background: `${color}18` }}
+        />
+
+        <div className="pointer-events-none absolute -bottom-20 -left-12 h-36 w-36 rounded-full bg-emerald-100/50 blur-3xl" />
+
         {editMode && (
           <div className="absolute right-4 top-4 z-20 flex gap-2">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-
-                onEditTarget?.({
-                  type: "notice",
-                  id: notice.id,
-                });
+                onEditTarget?.({ type: "notice", id: notice.id });
               }}
-              className="rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white shadow-lg transition hover:-translate-y-0.5"
+              className="rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800"
             >
               Edit
             </button>
@@ -225,11 +206,7 @@ function NoticeCard({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-
-                onDeleteTarget?.({
-                  type: "notice",
-                  id: notice.id,
-                });
+                onDeleteTarget?.({ type: "notice", id: notice.id });
               }}
               className="rounded-xl bg-red-50 px-3 py-2 text-xs font-black text-red-600 shadow-lg transition hover:-translate-y-0.5 hover:bg-red-100"
             >
@@ -238,13 +215,13 @@ function NoticeCard({
           </div>
         )}
 
-        {/* CARD HEADER */}
-        <div className="flex items-start justify-between gap-4">
+        <div className="relative z-10 flex items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2 pr-20">
             <span
-              className="rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[.12em]"
+              className="rounded-full border px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[.14em]"
               style={{
                 background: `${color}12`,
+                borderColor: `${color}25`,
                 color,
               }}
             >
@@ -252,44 +229,38 @@ function NoticeCard({
             </span>
 
             {notice.pinned && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-black text-amber-700">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.08em] text-amber-700">
                 <Pin size={12} />
                 Important
               </span>
             )}
 
             {hasPdf && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-700">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.08em] text-rose-700">
                 <FileText size={12} />
                 PDF
               </span>
             )}
           </div>
 
-          {/* DATE */}
-          <div className="shrink-0 text-right text-xs font-bold text-slate-400">
+          <div className="shrink-0 rounded-2xl bg-slate-50 px-3 py-2 text-right text-[11px] font-bold text-slate-400">
             <CalendarDays
               size={15}
-              className="ml-auto mb-1"
+              className="ml-auto mb-1 text-emerald-600"
             />
-
             {formatNoticeDate(notice.notice_date)}
           </div>
         </div>
 
-        {/* TITLE */}
-        <h3 className="mt-6 text-xl font-black tracking-[-.035em] text-slate-950 sm:text-2xl">
+        <h3 className="relative z-10 mt-6 max-w-2xl text-[22px] font-black leading-tight tracking-[-.04em] text-slate-950 sm:text-[25px]">
           {notice.title || "School Notice"}
         </h3>
 
-        {/* DESCRIPTION */}
-        <p className="mt-3 line-clamp-3 whitespace-pre-line text-sm leading-7 text-slate-500 sm:text-[15px]">
-          {notice.description ||
-            "Click to read the complete notice."}
+        <p className="relative z-10 mt-3 line-clamp-3 whitespace-pre-line text-sm leading-7 text-slate-500 sm:text-[15px]">
+          {notice.description || "Click to read the complete notice."}
         </p>
 
-        {/* CARD FOOTER */}
-        <div className="mt-7 flex items-center justify-between border-t border-slate-100 pt-5">
+        <div className="relative z-10 mt-7 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
           {!editMode ? (
             <button
               type="button"
@@ -297,13 +268,17 @@ function NoticeCard({
                 e.stopPropagation();
                 onClick?.();
               }}
-              className="inline-flex items-center gap-2 text-sm font-black transition-all hover:gap-3"
+              className="group/read inline-flex w-fit items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-black transition-all hover:-translate-y-0.5"
               style={{
+                background: `${color}0D`,
                 color,
               }}
             >
               Read full notice
-              <ArrowUpRight size={16} />
+              <ArrowUpRight
+                size={16}
+                className="transition-transform group-hover/read:translate-x-0.5 group-hover/read:-translate-y-0.5"
+              />
             </button>
           ) : (
             <span className="text-xs font-bold text-slate-400">
@@ -311,33 +286,19 @@ function NoticeCard({
             </span>
           )}
 
-          {/* PDF BUTTON */}
           {hasPdf && !editMode && (
             <a
-              href={
-                notice.pdf_url ||
-                notice.file_url
-              }
+              href={notice.pdf_url || notice.file_url}
               target="_blank"
               rel="noreferrer"
-              onClick={(e) =>
-                e.stopPropagation()
-              }
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs font-black text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-800 hover:shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex w-fit items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-black text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-lg"
             >
-              <Download size={14} />
-              PDF
+              <FileText size={14} />
+              View PDF
             </a>
           )}
         </div>
-
-        {/* DECORATION */}
-        <div
-          className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-60 blur-3xl"
-          style={{
-            background: `${color}20`,
-          }}
-        />
       </div>
     </motion.article>
   );
@@ -723,7 +684,7 @@ export default function Notices({
           <div className="mx-auto max-w-7xl">
             <div className="mb-5 flex items-end justify-between gap-4">
               <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-600">
+                <span className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 shadow-sm">
                   <Megaphone size={14} />
                   Announcements
                 </span>
@@ -889,7 +850,7 @@ export default function Notices({
                       (value) => !value
                     )
                   }
-                  className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-black"
+                  className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 px-4 py-2.5 text-xs font-black transition hover:-translate-y-0.5 hover:shadow-sm"
                   style={{
                     background: pdfOnly
                       ? "#DFF5EE"
@@ -1120,13 +1081,20 @@ export default function Notices({
                     settings.sidebar_button_link ||
                     "/calendar"
                   }
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-slate-950 shadow-xl transition hover:-translate-y-1"
+                  className="group inline-flex shrink-0 items-center justify-center gap-3 rounded-2xl bg-[#F4C95D] px-6 py-3.5 text-sm font-black text-[#173E2D] shadow-[0_12px_30px_rgba(244,201,93,.28)] ring-1 ring-[#FFE6A3] transition-all duration-200 hover:-translate-y-1 hover:bg-[#FFD66F] hover:shadow-[0_16px_35px_rgba(244,201,93,.38)]"
                 >
-                  {settings.sidebar_button_text ||
-                    "View Calendar"}
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/80 text-[#173E2D]">
+                    <CalendarDays size={17} />
+                  </span>
+
+                  <span>
+                    {settings.sidebar_button_text ||
+                      "View Calendar"}
+                  </span>
 
                   <ChevronRight
                     size={17}
+                    className="transition-transform duration-200 group-hover:translate-x-1"
                   />
                 </Link>
               </div>
@@ -1296,7 +1264,7 @@ export default function Notices({
                             selectedNotice.file_url
                           }
                           download
-                          className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-black text-amber-800 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-100 hover:shadow-md"
+                          className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-[#FFF7DD] px-5 py-3 text-sm font-black text-amber-900 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#FFEFB5] hover:shadow-md"
                         >
                           <Download
                             size={15}

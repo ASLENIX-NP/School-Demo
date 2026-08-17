@@ -57,7 +57,7 @@ const DEFAULT_ADMIN_SETTINGS = {
   institution_name:
     "Red Rose Secondary English Boarding School",
 
-  campus_location:
+  School_location:
     "Basudev Marga, Hetauda-2, Makwanpur",
 
   address:

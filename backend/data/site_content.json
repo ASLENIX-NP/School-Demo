@@ -61,7 +61,7 @@
       "story": {
         "badge": "Our Story",
         "title": "Building Tomorrow's Leaders Today",
-        "imageTopTitle": "Our Campus",
+        "imageTopTitle": "Our School",
         "imageTopSubtitle": "Hetauda-2",
         "paragraphs": [
           "Established with a vision to provide quality education in Makawanpur, Red Rose Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
@@ -212,7 +212,7 @@
     "storyImageZoom": 1,
     "storyImageOffsetX": 0,
     "storyImageOffsetY": 0,
-    "storyImageTopTitle": "Our Main Campus",
+    "storyImageTopTitle": "Our Main School",
     "storyImageTopSubtitle": "A Hub of Innovation & Learning",
     "storyBadgeYear": "Est. 2010 AD",
     "pillarBadge": "Our Core Values",
@@ -321,7 +321,7 @@
       }
     ],
     "ctaTitle": "Ready to Join Our Community?",
-    "ctaDescription": "Experience our campus, meet our dedicated faculty, and see firsthand how we nurture the leaders of tomorrow.",
+    "ctaDescription": "Experience our School, meet our dedicated faculty, and see firsthand how we nurture the leaders of tomorrow.",
     "ctaButtonText": "Schedule a Visit",
     "ctaButtonLink": "/contact",
     "storyImageAlt": ""
@@ -406,7 +406,7 @@
         "category": "Events",
         "date": "2026-06-20",
         "excerpt": "A vibrant showcase of traditional music, drama performances, and student art galleries celebrating national heritage and creative expression.",
-        "content": "The annual Red Rose Cultural Extravaganza transformed our school campus into a colorful hub of music, theatrical plays, folk dance, and fine art displays created by students from Grade 1 to Grade 10.",
+        "content": "The annual Red Rose Cultural Extravaganza transformed our school School into a colorful hub of music, theatrical plays, folk dance, and fine art displays created by students from Grade 1 to Grade 10.",
         "imageUrl": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800",
         "imageAlt": "Cultural Festival",
         "pinned": false,
@@ -975,7 +975,7 @@
     ]
   },
   "facilities": {
-    "badgeText": "Our Campus",
+    "badgeText": "Our School",
     "title": "Spaces Built For How Students Actually Learn smriti",
     "highlightedText": "Learn from sonicaa",
     "subtitle": "Red Rose Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student. smriti",
@@ -1041,24 +1041,24 @@
             "id": 1,
             "name": "Route 1",
             "from": "Hetauda – New Bus Park",
-            "to": "School Campus",
+            "to": "School School",
             "stops": [
               "New Bus Park",
               "Chandranagar",
               "Bhanu Chowk",
-              "School Campus"
+              "School School"
             ]
           },
           {
             "id": 2,
             "name": "Route 2",
             "from": "Hetauda – Old Bus Park",
-            "to": "School Campus",
+            "to": "School School",
             "stops": [
               "Old Bus Park",
               "Milan Chowk",
               "Bishnupur",
-              "School Campus"
+              "School School"
             ]
           }
         ]
@@ -1358,7 +1358,7 @@
         "id": "why-4",
         "icon": "ShieldCheck",
         "title": "Safe & Nurturing Environment",
-        "desc": "CCTV-monitored campus, strict safety protocols, and caring staff ensuring student well-being."
+        "desc": "CCTV-monitored School, strict safety protocols, and caring staff ensuring student well-being."
       }
     ],
     "processBadge": "Step-By-Step Workflow",
@@ -1374,8 +1374,8 @@
       {
         "id": "step-2",
         "number": "02",
-        "title": "Campus Interaction",
-        "desc": "Visit our campus to meet counselors and explore our learning environment."
+        "title": "School Interaction",
+        "desc": "Visit our School to meet counselors and explore our learning environment."
       },
       {
         "id": "step-3",
@@ -1499,7 +1499,7 @@
     "feeBadge": "Transparent Pricing",
     "feeTitle": "Fee Structure & Scholarship Policy",
     "feeDescription": "We provide transparent fee schedules with no hidden charges. Merit scholarships and need-based financial aid options are available for eligible candidates.",
-    "facilitiesBadge": "Campus Infrastructure",
+    "facilitiesBadge": "School Infrastructure",
     "facilitiesTitle": "Facilities for Comprehensive Growth",
     "facilitiesDescription": "Equipped with modern amenities to ensure safety, comfort, and interactive learning.",
     "facilitiesList": [
@@ -1535,7 +1535,7 @@
       {
         "id": "faq-1",
         "question": "What is the admission procedure?",
-        "answer": "Fill out the online inquiry form or visit our campus. After submission, our admissions team will schedule an assessment and parent interaction session."
+        "answer": "Fill out the online inquiry form or visit our School. After submission, our admissions team will schedule an assessment and parent interaction session."
       },
       {
         "id": "faq-2",
