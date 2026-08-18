@@ -680,6 +680,48 @@ export default function AdminNavbar() {
         `}
       </style>
 
+      <style>{`
+        /* Desktop preview: scale the complete navbar so the Admission
+           button stays inside the editor preview box. */
+        .admin-navbar-preview-frame {
+          overflow: hidden !important;
+        }
+
+        .admin-navbar-preview-scale {
+          width: 114% !important;
+          transform: scale(0.875);
+          transform-origin: top left;
+        }
+
+        .admin-navbar-preview-scale nav,
+        .admin-navbar-preview-scale header {
+          max-width: 100% !important;
+        }
+
+        .admin-navbar-preview-scale a[href="/admissions"],
+        .admin-navbar-preview-scale a[href*="/admissions"],
+        .admin-navbar-preview-scale button[aria-label*="admission" i] {
+          flex-shrink: 1 !important;
+          max-width: 170px !important;
+          min-width: 0 !important;
+          white-space: nowrap !important;
+        }
+
+        @media (max-width: 900px) {
+          .admin-navbar-preview-scale {
+            width: 125% !important;
+            transform: scale(0.8);
+          }
+        }
+
+        @media (max-width: 767px) {
+          .admin-navbar-preview-scale {
+            width: 100% !important;
+            transform: none !important;
+          }
+        }
+      `}</style>
+
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -739,7 +781,9 @@ export default function AdminNavbar() {
           }}
         >
           <div className="w-full min-w-0">
-            <Navbar editMode contentOverride={form} onEditTarget={openEditor} />
+            <div className="admin-navbar-preview-scale">
+              <Navbar editMode contentOverride={form} onEditTarget={openEditor} />
+            </div>
           </div>
         </div>
       </motion.div>

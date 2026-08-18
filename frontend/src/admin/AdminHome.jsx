@@ -422,7 +422,10 @@ export default function AdminHome() {
     if (target.type === "heroBadge") {
       setModalForm({ badge: form.hero.badge || "" });
     } else if (target.type === "heroTitle") {
-      setModalForm({ titleLine1: form.hero.titleLine1 || "" });
+      setModalForm({
+        titleLine1: form.hero.titleLine1 || "",
+        titleLine2: form.hero.titleLine2 || "",
+      });
     } else if (target.type === "heroDescription") {
       setModalForm({ description: form.hero.description || "" });
     } else if (target.type === "heroButtons") {
@@ -442,6 +445,11 @@ export default function AdminHome() {
       setModalForm({ image: heroImages[0] || form.hero.image || "", images: heroImages, imageAdjustments });
     } else if (target.type === "heroImageText") {
       setModalForm({ imageBottomTitle: form.hero.imageBottomTitle || "", imageBottomDescription: form.hero.imageBottomDescription || "" });
+    } else if (target.type === "heroMeta") {
+      setModalForm({ 
+        establishedYear: form.hero.establishedYear || "", 
+        subtitle: form.hero.subtitle || "" 
+      });
     } else if (target.type === "statsHeader") {
       setModalForm({ eyebrow: form.statsSection.eyebrow || "", title: form.statsSection.title || "", description: form.statsSection.description || "" });
     } else if (target.type === "statsCard") {
@@ -647,7 +655,11 @@ export default function AdminHome() {
       if (editingTarget.type === "heroBadge") {
         nextForm.hero = { ...nextForm.hero, badge: modalForm.badge || "" };
       } else if (editingTarget.type === "heroTitle") {
-        nextForm.hero = { ...nextForm.hero, titleLine1: modalForm.titleLine1 || "" };
+        nextForm.hero = {
+          ...nextForm.hero,
+          titleLine1: modalForm.titleLine1 || "",
+          titleLine2: modalForm.titleLine2 || "",
+        };
       } else if (editingTarget.type === "heroDescription") {
         nextForm.hero = { ...nextForm.hero, description: modalForm.description || "" };
       } else if (editingTarget.type === "heroButtons") {
@@ -662,6 +674,12 @@ export default function AdminHome() {
         nextForm.hero = { ...nextForm.hero, image: heroImages[0] || "", images: heroImages, imageAdjustments };
       } else if (editingTarget.type === "heroImageText") {
         nextForm.hero = { ...nextForm.hero, imageBottomTitle: modalForm.imageBottomTitle || "", imageBottomDescription: modalForm.imageBottomDescription || "" };
+      } else if (editingTarget.type === "heroMeta") {
+        nextForm.hero = { 
+          ...nextForm.hero, 
+          establishedYear: modalForm.establishedYear || "", 
+          subtitle: modalForm.subtitle || "" 
+        };
       } else if (editingTarget.type === "statsHeader") {
         nextForm.statsSection = { ...nextForm.statsSection, eyebrow: modalForm.eyebrow || "", title: modalForm.title || "", description: modalForm.description || "" };
       } else if (editingTarget.type === "statsCard") {
@@ -737,6 +755,7 @@ export default function AdminHome() {
     const titles = {
       heroBadge: "Edit Hero Badge", heroTitle: "Edit Hero Title", heroDescription: "Edit Hero Description",
       heroButtons: "Edit Hero Buttons", heroImage: "Change Hero Image", heroImageText: "Edit Hero Image Text",
+      heroMeta: "Edit School Details",
       statsHeader: "Edit School Highlights Heading", statsCard: "Edit Highlight Number Card",
       storyImage: "Change Story Image", storyImageText: "Edit Story Image Text",
       storyText: "Edit Story Text", storyButton: "Edit Story Button",
@@ -758,6 +777,7 @@ export default function AdminHome() {
     if (editingTarget.type === "storyImage") return "Save Story Image";
     if (editingTarget.type === "heroTitle") return "Save Hero Title";
     if (editingTarget.type === "heroButtons") return "Save Buttons";
+    if (editingTarget.type === "heroMeta") return "Save School Details";
     if (editingTarget.type === "statsCard") return "Save Number Card";
     if (editingTarget.type === "excellenceCard") return "Save Card";
     return "Save This Item";
@@ -882,6 +902,23 @@ export default function AdminHome() {
                     </>
                   )}
 
+                  {editingTarget.type === "heroMeta" && (
+                    <>
+                      <Field 
+                        label="Established Year" 
+                        value={modalForm.establishedYear} 
+                        onChange={(value) => updateModalField("establishedYear", value)} 
+                        placeholder="ESTABLISHED 2046 BS" 
+                      />
+                      <Field 
+                        label="Location / Subtitle" 
+                        value={modalForm.subtitle} 
+                        onChange={(value) => updateModalField("subtitle", value)} 
+                        placeholder="Basudev Marga, Hetauda-2" 
+                      />
+                    </>
+                  )}
+
                   {(editingTarget.type === "statsCard" || editingTarget.type === "excellenceCard") && (
                     <>
                       {editingTarget.type === "statsCard" && <><Field label="Number Value" value={modalForm.value} onChange={(value) => updateModalField("value", value)} /><Field label="Suffix" value={modalForm.suffix} onChange={(value) => updateModalField("suffix", value)} placeholder="+ / % / yrs" /><Field label="Label" value={modalForm.label} onChange={(value) => updateModalField("label", value)} /><Field label="Small Note" value={modalForm.note} onChange={(value) => updateModalField("note", value)} /></>}
@@ -890,7 +927,27 @@ export default function AdminHome() {
                   )}
 
                   {editingTarget.type === "heroBadge" && <Field label="Badge Text" value={modalForm.badge} onChange={(value) => updateModalField("badge", value)} placeholder="Admissions Open..." />}
-                  {editingTarget.type === "heroTitle" && <><Field label="Title Line 1" value={modalForm.titleLine1} onChange={(value) => updateModalField("titleLine1", value)} /></>}
+                  {editingTarget.type === "heroTitle" && (
+                    <>
+                      <Field
+                        label="Title Line 1"
+                        value={modalForm.titleLine1}
+                        onChange={(value) =>
+                          updateModalField("titleLine1", value)
+                        }
+                        placeholder="Enter the main hero heading"
+                      />
+
+                      <Field
+                        label="Heading 2"
+                        value={modalForm.titleLine2}
+                        onChange={(value) =>
+                          updateModalField("titleLine2", value)
+                        }
+                        placeholder="Enter the highlighted heading"
+                      />
+                    </>
+                  )}
                   {editingTarget.type === "heroDescription" && <Field label="Hero Description" value={modalForm.description} onChange={(value) => updateModalField("description", value)} textarea />}
                   {editingTarget.type === "heroButtons" && <><Field label="Primary Button Text" value={modalForm.primaryButtonText} onChange={(value) => updateModalField("primaryButtonText", value)} /><Field label="Primary Button Link" value={modalForm.primaryButtonLink} onChange={(value) => updateModalField("primaryButtonLink", value)} placeholder="/admissions" /><Field label="Secondary Button Text" value={modalForm.secondaryButtonText} onChange={(value) => updateModalField("secondaryButtonText", value)} /><Field label="Secondary Button Link" value={modalForm.secondaryButtonLink} onChange={(value) => updateModalField("secondaryButtonLink", value)} placeholder="/facilities" /></>}
                   {editingTarget.type === "heroImageText" && <><Field label="Image Bottom Title" value={modalForm.imageBottomTitle} onChange={(value) => updateModalField("imageBottomTitle", value)} /><Field label="Image Bottom Description" value={modalForm.imageBottomDescription} onChange={(value) => updateModalField("imageBottomDescription", value)} textarea /></>}

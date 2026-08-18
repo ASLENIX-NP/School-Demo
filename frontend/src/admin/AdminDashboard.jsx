@@ -4,10 +4,10 @@ import api from "../lib/api";
 import { motion, AnimatePresence } from "motion/react";
 import {
   LayoutDashboard, Home, Info, GraduationCap,
-  Bell, Images, Users, Phone, Footprints, LogOut, ArrowRight,
+  Bell, Images, Users, Phone, Footprints, LogOut,
   Settings, School, Newspaper, Inbox, Mail, Menu, X, FileText,
-  Megaphone, Clock, Star, ChevronRight, Zap, Globe, Shield,
-  Navigation, MessageSquare, BarChart3, Sparkles, PlusCircle,
+  Megaphone, Clock, ChevronRight, Globe, Shield,
+  Navigation, PlusCircle,
 } from "lucide-react";
 
 // ── IMPORT ALL YOUR EXISTING ADMIN PAGES ──
@@ -27,46 +27,37 @@ import AdminContact from "./AdminContact";
 import AdminFooter from "./AdminFooter";
 import AdminSettings from "./AdminSettings";
 
-// ============ "FROSTED AMBER" UNIQUE THEME ============
+// ============================================================
+// "THE LEDGER" ADMIN THEME
+// Same design language as the public site (About / Hero / Stats):
+// deep ink, brass gold + rose, warm paper accents, Fraunces for
+// headlines, Space Grotesk for eyebrows/labels. Keep this object
+// in sync with the public-site theme if it's ever centralized.
+// ============================================================
 const theme = {
-  bg: "#0B0E14",            // Deep Premium Gray
-  sidebarBg: "rgba(18, 22, 32, 0.95)",
-  card: "rgba(255, 255, 255, 0.04)", 
-  cardHover: "rgba(255, 255, 255, 0.08)",
-  border: "rgba(255, 255, 255, 0.08)",
-  borderSoft: "rgba(255, 255, 255, 0.02)",
-  text: "#F1F5F9",
-  muted: "#94A3B8",
-  primary: "#F59E0B",       // Vibrant Amber/Gold
-  accent: "#F97316",        // Deep Orange
-  success: "#22C55E",
-  warning: "#F59E0B",
+  ink: "#170F1A",
+  inkPanel: "rgba(30, 20, 32, 0.92)",
+  card: "rgba(231, 206, 156, 0.045)",
+  cardHover: "rgba(231, 206, 156, 0.09)",
+  border: "rgba(231, 206, 156, 0.14)",
+  borderSoft: "rgba(231, 206, 156, 0.05)",
+  text: "#F5EEE2",
+  muted: "#9C8D92",
+  primary: "#B98A42", // brass gold
+  primarySoft: "#E7CE9C",
+  accent: "#9C2748", // rose
+  accentDeep: "#6E1733",
+  moss: "#3F5B49",
+  success: "#4C9A6A",
+  warning: "#B98A42",
   danger: "#EF4444",
+  gradGold: "linear-gradient(135deg, #E7CE9C 0%, #B98A42 100%)",
+  gradInk: "linear-gradient(150deg, #170F1A 0%, #241722 55%, #331F2C 100%)",
 };
 
-// ── Icon Colors ──
-const colors = {
-  green: "#22C55E", purple: "#A78BFA", red: "#F87171", dark: "#0B1020",
-  cyan: "#22D3EE", gold: "#F59E0B", orange: "#FB923C", pink: "#F472B6",
-  blue: "#60A5FA", indigo: "#818CF8",
-};
-
-const adminSections = [
-  { title: "Manage Home", icon: Home, color: colors.cyan, editorKey: "home" },
-  { title: "Manage About", icon: Info, color: colors.purple, editorKey: "about" },
-  { title: "Manage Academics", icon: GraduationCap, color: colors.red, editorKey: "academics" },
-  { title: "Manage Admissions", icon: School, color: colors.cyan, editorKey: "admissions" },
-  { title: "Manage Notices", icon: Bell, color: colors.red, editorKey: "notices" },
-  { title: "Manage Calendar", icon: Clock, color: colors.blue, editorKey: "calendar" },
-  { title: "Manage Blog", icon: Newspaper, color: colors.indigo, editorKey: "blogs" },
-  { title: "Manage Announcements", icon: Newspaper, color: colors.orange, editorKey: "announcements" },
-  { title: "Manage Staff", icon: Users, color: colors.green, editorKey: "staff" },
-  { title: "Manage Facilities", icon: School, color: colors.purple, editorKey: "facilities" },
-  { title: "Manage Gallery", icon: Images, color: colors.gold, editorKey: "gallery" },
-  { title: "Manage Contact", icon: Phone, color: colors.cyan, editorKey: "contact" },
-  { title: "Manage Footer", icon: Footprints, color: colors.green, editorKey: "footer" },
-  { title: "Website Settings", icon: Settings, color: colors.purple, editorKey: "settings" },
-];
+// Rotating accent set for stat/section icon chips — brand palette
+// instead of an arbitrary rainbow.
+const ACCENTS = ["#9C2748", "#B98A42", "#3F5B49", "#6E1733", "#C6486B", "#2C4234"];
 
 // ── Sidebar navigation items ──────────────────────────────────────
 const navigationItems = [
@@ -127,29 +118,29 @@ function SidebarContent({
         <div className="flex items-center gap-3 mb-5">
           <div
             className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)", boxShadow: "0 6px 18px rgba(245,158,11,0.25)" }}
+            style={{ background: theme.gradGold, boxShadow: `0 6px 18px ${theme.primary}40` }}
           >
-            <Shield className="w-5 h-5 text-slate-950" />
+            <Shield className="w-5 h-5" style={{ color: theme.ink }} />
           </div>
           <div>
-            <div className="font-bold text-white text-sm tracking-tight">Red Rose</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-400/60">Admin Panel</div>
+            <div className="rr-serif font-semibold text-sm tracking-tight" style={{ color: theme.text }}>Red Rose</div>
+            <div className="rr-mono text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: `${theme.primarySoft}90` }}>Admin Panel</div>
           </div>
         </div>
 
         <div
           className="px-3 py-2.5 rounded-xl flex items-center gap-2.5"
-          style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${theme.border}` }}
+          style={{ background: theme.card, border: `1px solid ${theme.border}` }}
         >
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-slate-950"
-            style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)" }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
+            style={{ background: theme.gradGold, color: theme.ink }}
           >
             {(adminUser.email || "A")[0].toUpperCase()}
           </div>
           <div className="min-w-0">
-            <div className="text-white/80 text-xs font-semibold truncate">{adminUser.name || "Administrator"}</div>
-            <div className="text-[10px] truncate text-slate-500">{adminUser.email || "admin@Red Rose.edu.np"}</div>
+            <div className="text-xs font-semibold truncate" style={{ color: theme.text, opacity: 0.85 }}>{adminUser.name || "Administrator"}</div>
+            <div className="text-[10px] truncate" style={{ color: theme.muted }}>{adminUser.email || "admin@Red Rose.edu.np"}</div>
           </div>
         </div>
       </div>
@@ -172,25 +163,24 @@ function SidebarContent({
               className="w-full relative group block text-left"
             >
               <div
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left ${
-                  isActive ? "bg-white/10" : "bg-transparent"
-                }`}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left"
                 style={{
-                  color: isActive ? "#FFFFFF" : "#64748B",
+                  background: isActive ? `${theme.primary}17` : "transparent",
+                  color: isActive ? theme.text : theme.muted,
                   border: isActive ? `1px solid ${theme.border}` : "1px solid transparent",
                   transform: isActive ? "translateY(-1px)" : "translateY(0)",
-                  boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
+                  boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.25)" : "none",
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                    e.currentTarget.style.color = "#FFFFFF";
+                    e.currentTarget.style.background = theme.card;
+                    e.currentTarget.style.color = theme.text;
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
                     e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.color = "#64748B";
+                    e.currentTarget.style.color = theme.muted;
                   }
                 }}
               >
@@ -198,14 +188,14 @@ function SidebarContent({
                 <span className="text-sm font-medium truncate">{item.title}</span>
               </div>
 
-              {/* Glowing Amber Underline Indicator */}
+              {/* Brass gradient active indicator */}
               {isActive && (
                 <motion.div
                   layoutId="sidebarActiveIndicator"
                   className="absolute left-3 right-3 -bottom-0.5 h-0.5 rounded-full pointer-events-none"
                   style={{
-                    background: "linear-gradient(90deg, #F59E0B, #F97316)",
-                    boxShadow: "0 0 12px #F59E0B",
+                    background: theme.gradGold,
+                    boxShadow: `0 0 12px ${theme.primary}`,
                   }}
                 />
               )}
@@ -370,21 +360,33 @@ export default function AdminDashboard() {
   const announcementCount = announcements.length;
   const pinnedCount = notices.filter((n) => n.pinned).length;
 
-  // Stats update
+  // Stats — brass/rose/moss accent rotation instead of a rainbow palette
   const stats = [
-    { icon: FileText,  label: "Total Notices",  value: noticeCount,       sub: `${pinnedCount} pinned`,  color: colors.red,    trend: "+5%" },
-    { icon: Megaphone, label: "Announcements",  value: announcementCount, sub: `${announcements.filter(a => a.active !== false).length} active`, color: colors.orange, trend: "+3%" },
-    { icon: Inbox,     label: "Messages",        value: messages.length,   sub: `${unreadCount} unread`, color: colors.purple, trend: unreadCount > 0 ? `${unreadCount} new` : "All read" },
-    { icon: Users,     label: "Staff Members",   value: staff.length,      sub: "Active teachers",        color: colors.cyan,   trend: "Active" },
+    { icon: FileText, label: "Total Notices", value: noticeCount, sub: `${pinnedCount} pinned`, color: ACCENTS[0], trend: "+5%" },
+    { icon: Megaphone, label: "Announcements", value: announcementCount, sub: `${announcements.filter(a => a.active !== false).length} active`, color: ACCENTS[1], trend: "+3%" },
+    { icon: Inbox, label: "Messages", value: messages.length, sub: `${unreadCount} unread`, color: ACCENTS[2], trend: unreadCount > 0 ? `${unreadCount} new` : "All read" },
+    { icon: Users, label: "Staff Members", value: staff.length, sub: "Active teachers", color: ACCENTS[3], trend: "Active" },
   ];
 
   return (
-    <div className="min-h-screen flex" style={{ background: theme.bg, fontFamily: "'Inter', sans-serif" }}>
-      {/* Sleek Custom Scrollbar Styles for the Sidebar */}
+    <div className="rr-ledger min-h-screen flex" style={{ background: theme.ink, fontFamily: "'Inter', sans-serif" }}>
+      {/* Fonts, sidebar scrollbar, focus + motion rules */}
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+        .rr-serif { font-family: 'Fraunces', Georgia, 'Times New Roman', serif; }
+        .rr-mono { font-family: 'Space Grotesk', 'IBM Plex Mono', monospace; }
+
+        .rr-ledger a:focus-visible,
+        .rr-ledger button:focus-visible {
+          outline: 2px solid ${theme.primary};
+          outline-offset: 3px;
+          border-radius: 6px;
+        }
+
         .custom-sidebar-scroll {
           scrollbar-width: thin;
-          scrollbar-color: rgba(245, 158, 11, 0.3) transparent;
+          scrollbar-color: rgba(185, 138, 66, 0.3) transparent;
         }
         .custom-sidebar-scroll::-webkit-scrollbar {
           width: 5px;
@@ -393,11 +395,19 @@ export default function AdminDashboard() {
           background: transparent;
         }
         .custom-sidebar-scroll::-webkit-scrollbar-thumb {
-          background: rgba(245, 158, 11, 0.25);
+          background: rgba(185, 138, 66, 0.28);
           border-radius: 9999px;
         }
         .custom-sidebar-scroll::-webkit-scrollbar-thumb:hover {
-          background: rgba(245, 158, 11, 0.55);
+          background: rgba(185, 138, 66, 0.55);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .rr-ledger *, .rr-ledger *::before, .rr-ledger *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+          }
         }
       `}</style>
 
@@ -418,7 +428,7 @@ export default function AdminDashboard() {
         animate={{ x: sidebarOpen ? 0 : -280 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className="fixed inset-y-0 left-0 z-40 w-[260px] flex flex-col lg:hidden backdrop-blur-xl border-r shadow-2xl overflow-hidden h-full"
-        style={{ background: theme.sidebarBg, borderColor: theme.border }}
+        style={{ background: theme.inkPanel, borderColor: theme.border }}
       >
         <SidebarContent
           adminUser={adminUser}
@@ -434,7 +444,7 @@ export default function AdminDashboard() {
       <aside
         className="hidden lg:flex flex-col w-[240px] flex-shrink-0 backdrop-blur-xl border-r shadow-xl sticky top-0 h-screen overflow-hidden z-20"
         style={{
-          background: theme.sidebarBg,
+          background: theme.inkPanel,
           borderColor: theme.border,
         }}
       >
@@ -454,8 +464,8 @@ export default function AdminDashboard() {
         {/* Topbar */}
         <header
           className="flex-shrink-0 sticky top-0 z-30 px-4 sm:px-6 md:px-8 backdrop-blur-xl border-b"
-          style={{ 
-            background: "rgba(11, 14, 20, 0.75)", 
+          style={{
+            background: "rgba(23, 15, 26, 0.78)",
             borderColor: theme.border,
             borderBottom: `1px solid ${theme.primary}40`,
             boxShadow: "0 4px 30px rgba(0,0,0,0.3)"
@@ -466,16 +476,16 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="lg:hidden w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}
+                style={{ background: theme.card, color: theme.muted }}
               >
                 {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
-              
+
               <div className="min-w-0">
-                <h1 className="font-bold text-white text-base truncate tracking-tight">
+                <h1 className="font-bold text-base truncate tracking-tight" style={{ color: theme.text }}>
                   {activeEditor ? `Editing: ${activeEditor.charAt(0).toUpperCase() + activeEditor.slice(1)}` : "Dashboard"}
                 </h1>
-                <p className="text-xs truncate text-slate-400">
+                <p className="text-xs truncate" style={{ color: theme.muted }}>
                   {currentTime}
                 </p>
               </div>
@@ -484,21 +494,30 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-2 flex-shrink-0">
               <div
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                style={{ background: "rgba(34, 197, 94, 0.12)", border: "1px solid rgba(34, 197, 94, 0.2)" }}
+                style={{ background: "rgba(76, 154, 106, 0.14)", border: "1px solid rgba(76, 154, 106, 0.25)" }}
               >
-                <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-green-500" />
-                <span className="text-[10px] font-bold text-green-400 tracking-wide">Live</span>
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: theme.success }} />
+                <span className="rr-mono text-[10px] font-bold tracking-wide" style={{ color: theme.success }}>Live</span>
               </div>
               <a
                 href="/"
                 target="_blank"
                 rel="noreferrer"
-                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 shadow-sm border border-blue-400/40"
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5"
+                style={{ background: theme.gradGold, color: theme.ink, boxShadow: `0 4px 14px ${theme.primary}40` }}
               >
-                <Globe className="w-3.5 h-3.5 text-blue-100" />
+                <Globe className="w-3.5 h-3.5" />
                 <span>View Site</span>
               </a>
-              {activeEditor && <button onClick={() => handleSelectEditor(null)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}><X className="w-3.5 h-3.5" /><span className="hidden sm:inline">Close</span></button>}
+              {activeEditor && (
+                <button
+                  onClick={() => handleSelectEditor(null)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5"
+                  style={{ background: theme.card, border: `1px solid ${theme.border}`, color: theme.muted }}
+                >
+                  <X className="w-3.5 h-3.5" /><span className="hidden sm:inline">Close</span>
+                </button>
+              )}
             </div>
           </div>
         </header>
@@ -509,31 +528,32 @@ export default function AdminDashboard() {
 
             {!activeEditor ? (
               <div className="space-y-6">
-                
-                {/* ✨ WELCOME BANNER WITH ANIMATED AURORA ✨ */}
+
+                {/* ✨ WELCOME BANNER ✨ */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
                   className="relative overflow-hidden rounded-2xl p-8 border"
                   style={{
-                    background: "linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(249, 115, 22, 0.05), rgba(20, 24, 36, 0.9))",
-                    borderColor: "rgba(245, 158, 11, 0.15)",
-                    backdropFilter: "blur(12px)",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
+                    background: theme.gradInk,
+                    borderColor: theme.border,
+                    boxShadow: "0 20px 50px rgba(0,0,0,0.35)"
                   }}
                 >
-                  {/* Animated Glowing Aurora Background */}
+                  {/* Aurora background */}
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <motion.div 
+                    <motion.div
                       animate={{ x: [0, 40, 0], y: [0, -20, 0], scale: [1, 1.05, 1] }}
                       transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-amber-500/20 blur-[80px]" 
+                      className="absolute -top-20 -right-20 w-80 h-80 rounded-full blur-[90px]"
+                      style={{ background: "rgba(156,39,72,0.28)" }}
                     />
-                    <motion.div 
+                    <motion.div
                       animate={{ x: [0, -30, 0], y: [0, 30, 0] }}
                       transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                      className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-orange-500/20 blur-[80px]" 
+                      className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full blur-[90px]"
+                      style={{ background: "rgba(185,138,66,0.20)" }}
                     />
                   </div>
 
@@ -541,27 +561,34 @@ export default function AdminDashboard() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-2xl">{greeting.emoji}</span>
-                        <span className="text-xs font-bold uppercase tracking-[0.14em] text-amber-400/60">Admin Dashboard</span>
+                        <span className="rr-mono text-xs font-bold uppercase tracking-[0.18em]" style={{ color: `${theme.primarySoft}90` }}>Admin Dashboard</span>
                       </div>
-                      {/* Dynamic Greeting based on Time */}
-                      <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight tracking-tight">
-                        {greeting.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">{adminUser.name || "Admin"}!</span>
+                      <h2 className="rr-serif text-3xl sm:text-4xl font-semibold leading-tight tracking-tight" style={{ color: theme.text }}>
+                        {greeting.text}, <span className="text-transparent bg-clip-text" style={{ backgroundImage: theme.gradGold }}>{adminUser.name || "Admin"}!</span>
                       </h2>
-                      <p className="text-base text-slate-400 max-w-xl">Manage your school website — notices, staff, gallery, and more.</p>
+                      <p className="text-base max-w-xl" style={{ color: "rgba(245,238,226,0.6)" }}>Manage your school website — notices, staff, gallery, and more.</p>
                     </div>
 
                     <div className="flex flex-wrap gap-3">
-                      <button onClick={() => handleSelectEditor("notices")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-950 shadow-md" style={{ background: "linear-gradient(135deg, #F59E0B, #F97316)" }}>
+                      <button
+                        onClick={() => handleSelectEditor("notices")}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-1 shadow-md"
+                        style={{ background: theme.gradGold, color: theme.ink }}
+                      >
                         <PlusCircle className="w-4 h-4" /> Add Notice
                       </button>
-                      <button onClick={() => handleSelectEditor("announcements")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-1 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}>
+                      <button
+                        onClick={() => handleSelectEditor("announcements")}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-1"
+                        style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}`, color: theme.text }}
+                      >
                         <Megaphone className="w-4 h-4" /> Add Announcement
                       </button>
                     </div>
                   </div>
                 </motion.div>
 
-                {/* ✨ 3D STATS CARDS WITH PERSPECTIVE TILT ✨ */}
+                {/* ✨ 3D STATS CARDS ✨ */}
                 <div className="grid grid-cols-2 xl:grid-cols-4 gap-6">
                   {stats.map((stat, i) => {
                     const Icon = stat.icon;
@@ -573,76 +600,93 @@ export default function AdminDashboard() {
                         transition={{ duration: 0.5, delay: i * 0.1 }}
                         whileHover={{ y: -8, scale: 1.02 }}
                         className="relative p-6 border rounded-xl transition-all duration-300 group"
-                        style={{ 
-                          background: "linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))", 
+                        style={{
+                          background: `linear-gradient(145deg, ${theme.card}, ${theme.borderSoft})`,
                           borderColor: theme.border,
-                          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
                           transform: "perspective(800px)"
                         }}
                       >
                         <div className="absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl opacity-0 group-hover:opacity-50 transition-all duration-500 pointer-events-none" style={{ background: stat.color }} />
                         <div className="flex items-center justify-between mb-3">
-                          <div className="p-2.5 rounded-xl bg-white/5 border border-white/5" style={{ background: `${stat.color}20` }}>
+                          <div className="p-2.5 rounded-xl" style={{ background: `${stat.color}20` }}>
                             <Icon className="w-5 h-5" style={{ color: stat.color }} />
                           </div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${stat.color}15`, color: stat.color }}>
+                          <span className="rr-mono text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${stat.color}18`, color: stat.color }}>
                             {stat.trend}
                           </span>
                         </div>
-                        <div className="text-3xl font-bold text-white mb-1 tracking-tight">{stat.value}</div>
-                        <div className="text-xs font-medium text-slate-400">{stat.label}</div>
-                        <div className="text-[10px] mt-1 text-slate-500">{stat.sub}</div>
+                        <div className="rr-serif text-3xl font-semibold mb-1 tracking-tight" style={{ color: theme.text }}>{stat.value}</div>
+                        <div className="text-xs font-medium" style={{ color: theme.muted }}>{stat.label}</div>
+                        <div className="text-[10px] mt-1" style={{ color: `${theme.muted}99` }}>{stat.sub}</div>
                       </motion.div>
                     );
                   })}
                 </div>
 
                 {/* ✨ QUICK ACTION TASK BAR ✨ */}
-                <div className="flex flex-wrap gap-3 py-2 border-b border-white/5 pb-6">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider pr-4 self-center">Quick Actions:</span>
-                  <button onClick={() => handleSelectEditor("notices")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Manage Notices</button>
-                  <button onClick={() => handleSelectEditor("staff")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Manage Staff</button>
-                  <button onClick={() => handleSelectEditor("gallery")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">+ Update Gallery</button>
-                  <button onClick={() => handleSelectEditor("settings")} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">⚙ Settings</button>
+                <div className="flex flex-wrap gap-3 py-2 pb-6 border-b" style={{ borderColor: theme.borderSoft }}>
+                  <span className="rr-mono text-[11px] font-bold uppercase tracking-[0.14em] pr-4 self-center" style={{ color: `${theme.muted}` }}>Quick Actions:</span>
+                  <button onClick={() => handleSelectEditor("notices")} className="text-xs font-medium px-3 py-1.5 rounded-full transition-colors" style={{ background: theme.card, color: theme.muted }}>+ Manage Notices</button>
+                  <button onClick={() => handleSelectEditor("staff")} className="text-xs font-medium px-3 py-1.5 rounded-full transition-colors" style={{ background: theme.card, color: theme.muted }}>+ Manage Staff</button>
+                  <button onClick={() => handleSelectEditor("gallery")} className="text-xs font-medium px-3 py-1.5 rounded-full transition-colors" style={{ background: theme.card, color: theme.muted }}>+ Update Gallery</button>
+                  <button onClick={() => handleSelectEditor("settings")} className="text-xs font-medium px-3 py-1.5 rounded-full transition-colors" style={{ background: theme.card, color: theme.muted }}>⚙ Settings</button>
                 </div>
 
-                {/* ── Recent Messages (Frosted Glass Full Width) ── */}
-                <div className="rounded-xl overflow-hidden border" style={{ background: "rgba(255,255,255,0.03)", borderColor: theme.border, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
+                {/* ── Recent Messages ── */}
+                <div className="rounded-xl overflow-hidden border" style={{ background: theme.card, borderColor: theme.border, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
                   <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: theme.border }}>
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl" style={{ background: "rgba(167, 139, 250, 0.1)" }}>
-                        <Mail className="w-4 h-4" style={{ color: colors.purple }} />
+                      <div className="p-2 rounded-xl" style={{ background: `${theme.accent}18` }}>
+                        <Mail className="w-4 h-4" style={{ color: theme.accent }} />
                       </div>
                       <div>
-                        <h3 className="font-bold text-white text-sm tracking-tight">Recent Messages</h3>
-                        <p className="text-xs text-slate-400">Latest inquiries from visitors</p>
+                        <h3 className="rr-serif font-semibold text-sm tracking-tight" style={{ color: theme.text }}>Recent Messages</h3>
+                        <p className="text-xs" style={{ color: theme.muted }}>Latest inquiries from visitors</p>
                       </div>
                     </div>
-                    <button onClick={() => navigate("/admin/contact-messages")} className="flex items-center gap-1 text-xs font-medium transition-colors text-slate-400 hover:text-white">
+                    <button onClick={() => navigate("/admin/contact-messages")} className="flex items-center gap-1 text-xs font-medium transition-colors" style={{ color: theme.muted }}>
                       View All <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
 
                   <div className="p-5 space-y-3">
                     {messagesLoading ? (
-                      <div className="py-8 text-center text-sm text-slate-400">Loading messages...</div>
+                      <div className="py-8 text-center text-sm" style={{ color: theme.muted }}>Loading messages...</div>
                     ) : latestMessages.length === 0 ? (
                       <div className="py-8 text-center">
-                        <Mail className="w-8 h-8 mx-auto mb-2 text-slate-600" />
-                        <p className="text-sm text-slate-400">No messages yet</p>
+                        <Mail className="w-8 h-8 mx-auto mb-2" style={{ color: `${theme.muted}70` }} />
+                        <p className="text-sm" style={{ color: theme.muted }}>No messages yet</p>
                       </div>
                     ) : (
                       latestMessages.map((message) => (
-                        <div key={message.id} className="rounded-xl p-4 transition-all duration-200 cursor-pointer" style={{ background: message.is_read ? "rgba(255,255,255,0.02)" : "rgba(167, 139, 250, 0.06)", border: message.is_read ? `1px solid ${theme.border}` : "1px solid rgba(167, 139, 250, 0.2)" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"} onMouseLeave={e => e.currentTarget.style.background = message.is_read ? "rgba(255,255,255,0.02)" : "rgba(167, 139, 250, 0.06)"}>
+                        <div
+                          key={message.id}
+                          className="rounded-xl p-4 transition-all duration-200 cursor-pointer"
+                          style={{
+                            background: message.is_read ? theme.borderSoft : `${theme.primary}0F`,
+                            border: message.is_read ? `1px solid ${theme.border}` : `1px solid ${theme.primary}35`,
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = theme.cardHover}
+                          onMouseLeave={e => e.currentTarget.style.background = message.is_read ? theme.borderSoft : `${theme.primary}0F`}
+                        >
                           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-1">
                             <div className="flex items-center gap-2 min-w-0">
-                              {!message.is_read && <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-green-400" />}
-                              <span className="font-bold text-white text-sm truncate max-w-[150px]">{message.name || "Unknown Sender"}</span>
+                              {!message.is_read && <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: theme.success }} />}
+                              <span className="font-bold text-sm truncate max-w-[150px]" style={{ color: theme.text }}>{message.name || "Unknown Sender"}</span>
                             </div>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0 self-start sm:self-auto" style={{ background: message.source === "admission" ? "rgba(167, 139, 250, 0.15)" : "rgba(248, 113, 113, 0.12)", color: message.source === "admission" ? colors.purple : colors.red, }}>{getSourceLabel(message.source)}</span>
+                            <span
+                              className="rr-mono px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0 self-start sm:self-auto"
+                              style={{
+                                background: message.source === "admission" ? `${theme.primary}20` : `${theme.accent}18`,
+                                color: message.source === "admission" ? theme.primary : theme.accent,
+                              }}
+                            >
+                              {getSourceLabel(message.source)}
+                            </span>
                           </div>
-                          <p className="text-sm leading-relaxed line-clamp-2 text-slate-400">{message.message || "No message text."}</p>
-                          <p className="text-xs mt-1.5 text-slate-500">{formatDate(message.created_at)}</p>
+                          <p className="text-sm leading-relaxed line-clamp-2" style={{ color: theme.muted }}>{message.message || "No message text."}</p>
+                          <p className="text-xs mt-1.5" style={{ color: `${theme.muted}90` }}>{formatDate(message.created_at)}</p>
                         </div>
                       ))
                     )}
@@ -650,7 +694,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border p-6" style={{ background: "rgba(255,255,255,0.03)", borderColor: theme.border }}>
+              <div className="overflow-x-auto rounded-xl border p-6" style={{ background: theme.card, borderColor: theme.border }}>
                 {activeEditor === "navbar" && <AdminNavbar />}
                 {activeEditor === "home" && <AdminHome />}
                 {activeEditor === "about" && <AdminAbout />}
@@ -677,15 +721,15 @@ export default function AdminDashboard() {
       <AnimatePresence>
         {showLogoutConfirm && (
           <motion.div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowLogoutConfirm(false)}>
-            <motion.div initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: "spring", stiffness: 150, damping: 18 }} className="w-full max-w-sm overflow-hidden rounded-2xl border" style={{ background: "#1E293B", borderColor: theme.border, boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
-              <div className="h-1" style={{ background: `linear-gradient(90deg, ${theme.danger}, ${theme.warning})` }} />
+            <motion.div initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: "spring", stiffness: 150, damping: 18 }} className="w-full max-w-sm overflow-hidden rounded-2xl border" style={{ background: "#221521", borderColor: theme.border, boxShadow: "0 30px 60px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
+              <div className="h-1" style={{ background: `linear-gradient(90deg, ${theme.danger}, ${theme.primary})` }} />
               <div className="p-6 text-center">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)" }}><LogOut className="w-5 h-5" style={{ color: theme.danger }} /></div>
-                <h3 className="text-lg font-bold text-white mb-2">Log out?</h3>
-                <p className="text-sm mb-6 text-slate-400">You'll need to sign in again to access the admin panel.</p>
+                <h3 className="rr-serif text-lg font-semibold mb-2" style={{ color: theme.text }}>Log out?</h3>
+                <p className="text-sm mb-6" style={{ color: theme.muted }}>You'll need to sign in again to access the admin panel.</p>
                 <div className="flex gap-3">
-                  <button onClick={() => setShowLogoutConfirm(false)} className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5 text-slate-300 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${theme.border}` }}>Cancel</button>
-                  <button onClick={logout} className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5 text-white" style={{ background: "linear-gradient(135deg, #EF4444, #DC2626)", boxShadow: "0 4px 15px rgba(239, 68, 68, 0.2)" }}>Yes, Logout</button>
+                  <button onClick={() => setShowLogoutConfirm(false)} className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5" style={{ background: theme.card, border: `1px solid ${theme.border}`, color: theme.text }}>Cancel</button>
+                  <button onClick={logout} className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5 text-white" style={{ background: "linear-gradient(135deg, #EF4444, #DC2626)", boxShadow: "0 4px 15px rgba(239, 68, 68, 0.25)" }}>Yes, Logout</button>
                 </div>
               </div>
             </motion.div>

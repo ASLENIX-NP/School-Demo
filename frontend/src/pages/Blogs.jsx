@@ -71,83 +71,75 @@ function BlogCard({ post, index, featured = false }) {
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 25 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.12 }}
       transition={{
-        duration: 0.45,
-        delay: Math.min(index * 0.05, 0.2),
+        duration: 0.5,
+        delay: Math.min(index * 0.05, 0.18),
         ease: [0.22, 1, 0.36, 1],
       }}
-      whileHover={{ y: -7 }}
-      className={`blog-card-3d group ${featured ? "is-featured" : ""}`}
+      whileHover={{ y: -5 }}
+      className={`rr-blog-card ${featured ? "rr-blog-card-featured" : ""}`}
     >
-      <Link to={`/blogs/${post.slug}`} className="flex h-full flex-col">
-        <div className="blog-card-image">
-          <BlogImage
-            post={post}
-            className="h-full w-full object-cover group-hover:scale-[1.07]"
-          />
+      <Link to={`/blogs/${post.slug}`} className="rr-blog-card-link">
+        <div className="rr-blog-card-image">
+          <BlogImage post={post} className="group-hover:scale-[1.05]" />
 
-          <div className="blog-card-image-overlay" />
+          <div className="rr-blog-card-image-shade" />
 
-          <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
+          <div className="rr-blog-card-top">
             {featured && (
-              <span className="blog-featured-pill">
+              <span className="rr-blog-featured">
                 <Sparkles className="h-3 w-3" />
-                Featured
+                Featured story
               </span>
             )}
 
-            <span className="blog-card-category">
+            <span className="rr-blog-category">
               <Tag className="h-3 w-3" />
               {post.category || "School Life"}
             </span>
           </div>
 
-          <span className="blog-card-open">
-            <ArrowUpRight className="h-4 w-4" />
-          </span>
-
-          <div className="blog-card-number">
+          <div className="rr-blog-card-index">
             {String(index + 1).padStart(2, "0")}
           </div>
+
+          <span className="rr-blog-open">
+            <ArrowUpRight className="h-4 w-4" />
+          </span>
         </div>
 
-        <div className="blog-card-content">
-          <div className="blog-card-meta">
+        <div className="rr-blog-card-body">
+          <div className="rr-blog-meta">
             <span className="inline-flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               {formatBlogDate(post.date)}
             </span>
-
-            <span className="blog-dot">•</span>
-
+            <span className="rr-blog-meta-line" />
             <span className="inline-flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {readTime}
             </span>
           </div>
 
-          <h3 className="blog-card-title">
-            {post.title}
-          </h3>
+          <h3 className="rr-blog-card-title">{post.title}</h3>
 
-          <p className="blog-card-excerpt">
+          <p className="rr-blog-card-excerpt">
             {getPlainExcerpt(post)}
           </p>
 
-          <div className="blog-card-footer">
+          <div className="rr-blog-card-footer">
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className="blog-small-avatar">{initial}</div>
-
-              <span className="truncate text-xs font-bold text-slate-700">
+              <div className="rr-blog-avatar">{initial}</div>
+              <span className="truncate text-xs font-bold text-[#4D3C43]">
                 {authorName}
               </span>
             </div>
 
-            <span className="blog-explore">
-              Explore
+            <span className="rr-blog-read">
+              Read story
               <ArrowRight className="h-3.5 w-3.5" />
             </span>
           </div>
@@ -165,6 +157,9 @@ export default function Blogs() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
 
+  // =========================================================
+  // 1. FETCH DATA (Moved outside of JSX)
+  // =========================================================
   useEffect(() => {
     let alive = true;
 
@@ -193,976 +188,1093 @@ export default function Blogs() {
     };
   }, []);
 
+  // =========================================================
+  // 2. FILTER POSTS (Use useMemo for performance)
+  // =========================================================
   const visiblePosts = useMemo(() => {
-    const searchText = query.trim().toLowerCase();
+    const allPosts = content.posts || [];
+    
+    return allPosts.filter((post) => {
+      const matchQuery = !query || 
+        post.title?.toLowerCase().includes(query.toLowerCase()) ||
+        post.excerpt?.toLowerCase().includes(query.toLowerCase()) ||
+        post.content?.toLowerCase().includes(query.toLowerCase());
+      
+      const matchCategory = category === "All" || post.category === category;
 
-    return (content.posts || [])
-      .filter((post) => post.visible !== false)
-      .sort((a, b) => {
-        if (a.pinned !== b.pinned) {
-          return a.pinned ? -1 : 1;
-        }
+      return matchQuery && matchCategory;
+    });
+  }, [content.posts, query, category]);
 
-        return String(b.date || "").localeCompare(
-          String(a.date || "")
-        );
-      })
-      .filter(
-        (post) =>
-          category === "All" ||
-          post.category === category
-      )
-      .filter((post) => {
-        if (!searchText) return true;
-
-        const haystack = `
-          ${post.title}
-          ${post.category}
-          ${post.excerpt}
-          ${post.content}
-        `.toLowerCase();
-
-        return haystack.includes(searchText);
-      });
-  }, [content.posts, category, query]);
-
+  // =========================================================
+  // 3. JSX RENDERING (Return this OUTSIDE the useEffect)
+  // =========================================================
   return (
     <>
       <style>{`
-        /* =====================================================
-           SMRITI SCHOOL BLOG
-           Compact + Uniform + Colorful 3D Editorial Cards
-        ===================================================== */
+        /* =========================================================
+           RED ROSE SCHOOL — BLOG
+           Editorial / About-page visual system
+        ========================================================= */
 
-        .blog-page {
-          position: relative;
+        .rr-blog-page {
+          --rr-cream: #f4ecdf;
+          --rr-paper: #fbf7ef;
+          --rr-paper-white: #fffdf8;
+          --rr-ink: #261520;
+          --rr-burgundy: #2b1423;
+          --rr-burgundy-2: #40172a;
+          --rr-maroon: #a52b4a;
+          --rr-gold: #c9963d;
+          --rr-gold-light: #e8cf96;
+          --rr-muted: #756a70;
           min-height: 100vh;
+          position: relative;
           overflow: hidden;
-          background:
-            radial-gradient(circle at 8% 10%, rgba(234, 190, 70, .12), transparent 25%),
-            radial-gradient(circle at 94% 25%, rgba(36, 160, 210, .10), transparent 28%),
-            linear-gradient(180deg, #f8fbff 0%, #ffffff 48%, #f4f8fb 100%);
+          padding: 44px 0 90px;
+          background: var(--rr-cream);
+          color: var(--rr-ink);
         }
 
-        .blog-page::before {
+        .rr-blog-page::before {
           content: "";
           position: absolute;
           inset: 0;
           pointer-events: none;
-          opacity: .28;
-          background-image:
-            linear-gradient(rgba(15,23,42,.025) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(15,23,42,.025) 1px, transparent 1px);
-          background-size: 46px 46px;
-          mask-image: linear-gradient(to bottom, black, transparent 72%);
+          background:
+            radial-gradient(circle at 8% 22%, rgba(201,150,61,.11), transparent 28%),
+            radial-gradient(circle at 94% 62%, rgba(165,43,74,.07), transparent 30%);
         }
 
-        .blog-orb {
-          position: absolute;
-          border-radius: 999px;
-          pointer-events: none;
-        }
-
-        .blog-orb-one {
-          width: 320px;
-          height: 320px;
-          top: 280px;
-          left: -180px;
-          background: radial-gradient(circle, rgba(234,190,70,.16), rgba(234,190,70,0));
-        }
-
-        .blog-orb-two {
-          width: 420px;
-          height: 420px;
-          right: -220px;
-          top: 680px;
-          background: radial-gradient(circle, rgba(36,160,210,.12), rgba(36,160,210,0));
-        }
-
-        /* ================= HERO ================= */
-
-        .blog-hero {
+        .rr-blog-wrap {
           position: relative;
-          /*
-            The site navbar sits above the page content. Keep the
-            blog hero safely below it so the eyebrow/title is never
-            hidden underneath the navbar.
-          */
-          padding-top: 104px;
-          padding-bottom: 42px;
+          z-index: 2;
+          width: min(1280px, calc(100% - 48px));
+          margin: 0 auto;
         }
 
-        .blog-hero-grid {
+        /* HERO */
+        .rr-blog-hero {
+          position: relative;
+          overflow: hidden;
+          min-height: 445px;
+          padding: 64px 64px 78px;
+          border-radius: 0 0 38px 38px;
+          background:
+            radial-gradient(circle at 88% 20%, rgba(165,43,74,.30), transparent 31%),
+            radial-gradient(circle at 12% 85%, rgba(201,150,61,.10), transparent 33%),
+            linear-gradient(135deg, #1b101c 0%, #2b1423 56%, #391728 100%);
+          box-shadow: 0 28px 70px rgba(43,20,35,.18);
+          color: #fff;
+        }
+
+        .rr-blog-hero::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          opacity: .18;
+          pointer-events: none;
+          background-image: radial-gradient(rgba(255,255,255,.25) .75px, transparent .75px);
+          background-size: 22px 22px;
+          mask-image: linear-gradient(to bottom, black 10%, transparent 95%);
+        }
+
+        .rr-blog-hero::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: -1px;
+          height: 26px;
+          background: var(--rr-cream);
+          clip-path: polygon(
+            0 40%, 2% 100%, 5% 40%, 8% 100%, 11% 40%, 14% 100%,
+            17% 40%, 20% 100%, 23% 40%, 26% 100%, 29% 40%, 32% 100%,
+            35% 40%, 38% 100%, 41% 40%, 44% 100%, 47% 40%, 50% 100%,
+            53% 40%, 56% 100%, 59% 40%, 62% 100%, 65% 40%, 68% 100%,
+            71% 40%, 74% 100%, 77% 40%, 80% 100%, 83% 40%, 86% 100%,
+            89% 40%, 92% 100%, 95% 40%, 98% 100%, 100% 40%, 100% 100%, 0 100%
+          );
+        }
+
+        .rr-blog-hero-grid {
+          position: relative;
+          z-index: 2;
           display: grid;
-          grid-template-columns: minmax(0, 1.45fr) minmax(250px, .55fr);
-          gap: 42px;
-          align-items: end;
+          grid-template-columns: minmax(0, 1.35fr) minmax(250px, .65fr);
+          gap: 48px;
+          align-items: center;
         }
 
-        .blog-eyebrow {
+        .rr-blog-kicker {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 8px 14px;
-          border-radius: 999px;
-          color: #12638b;
-          background: rgba(255,255,255,.82);
-          border: 1px solid rgba(56,189,248,.25);
-          box-shadow: 0 8px 24px rgba(15,23,42,.055);
-          backdrop-filter: blur(12px);
-          font-size: 10px;
+          gap: 11px;
+          color: #e6c87d;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: .22em;
+          text-transform: uppercase;
+        }
+
+        .rr-blog-kicker::before {
+          content: "";
+          width: 38px;
+          height: 1px;
+          background: var(--rr-gold);
+        }
+
+        .rr-blog-hero h1 {
+          margin: 20px 0 0;
+          max-width: 850px;
+          font-family: var(--font-display);
+          font-size: clamp(50px, 6vw, 82px);
+          line-height: .93;
+          font-weight: 900;
+          letter-spacing: -.06em;
+          color: #fffaf5;
+        }
+
+        .rr-blog-hero h1 span {
+          color: #e8c978;
+        }
+
+        .rr-blog-hero-description {
+          max-width: 760px;
+          margin-top: 24px;
+          color: rgba(255,248,241,.78);
+          font-size: 16px;
+          line-height: 1.75;
+        }
+
+        .rr-blog-hero-mark {
+          position: relative;
+          min-height: 230px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .rr-blog-hero-mark::before,
+        .rr-blog-hero-mark::after {
+          content: "";
+          position: absolute;
+          border: 1px solid rgba(232,201,120,.22);
+          border-radius: 50%;
+        }
+
+        .rr-blog-hero-mark::before {
+          width: 220px;
+          height: 220px;
+        }
+
+        .rr-blog-hero-mark::after {
+          width: 158px;
+          height: 158px;
+        }
+
+        .rr-blog-mark-inner {
+          position: relative;
+          z-index: 2;
+          width: 118px;
+          height: 118px;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(232,201,120,.55);
+          border-radius: 50%;
+          background: rgba(255,255,255,.035);
+          box-shadow: inset 0 0 35px rgba(232,201,120,.06);
+          color: #e8c978;
+        }
+
+        .rr-blog-mark-inner::before {
+          content: "";
+          position: absolute;
+          inset: 10px;
+          border: 1px dashed rgba(232,201,120,.25);
+          border-radius: 50%;
+        }
+
+        .rr-blog-mark-inner svg {
+          position: relative;
+          z-index: 2;
+        }
+
+        .rr-blog-mark-caption {
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          white-space: nowrap;
+          color: rgba(255,255,255,.52);
+          font-size: 9px;
           font-weight: 900;
           letter-spacing: .18em;
           text-transform: uppercase;
         }
 
-        .blog-main-title {
-          margin-top: 18px;
-          max-width: 850px;
-          font-size: clamp(45px, 6vw, 78px);
-          line-height: .94;
-          letter-spacing: -.065em;
-          font-weight: 950;
-          color: #0a1628;
-        }
-
-        .blog-main-title span {
-          display: block;
-          color: #c69222;
-        }
-
-        .blog-hero-description {
-          max-width: 720px;
-          margin-top: 20px;
-          font-size: 16px;
-          line-height: 1.7;
-          color: #52647b;
-        }
-
-        .blog-hero-note {
-          padding: 20px;
-          border-radius: 24px;
-          background: linear-gradient(145deg, rgba(255,255,255,.92), rgba(242,247,251,.82));
-          border: 1px solid rgba(255,255,255,.96);
-          box-shadow:
-            0 18px 45px rgba(15,23,42,.07),
-            inset 0 1px 0 white;
-          backdrop-filter: blur(16px);
-        }
-
-        .blog-hero-note-line {
-          width: 38px;
-          height: 4px;
-          margin-bottom: 13px;
-          border-radius: 99px;
-          background: linear-gradient(90deg, #c69222, #f4d36f);
-        }
-
-        .blog-hero-note-title {
-          color: #0a1628;
-          font-size: 18px;
-          font-weight: 900;
-        }
-
-        .blog-hero-note-text {
-          margin-top: 7px;
-          color: #64748b;
-          font-size: 12px;
-          line-height: 1.55;
-        }
-
-        .blog-search-row {
-          margin-top: 26px;
+        /* SEARCH / FILTERS */
+        .rr-blog-tools {
+          position: relative;
+          z-index: 4;
           display: flex;
           flex-wrap: wrap;
           align-items: center;
           gap: 12px;
+          margin-top: -2px;
+          padding: 20px 22px;
+          border: 1px solid #e7dac8;
+          border-radius: 0 0 22px 22px;
+          background: rgba(251,247,239,.96);
+          box-shadow: 0 15px 35px rgba(69,48,38,.07);
         }
 
-        .blog-search {
+        .rr-blog-search {
           position: relative;
           width: min(390px, 100%);
         }
 
-        .blog-search input {
+        .rr-blog-search input {
           width: 100%;
-          height: 48px;
-          border-radius: 15px;
-          border: 1px solid rgba(148,163,184,.22);
-          background: rgba(255,255,255,.88);
-          box-shadow:
-            0 10px 26px rgba(15,23,42,.055),
-            inset 0 1px 0 white;
-          backdrop-filter: blur(12px);
-          padding: 0 42px;
+          height: 45px;
+          padding: 0 40px 0 42px;
+          border: 1px solid #ded2c2;
+          border-radius: 999px;
           outline: none;
-          color: #0f172a;
-          font-size: 13px;
-          transition: .25s ease;
+          background: #fffdf8;
+          color: var(--rr-ink);
+          font-size: 12px;
+          transition: .2s ease;
         }
 
-        .blog-search input:focus {
-          border-color: rgba(56,189,248,.55);
-          box-shadow:
-            0 12px 30px rgba(15,23,42,.08),
-            0 0 0 4px rgba(56,189,248,.09);
+        .rr-blog-search input:focus {
+          border-color: var(--rr-gold);
+          box-shadow: 0 0 0 4px rgba(201,150,61,.10);
         }
 
-        .blog-search-icon {
+        .rr-blog-search-icon {
           position: absolute;
-          left: 15px;
+          left: 16px;
           top: 50%;
           transform: translateY(-50%);
-          color: #94a3b8;
+          color: #9b8e92;
         }
 
-        .blog-search-clear {
+        .rr-blog-clear {
           position: absolute;
-          right: 10px;
+          right: 9px;
           top: 50%;
           transform: translateY(-50%);
-          width: 25px;
-          height: 25px;
+          width: 27px;
+          height: 27px;
+          display: grid;
+          place-items: center;
           border: 0;
           border-radius: 50%;
-          background: #edf2f7;
-          color: #64748b;
+          background: #f0e8dc;
+          color: #6f6268;
           cursor: pointer;
-          font-size: 12px;
           font-weight: 900;
         }
 
-        .blog-filter-row {
+        .rr-blog-filters {
           display: flex;
           flex-wrap: wrap;
           gap: 7px;
         }
 
-        .blog-filter {
-          border: 1px solid rgba(148,163,184,.22);
-          background: rgba(255,255,255,.78);
-          color: #52647b;
-          padding: 9px 14px;
+        .rr-blog-filter {
+          padding: 8px 13px;
+          border: 1px solid #ded2c2;
           border-radius: 999px;
-          font-size: 11px;
-          font-weight: 800;
+          background: #fffdf8;
+          color: #756a70;
+          font-size: 10px;
+          font-weight: 900;
           cursor: pointer;
-          backdrop-filter: blur(10px);
-          transition: .22s ease;
+          transition: .2s ease;
         }
 
-        .blog-filter:hover {
-          transform: translateY(-2px);
-          background: white;
-          color: #0a1628;
-          box-shadow: 0 7px 18px rgba(15,23,42,.06);
+        .rr-blog-filter:hover {
+          transform: translateY(-1px);
+          border-color: var(--rr-gold);
+          color: var(--rr-maroon);
         }
 
-        .blog-filter.active {
-          color: white;
-          background: #0a1628;
-          border-color: #0a1628;
-          box-shadow: 0 8px 20px rgba(10,22,40,.15);
+        .rr-blog-filter.active {
+          border-color: var(--rr-burgundy);
+          background: var(--rr-burgundy);
+          color: #fff;
         }
 
-        /* ================= STORIES HEADER ================= */
-
-        .blog-stories-section {
-          padding-bottom: 70px;
-        }
-
-        .blog-section-heading {
+        /* INTRO */
+        .rr-blog-section-heading {
           display: flex;
           align-items: end;
           justify-content: space-between;
           gap: 20px;
-          margin-bottom: 22px;
+          padding: 78px 0 30px;
         }
 
-        .blog-section-kicker {
-          margin-bottom: 5px;
-          color: #c69222;
-          font-size: 9px;
-          font-weight: 950;
+        .rr-blog-section-kicker {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          color: var(--rr-maroon);
+          font-size: 10px;
+          font-weight: 900;
           letter-spacing: .22em;
           text-transform: uppercase;
         }
 
-        .blog-section-title {
-          color: #0a1628;
-          font-size: 28px;
+        .rr-blog-section-kicker::before {
+          content: "";
+          width: 34px;
+          height: 1px;
+          background: var(--rr-gold);
+        }
+
+        .rr-blog-section-heading h2 {
+          margin-top: 11px;
+          font-family: var(--font-display);
+          color: var(--rr-ink);
+          font-size: clamp(38px, 4vw, 55px);
           line-height: 1;
-          font-weight: 950;
-          letter-spacing: -.04em;
+          font-weight: 900;
+          letter-spacing: -.05em;
         }
 
-        .blog-story-count {
+        .rr-blog-section-heading h2 span {
+          color: var(--rr-maroon);
+        }
+
+        .rr-blog-section-heading p {
+          max-width: 680px;
+          margin-top: 12px;
+          color: var(--rr-muted);
+          font-size: 15px;
+          line-height: 1.7;
+        }
+
+        .rr-blog-count {
+          flex-shrink: 0;
+          padding: 9px 14px;
+          border: 1px solid #e1d5c4;
           border-radius: 999px;
-          padding: 8px 13px;
-          background: white;
-          border: 1px solid #e4eaf0;
-          color: #64748b;
+          background: #fffaf3;
+          color: #806f76;
           font-size: 10px;
-          font-weight: 800;
-          box-shadow: 0 6px 16px rgba(15,23,42,.045);
+          font-weight: 900;
         }
 
-        /* ================= UNIFORM GRID ================= */
-
-        .blog-uniform-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 20px;
-          align-items: stretch;
-        }
-
-        /*
-          IMPORTANT:
-          Every card has the same height.
-          This removes the large/masonry look from the old page.
-        */
-
-        .blog-card-3d {
-          --card-accent: #c69222;
+        /* FEATURED STORY */
+        .rr-blog-feature {
           position: relative;
-          min-width: 0;
-          height: 470px;
           overflow: hidden;
-          border-radius: 24px;
-          background: white;
-          border: 1px solid rgba(226,232,240,.92);
-          border-top: 4px solid var(--card-accent);
-          box-shadow:
-            0 14px 32px rgba(15,23,42,.065),
-            0 2px 7px rgba(15,23,42,.025),
-            inset 0 1px 0 rgba(255,255,255,1);
-          transform-style: preserve-3d;
-          transition:
-            transform .32s ease,
-            box-shadow .32s ease,
-            border-color .32s ease;
-        }
-
-        /* Different accent colors create visual variety
-           without changing card dimensions. */
-
-        .blog-card-3d:nth-child(3n + 1) {
-          --card-accent: #d4a72c;
-        }
-
-        .blog-card-3d:nth-child(3n + 2) {
-          --card-accent: #2584a9;
-        }
-
-        .blog-card-3d:nth-child(3n + 3) {
-          --card-accent: #3d8c63;
-        }
-
-        /* =====================================================
-           MAIN FEATURED STORY
-           One full-width editorial card. Smaller posts stay
-           compact 3-column cards underneath.
-        ===================================================== */
-
-        .blog-card-3d.is-featured {
-          grid-column: 1 / -1;
-          height: 430px;
-          --card-accent: #d4a72c;
-
-          background:
-            linear-gradient(135deg, #fffdf6 0%, #ffffff 52%, #f7fbff 100%);
-
-          border: 1px solid rgba(212,167,44,.38);
-          border-top: 4px solid #d4a72c;
-
-          box-shadow:
-            0 24px 55px rgba(15,23,42,.09),
-            0 10px 25px rgba(212,167,44,.10),
-            inset 0 1px 0 rgba(255,255,255,1);
-
-          transform-style: preserve-3d;
-        }
-
-        .blog-card-3d.is-featured > a {
-          display: grid !important;
+          display: grid;
           grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
-          height: 100%;
+          min-height: 410px;
+          border: 1px solid #e3d5c2;
+          border-radius: 28px;
+          background: var(--rr-paper-white);
+          box-shadow: 0 24px 55px rgba(69,48,38,.10);
         }
 
-        .blog-card-3d.is-featured .blog-card-image {
-          height: 100%;
-          min-height: 0;
-          border-radius: 0;
+        .rr-blog-feature::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: -1px;
+          height: 17px;
+          background: var(--rr-cream);
+          clip-path: polygon(
+            0 35%, 3% 100%, 6% 35%, 9% 100%, 12% 35%, 15% 100%,
+            18% 35%, 21% 100%, 24% 35%, 27% 100%, 30% 35%, 33% 100%,
+            36% 35%, 39% 100%, 42% 35%, 45% 100%, 48% 35%, 51% 100%,
+            54% 35%, 57% 100%, 60% 35%, 63% 100%, 66% 35%, 69% 100%,
+            72% 35%, 75% 100%, 78% 35%, 81% 100%, 84% 35%, 87% 100%,
+            90% 35%, 93% 100%, 96% 35%, 100% 100%, 100% 100%, 0 100%
+          );
         }
 
-        .blog-card-3d.is-featured .blog-card-content {
-          min-width: 0;
+        .rr-blog-feature-image {
+          min-height: 410px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .rr-blog-feature-image img {
+          transition: transform .7s cubic-bezier(.22,1,.36,1);
+        }
+
+        .rr-blog-feature:hover .rr-blog-feature-image img {
+          transform: scale(1.045);
+        }
+
+        .rr-blog-feature-shade {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, rgba(24,11,21,.06), rgba(24,11,21,.35));
+        }
+
+        .rr-blog-feature-number {
+          position: absolute;
+          left: 24px;
+          bottom: 28px;
+          color: rgba(255,255,255,.9);
+          font-family: var(--font-display);
+          font-size: 54px;
+          line-height: .8;
+          font-weight: 900;
+          letter-spacing: -.06em;
+          text-shadow: 0 7px 24px rgba(0,0,0,.28);
+        }
+
+        .rr-blog-feature-content {
+          display: flex;
+          flex-direction: column;
           justify-content: center;
-          padding: 34px 42px;
+          padding: 42px;
         }
 
-        .blog-card-3d.is-featured .blog-card-title {
-          max-width: 620px;
-          margin-top: 14px;
-          font-size: clamp(26px, 3vw, 43px);
-          line-height: 1.02;
+        .rr-blog-feature-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          width: fit-content;
+          padding: 7px 11px;
+          border-radius: 999px;
+          background: #fff3d5;
+          border: 1px solid #ead29c;
+          color: #80601d;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: .13em;
+          text-transform: uppercase;
+        }
+
+        .rr-blog-feature-content h3 {
+          margin-top: 15px;
+          color: var(--rr-ink);
+          font-family: var(--font-display);
+          font-size: clamp(28px, 3vw, 43px);
+          line-height: 1.03;
+          font-weight: 900;
           letter-spacing: -.045em;
         }
 
-        .blog-card-3d.is-featured .blog-card-excerpt {
-          max-width: 570px;
-          margin-top: 14px;
+        .rr-blog-feature-content p {
+          max-width: 580px;
+          margin-top: 13px;
+          color: var(--rr-muted);
           font-size: 13px;
-          line-height: 1.65;
-          -webkit-line-clamp: 4;
+          line-height: 1.7;
         }
 
-        .blog-card-3d.is-featured .blog-card-footer {
-          margin-top: 26px;
+        .rr-blog-feature-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-top: 19px;
+          color: #88797f;
+          font-size: 10px;
+          font-weight: 800;
         }
 
-        .blog-card-3d.is-featured .blog-card-image img {
-          transform: scale(1.02);
-          transition:
-            transform .7s cubic-bezier(.22,1,.36,1),
-            filter .4s ease;
+        .rr-blog-feature-author {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          margin-top: 24px;
+          padding-top: 17px;
+          border-top: 1px solid #e9dece;
         }
 
-        .blog-card-3d.is-featured:hover {
-          transform: translateY(-8px);
-          border-color: rgba(212,167,44,.62);
-          box-shadow:
-            0 34px 70px rgba(15,23,42,.12),
-            0 14px 35px rgba(212,167,44,.16),
-            inset 0 1px 0 rgba(255,255,255,1);
-        }
-
-        .blog-card-3d.is-featured:hover .blog-card-image img {
-          transform: scale(1.07);
-        }
-
-        .blog-card-3d.is-featured::before {
-          content: "";
-          position: absolute;
-          z-index: -1;
-          inset: 16px -10px -14px;
-          border-radius: 32px;
-          background:
-            radial-gradient(
-              circle at 50% 100%,
-              rgba(212,167,44,.22),
-              transparent 62%
-            );
-          filter: blur(20px);
-          opacity: .65;
-          transition: opacity .35s ease;
-          pointer-events: none;
-        }
-
-        .blog-card-3d.is-featured:hover::before {
-          opacity: 1;
-        }
-
-        .blog-card-3d.is-featured .blog-featured-pill {
-          padding: 8px 12px;
-          color: #172033;
-          background:
-            linear-gradient(135deg, #ffe58a, #d4a72c);
-          border: 1px solid rgba(255,255,255,.8);
-          box-shadow:
-            0 8px 22px rgba(212,167,44,.30),
-            inset 0 1px 0 rgba(255,255,255,.7);
-          font-size: 8px;
-          letter-spacing: .14em;
-        }
-
-        .blog-card-3d.is-featured .blog-card-category {
-          color: #8a6512;
-          background: rgba(255,250,226,.94);
-          border-color: rgba(212,167,44,.20);
-        }
-
-        .blog-card-3d.is-featured .blog-card-title {
-          color: #0a1628;
-        }
-
-        .blog-card-3d.is-featured:hover .blog-card-title {
-          color: #b47f09;
-        }
-
-        .blog-card-3d.is-featured .blog-card-open {
-          background:
-            linear-gradient(135deg, #f9dc6a, #d4a72c);
-          box-shadow:
-            0 10px 25px rgba(212,167,44,.30),
-            inset 0 1px 0 rgba(255,255,255,.65);
-        }
-
-        .blog-card-3d:hover {
-          transform:
-            translateY(-7px)
-            rotateX(1deg)
-            rotateY(-1deg);
-          border-color: color-mix(in srgb, var(--card-accent) 30%, #e2e8f0);
-          box-shadow:
-            0 26px 52px rgba(15,23,42,.12),
-            0 8px 20px color-mix(in srgb, var(--card-accent) 12%, transparent),
-            inset 0 1px 0 white;
-        }
-
-        .blog-card-3d::after {
-          content: "";
-          position: absolute;
-          width: 150px;
-          height: 150px;
-          right: -85px;
-          bottom: -85px;
+        .rr-blog-feature-author-avatar,
+        .rr-blog-avatar {
+          display: grid;
+          place-items: center;
           border-radius: 50%;
-          background: color-mix(in srgb, var(--card-accent) 9%, transparent);
-          pointer-events: none;
-          transition: .35s ease;
+          background: linear-gradient(145deg, #a52b4a, #2b1423);
+          color: #fff;
+          font-weight: 900;
+          box-shadow: 0 7px 16px rgba(43,20,35,.16);
         }
 
-        .blog-card-3d:hover::after {
-          transform: scale(1.35);
+        .rr-blog-feature-author-avatar {
+          width: 31px;
+          height: 31px;
+          font-size: 9px;
         }
 
-        .blog-card-image {
-          position: relative;
-          height: 190px;
+        .rr-blog-feature-read {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          margin-left: auto;
+          color: var(--rr-maroon);
+          font-size: 11px;
+          font-weight: 900;
+        }
+
+        /* SMALL STORY GRID */
+        .rr-blog-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 20px;
+          margin-top: 24px;
+        }
+
+        .rr-blog-card {
+          min-width: 0;
+          height: 445px;
           overflow: hidden;
-          background: #e8eef3;
+          border: 1px solid #e5d9c8;
+          border-radius: 23px;
+          background: var(--rr-paper-white);
+          box-shadow: 0 16px 35px rgba(69,48,38,.075);
+          transition: .3s ease;
         }
 
-        .blog-card-image img {
-          transform: scale(1.015);
+        .rr-blog-card:hover {
+          border-color: #d2bd98;
+          box-shadow: 0 25px 48px rgba(69,48,38,.12);
         }
 
-        .blog-card-image-overlay {
+        .rr-blog-card-link {
+          display: flex;
+          height: 100%;
+          flex-direction: column;
+        }
+
+        .rr-blog-card-image {
+          position: relative;
+          height: 205px;
+          flex: 0 0 205px;
+          overflow: hidden;
+          background: #e7ddd0;
+        }
+
+        .rr-blog-card-image img {
+          transition: transform .7s cubic-bezier(.22,1,.36,1);
+        }
+
+        .rr-blog-card-image-shade {
           position: absolute;
           inset: 0;
           background:
-            linear-gradient(180deg, rgba(10,22,40,.05), transparent 52%),
-            linear-gradient(0deg, rgba(10,22,40,.28), transparent 42%);
+            linear-gradient(180deg, rgba(43,20,35,.04), transparent 50%),
+            linear-gradient(0deg, rgba(43,20,35,.30), transparent 50%);
           pointer-events: none;
         }
 
-        .blog-card-category {
+        .rr-blog-card-top {
+          position: absolute;
+          z-index: 2;
+          left: 14px;
+          right: 14px;
+          top: 14px;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 7px;
+        }
+
+        .rr-blog-category,
+        .rr-blog-featured {
           display: inline-flex;
           align-items: center;
           gap: 5px;
-          border-radius: 999px;
           padding: 6px 9px;
-          color: #173d62;
-          background: rgba(255,255,255,.92);
-          border: 1px solid rgba(255,255,255,.85);
-          box-shadow: 0 6px 16px rgba(15,23,42,.10);
-          backdrop-filter: blur(10px);
+          border-radius: 999px;
           font-size: 8px;
-          font-weight: 950;
-          letter-spacing: .11em;
+          font-weight: 900;
+          letter-spacing: .10em;
           text-transform: uppercase;
+          box-shadow: 0 6px 16px rgba(0,0,0,.10);
         }
 
-        .blog-featured-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-          border-radius: 999px;
-          padding: 6px 9px;
-          color: #132238;
-          background: #f7d56d;
-          box-shadow: 0 7px 18px rgba(0,0,0,.13);
-          font-size: 8px;
-          font-weight: 950;
-          letter-spacing: .1em;
-          text-transform: uppercase;
+        .rr-blog-category {
+          color: #553b45;
+          border: 1px solid rgba(255,255,255,.72);
+          background: rgba(255,251,245,.93);
         }
 
-        .blog-card-open {
+        .rr-blog-featured {
+          color: #fffaf0;
+          border: 1px solid rgba(255,255,255,.16);
+          background: var(--rr-maroon);
+        }
+
+        .rr-blog-card-index {
+          position: absolute;
+          left: 15px;
+          bottom: 13px;
+          color: rgba(255,255,255,.9);
+          font-family: var(--font-display);
+          font-size: 29px;
+          line-height: .8;
+          font-weight: 900;
+          text-shadow: 0 5px 18px rgba(0,0,0,.28);
+        }
+
+        .rr-blog-open {
           position: absolute;
           right: 14px;
-          bottom: 14px;
-          z-index: 3;
+          bottom: 13px;
+          width: 37px;
+          height: 37px;
           display: grid;
           place-items: center;
-          width: 38px;
-          height: 38px;
           border-radius: 50%;
-          color: #0a1628;
-          background: var(--card-accent);
-          box-shadow:
-            0 9px 22px rgba(0,0,0,.17),
-            inset 0 1px 0 rgba(255,255,255,.45);
+          color: #fff;
+          background: var(--rr-maroon);
+          box-shadow: 0 8px 19px rgba(43,20,35,.24);
           transition: .25s ease;
         }
 
-        .blog-card-3d:hover .blog-card-open {
-          transform: translate(2px,-2px) rotate(5deg) scale(1.05);
+        .rr-blog-card:hover .rr-blog-open {
+          transform: translate(2px,-2px);
+          background: var(--rr-gold);
+          color: var(--rr-ink);
         }
 
-        .blog-card-number {
-          position: absolute;
-          left: 15px;
-          bottom: 11px;
-          z-index: 2;
-          color: rgba(255,255,255,.88);
-          font-size: 29px;
-          font-weight: 950;
-          line-height: .8;
-          letter-spacing: -.06em;
-          text-shadow: 0 4px 15px rgba(0,0,0,.22);
-        }
-
-        .blog-card-content {
+        .rr-blog-card-body {
           display: flex;
-          flex: 1;
           min-height: 0;
+          flex: 1;
           flex-direction: column;
           padding: 18px 19px 17px;
           background:
-            radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--card-accent) 7%, transparent), transparent 42%),
-            #ffffff;
+            radial-gradient(circle at 100% 0%, rgba(201,150,61,.06), transparent 40%),
+            #fffdf8;
         }
 
-        .blog-card-meta {
+        .rr-blog-meta {
           display: flex;
           align-items: center;
           gap: 7px;
-          min-height: 16px;
-          color: #8a98a8;
+          color: #93868b;
           font-size: 9px;
-          font-weight: 700;
+          font-weight: 800;
         }
 
-        .blog-dot {
-          color: #cbd5e1;
+        .rr-blog-meta-line {
+          width: 3px;
+          height: 3px;
+          border-radius: 50%;
+          background: #c7b9bc;
         }
 
-        .blog-card-title {
-          margin-top: 9px;
+        .rr-blog-card-title {
           display: -webkit-box;
           overflow: hidden;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 2;
-          color: #0a1628;
-          font-size: 18px;
-          line-height: 1.12;
-          letter-spacing: -.025em;
-          font-weight: 950;
-          transition: color .22s ease;
-        }
-
-        .blog-card-3d:hover .blog-card-title {
-          color: var(--card-accent);
-        }
-
-        .blog-card-excerpt {
           margin-top: 9px;
+          color: var(--rr-ink);
+          font-family: var(--font-display);
+          font-size: 20px;
+          line-height: 1.08;
+          font-weight: 900;
+          letter-spacing: -.03em;
+          transition: color .2s ease;
+        }
+
+        .rr-blog-card:hover .rr-blog-card-title {
+          color: var(--rr-maroon);
+        }
+
+        .rr-blog-card-excerpt {
           display: -webkit-box;
           overflow: hidden;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 3;
-          color: #64748b;
+          margin-top: 9px;
+          color: var(--rr-muted);
           font-size: 11px;
-          line-height: 1.55;
+          line-height: 1.58;
         }
 
-        .blog-card-footer {
+        .rr-blog-card-footer {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 10px;
           margin-top: auto;
           padding-top: 13px;
-          border-top: 1px solid #edf1f4;
+          border-top: 1px solid #eadfcf;
         }
 
-        .blog-small-avatar {
-          display: grid;
-          flex-shrink: 0;
-          place-items: center;
+        .rr-blog-avatar {
           width: 28px;
           height: 28px;
-          border-radius: 50%;
-          color: white;
-          background: linear-gradient(145deg, #214b70, #0a1628);
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.18),
-            0 5px 12px rgba(10,22,40,.13);
+          flex: 0 0 auto;
           font-size: 9px;
-          font-weight: 900;
         }
 
-        .blog-explore {
+        .rr-blog-read {
           display: inline-flex;
-          flex-shrink: 0;
           align-items: center;
           gap: 4px;
-          color: var(--card-accent);
+          flex-shrink: 0;
+          color: var(--rr-maroon);
           font-size: 10px;
-          font-weight: 950;
-          transition: .22s ease;
+          font-weight: 900;
+          transition: .2s ease;
         }
 
-        .blog-card-3d:hover .blog-explore {
+        .rr-blog-card:hover .rr-blog-read {
           transform: translateX(2px);
         }
 
-        /* ================= EMPTY ================= */
-
-        .blog-empty {
+        /* EMPTY */
+        .rr-blog-empty {
           margin: 25px auto 70px;
-          max-width: 500px;
-          border-radius: 25px;
-          padding: 45px 25px;
+          max-width: 540px;
+          padding: 46px 28px;
           text-align: center;
-          background: rgba(255,255,255,.9);
-          border: 1px solid #e2e8f0;
-          box-shadow: 0 20px 45px rgba(15,23,42,.07);
+          border: 1px solid #e5d9c8;
+          border-radius: 24px;
+          background: var(--rr-paper-white);
+          box-shadow: 0 18px 40px rgba(69,48,38,.08);
         }
 
-        /* ================= RESPONSIVE ================= */
-
-        @media (max-width: 1100px) {
-          .blog-uniform-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .blog-card-3d.is-featured {
-            grid-column: 1 / -1;
-          }
-
-          .blog-hero-grid {
+        /* RESPONSIVE */
+        @media (max-width: 1050px) {
+          .rr-blog-hero-grid {
             grid-template-columns: 1fr;
           }
 
-          .blog-hero-note {
-            max-width: 520px;
+          .rr-blog-hero-mark {
+            display: none;
+          }
+
+          .rr-blog-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .rr-blog-feature {
+            grid-template-columns: 1fr;
+          }
+
+          .rr-blog-feature-image {
+            min-height: 280px;
           }
         }
 
-        @media (max-width: 680px) {
-          .blog-hero {
-            padding-top: 84px;
-            padding-bottom: 32px;
+        @media (max-width: 700px) {
+          .rr-blog-page {
+            padding-top: 24px;
           }
 
-          .blog-main-title {
-            font-size: clamp(43px, 14vw, 64px);
+          .rr-blog-wrap {
+            width: min(100% - 24px, 1280px);
           }
 
-          .blog-hero-description {
+          .rr-blog-hero {
+            min-height: 420px;
+            padding: 44px 25px 66px;
+            border-radius: 0 0 28px 28px;
+          }
+
+          .rr-blog-hero h1 {
+            font-size: 46px;
+          }
+
+          .rr-blog-hero-description {
             font-size: 14px;
           }
 
-          .blog-uniform-grid {
+          .rr-blog-tools {
+            flex-direction: column;
+            align-items: stretch;
+            border-radius: 0 0 18px 18px;
+            padding: 16px;
+          }
+
+          .rr-blog-search {
+            width: 100%;
+          }
+
+          .rr-blog-filters {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            padding-bottom: 2px;
+          }
+
+          .rr-blog-filter {
+            flex: 0 0 auto;
+          }
+
+          .rr-blog-section-heading {
+            padding-top: 55px;
+            align-items: flex-start;
+            flex-direction: column;
+          }
+
+          .rr-blog-section-heading h2 {
+            font-size: 38px;
+          }
+
+          .rr-blog-count {
+            display: none;
+          }
+
+          .rr-blog-feature {
+            min-height: 0;
+            border-radius: 22px;
+          }
+
+          .rr-blog-feature-image {
+            min-height: 220px;
+          }
+
+          .rr-blog-feature-content {
+            padding: 25px 21px 30px;
+          }
+
+          .rr-blog-feature-content h3 {
+            font-size: 29px;
+          }
+
+          .rr-blog-grid {
             grid-template-columns: 1fr;
             gap: 16px;
           }
 
-          .blog-card-3d {
-            height: 455px;
-          }
-
-          .blog-card-3d.is-featured {
-            grid-column: auto;
-            height: 455px;
-          }
-
-          .blog-card-3d.is-featured > a {
-            display: flex !important;
-            flex-direction: column;
-          }
-
-          .blog-card-3d.is-featured .blog-card-image {
-            height: 205px;
-            flex: 0 0 205px;
-          }
-
-          .blog-card-3d.is-featured .blog-card-content {
-            padding: 18px 19px 17px;
-          }
-
-          .blog-card-3d.is-featured .blog-card-title {
-            font-size: 23px;
-          }
-
-          .blog-card-3d.is-featured .blog-card-excerpt {
-            font-size: 11px;
-            line-height: 1.55;
-            -webkit-line-clamp: 3;
-          }
-
-          .blog-card-image {
-            height: 190px;
-          }
-
-          .blog-section-heading {
-            align-items: flex-start;
-            flex-direction: column;
-            margin-bottom: 17px;
-          }
-
-          .blog-story-count {
-            display: none;
-          }
-
-          .blog-search {
-            width: 100%;
-          }
-
-          .blog-filter-row {
-            width: 100%;
+          .rr-blog-card {
+            height: 435px;
           }
         }
       `}</style>
 
-      <section className="blog-page">
-        <div className="blog-orb blog-orb-one" />
-        <div className="blog-orb blog-orb-two" />
+      <section className="rr-blog-page">
+        <div className="rr-blog-wrap">
 
-        <div className="relative z-10 mx-auto max-w-[1320px] px-5 sm:px-8">
-          {/* ================= HERO ================= */}
-
+          {/* =====================================================
+              HERO — inspired by About page, but with a journal /
+              editorial identity of its own.
+          ====================================================== */}
           <motion.header
-            initial={{ opacity: 0, y: 22 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.6,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="blog-hero"
+            transition={{ duration: 0.55 }}
+            className="rr-blog-hero"
           >
-            <div className="blog-hero-grid">
+            <div className="rr-blog-hero-grid">
               <div>
-                <div className="blog-eyebrow">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  {content.pageBadge || "Knowledge Hub"}
+                <div className="rr-blog-kicker">
+                  {content.pageBadge || "School Journal"}
                 </div>
 
-                <h1 className="blog-main-title">
-                  {content.pageTitle || "School Blog"}
-                  <span>& Insights.</span>
+                <h1>
+                  {content.pageTitle || "Stories from"}{" "}
+                  <span>Red Rose.</span>
                 </h1>
 
-                <p className="blog-hero-description">
+                <p className="rr-blog-hero-description">
                   {content.pageDescription ||
-                    "Explore school activities, academic excellence, student achievements, competitions, and important educational updates."}
+                    "Explore school activities, academic achievements, student voices, competitions, celebrations, and the everyday moments that make our school community special."}
                 </p>
               </div>
 
-              <div className="blog-hero-note">
-                <div className="blog-hero-note-line" />
-
-                <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
-                  <BookOpen className="h-3.5 w-3.5 text-[#C69222]" />
-                  From the school desk
+              <div className="rr-blog-hero-mark" aria-hidden="true">
+                <div className="rr-blog-mark-inner">
+                  <BookOpen className="h-10 w-10" strokeWidth={1.4} />
                 </div>
 
-                <h2 className="blog-hero-note-title">
-                  Stories that stay with us.
-                </h2>
-
-                <p className="blog-hero-note-text">
-                  Discover the people, moments and ideas shaping
-                  our school community.
-                </p>
-              </div>
-            </div>
-
-            <div className="blog-search-row">
-              <div className="blog-search">
-                <Search className="blog-search-icon h-4 w-4" />
-
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search stories, events, achievements..."
-                  aria-label="Search blog articles"
-                />
-
-                {query && (
-                  <button
-                    type="button"
-                    onClick={() => setQuery("")}
-                    className="blog-search-clear"
-                    aria-label="Clear search"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-
-              <div className="blog-filter-row">
-                {(content.categories || ["All"]).map((cat) => {
-                  const isActive = category === cat;
-
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setCategory(cat)}
-                      className={`blog-filter ${
-                        isActive ? "active" : ""
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
+                <div className="rr-blog-mark-caption">
+                  Ideas · People · Moments
+                </div>
               </div>
             </div>
           </motion.header>
 
-          {/* ================= ALL STORIES ================= */}
+          {/* SEARCH + CATEGORY BAR */}
+          <div className="rr-blog-tools">
+            <div className="rr-blog-search">
+              <Search className="rr-blog-search-icon h-4 w-4" />
+
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search stories, achievements, activities..."
+                aria-label="Search blog articles"
+              />
+
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="rr-blog-clear"
+                  aria-label="Clear search"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+
+            <div className="rr-blog-filters">
+              {(content.categories || ["All"]).map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setCategory(cat)}
+                  className={`rr-blog-filter ${
+                    category === cat ? "active" : ""
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {visiblePosts.length > 0 && (
-            <section className="blog-stories-section">
-              <div className="blog-section-heading">
+            <>
+              <div className="rr-blog-section-heading">
                 <div>
-                  <p className="blog-section-kicker">
-                    School journal
-                  </p>
+                  <div className="rr-blog-section-kicker">
+                    From our school journal
+                  </div>
 
-                  <h2 className="blog-section-title">
-                    Latest stories.
+                  <h2>
+                    The latest <span>stories.</span>
                   </h2>
+
+                  <p>
+                    A collection of the people, achievements, activities,
+                    ideas, and moments shaping life at Red Rose.
+                  </p>
                 </div>
 
-                <div className="blog-story-count">
+                <div className="rr-blog-count">
                   {visiblePosts.length}{" "}
                   {visiblePosts.length === 1 ? "story" : "stories"}
                 </div>
               </div>
 
-              <div className="blog-uniform-grid">
-                {visiblePosts.map((post, index) => (
-                  <BlogCard
-                    key={post.id || post.slug}
-                    post={post}
-                    index={index}
-                    featured={index === 0}
-                  />
-                ))}
-              </div>
-            </section>
+              {/* =================================================
+                  FEATURED STORY
+                  First post gets a distinctive editorial layout.
+              ================================================== */}
+              <motion.article
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.12 }}
+                transition={{ duration: 0.5 }}
+                className="rr-blog-feature"
+              >
+                {(() => {
+                  const post = visiblePosts[0];
+                  const { authorName, initial } = getAuthorInfo(post);
+                  const readTime = getReadTime(
+                    post.content,
+                    post.excerpt
+                  );
+
+                  return (
+                    <>
+                      <Link
+                        to={`/blogs/${post.slug}`}
+                        className="rr-blog-feature-image"
+                      >
+                        <BlogImage post={post} />
+
+                        <div className="rr-blog-feature-shade" />
+
+                        <div className="absolute left-5 top-5 z-10">
+                          <span className="rr-blog-feature-label">
+                            <Sparkles className="h-3 w-3" />
+                            Featured story
+                          </span>
+                        </div>
+
+                        <div className="rr-blog-feature-number">
+                          01
+                        </div>
+                      </Link>
+
+                      <div className="rr-blog-feature-content">
+                        <div className="rr-blog-feature-label">
+                          <Tag className="h-3 w-3" />
+                          {post.category || "School Life"}
+                        </div>
+
+                        <h3>{post.title}</h3>
+
+                        <p>{getPlainExcerpt(post)}</p>
+
+                        <div className="rr-blog-feature-meta">
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatBlogDate(post.date)}
+                          </span>
+
+                          <span>·</span>
+
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {readTime}
+                          </span>
+                        </div>
+
+                        <div className="rr-blog-feature-author">
+                          <div className="rr-blog-feature-author-avatar">
+                            {initial}
+                          </div>
+
+                          <div className="min-w-0">
+                            <div className="text-[9px] font-black uppercase tracking-[0.13em] text-[#9A898F]">
+                              Written by
+                            </div>
+                            <div className="truncate text-xs font-black text-[#2B1423]">
+                              {authorName}
+                            </div>
+                          </div>
+
+                          <span className="rr-blog-feature-read">
+                            Read story
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </motion.article>
+
+              {/* =================================================
+                  REMAINING STORIES — compact, uniform cards.
+              ================================================== */}
+              {visiblePosts.length > 1 && (
+                <div className="rr-blog-grid">
+                  {visiblePosts.slice(1).map((post, index) => (
+                    <BlogCard
+                      key={post.id || post.slug}
+                      post={post}
+                      index={index + 1}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
-          {/* ================= EMPTY STATE ================= */}
-
           {visiblePosts.length === 0 && (
-            <div className="blog-empty">
-              <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+            <div className="rr-blog-empty">
+              <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-full bg-[#f3e8d8] text-[#A52B4A]">
                 <Calendar className="h-6 w-6" />
               </div>
 
-              <h2 className="text-2xl font-black text-[#0A1628]">
+              <h2 className="font-display text-2xl font-black text-[#2B1423]">
                 No stories found
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="mt-2 text-sm leading-6 text-[#756A70]">
                 {query
                   ? `No articles match "${query}". Try different keywords.`
                   : "School news and blog posts will appear here once published."}
@@ -1172,7 +1284,7 @@ export default function Blogs() {
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  className="mt-5 rounded-full bg-[#0A1628] px-5 py-2.5 text-xs font-black text-white transition hover:-translate-y-0.5 hover:bg-[#173d62]"
+                  className="mt-5 rounded-full bg-[#2B1423] px-5 py-2.5 text-xs font-black text-white transition hover:-translate-y-0.5 hover:bg-[#A52B4A]"
                 >
                   Clear Search
                 </button>

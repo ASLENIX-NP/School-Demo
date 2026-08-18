@@ -2,63 +2,64 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Award,
-  Camera,
-  Compass,
-  Eye,
-  GraduationCap,
-  Heart,
-  ImageIcon,
-  Lightbulb,
-  Pencil,
-  Plus,
-  Quote,
-  Sparkles,
-  Target,
-  Trash2,
-  Users,
-  UserRound,
-  Globe,
-  BookOpen,
-  Trophy,
-  X,
-  MessageSquare,
-  ChevronRight,
-  Mail,
-  Library,
-} from "lucide-react";
+import { Camera, ChevronRight, Pencil, Plus, Quote, Trash2, X } from "lucide-react";
 
-// ──────────────────────────────────────────────
-// Palette
-// ──────────────────────────────────────────────
-const palette = {
-  primary: "#2563EB",
-  secondary: "#0F172A",
-  accent: "#38BDF8",
-  accent2: "#F59E0B",
-  light: "#EAF6FF",
-  dark: "#102A43",
-  gray: "#64748B",
-  lightGray: "#E2E8F0",
+// ══════════════════════════════════════════════════════════════════════════
+// RED ROSE SCHOOL — ABOUT PAGE
+//
+// Design direction: "The Ledger" — a bound archive / yearbook aesthetic.
+// Deep rose ink, brass foil and warm paper replace the old flat blue/violet
+// gradients and stock icon grid. Depth comes from real layered shadows,
+// tilt, deckle (torn-paper) edges and a book-spread layout — not icons.
+//
+// Optional (recommended) font preload for index.html <head>, the component
+// also self-loads these fonts via @import so it works without it:
+//   <link rel="preconnect" href="https://fonts.googleapis.com">
+//   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+// ══════════════════════════════════════════════════════════════════════════
+
+const theme = {
+  ink: "#1E1420",
+  inkSoft: "#2D1C2A",
+  paper: "#F5EEE2",
+  paperDeep: "#E9DCC4",
+  card: "#FBF7EE",
+  rose: "#9C2748",
+  roseDeep: "#6E1733",
+  roseBright: "#C6486B",
+  gold: "#B98A42",
+  goldSoft: "#E7CE9C",
+  moss: "#3F5B49",
+  mossDeep: "#2C4234",
+  text: "#2B1E23",
+  textMuted: "#7C6B6F",
   white: "#FFFFFF",
-  gradient1: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)",
-  gradient2: "linear-gradient(135deg, #F59E0B 0%, #F97316 100%)",
-  gradient3: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
+  gradRose: "linear-gradient(135deg, #6E1733 0%, #9C2748 55%, #C6486B 100%)",
+  gradInk: "linear-gradient(160deg, #17101C 0%, #2A1826 55%, #3A2130 100%)",
+  gradGold: "linear-gradient(135deg, #E7CE9C 0%, #B98A42 100%)",
+  gradMoss: "linear-gradient(135deg, #2C4234 0%, #3F5B49 55%, #6E8F76 100%)",
 };
 
-// Rotating accent themes used to give each staff member their own identity
-// across the leadership cards and the message popup.
+// Rotating accent themes for staff cards / message popup.
 const STAFF_ACCENTS = [
-  { solid: "#2563EB", soft: "rgba(37,99,235,0.10)", ring: "rgba(37,99,235,0.35)", grad: "linear-gradient(135deg, #2563EB 0%, #4F46E5 55%, #7C3AED 100%)" },
-  { solid: "#F59E0B", soft: "rgba(245,158,11,0.10)", ring: "rgba(245,158,11,0.35)", grad: "linear-gradient(135deg, #F59E0B 0%, #F97316 100%)" },
-  { solid: "#8B5CF6", soft: "rgba(139,92,246,0.10)", ring: "rgba(139,92,246,0.35)", grad: "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 55%, #38BDF8 100%)" },
-  { solid: "#0EA5E9", soft: "rgba(14,165,233,0.10)", ring: "rgba(14,165,233,0.35)", grad: "linear-gradient(135deg, #0EA5E9 0%, #38BDF8 100%)" },
+  { solid: theme.rose, soft: "rgba(156,39,72,0.10)", ring: "rgba(156,39,72,0.35)", grad: theme.gradRose },
+  { solid: theme.gold, soft: "rgba(185,138,66,0.14)", ring: "rgba(185,138,66,0.35)", grad: theme.gradGold },
+  { solid: theme.moss, soft: "rgba(63,91,73,0.12)", ring: "rgba(63,91,73,0.35)", grad: theme.gradMoss },
+  { solid: theme.inkSoft, soft: "rgba(45,28,42,0.08)", ring: "rgba(45,28,42,0.30)", grad: theme.gradInk },
 ];
 
 const API_URL = "http://localhost:5000";
+
+// Torn-paper (deckle edge) clip-paths used for the story photo and the
+// message popup — the page's one recurring "material" motif.
+const DECKLE_CLIP =
+  "polygon(0% 2%,4% 0%,9% 3%,14% 0%,20% 2%,26% 0%,32% 3%,38% 0%,44% 2%,50% 0%,56% 3%,62% 0%,68% 2%,74% 0%,80% 3%,86% 0%,92% 2%,97% 0%,100% 3%,100% 97%,96% 100%,91% 97%,85% 100%,79% 97%,73% 100%,67% 97%,61% 100%,55% 97%,49% 100%,43% 97%,37% 100%,31% 97%,25% 100%,19% 97%,13% 100%,7% 97%,2% 100%,0% 97%)";
+
+const TORN_EDGE_CLIP =
+  "polygon(0% 40%,3% 8%,6% 44%,9% 12%,12% 40%,15% 6%,18% 38%,21% 14%,24% 42%,27% 8%,30% 36%,33% 12%,36% 42%,39% 6%,42% 38%,45% 10%,48% 44%,51% 8%,54% 36%,57% 12%,60% 40%,63% 6%,66% 38%,69% 10%,72% 42%,75% 8%,78% 36%,81% 12%,84% 40%,87% 6%,90% 38%,93% 10%,96% 42%,100% 8%,100% 100%,0% 100%)";
+
 // ──────────────────────────────────────────────
-// Default content
+// Default content (unchanged data contract — safe for existing editors)
 // ──────────────────────────────────────────────
 export const defaultAboutContent = {
   pageBadge: "About Our School",
@@ -183,7 +184,7 @@ export const defaultAboutContent = {
 };
 
 // ──────────────────────────────────────────────
-// Helpers
+// Helpers (unchanged logic)
 // ──────────────────────────────────────────────
 function clampNumber(value, min, max, fallback) {
   const numberValue = Number(value);
@@ -240,19 +241,51 @@ export function mergeAboutContent(saved = {}) {
   };
 }
 
-const ICONS = {
-  award: Award,
-  heart: Heart,
-  lightbulb: Lightbulb,
-  target: Target,
-  eye: Eye,
-  graduation: GraduationCap,
-  users: Users,
-  trophy: Trophy,
-  globe: Globe,
-  compass: Compass,
-  book: BookOpen,
-};
+// ──────────────────────────────────────────────
+// Global scoped styles: fonts, texture, motion & focus rules
+// ──────────────────────────────────────────────
+function LedgerStyles() {
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+      .rr-about { font-family: 'Inter', system-ui, -apple-system, sans-serif; --rr-gold: ${theme.gold}; }
+      .rr-serif { font-family: 'Fraunces', Georgia, 'Times New Roman', serif; }
+      .rr-mono { font-family: 'Space Grotesk', 'IBM Plex Mono', monospace; }
+
+      .rr-dropcap::first-letter {
+        font-family: 'Fraunces', serif;
+        font-weight: 600;
+        font-size: 3.4rem;
+        float: left;
+        line-height: 0.82;
+        padding-right: 0.4rem;
+        padding-top: 0.3rem;
+        color: ${theme.rose};
+      }
+
+      .rr-about a:focus-visible,
+      .rr-about button:focus-visible {
+        outline: 2px solid var(--rr-gold);
+        outline-offset: 3px;
+        border-radius: 6px;
+      }
+
+      @keyframes rr-float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
+      @keyframes rr-drift { 0% { transform: translate(0,0); } 50% { transform: translate(-1.5%,1.5%); } 100% { transform: translate(0,0); } }
+      .rr-emblem { animation: rr-float 7s ease-in-out infinite; }
+      .rr-grain { animation: rr-drift 18s ease-in-out infinite; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .rr-about *, .rr-about *::before, .rr-about *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+    `}</style>
+  );
+}
 
 // ──────────────────────────────────────────────
 // 3D tilt wrapper
@@ -306,7 +339,7 @@ function TiltCard({ children, className = "", style = {}, max = 7, glare = true 
           style={{
             opacity: hovering ? 1 : 0,
             transition: "opacity 260ms ease",
-            background: `radial-gradient(circle at ${glarePos.x}% ${glarePos.y}%, rgba(255,255,255,0.35), transparent 55%)`,
+            background: `radial-gradient(circle at ${glarePos.x}% ${glarePos.y}%, rgba(255,255,255,0.30), transparent 55%)`,
           }}
         />
       )}
@@ -372,7 +405,7 @@ function EditIconButton({ editMode, target, onEditTarget, icon: Icon = Pencil, l
         onEditTarget(target);
       }}
       className="absolute -top-2 -right-2 z-[90] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-lg backdrop-blur-md"
-      style={{ background: "rgba(255,255,255,0.2)", color: palette.primary, border: `1px solid rgba(255,255,255,0.4)` }}
+      style={{ background: "rgba(255,255,255,0.9)", color: theme.rose, border: `1px solid ${theme.gold}55` }}
       title={label}
     >
       <Icon className="w-3.5 h-3.5" />
@@ -391,7 +424,7 @@ function DeleteIconButton({ editMode, target, onDeleteTarget, label = "Delete" }
         onDeleteTarget(target);
       }}
       className="absolute -top-2 -right-12 z-[90] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
-      style={{ background: "#FEE2E2", color: "#DC2626", border: `2px solid ${palette.white}` }}
+      style={{ background: "#FBE3E7", color: "#9C2748", border: `2px solid ${theme.white}` }}
       title={label}
     >
       <Trash2 className="w-3.5 h-3.5" />
@@ -403,7 +436,7 @@ function EditableWrap({
   editMode,
   target,
   onEditTarget,
-  onDeleteTarget = () => { },
+  onDeleteTarget = () => {},
   icon = Pencil,
   label = "Edit",
   canDelete = false,
@@ -432,8 +465,8 @@ function SectionAddButton({ editMode, label, type, onAddTarget }) {
         e.stopPropagation();
         onAddTarget(type);
       }}
-      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
-      style={{ color: palette.white, background: palette.gradient1, boxShadow: "0 8px 20px rgba(37,99,235,0.22)" }}
+      className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
+      style={{ color: theme.white, background: theme.gradRose, boxShadow: `0 10px 24px ${theme.rose}40` }}
     >
       <Plus className="w-4 h-4" />
       {label}
@@ -442,57 +475,41 @@ function SectionAddButton({ editMode, label, type, onAddTarget }) {
 }
 
 // ──────────────────────────────────────────────
-// Shared visual building blocks
+// Section eyebrow + heading — the page's recurring type treatment
 // ──────────────────────────────────────────────
-function SectionHeader({ badge, badgeColor = palette.primary, badgeBg = "rgba(37,99,235,0.08)", title, description }) {
+function SectionIntro({ eyebrow, title, description, tone = "dark", align = "left" }) {
+  const light = tone === "light";
+  const isCenter = align === "center";
   return (
-    <div className="text-center max-w-3xl mx-auto mb-12 relative">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="inline-block"
-      >
-        <span
-          className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4 backdrop-blur-sm"
-          style={{ background: badgeBg, color: badgeColor, border: `1px solid ${badgeColor}20` }}
-        >
-          {badge}
+    <div className={isCenter ? "text-center max-w-2xl mx-auto" : ""}>
+      <div className={`flex items-center gap-3 mb-4 ${isCenter ? "justify-center" : ""}`}>
+        <span className="h-px w-10" style={{ background: theme.gold }} />
+        <span className="rr-mono text-[11px] font-semibold uppercase tracking-[0.28em]" style={{ color: light ? theme.goldSoft : theme.rose }}>
+          {eyebrow}
         </span>
-      </motion.div>
+        {!isCenter && <span className="h-px flex-1 max-w-[80px]" style={{ background: light ? "rgba(231,206,156,0.35)" : "rgba(156,39,72,0.25)" }} />}
+      </div>
       <h2
-        className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
-        style={{ color: palette.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.02em", lineHeight: 1.1 }}
+        className="rr-serif text-3xl sm:text-4xl md:text-[2.75rem] font-semibold leading-[1.08] tracking-tight"
+        style={{ color: light ? theme.white : theme.ink }}
       >
         {title}
       </h2>
       {description && (
-        <p className="text-lg leading-relaxed max-w-2xl mx-auto" style={{ color: palette.gray }}>
+        <p className="mt-4 max-w-xl text-base leading-7" style={{ color: light ? "rgba(245,238,226,0.72)" : theme.textMuted }}>
           {description}
         </p>
       )}
-      <div className="w-16 h-1 rounded-full mx-auto mt-4" style={{ background: palette.gradient2 }} />
-    </div>
-  );
-}
-
-// Animated, layered, premium background
-function DecorativeBackdrop() {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `radial-gradient(circle, ${palette.primary} 1px, transparent 1.3px)`, backgroundSize: "24px 24px" }} />
-      <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-30 blur-[120px] animate-pulse" style={{ background: palette.gradient1 }} />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full opacity-20 blur-[120px] animate-pulse delay-1000" style={{ background: palette.accent }} />
     </div>
   );
 }
 
 // ──────────────────────────────────────────────
-// SINGLE STAFF POPUP COMPONENT
+// STAFF MESSAGE POPUP — redesigned as an "open letter" card
 // ──────────────────────────────────────────────
 function StaffPopup({ isOpen, onClose, staff, accent }) {
   if (!isOpen || !staff) return null;
-  const theme = accent || STAFF_ACCENTS[0];
+  const t = accent || STAFF_ACCENTS[0];
 
   return (
     <AnimatePresence>
@@ -502,180 +519,74 @@ function StaffPopup({ isOpen, onClose, staff, accent }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
-        style={{ background: "rgba(8,12,24,0.72)", backdropFilter: "blur(10px)" }}
+        className="rr-about fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
+        style={{ background: "rgba(15,9,17,0.78)", backdropFilter: "blur(10px)" }}
         onClick={onClose}
       >
         <motion.div
-          initial={{ scale: 0.85, y: 50, opacity: 0, rotateX: 8 }}
-          animate={{ scale: 1, y: 0, opacity: 1, rotateX: 0 }}
-          exit={{ scale: 0.92, y: 24, opacity: 0 }}
+          initial={{ scale: 0.9, y: 40, opacity: 0 }}
+          animate={{ scale: 1, y: 0, opacity: 1 }}
+          exit={{ scale: 0.94, y: 20, opacity: 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 24 }}
-          className="relative w-full max-w-4xl max-h-[94vh] overflow-y-auto rounded-[2.25rem] bg-white"
-          style={{
-            boxShadow: `0 50px 110px -25px ${theme.solid}66, 0 25px 55px rgba(15,23,42,0.4), inset 0 1px 0 rgba(255,255,255,0.6)`,
-            border: "1px solid rgba(255,255,255,0.6)",
-          }}
+          className="relative w-full max-w-xl max-h-[92vh] overflow-y-auto"
+          style={{ filter: `drop-shadow(0 40px 70px rgba(0,0,0,0.45))` }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* ── Header banner with staff photo on the blue side ── */}
-          <div
-            className="relative min-h-[300px] md:min-h-[330px] overflow-hidden"
-            style={{ background: theme.grad }}
-          >
-            <div className="absolute inset-0 opacity-[0.14] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #fff 1.5px, transparent 1.8px)", backgroundSize: "20px 20px" }} />
-            <motion.div
-              animate={{ y: [0, -10, 0], x: [0, 6, 0] }}
-              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-16 -left-10 w-56 h-56 rounded-full pointer-events-none"
-              style={{ background: "rgba(255,255,255,0.16)", filter: "blur(55px)" }}
-            />
-            <motion.div
-              animate={{ y: [0, 12, 0], x: [0, -8, 0] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -bottom-24 -right-16 w-72 h-72 rounded-full pointer-events-none"
-              style={{ background: "rgba(255,255,255,0.13)", filter: "blur(65px)" }}
-            />
+          <div className="relative" style={{ clipPath: DECKLE_CLIP, background: theme.card }}>
+            {/* ribbon header */}
+            <div className="relative px-9 pt-9 pb-14" style={{ background: t.grad }}>
+              <div className="absolute inset-0 opacity-[0.12] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #fff 1.4px, transparent 1.7px)", backgroundSize: "18px 18px" }} />
+              <button
+                onClick={onClose}
+                className="absolute top-5 right-5 z-30 w-9 h-9 flex items-center justify-center rounded-full text-white transition-transform duration-300 hover:rotate-90"
+                style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)" }}
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
 
-            <Quote className="absolute top-7 left-7 w-16 h-16 md:w-20 md:h-20 text-white/15" strokeWidth={1.5} />
+              <Quote className="w-8 h-8 text-white/50 mb-4" strokeWidth={1.6} />
+              <div className="rr-mono text-[10px] uppercase tracking-[0.28em] text-white/70">Message from our {staff.role}</div>
 
-            <button
-              onClick={onClose}
-              className="absolute top-5 right-5 z-30 w-11 h-11 flex items-center justify-center rounded-full text-white transition-all duration-300 hover:scale-110 hover:rotate-90"
-              style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.35)" }}
-              title="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Staff photo sits inside the blue banner on the right */}
-            <div className="relative z-10 grid md:grid-cols-[1fr_0.8fr] min-h-[300px] md:min-h-[330px] items-center">
-              <div className="px-8 md:px-12 pt-10 pb-20 md:py-12 text-white">
-                <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-5 text-sm font-bold"
-                  style={{
-                    background: "rgba(255,255,255,0.16)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(10px)",
-                  }}
+              <div className="mt-6 flex items-center gap-4">
+                <div
+                  className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0"
+                  style={{ border: "3px solid rgba(255,255,255,0.85)", boxShadow: "0 10px 22px rgba(0,0,0,0.3)" }}
                 >
-                  <Sparkles className="w-4 h-4" />
-                  Message From Our Staff
+                  {staff.image ? (
+                    <img src={staff.image} alt={staff.name} style={getAdjustedImageStyle(staff)} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white/90 rr-serif text-xl font-semibold" style={{ background: "rgba(255,255,255,0.15)" }}>
+                      {staff.name?.split(" ").map((n) => n[0]).slice(0, 2).join("") || "RR"}
+                    </div>
+                  )}
                 </div>
-                <h4 className="text-3xl md:text-4xl font-extrabold leading-tight max-w-md">
-                  A message from {staff.role}
-                </h4>
-                <p className="mt-3 text-sm md:text-base text-white/80 max-w-md leading-relaxed">
-                  Words, guidance, and inspiration from the people who help shape our school community.
+                <div>
+                  <div className="rr-serif text-xl font-semibold text-white">{staff.name}</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-white/70">{staff.role}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* letter body */}
+            <div className="px-9 md:px-11 pb-11 -mt-7">
+              <div className="rounded-2xl bg-white px-7 py-8" style={{ boxShadow: "0 18px 40px rgba(30,20,32,0.14)" }}>
+                <h3 className="rr-serif text-2xl font-semibold" style={{ color: theme.ink }}>
+                  {staff.title}
+                </h3>
+                <p className="mt-4 text-[15px] leading-relaxed" style={{ color: theme.textMuted }}>
+                  {staff.message}
                 </p>
               </div>
 
-              <motion.div
-                initial={{ opacity: 0, x: 35, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ delay: 0.15, type: "spring", stiffness: 220, damping: 20 }}
-                className="relative h-[230px] md:h-[280px] mx-8 md:mx-10 mb-12 md:mb-0"
-                style={{ perspective: "1000px" }}
+              <button
+                onClick={onClose}
+                className="mt-7 w-full inline-flex items-center justify-center gap-2 rounded-full py-3.5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5"
+                style={{ background: theme.gradInk, boxShadow: "0 14px 28px rgba(0,0,0,0.25)" }}
               >
-                <motion.div
-                  animate={{ y: [0, -7, 0], rotateY: [0, 2, 0] }}
-                  transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="relative h-full w-full rounded-[2rem] overflow-hidden"
-                  style={{
-                    border: "5px solid rgba(255,255,255,0.9)",
-                    background: "rgba(255,255,255,0.16)",
-                    boxShadow: `0 24px 50px ${theme.solid}55, 0 12px 28px rgba(15,23,42,0.28)`,
-                    transformStyle: "preserve-3d",
-                  }}
-                >
-                  {staff.image ? (
-                    <img
-                      src={staff.image}
-                      alt={staff.name}
-                      className="w-full h-full object-cover"
-                      style={getAdjustedImageStyle(staff)}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-white/10 text-white/70">
-                      <UserRound className="w-20 h-20" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/10 pointer-events-none" />
-                </motion.div>
-
-                <div
-                  className="absolute -bottom-5 -left-4 md:-left-7 rounded-2xl px-4 py-3 bg-white shadow-xl"
-                  style={{ border: `1px solid ${theme.solid}25` }}
-                >
-                  <div className="text-sm font-extrabold" style={{ color: theme.solid }}>
-                    {staff.name}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">
-                    {staff.role}
-                  </div>
-                </div>
-              </motion.div>
+                Close message
+              </button>
             </div>
-          </div>
-
-          {/* ── Body ── */}
-          <div className="pt-20 pb-10 px-8 md:px-14 text-center">
-            <motion.h3
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="text-2xl md:text-3xl font-bold"
-              style={{ color: palette.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}
-            >
-              {staff.name}
-            </motion.h3>
-            <motion.span
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.32 }}
-              className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold px-4 py-1.5 rounded-full"
-              style={{ color: theme.solid, background: theme.soft, border: `1px solid ${theme.solid}30` }}
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              {staff.role}
-            </motion.span>
-
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.4 }}
-              className="relative mt-8 text-left rounded-2xl p-7 md:p-10"
-              style={{
-                background: `linear-gradient(145deg, ${theme.soft}, #FFFFFF 72%)`,
-                border: `1px solid ${theme.solid}25`,
-                boxShadow: `0 14px 32px ${theme.solid}12, inset 0 1px 0 rgba(255,255,255,0.9)`,
-              }}
-            >
-              <div
-                className="absolute -top-5 left-7 w-11 h-11 rounded-2xl flex items-center justify-center"
-                style={{ background: theme.grad, boxShadow: `0 10px 22px ${theme.solid}55` }}
-              >
-                <Quote className="w-5 h-5 text-white" strokeWidth={2.2} />
-              </div>
-              <h4 className="font-bold text-lg md:text-xl mb-3" style={{ color: palette.dark }}>
-                {staff.title}
-              </h4>
-              <p className="text-slate-600 text-[15px] md:text-base leading-relaxed">
-                {staff.message}
-              </p>
-            </motion.div>
-
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              whileHover={{ y: -2, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={onClose}
-              className="mt-10 inline-flex items-center gap-2 px-10 py-4 rounded-2xl text-base font-bold text-white transition-all duration-300 hover:-translate-y-1"
-              style={{ background: theme.grad, boxShadow: `0 14px 30px ${theme.solid}45` }}
-            >
-              Close Message
-            </motion.button>
           </div>
         </motion.div>
       </motion.div>
@@ -683,15 +594,15 @@ function StaffPopup({ isOpen, onClose, staff, accent }) {
   );
 }
 
-// ──────────────────────────────────────────────
-// About page
-// ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════
+// ABOUT PAGE
+// ══════════════════════════════════════════════════════════════════════════
 export default function About({
   editMode = false,
   contentOverride = null,
-  onEditTarget = () => { },
-  onDeleteTarget = () => { },
-  onAddTarget = () => { },
+  onEditTarget = () => {},
+  onDeleteTarget = () => {},
+  onAddTarget = () => {},
 }) {
   const [content, setContent] = useState(() =>
     contentOverride
@@ -717,29 +628,14 @@ export default function About({
     const loadAboutContent = async () => {
       try {
         setIsLoading(true);
-
-        const res = await axios.get(
-          `${API_URL}/api/site-content/about`,
-          {
-            timeout: 10000,
-          }
-        );
-
+        const res = await axios.get(`${API_URL}/api/site-content/about`, { timeout: 10000 });
         if (!alive) return;
-
         const saved = res.data?.data?.content;
-
-        console.log("ABOUT API DATA:", saved);
-
-        if (saved) {
-          setContent(mergeAboutContent(saved));
-        }
+        if (saved) setContent(mergeAboutContent(saved));
       } catch (error) {
         console.error("About content load error:", error);
       } finally {
-        if (alive) {
-          setIsLoading(false);
-        }
+        if (alive) setIsLoading(false);
       }
     };
     loadAboutContent();
@@ -750,17 +646,11 @@ export default function About({
 
   if (isLoading) {
     return (
-      <section
-        className="min-h-[70vh] flex items-center justify-center"
-        style={{
-          background:
-            "linear-gradient(180deg, #EAF6FF 0%, #F5FAFF 45%, #EAF6FF 100%)",
-        }}
-      >
+      <section className="min-h-[70vh] flex items-center justify-center" style={{ background: theme.paper }}>
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin" />
-          <p className="text-sm font-semibold text-slate-500">
-            Loading About page...
+          <div className="w-11 h-11 rounded-full border-[3px] animate-spin" style={{ borderColor: theme.paperDeep, borderTopColor: theme.rose }} />
+          <p className="rr-mono text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: theme.textMuted }}>
+            Loading About page…
           </p>
         </div>
       </section>
@@ -771,235 +661,195 @@ export default function About({
   const visibleStaff = (content.messages || []).filter((m) => m.visible !== false);
   const visibleMissionVision = (content.missionVision || []).filter((mv) => mv.visible !== false);
   const visibleJourney = (content.journey || []).filter((j) => j.visible !== false);
+  const pillarAccents = [theme.rose, theme.gold, theme.moss];
 
   return (
-    <section
-      className="relative overflow-hidden py-12 md:py-16"
-      style={{
-        background:
-          "linear-gradient(180deg, #EAF6FF 0%, #F5FAFF 45%, #EAF6FF 100%)",
-      }}
-    >
-      <DecorativeBackdrop />
+    <section className="rr-about relative py-10 md:py-16" style={{ background: theme.paper }}>
+      <LedgerStyles />
 
-      <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8">
-
-        {/* ─────────── PAGE HEADER (COLORFUL CONTAINER) ─────────── */}
+      <div className="relative z-10 max-w-[1320px] mx-auto px-5 sm:px-8">
+        {/* ═══════════════ HERO ═══════════════ */}
         <EditableWrap editMode={editMode} target={{ type: "pageHeader" }} onEditTarget={onEditTarget} label="Edit page header">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-16 md:mb-20"
+            className="relative overflow-hidden rounded-[2rem] md:rounded-[2.75rem]"
+            style={{ background: theme.gradInk, boxShadow: "0 40px 90px rgba(30,20,32,0.35)" }}
           >
-            <TiltCard
-              max={4}
-              glare={true}
-              className="relative rounded-[2rem] p-7 md:p-10 lg:p-12 overflow-hidden"
-              style={{
-                background: "#B9E1F5",
-                border: "1px solid #8CC7E8",
-                boxShadow:
-                  "0 24px 52px rgba(30,85,120,0.20), inset 0 1px 0 rgba(255,255,255,0.75)",
-                minHeight: "470px",
-              }}
-            >
-              {/* Bright decorative glow effects inside the header */}
-              <div
-                className="absolute -top-32 -right-32 w-80 h-80 rounded-full pointer-events-none"
-                style={{
-                  background: "rgba(56,189,248,0.28)",
-                  filter: "blur(70px)",
-                }}
-              />
-              <div
-                className="absolute -bottom-32 -left-24 w-80 h-80 rounded-full pointer-events-none"
-                style={{
-                  background: "rgba(245,158,11,0.20)",
-                  filter: "blur(75px)",
-                }}
-              />
-              <div
-                className="absolute top-1/2 right-1/3 w-72 h-72 rounded-full pointer-events-none"
-                style={{
-                  background: "rgba(255,255,255,0.08)",
-                  filter: "blur(80px)",
-                }}
-              />
+            {/* texture */}
+            <div className="rr-grain absolute -inset-10 opacity-[0.05] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1.4px)", backgroundSize: "22px 22px" }} />
+            <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-[100px] opacity-40 pointer-events-none" style={{ background: theme.rose }} />
+            <div className="absolute -bottom-28 -left-16 w-72 h-72 rounded-full blur-[100px] opacity-25 pointer-events-none" style={{ background: theme.moss }} />
 
-              {/* Soft 3D decorative shapes */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-24 -right-24 w-72 h-72 rounded-full pointer-events-none"
-                style={{
-                  background: "rgba(255,255,255,0.28)",
-                  filter: "blur(20px)",
-                }}
-              />
-
-              <div className="relative z-10 flex items-center min-h-[400px]">
-                <div className="max-w-4xl">
-                  <motion.span
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    whileInView={{ scale: 1, opacity: 1 }}
-                    viewport={{ once: true }}
-                    whileHover={{ scale: 1.04, y: -2 }}
-                    transition={{ duration: 0.35 }}
-                    className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold tracking-wide mb-5 text-sky-900 cursor-default"
-                    style={{
-                      background: "rgba(255,255,255,0.78)",
-                      boxShadow:
-                        "0 8px 20px rgba(8,47,73,0.08), inset 0 1px 0 rgba(255,255,255,0.95)",
-                      border: "1px solid rgba(255,255,255,0.95)",
-                    }}
-                  >
-                    <span
-                      className="flex items-center justify-center w-6 h-6 rounded-full"
-                      style={{
-                        background: "#3B82F6",
-                        color: "#fff",
-                      }}
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                    </span>
+            <div className="relative z-10 grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-center px-7 py-14 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="h-px w-10" style={{ background: theme.gold }} />
+                  <span className="rr-mono text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: theme.goldSoft }}>
                     {content.pageBadge}
-                  </motion.span>
-
-                  <h1
-                    className="text-4xl md:text-5xl lg:text-[4rem] font-bold mb-5"
-                    style={{
-                      color: "#0B3552",
-                      fontFamily: "var(--font-display)",
-                      letterSpacing: "-0.035em",
-                      lineHeight: 1.02,
-                      textShadow: "0 3px 12px rgba(255,255,255,0.25)",
-                    }}
-                  >
-                    {content.pageTitle}
-                  </h1>
-
-                  <p
-                    className="text-base md:text-lg lg:text-xl leading-relaxed max-w-2xl"
-                    style={{ color: "#244B66", fontWeight: 500 }}
-                  >
-                    {content.pageSubtitle}
-                  </p>
-
-                  <div
-                    className="w-20 h-1.5 rounded-full mt-7"
-                    style={{
-                      background: "#3B82F6",
-                      boxShadow: "0 4px 12px rgba(59,130,246,0.22)",
-                    }}
-                  />
+                  </span>
                 </div>
 
+                <h1
+                  className="rr-serif mt-7 text-[2.5rem] sm:text-5xl lg:text-[3.75rem] font-semibold leading-[1.04] tracking-tight max-w-xl"
+                  style={{ color: theme.white, textShadow: "0 4px 30px rgba(0,0,0,0.35)" }}
+                >
+                  {content.pageTitle}
+                </h1>
+
+                <p className="mt-6 max-w-lg text-base sm:text-lg leading-8" style={{ color: "rgba(245,238,226,0.72)" }}>
+                  {content.pageSubtitle}
+                </p>
+
+                <div className="mt-9 flex items-center gap-3">
+                  <span className="rr-mono text-[10px] font-semibold uppercase tracking-[0.3em] px-4 py-2 rounded-full" style={{ color: theme.goldSoft, border: `1px solid ${theme.goldSoft}45` }}>
+                    {content.storyBadgeYear}
+                  </span>
+                </div>
               </div>
-            </TiltCard>
+
+              {/* brass emblem */}
+              <div className="hidden lg:flex justify-center">
+                <div className="rr-emblem relative w-56 h-56">
+                  <div className="absolute inset-0 rounded-full" style={{ background: `conic-gradient(from 90deg, ${theme.gold}, ${theme.goldSoft}, ${theme.gold}, #7a5a26, ${theme.gold})`, boxShadow: "0 25px 55px rgba(0,0,0,0.4)" }} />
+                  <div className="absolute inset-[10px] rounded-full" style={{ background: theme.gradInk, border: `1px solid ${theme.goldSoft}55` }} />
+                  <div className="absolute inset-[22px] rounded-full flex flex-col items-center justify-center" style={{ border: `1px dashed ${theme.goldSoft}55` }}>
+                    <span className="rr-serif text-4xl font-semibold" style={{ color: theme.goldSoft }}>RR</span>
+                    <span className="rr-mono mt-1 text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(231,206,156,0.7)" }}>Red Rose</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* torn edge into the page */}
+            <div className="absolute bottom-0 left-0 right-0 h-10 md:h-14" style={{ background: theme.paper, clipPath: TORN_EDGE_CLIP }} />
           </motion.div>
         </EditableWrap>
 
-        {/* ─────────── OUR STORY ─────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6 }}
-          className="grid lg:grid-cols-2 gap-10 md:gap-14 items-center mb-16 md:mb-24"
-        >
-          <EditableWrap editMode={editMode} target={{ type: "storyImage" }} onEditTarget={onEditTarget} icon={Camera} label="Change story image">
-            <TiltCard max={5} glare={false} className="relative" style={{ transform: "perspective(1000px)" }}>
-              <div
-                className="relative rounded-2xl overflow-hidden min-h-[300px] md:min-h-[420px]"
-                style={{ background: palette.dark, boxShadow: "0 30px 70px rgba(15,23,42,0.15)" }}
-              >
-                {content.storyImageUrl ? (
-                  <img
-                    src={content.storyImageUrl}
-                    alt="Campus"
-                    draggable={false}
-                    className="absolute inset-0"
-                    style={getAdjustedImageStyle(content)}
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                    <ImageIcon className="w-12 h-12 mb-2" />
-                    <div className="text-xs font-bold uppercase tracking-wider">Add Story Image</div>
-                  </div>
-                )}
-                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(15,23,42,0.6) 0%, rgba(15,23,42,0.1) 50%, rgba(15,23,42,0.2) 100%)" }} />
-                <EditableWrap editMode={editMode} target={{ type: "storyImageText" }} onEditTarget={onEditTarget} label="Edit image caption" className="absolute inset-0">
-                  <div className="absolute top-0 left-0 right-0 p-6">
-                    <div className="text-white text-lg font-bold">{content.storyImageTopTitle}</div>
-                    <div className="text-white/80 text-sm">{content.storyImageTopSubtitle}</div>
-                  </div>
-                </EditableWrap>
-              </div>
+        {/* ═══════════════ STAT COINS (overlapping the torn edge) ═══════════════ */}
+        <div className="relative z-20 -mt-7 md:-mt-9 mb-16 md:mb-24 px-4 sm:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {(content.stats || []).map((stat, i) => (
               <motion.div
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -bottom-6 -left-4 md:-left-6 rounded-2xl px-5 py-4 hidden sm:block backdrop-blur-md border"
-                style={{
-                  background: "rgba(255, 255, 255, 0.5)",
-                  borderColor: "rgba(255, 255, 255, 0.6)",
-                  boxShadow: "0 12px 32px rgba(15,23,42,0.08)",
-                }}
+                key={stat.id || i}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="rounded-2xl px-5 py-6 text-center"
+                style={{ background: theme.card, border: `1px solid ${theme.paperDeep}`, boxShadow: "0 16px 34px rgba(30,20,32,0.10)" }}
               >
-                <div className="text-2xl font-bold" style={{ color: palette.primary, fontFamily: "var(--font-display)" }}>
-                  {content.storyBadgeYear}
+                <div className="rr-serif text-2xl sm:text-3xl font-semibold" style={{ color: theme.rose }}>
+                  <CountUp value={stat.value} suffix={stat.suffix} decimals={stat.decimals || 0} />
                 </div>
-                <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: palette.gray }}>
-                  {content.storyImageTopSubtitle}
+                <div className="mt-2 rr-mono text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: theme.textMuted }}>
+                  {stat.label}
                 </div>
               </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* ═══════════════ OUR STORY ═══════════════ */}
+        <motion.div
+          initial={{ opacity: 0, y: 26 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6 }}
+          className="grid lg:grid-cols-[0.95fr_1.05fr] gap-12 md:gap-16 items-center mb-20 md:mb-28"
+        >
+          <EditableWrap editMode={editMode} target={{ type: "storyImage" }} onEditTarget={onEditTarget} icon={Camera} label="Change story image">
+            <TiltCard max={5} glare={false} className="relative">
+              <div style={{ filter: "drop-shadow(0 26px 46px rgba(30,20,32,0.28))" }}>
+                <div
+                  className="relative aspect-[4/3] -rotate-1"
+                  style={{ clipPath: DECKLE_CLIP, background: theme.paperDeep }}
+                >
+                  {content.storyImageUrl ? (
+                    <img
+                      src={content.storyImageUrl}
+                      alt="Campus"
+                      draggable={false}
+                      className="absolute inset-0"
+                      style={getAdjustedImageStyle(content)}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ color: theme.textMuted }}>
+                      <span className="rr-mono text-[10px] font-semibold uppercase tracking-[0.2em]">Add Story Image</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent pointer-events-none" />
+
+                  <EditableWrap editMode={editMode} target={{ type: "storyImageText" }} onEditTarget={onEditTarget} label="Edit image caption" className="absolute inset-0">
+                    <div className="absolute left-7 right-7 bottom-7">
+                      <div className="rr-serif text-white text-xl font-semibold">{content.storyImageTopTitle}</div>
+                      <div className="mt-1 text-white/70 text-sm">{content.storyImageTopSubtitle}</div>
+                    </div>
+                  </EditableWrap>
+                </div>
+              </div>
+
+              {/* wax-seal badge */}
+              <div
+                className="absolute -bottom-6 -right-4 sm:right-4 w-24 h-24 rounded-full flex flex-col items-center justify-center rotate-[-8deg]"
+                style={{ background: theme.gradGold, boxShadow: "0 16px 30px rgba(185,138,66,0.45), inset 0 2px 4px rgba(255,255,255,0.4)", border: `3px solid ${theme.card}` }}
+              >
+                <span className="rr-serif text-[11px] font-bold leading-tight text-center px-2" style={{ color: theme.ink }}>
+                  {content.storyBadgeYear}
+                </span>
+              </div>
             </TiltCard>
           </EditableWrap>
 
-          <EditableWrap editMode={editMode} target={{ type: "storyText" }} onEditTarget={onEditTarget} label="Edit story text" className="lg:pl-4">
-            <div>
-              <span
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-4"
-                style={{ background: "rgba(56, 189, 248, 0.1)", color: palette.accent }}
-              >
-                {content.storyBadge}
-              </span>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: palette.dark, fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}>
-                {content.storyTitle}
-              </h2>
-              <div className="space-y-4">
-                {(content.storyParagraphs || []).map((text, idx) => (
-                  <p key={idx} className="text-base md:text-lg leading-relaxed" style={{ color: palette.gray }}>
-                    {text}
+          <EditableWrap editMode={editMode} target={{ type: "storyText" }} onEditTarget={onEditTarget} label="Edit story text">
+            <div className="lg:pl-2">
+              <SectionIntro eyebrow={content.storyBadge} title={content.storyTitle} />
+
+              <div className="mt-7 space-y-5 max-w-2xl">
+                {(content.storyParagraphs || []).map((paragraph, idx) => (
+                  <p key={idx} className={`text-base md:text-lg leading-8 ${idx === 0 ? "rr-dropcap" : ""}`} style={{ color: theme.textMuted }}>
+                    {paragraph}
                   </p>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                {["Student-first learning", "Strong values", "Future-ready skills"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="rr-mono rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em]"
+                    style={{ color: theme.rose, border: `1px solid ${theme.rose}30`, background: "rgba(156,39,72,0.05)" }}
+                  >
+                    {tag}
+                  </span>
                 ))}
               </div>
             </div>
           </EditableWrap>
         </motion.div>
 
-        {/* ─────────── CORE VALUES / PILLARS ─────────── */}
-        <div className="mb-16 md:mb-24">
-          {/* PILLAR HEADER - NOW EDITABLE */}
+        {/* ═══════════════ CORE VALUES ═══════════════ */}
+        <div className="mb-20 md:mb-28">
           <EditableWrap editMode={editMode} target={{ type: "pillarHeader" }} onEditTarget={onEditTarget} label="Edit pillar header">
-            <SectionHeader
-              badge={content.pillarBadge}
-              title={content.pillarTitle}
-              description={content.pillarDescription}
-              badgeBg="rgba(245, 158, 11, 0.15)"
-              badgeColor={palette.accent2}
-            />
+            <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-8 items-end mb-10">
+              <SectionIntro eyebrow={content.pillarBadge} title={content.pillarTitle} />
+              <p className="max-w-xl lg:justify-self-end lg:text-right text-base leading-7" style={{ color: theme.textMuted }}>
+                {content.pillarDescription}
+              </p>
+            </div>
           </EditableWrap>
 
           <div className="flex justify-end mb-6">
             <SectionAddButton editMode={editMode} label="Add Value" type="pillar" onAddTarget={onAddTarget} />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5 md:gap-6">
             {visiblePillars.map((p, i) => {
               const realIndex = content.pillars.findIndex((item) => item.id === p.id);
-              const Icon = ICONS[p.icon] || Award;
+              const accent = pillarAccents[i % pillarAccents.length];
+              const initial = (p.label || "R").trim().charAt(0).toUpperCase();
 
               return (
                 <EditableWrap
@@ -1014,37 +864,37 @@ export default function About({
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.25 }}
-                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.45, delay: i * 0.08 }}
                   >
                     <TiltCard
-                      max={6}
-                      className="rounded-2xl p-6 md:p-8 h-full backdrop-blur-md border"
-                      style={{
-                        background: "linear-gradient(145deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1))",
-                        borderColor: "rgba(255,255,255,0.6)",
-                        boxShadow: "0 10px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.8)"
-                      }}
+                      max={5}
+                      glare={false}
+                      className="relative min-h-[260px] rounded-[1.5rem] p-8 overflow-hidden transition-all duration-300 hover:-translate-y-1.5"
+                      style={{ background: theme.card, border: `1px solid ${theme.paperDeep}`, boxShadow: "0 16px 36px rgba(30,20,32,0.08)" }}
                     >
-                      <div className="absolute top-0 left-0 right-0 h-1.5 rounded-t-2xl" style={{ background: palette.gradient1 }} />
-
+                      {/* hanging tab */}
                       <div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-                        style={{
-                          background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.15))",
-                          color: palette.accent2,
-                          border: "1px solid rgba(245,158,11,0.1)",
-                          transform: "translateZ(24px)",
-                        }}
+                        className="absolute -top-px left-8 w-10 h-3 rounded-b-md"
+                        style={{ background: accent }}
+                      />
+                      {/* ghost initial watermark */}
+                      <span
+                        className="rr-serif absolute -top-3 right-4 text-[7rem] font-semibold leading-none select-none pointer-events-none"
+                        style={{ color: accent, opacity: 0.07 }}
                       >
-                        <Icon className="w-6 h-6" />
+                        {initial}
+                      </span>
+
+                      <div className="relative z-10 flex flex-col h-full pt-3">
+                        <span className="h-1 w-10 rounded-full mb-8" style={{ background: accent }} />
+                        <h3 className="rr-serif text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: theme.ink }}>
+                          {p.label}
+                        </h3>
+                        <p className="mt-4 text-sm leading-7" style={{ color: theme.textMuted }}>
+                          {p.desc}
+                        </p>
                       </div>
-                      <h3 className="text-xl font-bold mb-2" style={{ color: palette.dark }}>
-                        {p.label}
-                      </h3>
-                      <p className="text-sm leading-relaxed" style={{ color: palette.gray }}>
-                        {p.desc}
-                      </p>
                     </TiltCard>
                   </motion.div>
                 </EditableWrap>
@@ -1053,250 +903,185 @@ export default function About({
           </div>
         </div>
 
-        {/* ─────────── STAFF CONTAINERS ─────────── */}
-        <div className="mb-16 md:mb-24">
-          {/* LEADERSHIP HEADER - NOW EDITABLE */}
-          <EditableWrap editMode={editMode} target={{ type: "leadershipHeader" }} onEditTarget={onEditTarget} label="Edit leadership header">
-            <SectionHeader
-              badge={content.leadershipBadge}
-              title={content.leadershipTitle}
-              description={content.leadershipDescription}
-              badgeBg="rgba(37, 99, 235, 0.08)"
-              badgeColor={palette.primary}
-            />
-          </EditableWrap>
+        {/* ═══════════════ STAFF — CARD CATALOG ═══════════════ */}
+        <div className="relative -mx-5 sm:-mx-8 mb-20 md:mb-28 overflow-hidden">
+          <div className="relative px-5 sm:px-8 py-16 md:py-20" style={{ background: theme.gradInk }}>
+            <div className="rr-grain absolute -inset-10 opacity-[0.05] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1.4px)", backgroundSize: "22px 22px" }} />
 
-          <div className="flex justify-end mb-6">
-            <SectionAddButton editMode={editMode} label="Add Staff" type="message" onAddTarget={onAddTarget} />
-          </div>
+            <div className="relative z-10 max-w-[1320px] mx-auto">
+              <EditableWrap editMode={editMode} target={{ type: "leadershipHeader" }} onEditTarget={onEditTarget} label="Edit leadership header">
+                <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-7 mb-10">
+                  <SectionIntro eyebrow={content.leadershipBadge} title={content.leadershipTitle} tone="light" />
+                  <p className="max-w-sm text-base leading-7 lg:text-right" style={{ color: "rgba(245,238,226,0.68)" }}>
+                    {content.leadershipDescription}
+                  </p>
+                </div>
+              </EditableWrap>
 
-          <div className="grid md:grid-cols-2 gap-7 md:gap-9">
-            {visibleStaff.map((person, i) => {
-              const realIndex = content.messages.findIndex((m) => m.id === person.id);
-              const theme = STAFF_ACCENTS[i % STAFF_ACCENTS.length];
-              const preview =
-                person.message && person.message.length > 118
-                  ? `${person.message.slice(0, 118).trim()}…`
-                  : person.message;
+              <div className="flex justify-end mb-8">
+                <SectionAddButton editMode={editMode} label="Add Staff" type="message" onAddTarget={onAddTarget} />
+              </div>
 
-              return (
-                <EditableWrap
-                  key={person.id}
-                  editMode={editMode}
-                  target={{ type: "leadershipMessage", index: realIndex }}
-                  onEditTarget={onEditTarget}
-                  onDeleteTarget={onDeleteTarget}
-                  canDelete
-                  label="Edit staff profile"
-                >
-                  <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.25 }}
-                    transition={{ duration: 0.5, delay: i * 0.12 }}
-                  >
-                    <button
-                      onClick={() => setSelectedStaff({ ...person, __accentIndex: i })}
-                      className="w-full text-left group"
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
+                {visibleStaff.map((person, i) => {
+                  const realIndex = content.messages.findIndex((m) => m.id === person.id);
+                  const t = STAFF_ACCENTS[i % STAFF_ACCENTS.length];
+                  const tilt = i % 2 === 0 ? "-rotate-1" : "rotate-1";
+                  const preview = person.message && person.message.length > 120 ? `${person.message.slice(0, 120).trim()}…` : person.message;
+
+                  return (
+                    <EditableWrap
+                      key={person.id}
+                      editMode={editMode}
+                      target={{ type: "leadershipMessage", index: realIndex }}
+                      onEditTarget={onEditTarget}
+                      onDeleteTarget={onDeleteTarget}
+                      canDelete
+                      label="Edit staff profile"
                     >
-                      <TiltCard
-                        max={5}
-                        className="relative rounded-[1.75rem] p-7 md:p-8 h-full overflow-hidden backdrop-blur-md border transition-shadow duration-300 group-hover:shadow-2xl"
-                        style={{
-                          background: `linear-gradient(145deg, ${theme.soft}, rgba(255,255,255,0.94) 48%, rgba(255,255,255,0.72) 100%)`,
-                          borderColor: `${theme.solid}35`,
-                          boxShadow: `0 18px 40px ${theme.solid}18, inset 0 1px 0 rgba(255,255,255,0.95)`,
-                        }}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        transition={{ duration: 0.5, delay: i * 0.07 }}
                       >
-                        {/* Accent top bar */}
-                        <div className="absolute top-0 left-0 right-0 h-1.5" style={{ background: theme.grad }} />
-                        <div
-                          className="absolute -top-20 -right-20 w-44 h-44 rounded-full pointer-events-none"
-                          style={{ background: theme.solid, opacity: 0.08, filter: "blur(28px)" }}
-                        />
-                        <div
-                          className="absolute -bottom-24 -left-20 w-52 h-52 rounded-full pointer-events-none"
-                          style={{ background: i % 2 === 0 ? "#38BDF8" : "#F59E0B", opacity: 0.07, filter: "blur(32px)" }}
-                        />
-
-                        {/* Watermark quote mark */}
-                        <Quote
-                          className="absolute -top-2 -right-2 w-28 h-28 pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6"
-                          style={{ color: theme.solid, opacity: 0.07 }}
-                          strokeWidth={1.2}
-                        />
-
-                        <div className="relative flex items-start gap-5">
-                          {/* Photo with glowing ring */}
-                          <div className="flex-shrink-0 relative" style={{ transform: "translateZ(30px)" }}>
+                        <button type="button" onClick={() => setSelectedStaff({ ...person, __accentIndex: i })} className="w-full text-left group">
+                          <div className={`relative ${tilt} hover:rotate-0 transition-transform duration-300`}>
+                            {/* brass pin */}
                             <div
-                              className="absolute -inset-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                              style={{ background: theme.grad, filter: "blur(6px)" }}
+                              className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 w-5 h-5 rounded-full"
+                              style={{ background: theme.gradGold, boxShadow: "0 4px 10px rgba(185,138,66,0.5)" }}
                             />
-                            <div
-                              className="relative w-20 h-20 rounded-full overflow-hidden bg-slate-100 transition-transform duration-300 group-hover:scale-105"
-                              style={{ border: "3px solid white", boxShadow: `0 10px 22px ${theme.solid}30` }}
+                            <TiltCard
+                              max={4}
+                              glare={false}
+                              className="rounded-2xl px-6 pt-8 pb-6"
+                              style={{ background: theme.card, boxShadow: "0 18px 40px rgba(0,0,0,0.28)" }}
                             >
-                              {person.image ? (
-                                <img
-                                  src={person.image}
-                                  alt={person.name}
-                                  className="w-full h-full object-cover"
-                                  style={getAdjustedImageStyle(person)}
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400">
-                                  <UserRound className="w-8 h-8" />
+                              <div className="flex flex-col items-center text-center">
+                                <div
+                                  className="w-20 h-20 rounded-full overflow-hidden mb-4"
+                                  style={{ border: `3px solid ${t.solid}30`, boxShadow: `0 10px 22px ${t.solid}25` }}
+                                >
+                                  {person.image ? (
+                                    <img src={person.image} alt={person.name} style={getAdjustedImageStyle(person)} />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center rr-serif text-2xl font-semibold" style={{ background: t.soft, color: t.solid }}>
+                                      {person.name?.split(" ").map((n) => n[0]).slice(0, 2).join("") || "RR"}
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                            <div
-                              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center border-2 border-white"
-                              style={{ background: theme.solid, boxShadow: `0 4px 10px ${theme.solid}55` }}
-                            >
-                              <Mail className="w-3 h-3 text-white" />
-                            </div>
+
+                                <h3 className="rr-serif text-lg font-semibold" style={{ color: theme.ink }}>
+                                  {person.name}
+                                </h3>
+                                <span
+                                  className="rr-mono mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-1 rounded-full"
+                                  style={{ color: t.solid, background: t.soft }}
+                                >
+                                  {person.role}
+                                </span>
+
+                                <p className="mt-4 text-sm leading-6" style={{ color: theme.textMuted }}>
+                                  {preview}
+                                </p>
+
+                                <span
+                                  className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold transition-transform duration-300 group-hover:translate-x-1"
+                                  style={{ color: t.solid }}
+                                >
+                                  Read message
+                                  <ChevronRight className="w-3.5 h-3.5" />
+                                </span>
+                              </div>
+                            </TiltCard>
                           </div>
-
-                          {/* Info */}
-                          <div className="flex-1 min-w-0" style={{ transform: "translateZ(18px)" }}>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="font-bold text-slate-900 text-lg">{person.name}</h3>
-                            </div>
-                            <span
-                              className="inline-block mt-1 text-xs font-bold px-2.5 py-1 rounded-full"
-                              style={{ color: theme.solid, background: theme.soft }}
-                            >
-                              {person.role}
-                            </span>
-
-                            <p className="text-sm italic leading-relaxed mt-3" style={{ color: palette.gray }}>
-                              “{preview}”
-                            </p>
-                          </div>
-                        </div>
-
-                        <div
-                          className="relative mt-6 pt-5 flex items-center justify-between"
-                          style={{ borderTop: "1px dashed rgba(100,116,139,0.25)" }}
-                        >
-                          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: palette.gray }}>
-                            {person.title}
-                          </span>
-                          <span
-                            className="inline-flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-full transition-all duration-300 hover:-translate-y-0.5"
-                            style={{
-                              color: "#fff",
-                              background: theme.grad,
-                              boxShadow: `0 8px 18px ${theme.solid}35`,
-                            }}
-                          >
-                            Read Message
-                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                          </span>
-                        </div>
-                      </TiltCard>
-                    </button>
-                  </motion.div>
-                </EditableWrap>
-              );
-            })}
+                        </button>
+                      </motion.div>
+                    </EditableWrap>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* ─────────── MISSION & VISION (EXPANDED & FIXED) ─────────── */}
-        <div className="mb-16 md:mb-24 max-w-5xl mx-auto">
-          {/* MISSION/VISION BADGE - NOW EDITABLE */}
+        {/* ═══════════════ MISSION & VISION — OPEN BOOK SPREAD ═══════════════ */}
+        <div className="mb-20 md:mb-28">
           <EditableWrap editMode={editMode} target={{ type: "missionVisionBadge" }} onEditTarget={onEditTarget} label="Edit mission/vision badge">
-            <SectionHeader badge={content.missionVisionBadge} title="What Guides Every Decision We Make" badgeBg="rgba(56, 189, 248, 0.1)" badgeColor={palette.accent} />
+            <SectionIntro eyebrow={content.missionVisionBadge} title="What Shapes Every Decision We Make" align="center" />
           </EditableWrap>
 
-          <div className="flex justify-end mb-6">
+          <div className="flex justify-end mt-6 mb-8">
             <SectionAddButton editMode={editMode} label="Add Card" type="missionVision" onAddTarget={onAddTarget} />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 pt-6">
-            {visibleMissionVision.map((item, i) => {
-              const realIndex = content.missionVision.findIndex((mv) => mv.id === item.id);
-              const Icon = ICONS[item.icon] || Compass;
+          <div className="relative max-w-4xl mx-auto rounded-[1.75rem] overflow-hidden" style={{ background: theme.card, boxShadow: "0 30px 60px rgba(30,20,32,0.14)" }}>
+            {/* book spine */}
+            <div
+              className="hidden md:block absolute top-0 bottom-0 left-1/2 w-6 -translate-x-1/2 z-10"
+              style={{ background: `linear-gradient(90deg, rgba(30,20,32,0.12), rgba(30,20,32,0.02) 30%, transparent 50%, rgba(30,20,32,0.02) 70%, rgba(30,20,32,0.12))` }}
+            />
+            <div className="grid md:grid-cols-2">
+              {visibleMissionVision.map((item, i) => {
+                const realIndex = content.missionVision.findIndex((mv) => mv.id === item.id);
+                const isLeft = i % 2 === 0;
 
-              return (
-                <EditableWrap
-                  key={item.id}
-                  editMode={editMode}
-                  target={{ type: "missionVision", index: realIndex }}
-                  onEditTarget={onEditTarget}
-                  onDeleteTarget={onDeleteTarget}
-                  canDelete
-                  label="Edit mission or vision card"
-                >
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.25 }}
-                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                return (
+                  <EditableWrap
+                    key={item.id}
+                    editMode={editMode}
+                    target={{ type: "missionVision", index: realIndex }}
+                    onEditTarget={onEditTarget}
+                    onDeleteTarget={onDeleteTarget}
+                    canDelete
+                    label="Edit mission or vision card"
                   >
-                    <TiltCard
-                      max={6}
-                      glare={false}
-                      className="relative rounded-2xl p-8 md:p-10 h-full backdrop-blur-md border relative pt-10"
-                      style={{
-                        background: "linear-gradient(145deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))",
-                        borderColor: "rgba(255,255,255,0.6)",
-                        boxShadow: "0 10px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.8)"
-                      }}
+                    <motion.div
+                      initial={{ opacity: 0, x: isLeft ? -16 : 16 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, amount: 0.25 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      className={`p-9 md:p-12 ${isLeft ? "md:pr-10" : "md:pl-10"} ${i % 2 === 1 ? "border-t md:border-t-0" : ""}`}
+                      style={{ borderColor: theme.paperDeep }}
                     >
-                      {/* FIX: Icon is now relative and uses mt-[-32px] to pop out safely without being cut */}
-                      <div
-                        className="relative flex items-center justify-center w-16 h-16 rounded-2xl mx-auto -mt-[58px] mb-6 z-10"
-                        style={{
-                          background: palette.gradient1,
-                          color: palette.white,
-                          boxShadow: "0 8px 16px rgba(37,99,235,0.3)",
-                        }}
-                      >
-                        <Icon className="w-7 h-7" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold mb-3 text-center" style={{ color: palette.dark }}>{item.title}</h3>
-                        <p className="text-base leading-relaxed text-center" style={{ color: palette.gray }}>{item.desc}</p>
-                      </div>
-                    </TiltCard>
-                  </motion.div>
-                </EditableWrap>
-              );
-            })}
+                      <span className="rr-mono text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: theme.gold }}>
+                        {String(i + 1).padStart(2, "0")} — Chapter
+                      </span>
+                      <h3 className="rr-serif mt-3 text-2xl font-semibold" style={{ color: theme.ink }}>
+                        {item.title}
+                      </h3>
+                      <p className="mt-4 text-base leading-relaxed" style={{ color: theme.textMuted }}>
+                        {item.desc}
+                      </p>
+                    </motion.div>
+                  </EditableWrap>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* ─────────── OUR JOURNEY (VIBRANT & COLORFUL) ─────────── */}
-        <div className="mb-16 md:mb-24">
-          {/* JOURNEY BADGE - NOW EDITABLE */}
+        {/* ═══════════════ JOURNEY — LEDGER SPINE TIMELINE ═══════════════ */}
+        <div className="mb-20 md:mb-28">
           <EditableWrap editMode={editMode} target={{ type: "journeyBadge" }} onEditTarget={onEditTarget} label="Edit journey badge">
-            <SectionHeader badge={content.journeyBadge} title={content.journeyTitle} badgeBg="rgba(244, 162, 97, 0.15)" badgeColor={palette.accent2} />
+            <SectionIntro eyebrow={content.journeyBadge} title={content.journeyTitle} align="center" />
           </EditableWrap>
 
-          <div className="flex justify-end mb-6">
+          <div className="flex justify-end mt-6 mb-10">
             <SectionAddButton editMode={editMode} label="Add Milestone" type="journey" onAddTarget={onAddTarget} />
           </div>
 
           <div className="relative max-w-3xl mx-auto">
             <div
-              className="absolute left-[19px] md:left-1/2 top-2 bottom-2 w-0.5 md:-translate-x-1/2"
-              style={{ background: `linear-gradient(180deg, #2563EB, #0EA5E9, #F59E0B, #8B5CF6)`, opacity: 0.4 }}
+              className="absolute left-[7px] md:left-1/2 top-2 bottom-2 w-[2px] md:-translate-x-1/2"
+              style={{ background: theme.gradGold, opacity: 0.4 }}
             />
 
             <div className="space-y-8">
               {visibleJourney.map((item, i) => {
                 const realIndex = content.journey.findIndex((j) => j.id === item.id);
                 const isLeft = i % 2 === 0;
-                const colors = [
-                  { bg: "#2563EB", glow: "rgba(37,99,235,0.2)" },
-                  { bg: "#0EA5E9", glow: "rgba(14,165,233,0.2)" },
-                  { bg: "#F59E0B", glow: "rgba(245,158,11,0.2)" },
-                  { bg: "#8B5CF6", glow: "rgba(139,92,246,0.2)" }
-                ];
-                const nodeColor = colors[i % colors.length];
 
                 return (
                   <EditableWrap
@@ -1317,33 +1102,24 @@ export default function About({
                       className={`relative flex items-start gap-5 md:gap-0 ${isLeft ? "md:flex-row" : "md:flex-row-reverse"}`}
                     >
                       <div
-                        className="relative z-10 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white md:absolute md:left-1/2 md:-translate-x-1/2 transition-all hover:scale-110 hover:shadow-xl"
-                        style={{
-                          background: nodeColor.bg,
-                          boxShadow: `0 0 0 5px ${palette.light}, 0 0 0 6px ${nodeColor.bg}40, 0 8px 18px ${nodeColor.bg}55`
-                        }}
-                      >
-                        {i + 1}
-                      </div>
+                        className="relative z-10 flex-shrink-0 w-4 h-4 mt-1.5 rounded-full md:absolute md:left-1/2 md:-translate-x-1/2"
+                        style={{ background: theme.gradGold, boxShadow: `0 0 0 5px ${theme.paper}, 0 0 0 6px ${theme.gold}35, 0 6px 14px rgba(185,138,66,0.5)` }}
+                      />
 
                       <div className={`flex-1 md:w-[calc(50%-40px)] ${isLeft ? "md:pr-2" : "md:pl-2"}`}>
                         <TiltCard
                           max={4}
-                          className="rounded-2xl p-5 md:p-6 backdrop-blur-md border transition-all hover:shadow-lg"
-                          style={{
-                            background: "linear-gradient(145deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))",
-                            borderColor: "rgba(255,255,255,0.6)",
-                            boxShadow: "0 10px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
-                            borderLeft: `4px solid ${nodeColor.bg}`
-                          }}
+                          glare={false}
+                          className="rounded-2xl p-6"
+                          style={{ background: theme.card, border: `1px solid ${theme.paperDeep}`, boxShadow: "0 14px 32px rgba(30,20,32,0.08)" }}
                         >
-                          <div className="text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: nodeColor.bg }}>
+                          <div className="rr-mono text-xs font-bold uppercase tracking-[0.16em]" style={{ color: theme.rose }}>
                             {item.year}
                           </div>
-                          <h3 className="text-lg font-bold mb-1.5" style={{ color: palette.dark }}>
+                          <h3 className="rr-serif mt-2 text-lg font-semibold" style={{ color: theme.ink }}>
                             {item.title}
                           </h3>
-                          <p className="text-sm leading-relaxed" style={{ color: palette.gray }}>
+                          <p className="mt-2 text-sm leading-relaxed" style={{ color: theme.textMuted }}>
                             {item.desc}
                           </p>
                         </TiltCard>
@@ -1356,33 +1132,39 @@ export default function About({
           </div>
         </div>
 
-        {/* ─────────── CTA BAND ─────────── */}
+        {/* ═══════════════ CTA ═══════════════ */}
         <EditableWrap editMode={editMode} target={{ type: "ctaBand" }} onEditTarget={onEditTarget} label="Edit call to action">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6 }}
-            className="relative overflow-hidden rounded-2xl p-10 md:p-14 text-center"
-            style={{ background: palette.gradient1, boxShadow: "0 30px 70px rgba(37,99,235,0.25)" }}
+            className="relative overflow-hidden rounded-[2rem] p-10 md:p-16 text-center"
+            style={{ background: theme.gradInk, boxShadow: "0 34px 70px rgba(30,20,32,0.35)" }}
           >
-            <div className="absolute top-0 left-0 w-full h-full opacity-20" style={{ background: `radial-gradient(circle at top right, rgba(255,255,255,0.4), transparent 60%)` }} />
-            <div className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-2xl animate-pulse" />
+            <div className="absolute inset-0 rounded-[2rem] pointer-events-none" style={{ border: `1px solid ${theme.goldSoft}35`, margin: "10px" }} />
+            <div className="absolute -bottom-16 -right-16 w-64 h-64 rounded-full blur-[100px] opacity-30 pointer-events-none" style={{ background: theme.rose }} />
 
-            <h2 className="relative text-3xl md:text-4xl font-bold mb-4" style={{ color: palette.white, fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}>
+            <span className="rr-mono relative text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: theme.goldSoft }}>
+              Visit Us
+            </span>
+            <h2 className="rr-serif relative mt-4 text-3xl md:text-4xl font-semibold" style={{ color: theme.white }}>
               {content.ctaTitle}
             </h2>
-            <p className="relative max-w-xl mx-auto mb-8 text-lg" style={{ color: "rgba(255,255,255,0.85)" }}>
+            <p className="relative max-w-xl mx-auto mt-4 mb-9 text-base md:text-lg" style={{ color: "rgba(245,238,226,0.72)" }}>
               {content.ctaDescription}
             </p>
             <Link
               to={content.ctaButtonLink || "/contact"}
               onClick={(e) => {
-                if (editMode) { e.preventDefault(); return; }
+                if (editMode) {
+                  e.preventDefault();
+                  return;
+                }
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
-              className="relative inline-flex items-center gap-2 px-8 py-4 rounded-xl text-base font-bold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              style={{ color: palette.white, background: palette.dark, boxShadow: "0 14px 30px rgba(0,0,0,0.15)" }}
+              className="relative inline-flex items-center gap-2 px-9 py-4 rounded-full text-base font-bold transition-all duration-300 hover:-translate-y-1"
+              style={{ color: theme.ink, background: theme.gradGold, boxShadow: "0 18px 36px rgba(185,138,66,0.4)" }}
             >
               {content.ctaButtonText}
             </Link>
@@ -1390,7 +1172,7 @@ export default function About({
         </EditableWrap>
       </div>
 
-      {/* ─────────── STAFF POPUP OVERLAY ─────────── */}
+      {/* ═══════════════ STAFF POPUP ═══════════════ */}
       <StaffPopup
         isOpen={selectedStaff !== null}
         onClose={() => setSelectedStaff(null)}

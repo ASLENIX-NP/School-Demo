@@ -11,7 +11,7 @@ import {
     Pencil,
     UploadCloud,
   } from "lucide-react";
-  
+
 import {
   FaFacebook,
   FaInstagram,
@@ -29,17 +29,33 @@ import {
   FaSnapchat,
 } from "react-icons/fa6";
 
-// Shared identity palette — same navy / forest-green / gold family used
-// across the Hero and homepage sections, so the footer reads as part of
-// the same site rather than a bolted-on dark-mode panel.
-const palette = {
-  navy: "#0A1628",
-  primary: "#1E3A5F",
-  secondary: "#2D6A4F",
-  gold: "#C9A84C",
-  goldLight: "#E8D5A3",
-  crimson: "#8B0000",
+/* ============================================================
+   RED ROSE SCHOOL — FOOTER
+   Same "Ledger" identity as the rest of the site: deep ink,
+   brass gold + rose, warm paper accents, a torn-paper seam
+   where the page above tears into the dark footer. Keep
+   `theme` in sync with About.jsx / Hero.jsx / Stats.jsx /
+   Navbar.jsx if this ever gets centralized into a shared file.
+============================================================ */
+
+const theme = {
+  ink: "#1E1420",
+  inkSoft: "#2D1C2A",
+  paper: "#F5EEE2",
+  card: "#FBF7EE",
+  rose: "#9C2748",
+  roseDeep: "#6E1733",
+  gold: "#B98A42",
+  goldSoft: "#E7CE9C",
+  moss: "#3F5B49",
+  gradGold: "linear-gradient(135deg, #E7CE9C 0%, #B98A42 100%)",
+  gradInk: "linear-gradient(160deg, #17101C 0%, #241722 55%, #331F2C 100%)",
 };
+
+// Jagged, flat-top / torn-bottom strip — sits just above the footer so the
+// warm paper page above appears to tear into the dark footer below it.
+const TORN_TOP_CLIP =
+  "polygon(0% 0%,100% 0%,100% 92%,96% 96%,93% 62%,90% 94%,87% 98%,84% 68%,81% 92%,78% 96%,75% 66%,72% 94%,69% 98%,66% 68%,63% 92%,60% 96%,57% 66%,54% 94%,51% 98%,48% 68%,45% 92%,42% 96%,39% 66%,36% 94%,33% 98%,30% 68%,27% 92%,24% 96%,21% 66%,18% 94%,15% 98%,12% 68%,9% 92%,6% 96%,3% 66%,0% 92%)";
 
 export const defaultFooterContent = {
   logoUrl: "",
@@ -222,22 +238,51 @@ function stopEditNavigation(event, editMode) {
   event.stopPropagation();
 }
 
+/* =========================================================
+   SCOPED STYLES
+========================================================= */
+
+function LedgerStyles() {
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+      .rr-foot { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .rr-foot-serif { font-family: 'Fraunces', Georgia, serif; }
+      .rr-foot-mono { font-family: 'Space Grotesk', 'IBM Plex Mono', monospace; }
+
+      .rr-foot a:focus-visible,
+      .rr-foot button:focus-visible {
+        outline: 2px solid ${theme.gold};
+        outline-offset: 3px;
+        border-radius: 6px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .rr-foot *, .rr-foot *::before, .rr-foot *::after {
+          transition-duration: 0.001ms !important;
+        }
+      }
+    `}</style>
+  );
+}
+
 function AdminPillButton({ icon: Icon, label, onClick, tone = "edit" }) {
   const toneStyles = {
     edit: {
-      background: palette.gold,
-      color: palette.navy,
+      background: theme.gradGold,
+      color: theme.ink,
     },
     add: {
-      background: palette.secondary,
+      background: theme.moss,
       color: "#FFFFFF",
     },
     delete: {
-      background: palette.crimson,
+      background: theme.rose,
       color: "#FFFFFF",
     },
     dark: {
-      background: palette.navy,
+      background: theme.ink,
       color: "#FFFFFF",
     },
   };
@@ -282,10 +327,10 @@ function EditToolbar({ children, position = "top-right" }) {
 function FooterLabel({ children }) {
   return (
     <span
-      className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase mb-5"
-      style={{ color: palette.goldLight }}
+      className="rr-foot-mono inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase mb-5"
+      style={{ color: theme.goldSoft }}
     >
-      <span className="w-4 h-px" style={{ background: palette.gold }} />
+      <span className="w-4 h-px" style={{ background: theme.gold }} />
       {children}
     </span>
   );
@@ -354,13 +399,22 @@ export function Footer({
   const mapHref = normalizeMapUrl(content.contact.mapUrl, content.contact.address);
 
   return (
-    <footer
-      className="relative overflow-hidden"
-      style={{
-        background: `linear-gradient(180deg, ${palette.navy} 0%, #071120 100%)`,
-        borderTop: `3px solid ${palette.gold}`,
-      }}
-    >
+    <footer className="rr-foot relative" style={{ background: theme.ink }}>
+      <LedgerStyles />
+
+      {/* torn-paper seam — the page above tears into the dark footer */}
+      <div
+        className="absolute left-0 right-0 pointer-events-none"
+        style={{ top: "-13px", height: "14px", background: theme.ink, clipPath: TORN_TOP_CLIP }}
+        aria-hidden="true"
+      />
+
+      {/* decorative glow, clipped separately so it never covers the torn seam */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-10 -left-24 w-72 h-72 rounded-full blur-[110px] opacity-25" style={{ background: theme.rose }} />
+        <div className="absolute -bottom-24 -right-16 w-80 h-80 rounded-full blur-[110px] opacity-20" style={{ background: theme.gold }} />
+      </div>
+
       {editMode && (
         <div
           className="relative z-[90] mx-auto max-w-[1400px] px-6 pt-5"
@@ -370,7 +424,7 @@ export function Footer({
             className="rounded-xl px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
             style={{
               background: "rgba(255,255,255,0.04)",
-              border: `1px solid ${palette.gold}45`,
+              border: `1px solid ${theme.gold}45`,
             }}
           >
             <div>
@@ -396,7 +450,7 @@ export function Footer({
           {/* Identity column */}
           <div
             className={editMode ? "relative group rounded-2xl p-3 -m-3" : ""}
-            style={editMode ? { border: `1px dashed ${palette.gold}55` } : undefined}
+            style={editMode ? { border: `1px dashed ${theme.gold}55` } : undefined}
           >
             {editMode && (
               <EditToolbar position="top-left">
@@ -411,7 +465,7 @@ export function Footer({
             <div className="flex items-center gap-3 mb-5">
               <div
                 className="w-12 h-12 rounded-xl bg-white overflow-hidden flex items-center justify-center flex-shrink-0"
-                style={{ border: `1px solid ${palette.gold}55` }}
+                style={{ border: `1px solid ${theme.gold}55`, boxShadow: `0 0 0 3px ${theme.gold}18` }}
               >
                 {content.logoUrl ? (
                   <img
@@ -420,18 +474,15 @@ export function Footer({
                     className="w-full h-full object-contain p-1"
                   />
                 ) : (
-                  <School className="w-6 h-6" style={{ color: palette.navy }} />
+                  <School className="w-6 h-6" style={{ color: theme.ink }} />
                 )}
               </div>
 
               <div>
-                <div
-                  className="text-white text-lg font-bold leading-tight"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <div className="rr-foot-serif text-white text-lg font-semibold leading-tight">
                   {content.schoolName}
                 </div>
-                <div className="text-xs" style={{ color: palette.goldLight }}>
+                <div className="text-xs" style={{ color: theme.goldSoft }}>
                   {content.schoolSubtitle}
                 </div>
               </div>
@@ -441,12 +492,12 @@ export function Footer({
               <div
                 className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-6"
                 style={{
-                  background: "rgba(201,168,76,0.1)",
-                  border: `1px solid ${palette.gold}35`,
+                  background: `${theme.gold}15`,
+                  border: `1px solid ${theme.gold}35`,
                 }}
               >
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: palette.secondary }} />
-                <span className="text-[11px] font-semibold" style={{ color: palette.goldLight }}>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: theme.moss }} />
+                <span className="text-[11px] font-semibold" style={{ color: theme.goldSoft }}>
                   {content.admissionBadgeText}
                 </span>
               </div>
@@ -484,13 +535,13 @@ export function Footer({
                       border: "1px solid rgba(255,255,255,0.12)",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = palette.gold;
+                      e.currentTarget.style.borderColor = theme.gold;
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
                     }}
                   >
-                    <Icon className="w-3.5 h-3.5" style={{ color: palette.goldLight }} />
+                    <Icon className="w-3.5 h-3.5" style={{ color: theme.goldSoft }} />
                   </a>
                 );
               })}
@@ -520,9 +571,9 @@ export function Footer({
                   to={link.href || "/"}
                   onClick={(event) => stopEditNavigation(event, editMode)}
                   className="text-sm transition-colors duration-200 w-fit"
-                  style={{ color: "rgba(226,232,240,0.68)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(226,232,240,0.68)")}
+                  style={{ color: "rgba(245,238,226,0.68)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = theme.goldSoft)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,238,226,0.68)")}
                 >
                   {link.label}
                 </Link>
@@ -552,22 +603,22 @@ export function Footer({
 
             <FooterLabel>Get in Touch</FooterLabel>
 
-            <div className="flex flex-col gap-4 text-sm" style={{ color: "rgba(226,232,240,0.72)" }}>
+            <div className="flex flex-col gap-4 text-sm" style={{ color: "rgba(245,238,226,0.72)" }}>
               <a
                 href={mapHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(event) => stopEditNavigation(event, editMode)}
                 className="flex items-start gap-2.5 transition-colors duration-200"
-                onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(226,232,240,0.72)")}
+                onMouseEnter={(e) => (e.currentTarget.style.color = theme.goldSoft)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,238,226,0.72)")}
               >
-                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: palette.gold }} />
+                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: theme.gold }} />
                 <span>{content.contact.address}</span>
               </a>
 
               <div className="flex items-start gap-2.5">
-                <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: palette.gold }} />
+                <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: theme.gold }} />
 
                 {isMobile && !editMode ? (
                   <span className="flex flex-wrap items-center gap-x-1">
@@ -576,7 +627,7 @@ export function Footer({
                         <a
                           href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
                           className="transition-colors duration-200"
-                          onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = theme.goldSoft)}
                           onMouseLeave={(e) => (e.currentTarget.style.color = "inherit")}
                         >
                           {phone}
@@ -590,7 +641,7 @@ export function Footer({
                     type="button"
                     onClick={() => setShowContactModal(true)}
                     className="text-left transition-colors duration-200"
-                    onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = theme.goldSoft)}
                     onMouseLeave={(e) => (e.currentTarget.style.color = "inherit")}
                   >
                     {content.contact.phones.join(", ")}
@@ -602,10 +653,10 @@ export function Footer({
                 href={`mailto:${content.contact.email}`}
                 onClick={(event) => stopEditNavigation(event, editMode)}
                 className="flex items-center gap-2.5 break-all transition-colors duration-200"
-                onMouseEnter={(e) => (e.currentTarget.style.color = palette.goldLight)}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(226,232,240,0.72)")}
+                onMouseEnter={(e) => (e.currentTarget.style.color = theme.goldSoft)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,238,226,0.72)")}
               >
-                <Mail className="w-4 h-4 flex-shrink-0" style={{ color: palette.gold }} />
+                <Mail className="w-4 h-4 flex-shrink-0" style={{ color: theme.gold }} />
                 {content.contact.email}
               </a>
             </div>
@@ -617,8 +668,8 @@ export function Footer({
             editMode ? "relative group" : ""
           }`}
           style={{
-            borderTop: "1px solid rgba(255,255,255,0.08)",
-            color: "rgba(226,232,240,0.42)",
+            borderTop: "1px solid rgba(231,206,156,0.12)",
+            color: "rgba(245,238,226,0.4)",
           }}
         >
           {editMode && (
@@ -639,17 +690,17 @@ export function Footer({
           <div
             className="relative w-full max-w-md overflow-hidden rounded-2xl border shadow-2xl"
             style={{
-              background: `linear-gradient(180deg, ${palette.navy} 0%, #0D1E36 100%)`,
-              borderColor: `${palette.gold}35`,
+              background: theme.gradInk,
+              borderColor: `${theme.gold}35`,
             }}
           >
-            <div className="h-1" style={{ background: palette.gold }} />
+            <div className="h-1" style={{ background: theme.gradGold }} />
 
             {copied && (
               <div
                 className="absolute top-5 right-5 z-50 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold"
                 style={{
-                  background: palette.secondary,
+                  background: theme.moss,
                   color: "#FFFFFF",
                 }}
               >
@@ -659,8 +710,8 @@ export function Footer({
 
             <div className="relative z-10 p-6">
               <div className="flex items-center gap-3 pb-4">
-                <Phone className="w-5 h-5" style={{ color: palette.gold }} />
-                <h3 className="text-xl font-bold text-white">
+                <Phone className="w-5 h-5" style={{ color: theme.gold }} />
+                <h3 className="rr-foot-serif text-xl font-semibold text-white">
                   {content.modalTitle}
                 </h3>
               </div>
@@ -677,12 +728,12 @@ export function Footer({
                       border: "1px solid rgba(255,255,255,0.1)",
                     }}
                   >
-                    <span className="text-white text-lg">{phone}</span>
+                    <span className="rr-foot-mono text-white text-lg">{phone}</span>
                   </button>
                 ))}
               </div>
 
-              <p className="text-xs mt-4" style={{ color: "rgba(226,232,240,0.5)" }}>
+              <p className="text-xs mt-4" style={{ color: "rgba(245,238,226,0.5)" }}>
                 {content.modalHint}
               </p>
 
@@ -691,8 +742,8 @@ export function Footer({
                 onClick={() => setShowContactModal(false)}
                 className="mt-6 w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
                 style={{
-                  color: palette.navy,
-                  background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 100%)`,
+                  color: theme.ink,
+                  background: theme.gradGold,
                 }}
               >
                 {content.closeButtonText}

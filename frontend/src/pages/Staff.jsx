@@ -1,10 +1,7 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import api from "../lib/api";
 import {
-  Award,
-  BookOpen,
   Camera,
-  FileText,
   GraduationCap,
   Mail,
   Pencil,
@@ -13,88 +10,48 @@ import {
   Trash2,
   UserRound,
   Users,
+  Award,
   X,
-  Sparkles,
-  MapPin,
-  Calendar,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ─── ACCENT PALETTE ───
-// A small rotating set of accent colors used across icons, glow rings and blobs
-// so the page reads as intentionally colorful rather than a single-tint theme.
-// Exported so the admin editor can reuse the exact same hexes as defaults/swatches.
+/*
+ * RED ROSE STAFF PAGE
+ * -------------------
+ * Redesigned to follow the visual language of the About/Facilities pages:
+ * - warm cream background
+ * - burgundy editorial hero
+ * - gold accents
+ * - zig-zag section edge
+ * - large alternating staff sections
+ * - principal-message-style profile popup
+ *
+ * Existing API/edit targets are intentionally preserved so the admin editor
+ * can continue using this component without changing its target names.
+ */
+
 export const ACCENTS = [
-  { name: "indigo", solid: "#6366F1", soft: "rgba(99,102,241,0.16)" },
-  { name: "violet", solid: "#8B5CF6", soft: "rgba(139,92,246,0.16)" },
-  { name: "amber", solid: "#F59E0B", soft: "rgba(245,158,11,0.16)" },
-  { name: "cyan", solid: "#22D3EE", soft: "rgba(34,211,238,0.16)" },
-  { name: "rose", solid: "#FB7185", soft: "rgba(251,113,133,0.16)" },
+  { name: "burgundy", solid: "#A62B4F", soft: "rgba(166,43,79,0.14)" },
+  { name: "gold", solid: "#C79A3B", soft: "rgba(199,154,59,0.14)" },
+  { name: "green", solid: "#3F6652", soft: "rgba(63,102,82,0.14)" },
+  { name: "plum", solid: "#5C3B52", soft: "rgba(92,59,82,0.14)" },
+  { name: "rose", solid: "#B64A63", soft: "rgba(182,74,99,0.14)" },
 ];
 
 export function accentFor(index = 0) {
   return ACCENTS[index % ACCENTS.length];
 }
 
-// ─── 1. ULTRA-SMOOTH, LIGHTWEIGHT TILT CARD COMPONENT ───
-// Uses direct hardware-accelerated CSS transforms instead of heavy React spring hooks.
-// Disables on touch devices to ensure 100% native, lag-free mobile scrolling.
-function TiltCard({ children, className = "", style = {}, max = 6, editMode = false, ...props }) {
-  const ref = useRef(null);
-
-  const handleMove = useCallback((e) => {
-    if (editMode) return;
-    const el = ref.current;
-    if (!el || typeof window === "undefined") return;
-    if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) return;
-
-    const rect = el.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-
-    const px = (e.clientX - rect.left) / rect.width;
-    const py = (e.clientY - rect.top) / rect.height;
-    const rotY = (px - 0.5) * max * 2;
-    const rotX = (0.5 - py) * max * 2;
-
-    el.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateZ(0)`;
-  }, [editMode, max]);
-
-  const handleLeave = useCallback(() => {
-    if (editMode) return;
-    const el = ref.current;
-    if (el) {
-      el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)";
-    }
-  }, [editMode]);
-
-  return (
-    <div
-      ref={ref}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-      className={`relative ${className}`}
-      style={{
-        transition: editMode ? "none" : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease",
-        willChange: editMode ? "auto" : "transform",
-        ...style,
-      }}
-      {...props}
-    >
-      {/* Subtle glass glare reflection on hover for desktop */}
-      {!editMode && (
-        <div className="absolute inset-0 rounded-[inherit] pointer-events-none bg-gradient-to-br from-white/35 via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
-      )}
-      {children}
-    </div>
-  );
-}
-
 export const colors = {
-  navy: "#0A1628",
-  primary: "#1E3A5F",
-  slate: "#475569",
-  light: "#F8FAFC",
+  navy: "#15111A",
+  primary: "#A62B4F",
+  slate: "#786C72",
+  light: "#F5EEE2",
   white: "#FFFFFF",
+  burgundy: "#24131F",
+  gold: "#C79A3B",
+  cream: "#FBF7EF",
+  text: "#211824",
 };
 
 const HARDCODED_STAFF_IMAGE_URLS = [
@@ -109,11 +66,11 @@ function isHardcodedStaffImageUrl(value = "") {
 }
 
 export const defaultStaffContent = {
-  badgeText: "Faculty & Team",
-  title: "Our Staff Members",
-  highlightedWord: "Staff Members",
+  badgeText: "Our Faculty",
+  title: "The People Behind Every Student's Journey",
+  highlightedWord: "Student's Journey",
   subtitle:
-    "Meet the dedicated educators, department heads, and leaders guiding students at Red Rose Secondary English Boarding School.",
+    "Meet the dedicated educators, department heads, and leaders who make Red Rose Secondary English Boarding School a place to learn, grow, and belong.",
   stats: [
     {
       id: "teachingStaff",
@@ -228,10 +185,17 @@ export const defaultStaffContent = {
   ],
 };
 
+function clampNumber(value, min, max, fallback) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) return fallback;
+  return Math.min(max, Math.max(min, numberValue));
+}
+
 function normalizeStats(stats) {
   if (!Array.isArray(stats) || stats.length === 0) {
     return defaultStaffContent.stats;
   }
+
   return stats.map((stat, index) => ({
     ...(defaultStaffContent.stats[index] || {}),
     ...stat,
@@ -240,19 +204,16 @@ function normalizeStats(stats) {
   }));
 }
 
-function clampNumber(value, min, max, fallback) {
-  const numberValue = Number(value);
-  if (!Number.isFinite(numberValue)) return fallback;
-  return Math.min(max, Math.max(min, numberValue));
-}
-
 function normalizeStaff(staff) {
   if (!Array.isArray(staff) || staff.length === 0) {
     return defaultStaffContent.staff;
   }
+
   return staff.map((member, index) => {
     const savedImageUrl = String(member.imageUrl || "").trim();
-    const cleanImageUrl = isHardcodedStaffImageUrl(savedImageUrl) ? "" : savedImageUrl;
+    const cleanImageUrl = isHardcodedStaffImageUrl(savedImageUrl)
+      ? ""
+      : savedImageUrl;
 
     return {
       ...(defaultStaffContent.staff[index] || {}),
@@ -269,7 +230,10 @@ function normalizeStaff(staff) {
       email: member.email || "",
       description: member.description || "",
       visible: member.visible !== false,
-      accentColor: typeof member.accentColor === "string" ? member.accentColor.trim() : "",
+      accentColor:
+        typeof member.accentColor === "string"
+          ? member.accentColor.trim()
+          : "",
     };
   });
 }
@@ -302,7 +266,7 @@ function getStaffImageStyle(staff = {}) {
   };
 }
 
-function StaffImage({ staff }) {
+function StaffImage({ staff, className = "" }) {
   const src = staff?.imageUrl || "";
   const name = staff?.name || "Staff member";
 
@@ -311,7 +275,7 @@ function StaffImage({ staff }) {
       <img
         src={src}
         alt={name}
-        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        className={`w-full h-full object-cover ${className}`}
         style={getStaffImageStyle(staff)}
         loading="lazy"
       />
@@ -319,8 +283,8 @@ function StaffImage({ staff }) {
   }
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-      <UserRound className="w-16 h-16 text-slate-300" />
+    <div className="w-full h-full flex items-center justify-center bg-[#E9DED0]">
+      <UserRound className="w-20 h-20 text-[#BBAFA7]" />
     </div>
   );
 }
@@ -339,8 +303,7 @@ function ActionButtons({
 
   return (
     <div
-      className={`${className} flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 pointer-events-auto`}
-      style={{ transform: "translateZ(60px)" }}
+      className={`${className} flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300`}
     >
       <button
         type="button"
@@ -349,7 +312,12 @@ function ActionButtons({
           event.stopPropagation();
           onEditTarget(target);
         }}
-        className="rounded-full w-8 h-8 flex items-center justify-center bg-white text-slate-900 shadow-lg border border-slate-200 hover:scale-110 transition-transform cursor-pointer"
+        className="rounded-full w-8 h-8 flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+        style={{
+          background: colors.white,
+          color: colors.text,
+          border: "1px solid #E5D8C8",
+        }}
         title={label}
       >
         <Icon className="w-3.5 h-3.5" />
@@ -363,7 +331,12 @@ function ActionButtons({
             event.stopPropagation();
             onDeleteTarget(target);
           }}
-          className="rounded-full w-8 h-8 flex items-center justify-center bg-white text-red-600 shadow-lg border border-slate-200 hover:scale-110 hover:bg-red-50 transition-all cursor-pointer"
+          className="rounded-full w-8 h-8 flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          style={{
+            background: "#FCE7E7",
+            color: "#B3261E",
+            border: "1px solid #F3CCCC",
+          }}
           title="Delete"
         >
           <Trash2 className="w-3.5 h-3.5" />
@@ -377,7 +350,7 @@ function EditableWrap({
   editMode,
   target,
   onEditTarget,
-  onDeleteTarget = () => { },
+  onDeleteTarget = () => {},
   canDelete = false,
   label = "Edit",
   icon = Pencil,
@@ -413,181 +386,308 @@ function AddStaffButton({ editMode, onAddTarget }) {
         event.stopPropagation();
         onAddTarget("staffMember");
       }}
-      className="mt-10 sm:mt-12 mx-auto flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold bg-white text-slate-900 border border-slate-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
+      className="mt-10 mx-auto flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold shadow-md hover:-translate-y-0.5 transition-all"
+      style={{
+        background: colors.burgundy,
+        color: colors.white,
+      }}
     >
-      <Plus className="w-4 h-4 text-indigo-500" />
+      <Plus className="w-4 h-4" />
       Add Staff Member
     </button>
   );
 }
 
-// ─── BACKGROUND: layered dot-matrix + smooth optimized ambient glows ───
-function GridBlobBackground({ editMode = false }) {
-  return (
-    <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none select-none">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50" />
-
-      {/* Dot matrix — quiet depth cue */}
-      <div
-        className="absolute inset-0 opacity-[0.35]"
-        style={{
-          backgroundImage: "radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px)",
-          backgroundSize: "26px 26px",
-          maskImage: "radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 90%)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 90%)",
-        }}
-      />
-
-      {/* Lightweight CSS ambient glows - no heavy JS physics loops */}
-      {!editMode && (
-        <>
-          <div
-            className="absolute -top-32 -left-24 w-[420px] h-[420px] rounded-full blur-3xl opacity-60 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle, ${ACCENTS[0].soft.replace("0.16", "0.4")}, transparent 70%)`,
-            }}
-          />
-          <div
-            className="absolute top-1/4 -right-36 w-[480px] h-[480px] rounded-full blur-3xl opacity-50 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle, ${ACCENTS[2].soft.replace("0.16", "0.35")}, transparent 70%)`,
-            }}
-          />
-          <div
-            className="absolute bottom-0 left-1/4 w-[360px] h-[360px] rounded-full blur-3xl opacity-45 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle, ${ACCENTS[3].soft.replace("0.16", "0.35")}, transparent 70%)`,
-            }}
-          />
-          <div
-            className="absolute top-6 right-1/3 w-[260px] h-[260px] rounded-full blur-3xl opacity-40 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle, ${ACCENTS[1].soft.replace("0.16", "0.35")}, transparent 70%)`,
-            }}
-          />
-        </>
-      )}
-    </div>
-  );
-}
-
-// ─── Clean, vibrant glowing frame behind staff photo ───
-function AvatarGlowFrame({ accent, editMode = false, children }) {
+function ZigZagBottom({ color = colors.cream }) {
   return (
     <div
-      className="relative p-[2.5px] rounded-[26px] overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(99,102,241,0.22)]"
+      className="absolute bottom-0 left-0 right-0 h-8 z-20"
       style={{
-        background: `linear-gradient(135deg, ${accent.solid}, ${accent.soft || "rgba(99,102,241,0.25)"})`,
+        background: `linear-gradient(135deg, transparent 25%, ${color} 25%) 0 0 / 42px 32px repeat-x`,
+        clipPath:
+          "polygon(0 42%, 3% 100%, 6% 42%, 9% 100%, 12% 42%, 15% 100%, 18% 42%, 21% 100%, 24% 42%, 27% 100%, 30% 42%, 33% 100%, 36% 42%, 39% 100%, 42% 42%, 45% 100%, 48% 42%, 51% 100%, 54% 42%, 57% 100%, 60% 42%, 63% 100%, 66% 42%, 69% 100%, 72% 42%, 75% 100%, 78% 42%, 81% 100%, 84% 42%, 87% 100%, 90% 42%, 93% 100%, 96% 42%, 100% 100%, 100% 100%, 0 100%)",
       }}
-    >
-      <div className="relative rounded-[23.5px] overflow-hidden bg-white h-full w-full">{children}</div>
+    />
+  );
+}
+
+function HeroPattern() {
+  return (
+    <div
+      className="absolute inset-0 opacity-[0.13] pointer-events-none"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1.2px)",
+        backgroundSize: "18px 18px",
+        maskImage:
+          "linear-gradient(to bottom, black 0%, black 65%, transparent 100%)",
+        WebkitMaskImage:
+          "linear-gradient(to bottom, black 0%, black 65%, transparent 100%)",
+      }}
+    />
+  );
+}
+
+function SectionLabel({ children, light = false }) {
+  return (
+    <div className="flex items-center gap-3 mb-5">
+      <span
+        className="w-10 h-px"
+        style={{ background: light ? "#DDBE76" : colors.gold }}
+      />
+      <span
+        className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.22em]"
+        style={{ color: light ? "#E8CF98" : colors.primary }}
+      >
+        {children}
+      </span>
     </div>
   );
 }
 
-function StaffPopup({ staff, onClose, accent }) {
+function StaffPopup({ staff, onClose }) {
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
+    if (!staff) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
     };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [staff, onClose]);
 
   return (
     <AnimatePresence>
       {staff && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
-          style={{ background: "rgba(10, 22, 40, 0.75)", backdropFilter: "blur(12px)" }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          style={{
+            background: "rgba(24, 17, 23, 0.78)",
+            backdropFilter: "blur(9px)",
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            onClick={(event) => event.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.96, y: 25 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ type: "spring", stiffness: 280, damping: 24 }}
-            className="relative w-full max-w-3xl my-auto bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col"
+            exit={{ opacity: 0, scale: 0.97, y: 15 }}
+            transition={{ type: "spring", stiffness: 260, damping: 24 }}
+            className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-[28px] shadow-[0_35px_100px_rgba(0,0,0,0.35)]"
+            style={{
+              background: colors.cream,
+              border: "1px solid rgba(255,255,255,0.2)",
+            }}
           >
+            {/* Burgundy principal-message-style header */}
             <div
-              className="h-1.5 w-full shrink-0"
-              style={{ background: `linear-gradient(90deg, ${ACCENTS[0].solid}, ${ACCENTS[2].solid}, ${ACCENTS[3].solid})` }}
-            />
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute top-4 right-4 z-50 w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm cursor-pointer"
+              className="relative overflow-hidden px-6 sm:px-9 pt-7 sm:pt-8 pb-14"
+              style={{
+                background:
+                  "linear-gradient(135deg, #8F2345 0%, #B82E53 58%, #8E2746 100%)",
+              }}
             >
-              <X className="w-5 h-5" />
-            </button>
+              <div
+                className="absolute inset-0 opacity-[0.16]"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1.5px)",
+                  backgroundSize: "16px 16px",
+                }}
+              />
 
-            <div className="grid grid-cols-1 md:grid-cols-12 min-h-[380px] overflow-y-auto">
-              {/* Image Area */}
-              <div className="md:col-span-5 relative h-64 md:h-auto bg-gradient-to-br from-slate-100 to-slate-200 shrink-0">
-                {staff.imageUrl ? (
-                  <img
-                    src={staff.imageUrl}
-                    alt={staff.name}
-                    className="w-full h-full object-cover"
-                    style={getStaffImageStyle(staff)}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center min-h-[220px]">
-                    <UserRound className="w-20 h-20 text-slate-400" />
+              <div className="relative z-10">
+                <div className="flex items-start justify-between">
+                  <div
+                    className="text-5xl sm:text-6xl leading-none"
+                    style={{
+                      color: "rgba(255,255,255,0.75)",
+                      fontFamily: "Georgia, serif",
+                    }}
+                  >
+                    “
                   </div>
-                )}
-              </div>
 
-              {/* Content Area */}
-              <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2.5 mb-2">
-                    <span
-                      className="inline-block px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm"
-                      style={{ backgroundColor: accent?.solid || "#1E293B" }}
-                    >
-                      {staff.position}
-                    </span>
-                    {staff.qualification && (
-                      <span className="text-xs font-medium text-slate-500">{staff.qualification}</span>
-                    )}
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">{staff.name}</h2>
-
-                  {staff.description && (
-                    <p className="text-sm text-slate-600 leading-relaxed mb-6">
-                      {staff.description}
-                    </p>
-                  )}
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="w-10 h-10 rounded-full flex items-center justify-center hover:rotate-90 transition-all duration-300"
+                    style={{
+                      color: colors.white,
+                      background: "rgba(255,255,255,0.12)",
+                      border: "1px solid rgba(255,255,255,0.28)",
+                    }}
+                    title="Close"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
 
-                <div className="pt-5 border-t border-slate-100 flex flex-wrap gap-4 sm:gap-6">
+                <p
+                  className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.28em] mb-6"
+                  style={{ color: "#F1D9A0" }}
+                >
+                  Meet Our Team
+                </p>
+
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-1 shrink-0"
+                    style={{ background: "#D6AE57" }}
+                  >
+                    <div className="w-full h-full rounded-full overflow-hidden bg-[#E9DED0] flex items-center justify-center">
+                      <StaffImage staff={staff} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3
+                      className="text-xl sm:text-2xl font-bold"
+                      style={{
+                        color: colors.white,
+                        fontFamily: "Georgia, 'Times New Roman', serif",
+                      }}
+                    >
+                      {staff.name}
+                    </h3>
+                    <p
+                      className="mt-1 text-xs sm:text-sm font-semibold uppercase tracking-[0.12em]"
+                      style={{ color: "#F0D99E" }}
+                    >
+                      {staff.position}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Header-to-paper zig-zag */}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-8"
+                style={{
+                  background: colors.cream,
+                  clipPath:
+                    "polygon(0 45%, 4% 100%, 8% 45%, 12% 100%, 16% 45%, 20% 100%, 24% 45%, 28% 100%, 32% 45%, 36% 100%, 40% 45%, 44% 100%, 48% 45%, 52% 100%, 56% 45%, 60% 100%, 64% 45%, 68% 100%, 72% 45%, 76% 100%, 80% 45%, 84% 100%, 88% 45%, 92% 100%, 96% 45%, 100% 100%, 100% 100%, 0 100%)",
+                }}
+              />
+            </div>
+
+            {/* Cream paper content */}
+            <div className="px-6 sm:px-10 pt-2 pb-8 sm:pb-10">
+              <h2
+                className="text-2xl sm:text-3xl font-bold leading-tight mb-3"
+                style={{
+                  color: colors.text,
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                }}
+              >
+                {staff.name}
+              </h2>
+
+              <div
+                className="w-14 h-1 rounded-full mb-5"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #A62B4F, #C79A3B)",
+                }}
+              />
+
+              {staff.qualification && (
+                <p
+                  className="text-sm font-semibold mb-4"
+                  style={{ color: colors.primary }}
+                >
+                  {staff.qualification}
+                </p>
+              )}
+
+              {staff.description && (
+                <div
+                  className="rounded-2xl px-5 py-4 mb-5"
+                  style={{
+                    background: "#F7F0E6",
+                    border: "1px solid #E9DCCB",
+                  }}
+                >
+                  <p
+                    className="text-sm sm:text-base leading-7"
+                    style={{ color: "#6F6268" }}
+                  >
+                    {staff.description}
+                  </p>
+                </div>
+              )}
+
+              <div
+                className="rounded-2xl p-5"
+                style={{
+                  background: "#FFF9F0",
+                  border: "1px solid #E9DCCB",
+                }}
+              >
+                <p
+                  className="text-[10px] font-bold uppercase tracking-[0.2em] mb-4"
+                  style={{ color: colors.primary }}
+                >
+                  Contact
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {staff.phone && (
                     <a
                       href={`tel:${staff.phone}`}
-                      className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:-translate-y-0.5 transition-transform"
+                      style={{
+                        background: "#F5EEE3",
+                        color: colors.text,
+                      }}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
-                        <Phone className="w-4 h-4 text-slate-500" />
-                      </div>
-                      <span>{staff.phone}</span>
+                      <span
+                        className="w-9 h-9 rounded-full flex items-center justify-center"
+                        style={{
+                          background: "#EAD3D9",
+                          color: colors.primary,
+                        }}
+                      >
+                        <Phone className="w-4 h-4" />
+                      </span>
+                      <span className="text-sm font-medium break-all">
+                        {staff.phone}
+                      </span>
                     </a>
                   )}
 
                   {staff.email && (
                     <a
                       href={`mailto:${staff.email}`}
-                      className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors break-all"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:-translate-y-0.5 transition-transform"
+                      style={{
+                        background: "#F5EEE3",
+                        color: colors.text,
+                      }}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
-                        <Mail className="w-4 h-4 text-slate-500" />
-                      </div>
-                      <span>{staff.email}</span>
+                      <span
+                        className="w-9 h-9 rounded-full flex items-center justify-center"
+                        style={{
+                          background: "#F0E1BE",
+                          color: "#8A681E",
+                        }}
+                      >
+                        <Mail className="w-4 h-4" />
+                      </span>
+                      <span className="text-sm font-medium break-all">
+                        {staff.email}
+                      </span>
                     </a>
                   )}
                 </div>
@@ -603,320 +703,553 @@ function StaffPopup({ staff, onClose, accent }) {
 export function Staff({
   editMode = false,
   contentOverride = null,
-  onEditTarget = () => { },
-  onDeleteTarget = () => { },
-  onAddTarget = () => { },
+  onEditTarget = () => {},
+  onDeleteTarget = () => {},
+  onAddTarget = () => {},
 }) {
   const [content, setContent] = useState(() =>
     mergeStaffContent(contentOverride || defaultStaffContent)
   );
   const [selectedStaff, setSelectedStaff] = useState(null);
-  const [selectedAccent, setSelectedAccent] = useState(ACCENTS[0]);
 
   useEffect(() => {
     if (contentOverride) {
       setContent(mergeStaffContent(contentOverride));
-      return;
+      return undefined;
     }
 
     let alive = true;
+
     const loadStaffContent = async () => {
       try {
-        const res = await api.get(
-          "/api/site-content/staff",
-          { timeout: 8000 }
-        );
+        const res = await api.get("/api/site-content/staff", {
+          timeout: 8000,
+        });
+
         if (!alive) return;
-        setContent(mergeStaffContent(res.data?.data?.content || {}));
+
+        setContent(
+          mergeStaffContent(res.data?.data?.content || {})
+        );
       } catch (error) {
         console.error("Staff content load error:", error);
-        if (alive) setContent(mergeStaffContent(defaultStaffContent));
+
+        if (alive) {
+          setContent(mergeStaffContent(defaultStaffContent));
+        }
       }
     };
 
     loadStaffContent();
+
     return () => {
       alive = false;
     };
   }, [contentOverride]);
 
   useEffect(() => {
-    if (editMode || !selectedStaff) return;
+    if (editMode || !selectedStaff) return undefined;
+
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
     return () => {
       document.body.style.overflow = previousOverflow;
     };
   }, [selectedStaff, editMode]);
 
-  const visibleStaff = content.staff.filter((staff) => staff.visible !== false);
+  const visibleStaff = content.staff.filter(
+    (staff) => staff.visible !== false
+  );
 
-  // Split the title around the highlighted word so it can carry a gradient accent.
-  const title = content.title || "Our Staff Members";
-  const highlight = content.highlightedWord && title.includes(content.highlightedWord)
-    ? content.highlightedWord
-    : null;
-  const [titleBefore, titleAfter] = highlight ? title.split(highlight) : [title, ""];
+  const title = content.title || "The People Behind Every Student's Journey";
+  const highlight =
+    content.highlightedWord && title.includes(content.highlightedWord)
+      ? content.highlightedWord
+      : null;
+
+  const [titleBefore, titleAfter] = highlight
+    ? title.split(highlight)
+    : [title, ""];
 
   return (
-    <section className={`relative overflow-hidden w-full ${editMode ? "py-8 px-3 sm:px-6" : "min-h-screen pt-28 pb-24"}`}>
-      <GridBlobBackground editMode={editMode} />
-
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 relative z-10">
-
-        {/* ─── HEADER ─── */}
+    <section
+      className={`relative overflow-hidden ${
+        editMode ? "py-8 px-3 sm:px-6" : "pt-24 pb-24 sm:pt-28"
+      }`}
+      style={{ background: colors.cream }}
+    >
+      {/* ============================================================
+          HERO
+          ============================================================ */}
+      <div className="relative z-10 max-w-[1260px] mx-auto px-4 sm:px-7">
         <EditableWrap
           editMode={editMode}
           target={{ type: "pageHeader" }}
           onEditTarget={onEditTarget}
           label="Edit staff heading"
         >
-          {editMode ? (
-            <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-              <span
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-md mb-6"
-                style={{ background: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[1].solid})` }}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                {content.badgeText || "Faculty & Team"}
-              </span>
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55 }}
+            className="relative overflow-hidden rounded-[34px] min-h-[430px] sm:min-h-[470px] flex items-center"
+            style={{
+              background:
+                "linear-gradient(135deg, #1D111B 0%, #2C1525 48%, #4A1C2E 100%)",
+              boxShadow: "0 28px 70px rgba(54,30,39,0.20)",
+            }}
+          >
+            <HeroPattern />
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
-                {titleBefore}
-                {highlight && (
+            <div className="relative z-10 w-full px-7 sm:px-12 lg:px-16 py-14 sm:py-16">
+              <div className="max-w-[820px]">
+                <SectionLabel light>
+                  {content.badgeText || "Our Faculty"}
+                </SectionLabel>
+
+                <h1
+                  className="text-4xl sm:text-5xl lg:text-[64px] leading-[1.02] tracking-[-0.035em] font-bold"
+                  style={{
+                    color: colors.white,
+                    fontFamily:
+                      "Georgia, 'Times New Roman', serif",
+                  }}
+                >
+                  {titleBefore}
+                  {highlight && (
+                    <span style={{ color: "#E6C978" }}>
+                      {highlight}
+                    </span>
+                  )}
+                  {titleAfter}
+                </h1>
+
+                <p
+                  className="mt-7 max-w-2xl text-base sm:text-lg leading-8"
+                  style={{ color: "rgba(255,255,255,0.72)" }}
+                >
+                  {content.subtitle}
+                </p>
+
+                <div className="mt-8 inline-flex items-center gap-2 rounded-full px-4 py-2 border border-[#D5B86D]/40 bg-white/5">
                   <span
-                    className="bg-clip-text text-transparent"
-                    style={{ backgroundImage: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[3].solid})` }}
+                    className="w-2 h-2 rounded-full"
+                    style={{ background: "#E1C16E" }}
+                  />
+                  <span
+                    className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]"
+                    style={{ color: "#E6D29C" }}
                   >
-                    {highlight}
+                    Dedicated to every learner
                   </span>
-                )}
-                {titleAfter}
-              </h1>
+                </div>
+              </div>
 
-              <p className="mt-4 text-sm sm:text-base md:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-light">
-                {content.subtitle ||
-                  "Meet the dedicated educators, department heads, and leaders guiding students at Red Rose Secondary English Boarding School."}
-              </p>
+              {/* RR mark */}
+              <div className="absolute right-7 sm:right-12 lg:right-16 top-1/2 -translate-y-1/2 hidden md:flex">
+                <div
+                  className="w-40 h-40 lg:w-52 lg:h-52 rounded-full p-2"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #C79A3B, #F0D891, #8E6720)",
+                  }}
+                >
+                  <div
+                    className="w-full h-full rounded-full flex flex-col items-center justify-center"
+                    style={{
+                      background: "#281521",
+                      border: "1px dashed rgba(226,201,137,0.5)",
+                    }}
+                  >
+                    <div
+                      className="text-4xl lg:text-5xl font-bold"
+                      style={{
+                        color: "#E3C67C",
+                        fontFamily:
+                          "Georgia, 'Times New Roman', serif",
+                      }}
+                    >
+                      RR
+                    </div>
+                    <div
+                      className="mt-1 text-[8px] font-bold tracking-[0.28em]"
+                      style={{ color: "#D7C59D" }}
+                    >
+                      RED ROSE
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-center max-w-3xl mx-auto mb-16"
-            >
-              <span
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-md mb-6"
-                style={{ background: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[1].solid})` }}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                {content.badgeText || "Faculty & Team"}
-              </span>
 
-              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
-                {titleBefore}
-                {highlight && (
-                  <span
-                    className="bg-clip-text text-transparent"
-                    style={{ backgroundImage: `linear-gradient(120deg, ${ACCENTS[0].solid}, ${ACCENTS[3].solid})` }}
-                  >
-                    {highlight}
-                  </span>
-                )}
-                {titleAfter}
-              </h1>
-
-              <p className="mt-4 text-base sm:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-light">
-                {content.subtitle ||
-                  "Meet the dedicated educators, department heads, and leaders guiding students at Red Rose Secondary English Boarding School."}
-              </p>
-            </motion.div>
-          )}
+            <ZigZagBottom />
+          </motion.div>
         </EditableWrap>
 
-        {/* ─── STATS ─── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-14 sm:mb-20">
-          {content.stats.map((stat, index) => {
-            const Icon = getStatIcon(stat.icon);
-            const accent = { solid: stat.color || accentFor(index).solid };
+        {/* ============================================================
+            SMALL STAT STRIP
+            ============================================================ */}
+        <div className="relative z-30 -mt-5 sm:-mt-7 px-3 sm:px-8">
+          <div
+            className="grid grid-cols-1 sm:grid-cols-3 rounded-[22px] overflow-hidden"
+            style={{
+              background: "#FFF9F0",
+              border: "1px solid #E8DCCB",
+              boxShadow: "0 18px 40px rgba(55,39,30,0.10)",
+            }}
+          >
+            {content.stats.map((stat, index) => {
+              const Icon = getStatIcon(stat.icon);
 
-            const statCardContent = (
-              <div className="relative rounded-2xl p-6 md:p-8 text-center bg-white/80 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] hover:shadow-[0_16px_40px_rgba(15,23,42,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center overflow-hidden">
-                <div
-                  className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-60 pointer-events-none"
-                  style={{ background: accent.solid }}
-                />
-                <div
-                  className="relative w-12 h-12 rounded-2xl text-white flex items-center justify-center mb-4 shadow-md"
-                  style={{ background: `linear-gradient(135deg, ${accent.solid}, ${accentFor(index + 1).solid})` }}
+              return (
+                <EditableWrap
+                  key={stat.id || index}
+                  editMode={editMode}
+                  target={{ type: "statCard", index }}
+                  onEditTarget={onEditTarget}
+                  label="Edit number card"
+                  className="h-full"
                 >
-                  <Icon className="w-6 h-6" />
-                </div>
-                <h3 className="relative text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                  {stat.value}
-                </h3>
-                <p className="relative text-sm font-medium text-slate-500 mt-1">{stat.label}</p>
-              </div>
+                  <div
+                    className={`p-5 sm:p-6 text-center flex items-center justify-center gap-4 ${
+                      index !== content.stats.length - 1
+                        ? "border-b sm:border-b-0 sm:border-r"
+                        : ""
+                    }`}
+                    style={{ borderColor: "#E8DCCB" }}
+                  >
+                    <div
+                      className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+                      style={{
+                        background:
+                          index === 1 ? "#F0E4C7" : "#EAD6DD",
+                        color:
+                          index === 1
+                            ? "#8A681E"
+                            : colors.primary,
+                      }}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </div>
+
+                    <div className="text-left">
+                      <div
+                        className="text-2xl font-bold"
+                        style={{
+                          color: colors.text,
+                          fontFamily:
+                            "Georgia, 'Times New Roman', serif",
+                        }}
+                      >
+                        {stat.value}
+                      </div>
+                      <div
+                        className="text-[10px] font-bold uppercase tracking-[0.15em]"
+                        style={{ color: colors.slate }}
+                      >
+                        {stat.label}
+                      </div>
+                    </div>
+                  </div>
+                </EditableWrap>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ============================================================
+            INTRO
+            ============================================================ */}
+        <div className="max-w-[1050px] mx-auto pt-24 sm:pt-32 pb-12">
+          <SectionLabel>Our People</SectionLabel>
+
+          <div className="grid lg:grid-cols-[1fr_1.2fr] gap-8 lg:gap-20 items-start">
+            <h2
+              className="text-3xl sm:text-4xl lg:text-5xl leading-[1.08] font-bold"
+              style={{
+                color: colors.text,
+                fontFamily:
+                  "Georgia, 'Times New Roman', serif",
+              }}
+            >
+              Educators who make a difference{" "}
+              <span style={{ color: colors.primary }}>
+                every day.
+              </span>
+            </h2>
+
+            <p
+              className="text-base sm:text-lg leading-8"
+              style={{ color: colors.slate }}
+            >
+              Great schools are built by people who care deeply about
+              learning and about the students they serve. At Red Rose,
+              our faculty combine subject expertise, mentorship, and
+              genuine attention to help students discover confidence,
+              curiosity, and purpose.
+            </p>
+          </div>
+        </div>
+
+        {/* ============================================================
+            STAFF EDITORIAL LIST
+            ============================================================ */}
+        <div className="max-w-[1050px] mx-auto space-y-8 sm:space-y-10">
+          {visibleStaff.map((staff, index) => {
+            const realIndex = content.staff.findIndex(
+              (member) => member.id === staff.id
             );
+
+            const isReversed = index % 2 === 1;
+            const accent =
+              staff.accentColor || accentFor(realIndex).solid;
 
             return (
               <EditableWrap
-                key={stat.id || index}
+                key={staff.id}
                 editMode={editMode}
-                target={{ type: "statCard", index }}
+                target={{ type: "staffCard", index: realIndex }}
                 onEditTarget={onEditTarget}
-                label="Edit number card"
+                onDeleteTarget={onDeleteTarget}
+                canDelete
+                label="Edit staff member"
+                className="group"
               >
-                {editMode ? (
-                  statCardContent
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, y: 18 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.08 }}
-                  >
-                    {statCardContent}
-                  </motion.div>
-                )}
-              </EditableWrap>
-            );
-          })}
-        </div>
+                <motion.article
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.15 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: Math.min(index * 0.04, 0.2),
+                  }}
+                  onClick={() => {
+                    if (!editMode) setSelectedStaff(staff);
+                  }}
+                  className={`relative cursor-pointer grid grid-cols-1 md:grid-cols-2 overflow-visible rounded-[28px] transition-all duration-300 hover:-translate-y-1 ${
+                    isReversed ? "md:[&>div:first-child]:order-2" : ""
+                  }`}
+                  style={{
+                    background: "#FFF9F0",
+                    border: "1px solid #E8DCCB",
+                    boxShadow:
+                      "0 10px 35px rgba(55,39,30,0.08)",
+                  }}
+                >
+                  {/* Image */}
+                  <div className="relative min-h-[320px] sm:min-h-[390px] overflow-hidden rounded-t-[28px] md:rounded-t-none md:first:rounded-l-[28px] md:last:rounded-r-[28px]">
+                    <StaffImage
+                      staff={staff}
+                      className="transition-transform duration-700 group-hover:scale-[1.035]"
+                    />
 
-        {/* ─── STAFF GRID ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {visibleStaff.map((staff, index) => {
-            const realIndex = content.staff.findIndex((m) => m.id === staff.id);
-            const accent = { solid: staff.accentColor || accentFor(realIndex).solid };
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          "linear-gradient(180deg, transparent 50%, rgba(24,15,22,0.28) 100%)",
+                      }}
+                    />
 
-            const cardInner = (
-              <TiltCard
-                editMode={editMode}
-                className="relative bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)] hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col h-full"
-              >
-                <ActionButtons
-                  editMode={editMode}
-                  target={{ type: "staffCard", index: realIndex }}
-                  onEditTarget={onEditTarget}
-                  onDeleteTarget={onDeleteTarget}
-                  canDelete
-                  label="Edit staff member"
-                  className="absolute top-3 right-3 z-30"
-                />
-
-                {/* Framed photo with glowing accent frame */}
-                <div className="p-5 pb-0">
-                  <AvatarGlowFrame accent={accent} editMode={editMode}>
-                    <div className="relative h-56 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
-                      <StaffImage staff={staff} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none" />
-
-                      {editMode && (
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            onEditTarget({ type: "staffImage", index: realIndex });
-                          }}
-                          className="absolute top-3 left-3 z-30 h-9 w-9 rounded-full bg-white text-slate-800 flex items-center justify-center shadow-md border border-slate-200 hover:scale-105 transition-transform opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer pointer-events-auto"
-                          style={{ transform: "translateZ(60px)" }}
-                          title="Change photo"
-                        >
-                          <Camera className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </AvatarGlowFrame>
-                </div>
-
-                {/* Content Area */}
-                <div className="p-6 flex-1 flex flex-col justify-between relative z-20">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
+                    {/* Small number marker */}
+                    <div
+                      className="absolute top-5 left-5 w-12 h-12 rounded-full flex items-center justify-center"
+                      style={{
+                        background: "rgba(255,250,241,0.94)",
+                        color: colors.primary,
+                        border: "1px solid rgba(255,255,255,0.8)",
+                      }}
+                    >
                       <span
-                        className="w-1.5 h-1.5 rounded-full shrink-0"
-                        style={{ backgroundColor: accent.solid }}
-                      />
-                      <span
-                        className="text-[11px] font-bold uppercase tracking-wider"
-                        style={{ color: accent.solid }}
+                        className="text-sm font-bold"
+                        style={{
+                          fontFamily:
+                            "Georgia, 'Times New Roman', serif",
+                        }}
                       >
-                        {staff.position}
+                        {String(index + 1).padStart(2, "0")}
                       </span>
                     </div>
 
-                    <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight leading-snug group-hover:text-slate-800 transition-colors">
+                    {editMode && (
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          onEditTarget({
+                            type: "staffImage",
+                            index: realIndex,
+                          });
+                        }}
+                        className="absolute top-5 right-5 z-30 w-10 h-10 rounded-full flex items-center justify-center shadow-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                        style={{
+                          background: colors.white,
+                          color: colors.text,
+                        }}
+                        title="Change photo"
+                      >
+                        <Camera className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Text */}
+                  <div
+                    className={`relative p-7 sm:p-9 lg:p-11 flex flex-col justify-center ${
+                      isReversed
+                        ? "md:order-1"
+                        : "md:order-2"
+                    }`}
+                  >
+                    <div
+                      className="w-12 h-1 rounded-full mb-7"
+                      style={{
+                        background:
+                          "linear-gradient(90deg, #A62B4F, #C79A3B)",
+                      }}
+                    />
+
+                    <p
+                      className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] mb-3"
+                      style={{ color: accent }}
+                    >
+                      {staff.position}
+                    </p>
+
+                    <h3
+                      className="text-3xl sm:text-4xl font-bold leading-tight"
+                      style={{
+                        color: colors.text,
+                        fontFamily:
+                          "Georgia, 'Times New Roman', serif",
+                      }}
+                    >
                       {staff.name}
                     </h3>
 
                     {staff.qualification && (
-                      <p className="mt-1 text-xs font-medium text-slate-400">
+                      <p
+                        className="mt-2 text-sm font-medium"
+                        style={{ color: "#9A8B86" }}
+                      >
                         {staff.qualification}
                       </p>
                     )}
 
                     {staff.description && (
-                      <p className="mt-3 text-sm text-slate-500 leading-relaxed line-clamp-3">
+                      <p
+                        className="mt-6 text-sm sm:text-base leading-7"
+                        style={{ color: colors.slate }}
+                      >
                         {staff.description}
                       </p>
                     )}
-                  </div>
 
-                  {/* Footer Action */}
-                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-sm font-semibold">
-                    <span className="flex items-center gap-2 text-slate-500">
-                      <Mail className="w-4 h-4" /> Contact
-                    </span>
-                    <span
-                      className="flex items-center gap-1 group-hover:translate-x-1 transition-transform"
-                      style={{ color: accent.solid }}
+                    <div
+                      className="mt-7 pt-5 border-t flex items-center justify-between gap-4"
+                      style={{ borderColor: "#E8DCCB" }}
                     >
-                      View Profile <span className="text-lg">↗</span>
-                    </span>
+                      <div
+                        className="flex items-center gap-2 text-xs font-semibold"
+                        style={{ color: "#796B70" }}
+                      >
+                        <Mail className="w-4 h-4" />
+                        Meet our team
+                      </div>
+
+                      <span
+                        className="text-sm font-bold"
+                        style={{ color: colors.primary }}
+                      >
+                        View Profile →
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </TiltCard>
-            );
 
-            if (editMode) {
-              return (
-                <div
-                  key={staff.id}
-                  className="group relative"
-                >
-                  {cardInner}
-                </div>
-              );
-            }
-
-            return (
-              <motion.div
-                key={staff.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.06 }}
-                onClick={() => {
-                  setSelectedAccent(accent);
-                  setSelectedStaff(staff);
-                }}
-                className="group cursor-pointer"
-              >
-                {cardInner}
-              </motion.div>
+                  {/* Accent corner */}
+                  <div
+                    className={`absolute top-0 ${
+                      isReversed ? "right-0" : "left-0"
+                    } w-2 h-24 rounded-b-full`}
+                    style={{ background: accent }}
+                  />
+                </motion.article>
+              </EditableWrap>
             );
           })}
         </div>
 
-        <AddStaffButton editMode={editMode} onAddTarget={onAddTarget} />
+        <AddStaffButton
+          editMode={editMode}
+          onAddTarget={onAddTarget}
+        />
+
+        {/* ============================================================
+            CLOSING STATEMENT
+            ============================================================ */}
+        {!editMode && (
+          <div
+            className="max-w-[1050px] mx-auto mt-20 sm:mt-28 rounded-[30px] p-9 sm:p-12 text-center relative overflow-hidden"
+            style={{
+              background:
+                "linear-gradient(135deg, #24131F 0%, #431B2D 100%)",
+              boxShadow:
+                "0 22px 55px rgba(45,25,36,0.16)",
+            }}
+          >
+            <HeroPattern />
+
+            <div className="relative z-10">
+              <div
+                className="text-4xl mb-3"
+                style={{
+                  color: "#DABF79",
+                  fontFamily:
+                    "Georgia, 'Times New Roman', serif",
+                }}
+              >
+                “
+              </div>
+
+              <h3
+                className="text-2xl sm:text-3xl font-bold"
+                style={{
+                  color: colors.white,
+                  fontFamily:
+                    "Georgia, 'Times New Roman', serif",
+                }}
+              >
+                Every student deserves someone who believes in them.
+              </h3>
+
+              <p
+                className="mt-4 max-w-2xl mx-auto text-sm sm:text-base leading-7"
+                style={{ color: "rgba(255,255,255,0.68)" }}
+              >
+                That is the standard we bring to our classrooms,
+                corridors, activities, and every student interaction.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {!editMode && (
-        <StaffPopup staff={selectedStaff} onClose={() => setSelectedStaff(null)} accent={selectedAccent} />
+        <StaffPopup
+          staff={selectedStaff}
+          onClose={() => setSelectedStaff(null)}
+        />
       )}
+
+      <style>{`
+        @media (max-width: 767px) {
+          .staff-page-safe {
+            overflow-x: hidden;
+          }
+        }
+      `}</style>
     </section>
   );
 }

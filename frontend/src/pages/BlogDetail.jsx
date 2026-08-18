@@ -7,11 +7,13 @@ import {
   ArrowRight,
   ArrowUpRight,
   Calendar,
-  Clock,
+  Clock3,
   Image as ImageIcon,
-  Sparkles,
   Tag,
+  BookOpen,
+  Sparkles,
 } from "lucide-react";
+
 import {
   defaultBlogContent,
   formatBlogDate,
@@ -20,57 +22,94 @@ import {
   mergeBlogContent,
 } from "./blogUtils";
 
+/*
+|--------------------------------------------------------------------------
+| RED ROSE SCHOOL — BLOG DETAIL
+|--------------------------------------------------------------------------
+| Complete replacement for BlogDetail.jsx
+|
+| IMPORTANT CHANGE IN THIS VERSION:
+| A clearly visible "← Back to Blog" button is placed ABOVE the
+| article hero. It always links directly to /blogs.
+|
+| The button is intentionally large and high-contrast so it cannot
+| disappear into the burgundy hero background.
+|--------------------------------------------------------------------------
+*/
+
 function BlogImage({ post, className = "" }) {
   if (post?.imageUrl) {
     return (
       <img
         src={post.imageUrl}
-        alt={post.imageAlt || post.title}
+        alt={post.imageAlt || post.title || "School blog"}
         className={`h-full w-full object-cover ${className}`}
       />
     );
   }
 
   return (
-    <div className="flex h-full min-h-[360px] w-full items-center justify-center bg-slate-100 text-slate-300">
-      <ImageIcon className="h-16 w-16 text-[#9AA7B5]" />
+    <div className="rr-blog-no-image">
+      <ImageIcon size={52} />
     </div>
   );
 }
 
 function splitContent(content = "") {
   const text = String(content || "").trim();
+
   if (!text) return [];
-  return text.split(/\n{2,}/).map((part) => part.trim()).filter(Boolean);
+
+  return text
+    .split(/\n{2,}/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
-function RelatedCard({ post, index = 0 }) {
+function SectionLabel({ children, light = false }) {
+  return (
+    <div
+      className={`rr-blog-label ${light ? "rr-blog-label-light" : ""}`}
+    >
+      <span />
+      {children}
+    </div>
+  );
+}
+
+function RelatedCard({ post }) {
   return (
     <Link
       to={`/blogs/${post.slug}`}
-      className="group block rounded-2xl bg-white/90 backdrop-blur-md overflow-hidden shadow-md border border-[#E9EDF1] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#2D6A4F]/25 hover:bg-white"
+      className="rr-related-card"
     >
-      <div className="h-40 overflow-hidden bg-slate-100 relative">
-        <div className="absolute top-3 left-3 z-10">
-          <span className="rounded-full bg-white/90 backdrop-blur-md px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#173B5F] shadow-xs border border-[#E9EDF1]">
-            {post.category}
-          </span>
-        </div>
-        <BlogImage post={post} className="group-hover:scale-105 transition-transform duration-500" />
+      <div className="rr-related-image">
+        <BlogImage
+          post={post}
+          className="rr-related-image-img"
+        />
+
+        <span className="rr-related-category">
+          {post.category || "School Life"}
+        </span>
+
+        <span className="rr-related-open">
+          <ArrowUpRight size={15} />
+        </span>
       </div>
-      <div className="p-5">
-        <h3 className="line-clamp-2 text-base font-extrabold text-[#173B5F] group-hover:text-[#2D6A4F] transition-colors leading-snug">
-          {post.title}
-        </h3>
-        <div className="mt-3 flex items-center justify-between text-xs text-[#667085]">
-          <span className="flex items-center gap-1 font-medium">
-            <Calendar className="w-3.5 h-3.5 text-[#9AA7B5]" />
-            {formatBlogDate(post.date)}
-          </span>
-          <span className="flex items-center gap-1 font-extrabold text-[#173B5F] group-hover:text-[#2D6A4F] group-hover:translate-x-0.5 transition-all">
-            Read <ArrowUpRight className="w-3.5 h-3.5" />
-          </span>
+
+      <div className="rr-related-body">
+        <div className="rr-related-date">
+          <Calendar size={13} />
+          {formatBlogDate(post.date)}
         </div>
+
+        <h3>{post.title}</h3>
+
+        <span className="rr-related-read">
+          Read story
+          <ArrowRight size={13} />
+        </span>
       </div>
     </Link>
   );
@@ -78,21 +117,46 @@ function RelatedCard({ post, index = 0 }) {
 
 export default function BlogDetail() {
   const { slug } = useParams();
-  const [content, setContent] = useState(() => mergeBlogContent(defaultBlogContent));
+
+  const [content, setContent] = useState(() =>
+    mergeBlogContent(defaultBlogContent)
+  );
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
 
-    const loadBlogs = async () => {
+    async function loadBlogs() {
       try {
-        const res = await api.get("/api/site-content/blogs");
+        const response = await api.get(
+          "/api/site-content/blogs"
+        );
+
         if (!alive) return;
-        setContent(mergeBlogContent(res.data?.data?.content || {}));
+
+        setContent(
+          mergeBlogContent(
+            response.data?.data?.content || {}
+          )
+        );
       } catch (error) {
-        console.error("Blog detail load error:", error);
-        if (alive) setContent(mergeBlogContent(defaultBlogContent));
+        console.error(
+          "Blog detail load error:",
+          error
+        );
+
+        if (alive) {
+          setContent(
+            mergeBlogContent(defaultBlogContent)
+          );
+        }
+      } finally {
+        if (alive) {
+          setLoading(false);
+        }
       }
-    };
+    }
 
     loadBlogs();
 
@@ -102,315 +166,1886 @@ export default function BlogDetail() {
   }, []);
 
   const posts = useMemo(
-    () => (content.posts || []).filter((post) => post.visible !== false),
+    () =>
+      (content.posts || []).filter(
+        (post) => post.visible !== false
+      ),
     [content.posts]
   );
 
-  const currentIndex = posts.findIndex((post) => post.slug === slug);
-  const post = currentIndex >= 0 ? posts[currentIndex] : null;
-  const previousPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
-  const nextPost = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+  const currentIndex = posts.findIndex(
+    (post) => post.slug === slug
+  );
+
+  const post =
+    currentIndex >= 0
+      ? posts[currentIndex]
+      : null;
+
+  const previousPost =
+    currentIndex > 0
+      ? posts[currentIndex - 1]
+      : null;
+
+  const nextPost =
+    currentIndex >= 0 &&
+    currentIndex < posts.length - 1
+      ? posts[currentIndex + 1]
+      : null;
+
   const relatedPosts = post
     ? posts
-        .filter((item) => item.id !== post.id && item.category === post.category)
+        .filter(
+          (item) =>
+            item.id !== post.id &&
+            item.category === post.category
+        )
         .slice(0, 4)
     : [];
 
-  if (!post) {
+  /* ----------------------------------------------------------
+     LOADING
+  ---------------------------------------------------------- */
+
+  if (loading) {
     return (
-      <section className="min-h-screen pt-36 pb-24 bg-[#F7F9FC] flex items-center justify-center">
-        <div className="mx-auto max-w-xl px-6 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg border border-slate-200">
-            <Sparkles className="h-7 w-7 text-[#D5A72A]" />
-          </div>
-          <h1 className="text-3xl font-black tracking-tight text-[#0B1B33]">
-            Blog post not found
-          </h1>
-          <p className="mt-3 text-slate-500">
-            The article you are looking for might have been moved or updated.
-          </p>
-          <Link
-            to="/blogs"
-            className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#0B1B33] px-6 py-3 text-sm font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#15345A]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Blog
-          </Link>
-        </div>
-      </section>
+      <main className="rr-blog-loading">
+        <div className="rr-blog-spinner" />
+        <p>Loading story...</p>
+
+        <style>{`
+          .rr-blog-loading {
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #f7eee2;
+            color: #70666a;
+            font-family: Inter, system-ui, sans-serif;
+          }
+
+          .rr-blog-spinner {
+            width: 38px;
+            height: 38px;
+            border: 3px solid #e3d7c8;
+            border-top-color: #b98a42;
+            border-radius: 50%;
+            animation: rr-blog-spin .8s linear infinite;
+          }
+
+          @keyframes rr-blog-spin {
+            to {
+              transform: rotate(360deg);
+            }
+          }
+
+          .rr-blog-loading p {
+            margin: 0;
+            font-size: 11px;
+            font-weight: 800;
+          }
+        `}</style>
+      </main>
     );
   }
 
-  const paragraphs = splitContent(post.content || post.excerpt);
-  const { authorName, initial } = getAuthorInfo(post);
-  const readTime = getReadTime(post.content, post.excerpt);
+  /* ----------------------------------------------------------
+     NOT FOUND
+  ---------------------------------------------------------- */
 
-  return (
-    <section className="relative min-h-screen overflow-hidden bg-[#F7F9FC] pb-24 pt-28 text-[#0B1B33]">
-      {/* Soft editorial background */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-40 top-24 h-96 w-96 rounded-full bg-[#E9C46A]/20 blur-3xl" />
-        <div className="absolute -right-40 top-[38%] h-[34rem] w-[34rem] rounded-full bg-[#2A6F97]/10 blur-3xl" />
-        <div className="absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full border border-[#D5A72A]/10" />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-[1180px] px-5 sm:px-8">
-        {/* Minimal navigation */}
-        <div className="mb-7 flex items-center justify-between">
-          <Link
-            to="/blogs"
-            className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-[#0B1B33] shadow-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#D5A72A]/50 hover:shadow-md"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            All stories
-          </Link>
-
-          <div className="hidden items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 sm:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#D5A72A]" />
-            Smriti School Journal
+  if (!post) {
+    return (
+      <main className="rr-blog-not-found">
+        <div className="rr-blog-not-found-card">
+          <div className="rr-blog-not-found-icon">
+            <BookOpen size={25} />
           </div>
+
+          <SectionLabel>
+            School Journal
+          </SectionLabel>
+
+          <h1>Story not found</h1>
+
+          <p>
+            The article you are looking for may
+            have been moved, unpublished, or
+            updated.
+          </p>
+
+          <Link to="/blogs">
+            <ArrowLeft size={16} />
+            Back to Blog
+          </Link>
         </div>
 
-        {/* Distinctive split hero */}
-        <motion.article
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-[34px] border border-white/80 bg-white shadow-[0_30px_90px_rgba(11,27,51,0.12)]"
-        >
-          <div className="grid lg:grid-cols-[0.92fr_1.08fr]">
-            {/* Story information */}
-            <div className="relative flex min-h-[560px] flex-col justify-between overflow-hidden bg-[#0B1B33] p-7 text-white sm:p-10 lg:p-12">
-              <div className="pointer-events-none absolute -right-28 -top-28 h-72 w-72 rounded-full border border-white/10" />
-              <div className="pointer-events-none absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-[#D5A72A]/10 blur-2xl" />
+        <style>{`
+          .rr-blog-not-found {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 70px 18px;
+            background: #f7eee2;
+            color: #241a21;
+          }
 
-              <div className="relative z-10">
-                <div className="mb-8 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[#E9C46A]/30 bg-[#E9C46A]/10 px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-[#F7D66A]">
-                    <Tag className="h-3.5 w-3.5" />
-                    {post.category}
+          .rr-blog-not-found-card {
+            width: min(500px, 100%);
+            padding: 42px 30px;
+            text-align: center;
+            border: 1px solid #e5d7c7;
+            border-radius: 24px;
+            background: #fffaf1;
+            box-shadow: 0 20px 55px rgba(50,25,32,.09);
+          }
+
+          .rr-blog-not-found-icon {
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            border-radius: 15px;
+            color: #b98a42;
+            background: #f1e4c9;
+          }
+
+          .rr-blog-not-found-card h1 {
+            margin: 13px 0 8px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 35px;
+          }
+
+          .rr-blog-not-found-card p {
+            margin: 0;
+            color: #70666a;
+            font-size: 12px;
+            line-height: 1.75;
+          }
+
+          .rr-blog-not-found-card > a {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 23px;
+            padding: 12px 17px;
+            border-radius: 10px;
+            color: white;
+            background: #4a1830;
+            text-decoration: none;
+            font-size: 9px;
+            font-weight: 900;
+            transition: .2s ease;
+          }
+
+          .rr-blog-not-found-card > a:hover {
+            transform: translateY(-2px);
+            background: #6e1733;
+          }
+        `}</style>
+      </main>
+    );
+  }
+
+  const paragraphs = splitContent(
+    post.content || post.excerpt
+  );
+
+  const { authorName, initial } =
+    getAuthorInfo(post);
+
+  const readTime = getReadTime(
+    post.content,
+    post.excerpt
+  );
+
+  return (
+    <main className="rr-blog-detail">
+      <style>{`
+        /* =========================================================
+           RED ROSE BLOG DETAIL — COMPLETE STYLES
+        ========================================================= */
+
+        .rr-blog-detail {
+          --rr-burgundy: #4a1830;
+          --rr-burgundy-dark: #24121f;
+          --rr-rose: #a3294c;
+          --rr-gold: #c89a36;
+          --rr-gold-light: #e5c66f;
+          --rr-cream: #f7eee2;
+          --rr-paper: #fffaf1;
+          --rr-ink: #241a21;
+          --rr-muted: #70666a;
+          --rr-line: #e5d7c7;
+
+          min-height: 100vh;
+          overflow-x: hidden;
+          color: var(--rr-ink);
+          background: var(--rr-cream);
+          font-family:
+            Inter,
+            ui-sans-serif,
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+        }
+
+        .rr-blog-detail *,
+        .rr-blog-detail *::before,
+        .rr-blog-detail *::after {
+          box-sizing: border-box;
+        }
+
+        .rr-blog-shell {
+          width: min(1140px, calc(100% - 32px));
+          margin: 0 auto;
+        }
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .rr-blog-hero {
+          position: relative;
+          overflow: hidden;
+          padding: 28px 0 0;
+          background:
+            radial-gradient(
+              circle at 8% 22%,
+              rgba(229,198,111,.10),
+              transparent 24%
+            ),
+            linear-gradient(
+              135deg,
+              #24121f 0%,
+              #42162c 58%,
+              #5a1d3a 100%
+            );
+        }
+
+        .rr-blog-pattern {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          opacity: .10;
+          background-image:
+            radial-gradient(
+              circle,
+              #ffffff 1px,
+              transparent 1.2px
+            );
+          background-size: 19px 19px;
+        }
+
+        .rr-blog-orbit {
+          position: absolute;
+          pointer-events: none;
+          border: 1px solid rgba(229,198,111,.10);
+          border-radius: 50%;
+        }
+
+        .rr-blog-orbit-one {
+          width: 500px;
+          height: 500px;
+          left: -300px;
+          top: -230px;
+        }
+
+        .rr-blog-orbit-two {
+          width: 430px;
+          height: 430px;
+          right: -240px;
+          bottom: -300px;
+        }
+
+        /*
+         * ==========================================================
+         * THE IMPORTANT BACK BUTTON
+         * ==========================================================
+         * This is deliberately NOT hidden.
+         * It is placed above the article and has a gold border,
+         * cream text and enough padding to remain clearly visible.
+         */
+
+        .rr-blog-back-button {
+          position: relative;
+          z-index: 20;
+
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
+
+          margin: 0 0 20px 0;
+          padding: 11px 17px;
+
+          border: 1px solid rgba(229,198,111,.58);
+          border-radius: 999px;
+
+          color: #fff8e9;
+          background:
+            linear-gradient(
+              135deg,
+              rgba(255,255,255,.12),
+              rgba(255,255,255,.05)
+            );
+
+          box-shadow:
+            0 8px 22px rgba(0,0,0,.16),
+            inset 0 1px 0 rgba(255,255,255,.12);
+
+          text-decoration: none;
+
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+
+          backdrop-filter: blur(8px);
+
+          transition:
+            transform .22s ease,
+            background .22s ease,
+            border-color .22s ease,
+            color .22s ease,
+            box-shadow .22s ease;
+        }
+
+        .rr-blog-back-button svg {
+          flex: 0 0 auto;
+          transition: transform .22s ease;
+        }
+
+        .rr-blog-back-button:hover {
+          transform: translateY(-2px);
+          border-color: #efd477;
+          color: #fff3c7;
+          background: rgba(229,198,111,.15);
+          box-shadow:
+            0 12px 28px rgba(0,0,0,.22),
+            0 0 0 3px rgba(229,198,111,.08);
+        }
+
+        .rr-blog-back-button:hover svg {
+          transform: translateX(-3px);
+        }
+
+        .rr-blog-hero-card {
+          position: relative;
+          z-index: 5;
+
+          display: grid;
+          grid-template-columns:
+            minmax(0, .90fr)
+            minmax(0, 1.10fr);
+
+          min-height: 555px;
+          overflow: hidden;
+
+          border-radius: 28px 28px 0 0;
+
+          background: var(--rr-paper);
+
+          box-shadow:
+            0 28px 75px rgba(0,0,0,.24);
+        }
+
+        .rr-blog-hero-copy {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+
+          min-width: 0;
+          padding: 44px 42px 37px;
+
+          color: white;
+
+          background:
+            radial-gradient(
+              circle at 85% 8%,
+              rgba(229,198,111,.09),
+              transparent 25%
+            ),
+            linear-gradient(
+              145deg,
+              #2b1524,
+              #4a1830
+            );
+        }
+
+        .rr-blog-pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 26px;
+        }
+
+        .rr-blog-category-pill,
+        .rr-blog-read-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+
+          padding: 8px 10px;
+
+          border-radius: 999px;
+
+          font-size: 8px;
+          font-weight: 900;
+          letter-spacing: .10em;
+          text-transform: uppercase;
+        }
+
+        .rr-blog-category-pill {
+          color: #f6d876;
+          border: 1px solid rgba(229,198,111,.34);
+          background: rgba(229,198,111,.09);
+        }
+
+        .rr-blog-read-pill {
+          color: rgba(255,255,255,.68);
+          border: 1px solid rgba(255,255,255,.12);
+          background: rgba(255,255,255,.045);
+        }
+
+        .rr-blog-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+
+          color: var(--rr-rose);
+
+          font-size: 8px;
+          font-weight: 900;
+          letter-spacing: .22em;
+          text-transform: uppercase;
+        }
+
+        .rr-blog-label > span {
+          width: 28px;
+          height: 1px;
+          flex: 0 0 auto;
+          background: var(--rr-gold);
+        }
+
+        .rr-blog-label-light {
+          color: #ddc48b;
+        }
+
+        .rr-blog-hero-copy h1 {
+          max-width: 590px;
+          margin: 14px 0 0;
+
+          color: white;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: clamp(42px, 5vw, 68px);
+          font-weight: 700;
+          line-height: .96;
+          letter-spacing: -.045em;
+        }
+
+        .rr-blog-excerpt {
+          max-width: 550px;
+
+          margin: 22px 0 0;
+          padding-left: 15px;
+
+          border-left: 2px solid var(--rr-gold);
+
+          color: rgba(255,255,255,.65);
+
+          font-size: 12px;
+          line-height: 1.8;
+        }
+
+        .rr-blog-author {
+          display: flex;
+          align-items: center;
+          gap: 11px;
+
+          margin-top: 35px;
+          padding-top: 20px;
+
+          border-top: 1px solid rgba(255,255,255,.11);
+        }
+
+        .rr-blog-author-avatar {
+          width: 43px;
+          height: 43px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          flex: 0 0 auto;
+
+          border: 2px solid #e1bd57;
+          border-radius: 50%;
+
+          color: #332316;
+          background: #f0cf70;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: 13px;
+          font-weight: 900;
+        }
+
+        .rr-blog-author span,
+        .rr-blog-author strong,
+        .rr-blog-author small {
+          display: block;
+        }
+
+        .rr-blog-author span {
+          margin-bottom: 3px;
+          color: rgba(255,255,255,.45);
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: .13em;
+          text-transform: uppercase;
+        }
+
+        .rr-blog-author strong {
+          color: white;
+          font-size: 11px;
+        }
+
+        .rr-blog-author small {
+          margin-top: 2px;
+          color: rgba(255,255,255,.45);
+          font-size: 8px;
+        }
+
+        .rr-blog-hero-image {
+          position: relative;
+          min-height: 555px;
+          overflow: hidden;
+          background: #e9ded0;
+        }
+
+        .rr-blog-main-image {
+          transition: transform .7s ease;
+        }
+
+        .rr-blog-hero-card:hover
+          .rr-blog-main-image {
+          transform: scale(1.018);
+        }
+
+        .rr-blog-image-shade {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(
+              180deg,
+              rgba(36,18,31,.02),
+              rgba(36,18,31,.27)
+            );
+        }
+
+        .rr-blog-featured {
+          position: absolute;
+          left: 21px;
+          bottom: 21px;
+
+          padding: 8px 11px;
+
+          border: 1px solid rgba(255,255,255,.32);
+          border-radius: 999px;
+
+          color: white;
+          background: rgba(36,18,31,.54);
+
+          font-size: 8px;
+          font-weight: 900;
+          letter-spacing: .15em;
+          text-transform: uppercase;
+
+          backdrop-filter: blur(8px);
+        }
+
+        .rr-blog-image-arrow {
+          position: absolute;
+          right: 21px;
+          bottom: 21px;
+
+          width: 40px;
+          height: 40px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          border: 1px solid rgba(255,255,255,.32);
+          border-radius: 50%;
+
+          color: white;
+          background: rgba(36,18,31,.44);
+
+          backdrop-filter: blur(8px);
+        }
+
+        .rr-blog-no-image {
+          width: 100%;
+          height: 100%;
+          min-height: 360px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          color: #b6a99c;
+
+          background:
+            radial-gradient(
+              circle,
+              #eee1d2 1px,
+              transparent 1.2px
+            );
+          background-size: 18px 18px;
+        }
+
+        /* =========================================================
+           ZIG ZAG
+        ========================================================= */
+
+        .rr-blog-zigzag {
+          position: relative;
+          z-index: 10;
+
+          height: 34px;
+          margin-top: -1px;
+          overflow: hidden;
+        }
+
+        .rr-blog-zigzag-inner {
+          width: 100%;
+          height: 100%;
+
+          background: var(--rr-cream);
+
+          clip-path:
+            polygon(
+              0 38%,
+              4% 100%,
+              8% 38%,
+              12% 100%,
+              16% 38%,
+              20% 100%,
+              24% 38%,
+              28% 100%,
+              32% 38%,
+              36% 100%,
+              40% 38%,
+              44% 100%,
+              48% 38%,
+              52% 100%,
+              56% 38%,
+              60% 100%,
+              64% 38%,
+              68% 100%,
+              72% 38%,
+              76% 100%,
+              80% 38%,
+              84% 100%,
+              88% 38%,
+              92% 100%,
+              96% 38%,
+              100% 100%,
+              100% 100%,
+              0 100%
+            );
+        }
+
+        /* =========================================================
+           STORY
+        ========================================================= */
+
+        .rr-blog-story-section {
+          padding: 70px 0 80px;
+
+          background:
+            radial-gradient(
+              circle at 7% 15%,
+              rgba(200,154,54,.07),
+              transparent 23%
+            ),
+            var(--rr-cream);
+        }
+
+        .rr-blog-story-grid {
+          display: grid;
+          grid-template-columns:
+            minmax(0, 1fr)
+            235px;
+
+          gap: 30px;
+          align-items: start;
+        }
+
+        .rr-blog-story-card {
+          overflow: hidden;
+
+          border: 1px solid var(--rr-line);
+          border-radius: 23px;
+
+          background:
+            linear-gradient(
+              135deg,
+              rgba(255,250,241,.96),
+              rgba(255,247,237,.88)
+            );
+
+          box-shadow:
+            0 17px 46px rgba(57,33,39,.06);
+        }
+
+        .rr-blog-story-heading {
+          padding: 30px 35px 0;
+        }
+
+        .rr-blog-story-rule {
+          width: 44px;
+          height: 3px;
+
+          margin-top: 12px;
+
+          border-radius: 99px;
+
+          background:
+            linear-gradient(
+              90deg,
+              var(--rr-rose),
+              var(--rr-gold)
+            );
+        }
+
+        .rr-blog-story-content {
+          padding: 27px 35px 34px;
+        }
+
+        .rr-blog-story-content p {
+          max-width: 790px;
+
+          margin: 0 0 23px;
+
+          color: #51484c;
+
+          font-size: 15px;
+          line-height: 1.95;
+        }
+
+        .rr-blog-story-content p:last-child {
+          margin-bottom: 0;
+        }
+
+        .rr-blog-story-content
+          .rr-blog-lead::first-letter {
+          float: left;
+
+          margin:
+            .08em .12em 0 0;
+
+          color: var(--rr-rose);
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: 4.2rem;
+          line-height: .78;
+          font-weight: 700;
+        }
+
+        .rr-blog-story-footer {
+          display: grid;
+          grid-template-columns:
+            repeat(3, 1fr);
+
+          border-top: 1px solid var(--rr-line);
+          background: #f5eadc;
+        }
+
+        .rr-blog-story-footer-item {
+          padding: 16px 20px;
+          border-right: 1px solid var(--rr-line);
+        }
+
+        .rr-blog-story-footer-item:last-child {
+          border-right: 0;
+        }
+
+        .rr-blog-story-footer-item span,
+        .rr-blog-story-footer-item strong {
+          display: block;
+        }
+
+        .rr-blog-story-footer-item span {
+          margin-bottom: 4px;
+
+          color: #9a8e88;
+
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: .13em;
+          text-transform: uppercase;
+        }
+
+        .rr-blog-story-footer-item strong {
+          color: var(--rr-ink);
+          font-size: 9px;
+        }
+
+        /* =========================================================
+           ARTICLE INFO
+        ========================================================= */
+
+        .rr-blog-info {
+          position: sticky;
+          top: 105px;
+        }
+
+        .rr-blog-info-card {
+          padding: 22px 19px;
+
+          border: 1px solid var(--rr-line);
+          border-radius: 18px;
+
+          background: rgba(255,250,241,.9);
+
+          box-shadow:
+            0 10px 30px rgba(57,33,39,.05);
+        }
+
+        .rr-blog-info-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 9px;
+          margin-top: 20px;
+        }
+
+        .rr-blog-info-icon {
+          width: 33px;
+          height: 33px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          flex: 0 0 auto;
+
+          border-radius: 10px;
+
+          color: var(--rr-rose);
+          background: #f1dce1;
+        }
+
+        .rr-blog-info-text small,
+        .rr-blog-info-text strong {
+          display: block;
+        }
+
+        .rr-blog-info-text small {
+          margin-bottom: 3px;
+
+          color: #9a8e88;
+
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+        }
+
+        .rr-blog-info-text strong {
+          color: var(--rr-ink);
+          font-size: 9px;
+        }
+
+        .rr-blog-info-divider {
+          height: 1px;
+          margin: 20px 0 17px;
+          background: var(--rr-line);
+        }
+
+        .rr-blog-info-card > a {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+
+          color: var(--rr-rose);
+          text-decoration: none;
+
+          font-size: 9px;
+          font-weight: 900;
+        }
+
+        /* =========================================================
+           PREVIOUS / NEXT
+        ========================================================= */
+
+        .rr-blog-navigation {
+          padding: 0 0 75px;
+          background: var(--rr-cream);
+        }
+
+        .rr-blog-nav-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 13px;
+        }
+
+        .rr-blog-nav-card {
+          min-height: 84px;
+
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          padding: 15px 18px;
+
+          border: 1px solid var(--rr-line);
+          border-radius: 17px;
+
+          color: var(--rr-ink);
+          background: var(--rr-paper);
+
+          text-decoration: none;
+
+          transition:
+            transform .23s ease,
+            box-shadow .23s ease,
+            border-color .23s ease;
+        }
+
+        .rr-blog-nav-card:hover {
+          transform: translateY(-3px);
+          border-color: #d5b77a;
+          box-shadow:
+            0 12px 28px rgba(57,33,39,.07);
+        }
+
+        .rr-blog-nav-card.next {
+          justify-content: flex-end;
+          text-align: right;
+
+          color: white;
+          border-color: transparent;
+
+          background:
+            linear-gradient(
+              135deg,
+              #301523,
+              #4b1830
+            );
+        }
+
+        .rr-blog-nav-icon {
+          width: 39px;
+          height: 39px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          flex: 0 0 auto;
+
+          border-radius: 50%;
+
+          color: var(--rr-ink);
+          background: #f2e8da;
+        }
+
+        .rr-blog-nav-card.next
+          .rr-blog-nav-icon {
+          color: #332316;
+          background: #e9c95f;
+        }
+
+        .rr-blog-nav-card span {
+          display: block;
+
+          margin-bottom: 5px;
+
+          color: #9a8e88;
+
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: .16em;
+          text-transform: uppercase;
+        }
+
+        .rr-blog-nav-card strong {
+          display: block;
+
+          max-width: 390px;
+          overflow: hidden;
+
+          color: var(--rr-ink);
+
+          font-size: 11px;
+          line-height: 1.35;
+
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .rr-blog-nav-card.next strong {
+          color: white;
+        }
+
+        .rr-blog-nav-card.next:hover strong {
+          color: #f0d475;
+        }
+
+        /* =========================================================
+           RELATED STORIES
+        ========================================================= */
+
+        .rr-blog-related-section {
+          padding: 78px 0 88px;
+
+          background:
+            linear-gradient(
+              135deg,
+              #f0e3d5,
+              #f8efe3
+            );
+        }
+
+        .rr-blog-related-heading {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+
+          gap: 20px;
+          margin-bottom: 25px;
+        }
+
+        .rr-blog-related-heading h2 {
+          margin: 10px 0 0;
+
+          color: var(--rr-ink);
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: 35px;
+          line-height: 1;
+          letter-spacing: -.04em;
+        }
+
+        .rr-blog-related-heading h2 span {
+          color: var(--rr-rose);
+        }
+
+        .rr-blog-related-heading > a {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+
+          color: var(--rr-rose);
+
+          text-decoration: none;
+
+          font-size: 9px;
+          font-weight: 900;
+        }
+
+        .rr-related-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+          gap: 14px;
+        }
+
+        .rr-related-card {
+          overflow: hidden;
+
+          border: 1px solid var(--rr-line);
+          border-radius: 17px;
+
+          color: inherit;
+          background: var(--rr-paper);
+
+          text-decoration: none;
+
+          box-shadow:
+            0 7px 24px rgba(57,33,39,.04);
+
+          transition:
+            transform .25s ease,
+            box-shadow .25s ease,
+            border-color .25s ease;
+        }
+
+        .rr-related-card:hover {
+          transform: translateY(-5px);
+          border-color: #d4bb88;
+
+          box-shadow:
+            0 16px 35px rgba(57,33,39,.09);
+        }
+
+        .rr-related-image {
+          position: relative;
+
+          height: 165px;
+          overflow: hidden;
+
+          background: #eadfd2;
+        }
+
+        .rr-related-image-img {
+          transition: transform .55s ease;
+        }
+
+        .rr-related-card:hover
+          .rr-related-image-img {
+          transform: scale(1.05);
+        }
+
+        .rr-related-category {
+          position: absolute;
+          left: 10px;
+          top: 10px;
+
+          padding: 6px 8px;
+
+          border: 1px solid rgba(255,255,255,.45);
+          border-radius: 999px;
+
+          color: #5b2838;
+          background: rgba(255,248,237,.90);
+
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+
+          backdrop-filter: blur(5px);
+        }
+
+        .rr-related-open {
+          position: absolute;
+          right: 10px;
+          bottom: 10px;
+
+          width: 32px;
+          height: 32px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          border-radius: 50%;
+
+          color: #2e201a;
+          background: #e9c95f;
+        }
+
+        .rr-related-body {
+          padding: 15px;
+        }
+
+        .rr-related-date {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+
+          color: #9b8d86;
+
+          font-size: 7px;
+          font-weight: 800;
+        }
+
+        .rr-related-body h3 {
+          display: -webkit-box;
+          overflow: hidden;
+
+          margin: 9px 0 12px;
+
+          color: var(--rr-ink);
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: 17px;
+          line-height: 1.12;
+
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+        }
+
+        .rr-related-read {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+
+          color: var(--rr-rose);
+
+          font-size: 8px;
+          font-weight: 900;
+        }
+
+        /* =========================================================
+           FINAL CTA
+        ========================================================= */
+
+        .rr-blog-final {
+          position: relative;
+          overflow: hidden;
+
+          min-height: 300px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          background:
+            radial-gradient(
+              circle at 15% 30%,
+              rgba(229,198,111,.1),
+              transparent 26%
+            ),
+            radial-gradient(
+              circle at 88% 75%,
+              rgba(163,41,76,.14),
+              transparent 28%
+            ),
+            linear-gradient(
+              135deg,
+              #25121f,
+              #4b1830
+            );
+        }
+
+        .rr-blog-final-pattern {
+          position: absolute;
+          inset: 0;
+
+          pointer-events: none;
+
+          opacity: .09;
+
+          background-image:
+            radial-gradient(
+              circle,
+              #fff 1px,
+              transparent 1.2px
+            );
+
+          background-size: 19px 19px;
+        }
+
+        .rr-blog-final-inner {
+          position: relative;
+          z-index: 2;
+
+          width: min(
+            700px,
+            calc(100% - 32px)
+          );
+
+          padding: 60px 0;
+
+          text-align: center;
+          color: white;
+        }
+
+        .rr-blog-final-inner > svg {
+          color: var(--rr-gold-light);
+        }
+
+        .rr-blog-final-inner h2 {
+          margin: 13px 0 9px;
+
+          color: white;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: 39px;
+          line-height: 1;
+          letter-spacing: -.04em;
+        }
+
+        .rr-blog-final-inner p {
+          max-width: 570px;
+
+          margin: 0 auto;
+
+          color: rgba(255,255,255,.58);
+
+          font-size: 11px;
+          line-height: 1.75;
+        }
+
+        .rr-blog-final-inner > a {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+
+          margin-top: 22px;
+          padding: 12px 17px;
+
+          border: 1px solid #e2be57;
+          border-radius: 10px;
+
+          color: #2d2118;
+          background: #efd06f;
+
+          text-decoration: none;
+
+          font-size: 9px;
+          font-weight: 900;
+
+          transition: .22s ease;
+        }
+
+        .rr-blog-final-inner > a:hover {
+          transform: translateY(-2px);
+          box-shadow:
+            0 10px 25px rgba(0,0,0,.18);
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 980px) {
+          .rr-blog-hero-card {
+            grid-template-columns: 1fr;
+          }
+
+          .rr-blog-hero-copy {
+            min-height: 470px;
+          }
+
+          .rr-blog-hero-image {
+            min-height: 410px;
+          }
+
+          .rr-blog-story-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .rr-blog-info {
+            position: static;
+          }
+
+          .rr-blog-info-card {
+            max-width: 500px;
+          }
+
+          .rr-related-grid {
+            grid-template-columns:
+              repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 650px) {
+          .rr-blog-shell {
+            width: min(
+              calc(100% - 24px),
+              1140px
+            );
+          }
+
+          .rr-blog-hero {
+            padding-top: 20px;
+          }
+
+          /*
+           * Mobile back button stays visible and easy to tap.
+           */
+          .rr-blog-back-button {
+            width: auto;
+            min-height: 43px;
+            margin-bottom: 14px;
+            padding: 11px 15px;
+            font-size: 8px;
+          }
+
+          .rr-blog-hero-card {
+            border-radius: 20px 20px 0 0;
+          }
+
+          .rr-blog-hero-copy {
+            min-height: 470px;
+            padding: 31px 23px 27px;
+          }
+
+          .rr-blog-hero-copy h1 {
+            font-size: 43px;
+          }
+
+          .rr-blog-excerpt {
+            font-size: 11px;
+          }
+
+          .rr-blog-hero-image {
+            min-height: 310px;
+          }
+
+          .rr-blog-story-section {
+            padding: 53px 0;
+          }
+
+          .rr-blog-story-heading {
+            padding: 25px 21px 0;
+          }
+
+          .rr-blog-story-content {
+            padding: 22px 21px 27px;
+          }
+
+          .rr-blog-story-content p {
+            font-size: 14px;
+          }
+
+          .rr-blog-story-footer {
+            grid-template-columns: 1fr;
+          }
+
+          .rr-blog-story-footer-item {
+            border-right: 0;
+            border-bottom: 1px solid var(--rr-line);
+          }
+
+          .rr-blog-story-footer-item:last-child {
+            border-bottom: 0;
+          }
+
+          .rr-blog-nav-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .rr-blog-related-heading {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+
+          .rr-related-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .rr-blog-related-heading h2 {
+            font-size: 31px;
+          }
+
+          .rr-blog-final-inner h2 {
+            font-size: 34px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .rr-blog-detail *,
+          .rr-blog-detail *::before,
+          .rr-blog-detail *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+          }
+        }
+      `}</style>
+
+      {/* =========================================================
+          HERO
+      ========================================================= */}
+
+      <section className="rr-blog-hero">
+        <div className="rr-blog-pattern" />
+
+        <div className="rr-blog-orbit rr-blog-orbit-one" />
+        <div className="rr-blog-orbit rr-blog-orbit-two" />
+
+        <div className="rr-blog-shell">
+          {/* ======================================================
+              BACK TO BLOG — ALWAYS VISIBLE
+          ====================================================== */}
+
+          <Link
+            to="/blogs"
+            className="rr-blog-back-button"
+            aria-label="Go back to Blog"
+            title="Go back to Blog"
+          >
+            <ArrowLeft size={16} />
+            Back to Blog
+          </Link>
+
+          <motion.article
+            className="rr-blog-hero-card"
+            initial={{
+              opacity: 0,
+              y: 22,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: .6,
+              ease: "easeOut",
+            }}
+          >
+            {/* LEFT — ARTICLE INFORMATION */}
+
+            <div className="rr-blog-hero-copy">
+              <div>
+                <div className="rr-blog-pills">
+                  <span className="rr-blog-category-pill">
+                    <Tag size={13} />
+                    {post.category || "School Life"}
                   </span>
 
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-300">
+                  <span className="rr-blog-read-pill">
+                    <Clock3 size={13} />
                     {readTime}
                   </span>
                 </div>
 
-                <p className="mb-5 text-[10px] font-black uppercase tracking-[0.28em] text-[#F7D66A]">
-                  School journal · {formatBlogDate(post.date)}
-                </p>
+                <SectionLabel light>
+                  School Journal ·{" "}
+                  {formatBlogDate(post.date)}
+                </SectionLabel>
 
-                <h1 className="max-w-3xl text-4xl font-black leading-[0.98] tracking-[-0.045em] sm:text-5xl lg:text-[4.2rem]">
-                  {post.title}
-                </h1>
+                <h1>{post.title}</h1>
 
                 {post.excerpt && (
-                  <p className="mt-7 max-w-xl border-l-2 border-[#D5A72A] pl-4 text-sm leading-7 text-slate-300 sm:text-base">
+                  <p className="rr-blog-excerpt">
                     {post.excerpt}
                   </p>
                 )}
               </div>
 
-              <div className="relative z-10 mt-12 flex items-center gap-3 border-t border-white/10 pt-6">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F3C74F] text-sm font-black text-[#0B1B33] shadow-lg">
+              <div className="rr-blog-author">
+                <div className="rr-blog-author-avatar">
                   {initial}
                 </div>
+
                 <div>
-                  <p className="text-sm font-extrabold text-white">{authorName}</p>
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    {post.authorRole || "Red Rose School"}
-                  </p>
+                  <span>Written by</span>
+
+                  <strong>
+                    {authorName}
+                  </strong>
+
+                  <small>
+                    {post.authorRole ||
+                      "Red Rose School"}
+                  </small>
                 </div>
               </div>
             </div>
 
-            {/* Image panel */}
-            <div className="relative min-h-[380px] overflow-hidden bg-slate-200 lg:min-h-[560px]">
-              {post.imageUrl ? (
-                <BlogImage
-                  post={post}
-                  className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.025]"
-                />
-              ) : (
-                <div className="flex h-full min-h-[380px] items-center justify-center bg-slate-100">
-                  <ImageIcon className="h-16 w-16 text-slate-300" />
-                </div>
-              )}
+            {/* RIGHT — IMAGE */}
 
-              <div className="absolute inset-0 bg-gradient-to-t from-[#071426]/35 via-transparent to-white/5" />
+            <div className="rr-blog-hero-image">
+              <BlogImage
+                post={post}
+                className="rr-blog-main-image"
+              />
 
-              <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
-                <span className="rounded-full border border-white/30 bg-[#0B1B33]/55 px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md">
-                  Featured story
-                </span>
+              <div className="rr-blog-image-shade" />
 
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white backdrop-blur-md">
-                  <ArrowUpRight className="h-4 w-4" />
-                </span>
-              </div>
-            </div>
-          </div>
-        </motion.article>
+              <span className="rr-blog-featured">
+                Featured Story
+              </span>
 
-        {/* Reading area */}
-        <div className="mx-auto mt-10 grid max-w-[1040px] gap-10 lg:grid-cols-[minmax(0,1fr)_220px]">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.12 }}
-            className="rounded-[28px] border border-slate-200/80 bg-white p-7 shadow-[0_18px_55px_rgba(11,27,51,0.06)] sm:p-10 lg:p-12"
-          >
-            <div className="mb-9 flex items-center gap-3">
-              <span className="h-8 w-1 rounded-full bg-[#D5A72A]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
-                The story
+              <span className="rr-blog-image-arrow">
+                <ArrowUpRight size={17} />
               </span>
             </div>
-
-            <div className="blog-detail-content space-y-7 text-[17px] leading-[1.95] text-[#334155] sm:text-[18px]">
-              {paragraphs.map((paragraph, index) => (
-                <p
-                  key={index}
-                  className={index === 0 ? "first-paragraph" : ""}
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Small sticky article info rail */}
-          <aside className="lg:sticky lg:top-28 lg:self-start">
-            <div className="rounded-[24px] border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur-xl">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D5A72A]">
-                Article info
-              </p>
-
-              <div className="mt-5 space-y-4">
-                <div className="flex items-start gap-3">
-                  <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-[#2A6F97]" />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Published</p>
-                    <p className="mt-1 text-xs font-extrabold text-[#0B1B33]">{formatBlogDate(post.date)}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[#2A6F97]" />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Reading time</p>
-                    <p className="mt-1 text-xs font-extrabold text-[#0B1B33]">{readTime}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 h-px bg-slate-100" />
-
-              <Link
-                to="/blogs"
-                className="mt-5 inline-flex items-center gap-2 text-xs font-black text-[#0B1B33] transition hover:text-[#2A6F97]"
-              >
-                Explore more stories
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </aside>
+          </motion.article>
         </div>
 
-        {/* Previous / Next */}
-        {(previousPost || nextPost) && (
-          <div className="mx-auto mt-10 grid max-w-[1040px] grid-cols-1 gap-4 sm:grid-cols-2">
-            {previousPost ? (
-              <Link
-                to={`/blogs/${previousPost.slug}`}
-                className="group rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F5F7FA] text-[#0B1B33] transition group-hover:bg-[#0B1B33] group-hover:text-white">
-                    <ArrowLeft className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
-                      Previous
-                    </p>
-                    <p className="mt-1 truncate text-sm font-extrabold text-[#0B1B33] group-hover:text-[#2A6F97]">
-                      {previousPost.title}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ) : (
-              <div />
-            )}
+        <div className="rr-blog-zigzag">
+          <div className="rr-blog-zigzag-inner" />
+        </div>
+      </section>
 
-            {nextPost && (
-              <Link
-                to={`/blogs/${nextPost.slug}`}
-                className="group rounded-[22px] border border-slate-200 bg-[#0B1B33] p-5 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="flex items-center justify-end gap-3 text-right">
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
-                      Next
-                    </p>
-                    <p className="mt-1 truncate text-sm font-extrabold text-white group-hover:text-[#F7D66A]">
-                      {nextPost.title}
-                    </p>
-                  </div>
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition group-hover:bg-[#F3C74F] group-hover:text-[#0B1B33]">
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
+      {/* =========================================================
+          STORY
+      ========================================================= */}
+
+      <section className="rr-blog-story-section">
+        <div className="rr-blog-shell">
+          <div className="rr-blog-story-grid">
+            <motion.article
+              className="rr-blog-story-card"
+              initial={{
+                opacity: 0,
+                y: 18,
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+              }}
+              viewport={{
+                once: true,
+              }}
+              transition={{
+                duration: .5,
+              }}
+            >
+              <div className="rr-blog-story-heading">
+                <SectionLabel>
+                  The Story
+                </SectionLabel>
+
+                <div className="rr-blog-story-rule" />
+              </div>
+
+              <div className="rr-blog-story-content">
+                {paragraphs.length > 0 ? (
+                  paragraphs.map(
+                    (paragraph, index) => (
+                      <p
+                        key={index}
+                        className={
+                          index === 0
+                            ? "rr-blog-lead"
+                            : ""
+                        }
+                      >
+                        {paragraph}
+                      </p>
+                    )
+                  )
+                ) : (
+                  <p>
+                    No additional article content
+                    is available.
+                  </p>
+                )}
+              </div>
+
+              <div className="rr-blog-story-footer">
+                <div className="rr-blog-story-footer-item">
+                  <span>Category</span>
+                  <strong>
+                    {post.category ||
+                      "School Life"}
+                  </strong>
                 </div>
-              </Link>
-            )}
+
+                <div className="rr-blog-story-footer-item">
+                  <span>Published</span>
+                  <strong>
+                    {formatBlogDate(
+                      post.date
+                    )}
+                  </strong>
+                </div>
+
+                <div className="rr-blog-story-footer-item">
+                  <span>Reading time</span>
+                  <strong>{readTime}</strong>
+                </div>
+              </div>
+            </motion.article>
+
+            {/* ARTICLE INFO */}
+
+            <aside className="rr-blog-info">
+              <div className="rr-blog-info-card">
+                <SectionLabel>
+                  Article Details
+                </SectionLabel>
+
+                <div className="rr-blog-info-item">
+                  <div className="rr-blog-info-icon">
+                    <Calendar size={16} />
+                  </div>
+
+                  <div className="rr-blog-info-text">
+                    <small>Published</small>
+                    <strong>
+                      {formatBlogDate(
+                        post.date
+                      )}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="rr-blog-info-item">
+                  <div className="rr-blog-info-icon">
+                    <Clock3 size={16} />
+                  </div>
+
+                  <div className="rr-blog-info-text">
+                    <small>
+                      Reading time
+                    </small>
+                    <strong>
+                      {readTime}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="rr-blog-info-divider" />
+
+                <Link to="/blogs">
+                  Back to all stories
+                  <ArrowRight size={14} />
+                </Link>
+              </div>
+            </aside>
           </div>
-        )}
+        </div>
+      </section>
 
-        {/* Related stories */}
-        {relatedPosts.length > 0 && (
-          <div className="mx-auto mt-16 max-w-[1040px]">
-            <div className="mb-7 flex items-end justify-between gap-4">
+      {/* =========================================================
+          PREVIOUS / NEXT
+      ========================================================= */}
+
+      {(previousPost || nextPost) && (
+        <section className="rr-blog-navigation">
+          <div className="rr-blog-shell">
+            <div className="rr-blog-nav-grid">
+              {previousPost ? (
+                <Link
+                  to={`/blogs/${previousPost.slug}`}
+                  className="rr-blog-nav-card"
+                >
+                  <div className="rr-blog-nav-icon">
+                    <ArrowLeft size={16} />
+                  </div>
+
+                  <div>
+                    <span>
+                      Previous Story
+                    </span>
+
+                    <strong>
+                      {previousPost.title}
+                    </strong>
+                  </div>
+                </Link>
+              ) : (
+                <div />
+              )}
+
+              {nextPost ? (
+                <Link
+                  to={`/blogs/${nextPost.slug}`}
+                  className="rr-blog-nav-card next"
+                >
+                  <div>
+                    <span>
+                      Next Story
+                    </span>
+
+                    <strong>
+                      {nextPost.title}
+                    </strong>
+                  </div>
+
+                  <div className="rr-blog-nav-icon">
+                    <ArrowRight size={16} />
+                  </div>
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =========================================================
+          RELATED STORIES
+      ========================================================= */}
+
+      {relatedPosts.length > 0 && (
+        <section className="rr-blog-related-section">
+          <div className="rr-blog-shell">
+            <div className="rr-blog-related-heading">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#D5A72A]">
-                  Continue reading
-                </p>
-                <h2 className="mt-1 text-2xl font-black tracking-tight text-[#0B1B33]">
-                  More from {post.category}
+                <SectionLabel>
+                  Continue Reading
+                </SectionLabel>
+
+                <h2>
+                  More from{" "}
+                  <span>
+                    {post.category}
+                  </span>
                 </h2>
               </div>
 
-              <Link
-                to="/blogs"
-                className="hidden items-center gap-1 text-xs font-black text-[#0B1B33] hover:text-[#2A6F97] sm:flex"
-              >
-                View all
-                <ArrowRight className="h-3.5 w-3.5" />
+              <Link to="/blogs">
+                View all stories
+                <ArrowRight size={14} />
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {relatedPosts.map((rPost, index) => (
-                <RelatedCard key={rPost.id || rPost.slug} post={rPost} index={index} />
-              ))}
+            <div className="rr-related-grid">
+              {relatedPosts.map(
+                (relatedPost) => (
+                  <RelatedCard
+                    key={
+                      relatedPost.id ||
+                      relatedPost.slug
+                    }
+                    post={relatedPost}
+                  />
+                )
+              )}
             </div>
           </div>
-        )}
-      </div>
+        </section>
+      )}
 
-      <style>{`
-        .blog-detail-content .first-paragraph::first-letter {
-          float: left;
-          margin: 0.08em 0.12em 0 0;
-          font-size: 4.2rem;
-          line-height: 0.8;
-          font-weight: 900;
-          color: #D5A72A;
-        }
+      {/* =========================================================
+          FINAL CTA
+      ========================================================= */}
 
-        .blog-detail-content p {
-          max-width: 760px;
-        }
-      `}</style>
-    </section>
+      <section className="rr-blog-final">
+        <div className="rr-blog-final-pattern" />
+
+        <div className="rr-blog-final-inner">
+          <Sparkles size={18} />
+
+          <h2>
+            Discover More School Stories
+          </h2>
+
+          <p>
+            Explore announcements, achievements,
+            activities, and moments from the Red
+            Rose School community.
+          </p>
+
+          <Link to="/blogs">
+            <BookOpen size={15} />
+            Back to School Journal
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+    </main>
   );
 }

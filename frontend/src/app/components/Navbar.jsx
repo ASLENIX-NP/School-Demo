@@ -5,6 +5,15 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Camera, Menu, Pencil, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+/* ============================================================
+   RED ROSE SCHOOL — NAVBAR
+   Same "Ledger" identity as the rest of the site: deep ink,
+   brass gold + rose, Fraunces for the school name, Space
+   Grotesk for the small tracked subtitle. Keep `theme` in sync
+   with About.jsx / Hero.jsx / Stats.jsx / Footer.jsx if this
+   ever gets centralized into a shared file.
+============================================================ */
+
 export const defaultNavbarContent = {
   logoUrl: "",
   schoolName: "Red Rose",
@@ -26,14 +35,15 @@ export const defaultNavbarContent = {
   ],
 };
 
-// Shared identity palette — same navy / forest-green / gold family used
-// across the Hero and homepage sections, so the whole site reads as one place.
-const palette = {
-  navy: "#0A1628",
-  primary: "#1E3A5F",
-  secondary: "#2D6A4F",
-  gold: "#C9A84C",
-  goldLight: "#E8D5A3",
+const theme = {
+  ink: "#1E1420",
+  inkSoft: "#2D1C2A",
+  card: "#FBF7EE",
+  rose: "#9C2748",
+  roseBright: "#C6486B",
+  gold: "#B98A42",
+  goldSoft: "#E7CE9C",
+  gradGold: "linear-gradient(135deg, #E7CE9C 0%, #B98A42 100%)",
 };
 
 export function mergeNavbarContent(saved = {}) {
@@ -54,13 +64,43 @@ export function mergeNavbarContent(saved = {}) {
   };
 }
 
+/* =========================================================
+   SCOPED STYLES
+========================================================= */
+
+function LedgerStyles() {
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+      .rr-nav { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .rr-nav-serif { font-family: 'Fraunces', Georgia, serif; }
+      .rr-nav-mono { font-family: 'Space Grotesk', 'IBM Plex Mono', monospace; }
+
+      .rr-nav a:focus-visible,
+      .rr-nav button:focus-visible {
+        outline: 2px solid ${theme.gold};
+        outline-offset: 3px;
+        border-radius: 6px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .rr-nav *, .rr-nav *::before, .rr-nav *::after {
+          animation-duration: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+    `}</style>
+  );
+}
+
 function HoverEditIcon({ icon: Icon = Pencil, label = "Edit" }) {
   return (
     <span
       className="pointer-events-none absolute -top-3 -right-3 z-[90] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-xl"
       style={{
-        background: palette.gold,
-        color: palette.navy,
+        background: theme.gradGold,
+        color: theme.ink,
         border: "2px solid rgba(255,255,255,0.85)",
       }}
       title={label}
@@ -138,7 +178,9 @@ export function Navbar({
   const logoSrc = navbarContent.logoUrl || defaultSchoolLogo;
 
   return (
-    <>
+    <div className="rr-nav">
+      <LedgerStyles />
+
       <motion.header
         initial={editMode ? false : { y: -24, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -146,9 +188,9 @@ export function Navbar({
         className={editMode ? "relative z-50 w-full" : "fixed top-0 left-0 right-0 z-50 w-full"}
         style={{
           background: scrolled
-            ? "linear-gradient(180deg, rgba(10,22,40,0.97) 0%, rgba(10,22,40,0.94) 100%)"
-            : "linear-gradient(180deg, rgba(10,22,40,0.82) 0%, rgba(10,22,40,0.5) 100%)",
-          borderBottom: `1px solid rgba(201,168,76,${scrolled ? 0.32 : 0.14})`,
+            ? `linear-gradient(180deg, ${theme.ink}F7 0%, ${theme.ink}F0 100%)`
+            : `linear-gradient(180deg, ${theme.ink}D0 0%, ${theme.ink}80 100%)`,
+          borderBottom: `1px solid rgba(185,138,66,${scrolled ? 0.32 : 0.14})`,
           backdropFilter: "blur(16px)",
         }}
       >
@@ -182,7 +224,8 @@ export function Navbar({
                 style={{
                   width: "42px",
                   height: "42px",
-                  border: `1.5px solid ${palette.gold}`,
+                  border: `1.5px solid ${theme.gold}`,
+                  boxShadow: `0 0 0 3px ${theme.gold}1F`,
                 }}
               >
                 <img
@@ -206,11 +249,10 @@ export function Navbar({
                 title={editMode ? "Edit school name" : ""}
               >
                 <div
-                  className="font-bold text-lg leading-tight"
+                  className="rr-nav-serif font-semibold text-lg leading-tight"
                   style={{
                     color: "#FFFFFF",
-                    fontFamily: "var(--font-display)",
-                    letterSpacing: "-0.02em",
+                    letterSpacing: "-0.01em",
                   }}
                 >
                   {navbarContent.schoolName}
@@ -229,8 +271,8 @@ export function Navbar({
                 title={editMode ? "Edit school subtitle" : ""}
               >
                 <div
-                  className="text-[11px] font-medium tracking-wide leading-tight"
-                  style={{ color: palette.goldLight }}
+                  className="rr-nav-mono text-[10px] font-semibold uppercase tracking-[0.16em] leading-tight"
+                  style={{ color: theme.goldSoft }}
                 >
                   {navbarContent.schoolSubtitle}
                 </div>
@@ -262,14 +304,14 @@ export function Navbar({
                   }
                   title={editMode ? `Edit ${link.label}` : ""}
                   style={{
-                    color: active ? palette.goldLight : "rgba(255,255,255,0.78)",
+                    color: active ? theme.goldSoft : "rgba(245,238,226,0.75)",
                   }}
                 >
                   {link.label}
                   <span
                     className={`absolute left-3.5 right-3.5 -bottom-0.5 h-[2px] origin-left transition-transform duration-300 ${active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                       }`}
-                    style={{ background: palette.gold }}
+                    style={{ background: theme.rose }}
                   />
                   {editMode && <HoverEditIcon icon={Pencil} label="Edit Link" />}
                 </Link>
@@ -288,9 +330,9 @@ export function Navbar({
                 }}
                 className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
                 style={{
-                  color: palette.navy,
-                  background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 100%)`,
-                  boxShadow: "0 10px 26px rgba(201,168,76,0.32)",
+                  color: theme.ink,
+                  background: theme.gradGold,
+                  boxShadow: `0 10px 26px ${theme.gold}45`,
                 }}
               >
                 {navbarContent.admissionButtonText || "Admission Open"}
@@ -300,8 +342,6 @@ export function Navbar({
               </Link>
             </div>
           )}
-
-
 
           <button
             type="button"
@@ -332,8 +372,8 @@ export function Navbar({
                 : "fixed top-[70px] left-0 right-0 z-40 xl:hidden"
             }
             style={{
-              background: "linear-gradient(180deg, rgba(10,22,40,0.98) 0%, rgba(10,22,40,0.96) 100%)",
-              borderBottom: `1px solid rgba(201,168,76,0.25)`,
+              background: `linear-gradient(180deg, ${theme.ink}FA 0%, ${theme.ink}F5 100%)`,
+              borderBottom: `1px solid rgba(185,138,66,0.25)`,
               backdropFilter: "blur(16px)",
             }}
           >
@@ -354,9 +394,9 @@ export function Navbar({
                     }}
                     className="px-4 py-3 rounded-lg text-sm font-medium transition-all border-l-2"
                     style={{
-                      color: active ? palette.goldLight : "rgba(255,255,255,0.82)",
-                      background: active ? "rgba(201,168,76,0.08)" : "transparent",
-                      borderColor: active ? palette.gold : "transparent",
+                      color: active ? theme.goldSoft : "rgba(245,238,226,0.8)",
+                      background: active ? `${theme.rose}18` : "transparent",
+                      borderColor: active ? theme.rose : "transparent",
                     }}
                   >
                     {link.label}
@@ -377,9 +417,9 @@ export function Navbar({
                   }}
                   className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-sm font-bold text-center transition-all hover:scale-105 hover:-translate-y-0.5 active:scale-95"
                   style={{
-                    color: palette.navy,
-                    background: `linear-gradient(135deg, ${palette.gold} 0%, ${palette.goldLight} 100%)`,
-                    boxShadow: "0 10px 24px rgba(201,168,76,0.35)",
+                    color: theme.ink,
+                    background: theme.gradGold,
+                    boxShadow: `0 10px 24px ${theme.gold}45`,
                   }}
                 >
                   {navbarContent.admissionButtonText || "Admission Open"}
@@ -390,7 +430,7 @@ export function Navbar({
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }
 

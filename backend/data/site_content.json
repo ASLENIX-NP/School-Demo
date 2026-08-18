@@ -1,33 +1,45 @@
 {
   "home": {
     "hero": {
-      "badge": "WISDOM IS DIVINE",
+      "badge": "FOR KNOWLEDGE AND VIRTUE",
       "schoolName": "RED ROSE SCHOOL",
-      "titleLine1": "Learning Today.",
-      "titleLine2": "Leading Tomorrow.",
-      "establishedYear": "ESTABLISHED 2046 BS",
-      "subtitle": "Basudev Marga, Hetauda-2",
-      "description": "A welcoming learning community where curiosity, creativity, discipline and values help every student grow with confidence.",
+      "titleLine1": "Where Young Minds Bloom,",
+      "titleLine2": "Dreams Take Flight",
+      "establishedYear": "ESTABLISHED 2047 BS",
+      "subtitle": "Hatiya, Hetauda-16",
+      "description": "A nurturing community where knowledge inspires curiosity, values shape character, and every child is empowered to learn, lead, and create a brighter future.",
       "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786449642373_images_9Ko2PaVGY.png",
       "images": [
-        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786449642373_images_9Ko2PaVGY.png"
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786449642373_images_9Ko2PaVGY.png",
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786944659934_WhatsApp_Image_2026-08-13_at_11.09.05__5__zHEtpdai2.jpeg",
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786944661678_WhatsApp_Image_2026-08-13_at_11.09.04__2__IU7OCP1tp.jpeg"
       ],
-      "primaryButtonText": "Start Admission",
-      "primaryButtonLink": "/admissions",
-      "secondaryButtonText": "Explore School",
-      "secondaryButtonLink": "/about",
       "imageAdjustments": {
         "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786449642373_images_9Ko2PaVGY.png": {
           "imageZoom": 1,
           "imageOffsetX": 0,
           "imageOffsetY": 0
+        },
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786944659934_WhatsApp_Image_2026-08-13_at_11.09.05__5__zHEtpdai2.jpeg": {
+          "imageZoom": 1,
+          "imageOffsetX": 0,
+          "imageOffsetY": 0
+        },
+        "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786944661678_WhatsApp_Image_2026-08-13_at_11.09.04__2__IU7OCP1tp.jpeg": {
+          "imageZoom": 1,
+          "imageOffsetX": 0,
+          "imageOffsetY": 0
         }
-      }
+      },
+      "primaryButtonText": "Start Admission",
+      "primaryButtonLink": "/admissions",
+      "secondaryButtonText": "Explore School",
+      "secondaryButtonLink": "/about"
     },
     "statsSection": {
       "eyebrow": "Our Impact",
       "title": "Creating Futures, One Student at a Time",
-      "description": "Real numbers that reflect our commitment to excellence and holistic education in the Makwanpur region.",
+      "description": "",
       "stats": [
         {
           "value": "3800",
@@ -37,14 +49,14 @@
           "color": "#1E3A5F"
         },
         {
-          "value": "240",
-          "suffix": "+",
+          "value": "32",
+          "suffix": "",
           "label": "Expert Teachers",
           "note": "Academic support team",
           "color": "#2D6A4F"
         },
         {
-          "value": "35",
+          "value": "36",
           "suffix": " yrs",
           "label": "Years of Excellence",
           "note": "Serving Makwanpur",
@@ -60,14 +72,14 @@
       ],
       "story": {
         "badge": "Our Story",
-        "title": "Building Tomorrow's Leaders Today",
-        "imageTopTitle": "Our School",
+        "title": "Nurturing Minds, Inspiring Futures",
+        "imageTopTitle": "Our Campus",
         "imageTopSubtitle": "Hetauda-2",
         "paragraphs": [
-          "Established with a vision to provide quality education in Makawanpur, Red Rose Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
-          "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development."
+          "At Red Rose English Boarding School, we believe that every child has the potential to learn, grow, and make a difference. Guided by our motto, “For Knowledge and Virtue,” we provide a safe, caring, and inspiring environment where students develop strong academic foundations, confidence, creativity, and moral values.",
+          "Located in Hetauda-16, Hatiya, Makwanpur, our school brings together dedicated teachers, supportive parents, and a vibrant learning community. Through quality education, technology, sports, arts, leadership, and extracurricular activities, we prepare students not only for academic success but also to become responsible citizens, lifelong learners, and future leaders."
         ],
-        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786449653995_images_nGFkbELaa.png",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786944684693_WhatsApp_Image_2026-08-13_at_11.09.05__5__c9c58VhG-.jpeg",
         "buttonText": "Read Our Story",
         "imageZoom": 1,
         "imageOffsetX": 0,
@@ -169,8 +181,8 @@
   },
   "about": {
     "pageBadge": "About Our School",
-    "pageTitle": "Building a Brighter Future, All Student at a Time ",
-    "pageSubtitle": "Rooted in tradition, driven by innovation. We are a community dedicated to nurturing confident, compassionate, and capable learners ready for tomorrow's world.",
+    "pageTitle": "Nurturing Minds, Inspiring Futures",
+    "pageSubtitle": "Where curiosity becomes confidence, values become character, and every child discovers the courage to shape tomorrow.",
     "stats": [
       {
         "id": 1,
@@ -203,34 +215,35 @@
       }
     ],
     "storyBadge": "Our Story",
-    "storyTitle": "Where Passion Meets Purpose with Our Excellent Guidance",
+    "storyTitle": "Shaping Minds. Building Character. Inspiring Futures.",
     "storyParagraphs": [
-      "Founded with a vision to redefine local education, our school has quickly become a cornerstone of academic excellence in our community. We believe that education is not just about textbooks, but about building character, resilience, and a lifelong love for learning.",
-      "Our approach is simple yet profound: provide world-class facilities, encourage creative thinking, and foster an environment where every student feels seen, heard, and empowered to reach their full potential. We prepare students not just for exams, but for life."
+      "At Red Rose English Boarding School, we believe that education is the foundation for successful lives and responsible communities. Located in Hetauda-16, Hatiya, Makwanpur, our school provides a safe, inclusive, and inspiring environment where every child is encouraged to discover their potential, embrace challenges, and grow with confidence. Guided by our motto, “For Knowledge and Virtue,” we nurture not only academic excellence but also integrity, respect, creativity, leadership, and social responsibility.",
+      "Our approach goes beyond textbooks, combining strong academics with practical learning, technology, sports, arts, leadership, and extracurricular opportunities. Through dedicated teachers, personalized guidance, and strong collaboration among parents, school, and community, we support the intellectual, emotional, physical, and social development of every learner. We strive to develop critical thinking, communication, collaboration, resilience, and problem-solving skills while inspiring curiosity and lifelong learning. At Red Rose English Boarding School, we don't just educate students—we inspire lifelong learners, responsible citizens, and future leaders."
     ],
-    "storyImageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786083628004_Screenshot_2026-07-08_110852_uzp9xjRar.png",
+    "storyImageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786944758191_WhatsApp_Image_2026-08-13_at_11.09.06_ALZ9eL40f7.jpeg",
     "storyImageZoom": 1,
     "storyImageOffsetX": 0,
     "storyImageOffsetY": 0,
-    "storyImageTopTitle": "Our Main School",
+    "storyImageTopTitle": "Our Main Campus",
     "storyImageTopSubtitle": "A Hub of Innovation & Learning",
     "storyBadgeYear": "Est. 2010 AD",
     "pillarBadge": "Our Core Values",
     "pillarTitle": "The Principles That Guide Our Community",
-    "pillarDescription": "More than just words on a wall, these values shape our culture, our teaching, and our relationships every single day.",
+    "pillarDescription": "",
     "pillars": [
       {
         "id": 1,
         "icon": "trophy",
         "label": "Academic Excellence",
-        "desc": "We challenge our students to strive for greatness through a rigorous, engaging, and supportive curriculum.",
-        "visible": true
+        "desc": "Our academic programs go beyond textbooks they cultivate deep thinking, creative problem-solving, and a lifelong love for learning that prepares students for excellence in every endeavor.\n\n\n\n\n",
+        "visible": true,
+        "color": "#168A3A"
       },
       {
         "id": 2,
         "icon": "heart",
-        "label": "Character & Integrity",
-        "desc": "We believe that true education is built on a foundation of honesty, respect, and empathy for others........................................................",
+        "label": "Character and Integrity",
+        "desc": "We build character through everyday actions teaching our students that real success is measured not by achievement alone, but by the strength of their principles and the depth of their compassion.",
         "visible": true,
         "color": "#168A3A"
       },
@@ -238,21 +251,22 @@
         "id": 3,
         "icon": "globe",
         "label": "Global Readiness",
-        "desc": "Equipping students with the critical thinking skills and cultural awareness needed to thrive in an interconnected world.",
-        "visible": true
+        "desc": "We prepare students to thrive in an interconnected world—equipping them with adaptable thinking, cultural awareness, and the confidence to embrace diverse perspectives and new opportunities.",
+        "visible": true,
+        "color": "#168A3A"
       }
     ],
     "leadershipBadge": "Our Leadership",
     "leadershipTitle": "Words From Our Staff",
-    "leadershipDescription": "Hear directly from the dedicated educators and leaders who make our school a home for learning.",
+    "leadershipDescription": "Hear directly from the dedicated educators and leaders who make our school a home for learning.wow",
     "messages": [
       {
         "id": 1,
-        "name": "Mr. Ram Sharma",
+        "name": "Sarita Bhandari Dahal",
         "role": "Principal",
-        "title": "Creating Opportunities for Every Child",
-        "message": "Our mission is to provide a safe, nurturing, and academically rigorous environment where every child discovers their unique potential. We are committed to not just teaching lessons, but inspiring a generation of thinkers, leaders, and dreamers.",
-        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&auto=format",
+        "title": "Dear Students, Parents, and Visitors,",
+        "message": "Welcome to Red Rose English Boarding School, where learning is inspired by our commitment to \"For Knowledge and Virtue.\" We believe that every child possesses unique talents and the potential to achieve excellence when provided with the right guidance, opportunities, and encouragement.\nOur dedicated team of educators works tirelessly to create a safe, inclusive, and stimulating learning environment that promotes academic achievement, character development, creativity, and lifelong learning. We strive to prepare our students not only for examinations but also for the challenges and opportunities of the future.\nAt Red Rose English Boarding School, we value the strong partnership between students, parents, teachers, and the community. Together, we nurture confident, compassionate, and responsible individuals who are ready to make a positive difference in society.\nThank you for visiting our website. We invite you to become a part of our school family and join us in shaping a brighter future for every child.",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786945813069_WhatsApp_Image_2026-08-13_at_11.09.05_laP7a31xX.jpeg",
         "imageZoom": 1,
         "imageOffsetX": 0,
         "imageOffsetY": 0,
@@ -260,11 +274,11 @@
       },
       {
         "id": 2,
-        "name": "Mrs. Sita Poudel",
-        "role": "Vice Principal",
-        "title": "A Commitment to Excellence",
-        "message": "Behind every great school is a dedicated team. Our educators are our greatest asset, working tirelessly to ensure that no child is left behind. Through innovation, compassion, and unwavering dedication, we are making a real difference in the community.",
-        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&auto=format",
+        "name": "Madan Dahal",
+        "role": "Founder",
+        "title": "Dear Students, Parents, and Well-Wishers,",
+        "message": "It gives me immense pleasure to welcome you to Red Rose English Boarding School. When this institution was established, the vision was simple yet profound—to provide quality education that nurtures both knowledge and character, empowering young minds to become responsible, confident, and compassionate citizens.\nEducation is not merely about academic success; it is about developing values, discipline, curiosity, and the courage to face life's challenges. At Red Rose English Boarding School, we are committed to creating an environment where every child is respected, inspired, and encouraged to discover their full potential.\nThe success of our school is the result of the unwavering dedication of our teachers, the trust of our parents, the hard work of our students, and the continued support of our community. Together, we have built a learning community that strives for excellence while remaining grounded in integrity, respect, and service.\nAs we continue this journey, we remain committed to preparing our students not only for academic achievement but also for meaningful lives as ethical leaders and lifelong learners.\nThank you for your trust and confidence in Red Rose English Boarding School. We look forward to continuing this journey of excellence together.",
+        "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786945929335_WhatsApp_Image_2026-08-13_at_11.09.06_55wyP3psQ0.jpeg",
         "imageZoom": 1,
         "imageOffsetX": 0,
         "imageOffsetY": 0,
@@ -293,35 +307,42 @@
     "journey": [
       {
         "id": 1,
-        "year": "2010 AD",
-        "title": "School Founded",
-        "desc": "Our school opens with a vision to deliver modern, high-quality education to the local community.",
+        "year": "SCHOOL ESTABLISHED",
+        "title": "A Vision for Quality Education",
+        "desc": "Red Rose English Boarding School was established with a simple yet meaningful goal—to provide quality education that nurtures knowledge, character, creativity, and lifelong learning. From the beginning, the school focused on creating a strong foundation where children could learn, grow, and discover their potential.",
         "visible": true
       },
       {
         "id": 2,
-        "year": "2015 AD",
-        "title": "Expanded To Secondary",
-        "desc": "Rising demand pushed the school to extend its academic structure, offering education up to Grade 10.",
+        "year": "BUILDING A CARING COMMUNITY",
+        "title": "A Safe Place to Learn and Grow",
+        "desc": "As the school grew, it developed a safe, caring, and inspiring environment where every child could discover their abilities. Through academic excellence, discipline, and holistic development, Red Rose earned the confidence of parents and the respect of the wider community.",
         "visible": true
       },
       {
         "id": 3,
         "year": "2018 AD",
-        "title": "Academic Achievements",
-        "desc": "Focused classroom teaching and dedicated staff began producing some of the region's strongest exam results.",
+        "title": "Growing Through Innovation",
+        "desc": "The school continuously strengthened its academic programs and embraced modern teaching methodologies. Technology was integrated into classrooms while students were given greater opportunities to develop their skills through sports, arts, leadership, and extracurricular activities.",
         "visible": true
       },
       {
         "id": 4,
-        "year": "Today",
-        "title": "A Growing Community",
-        "desc": "A vibrant community of over 2,500 students, 180+ educators, and a shared focus on holistic excellence.",
+        "year": "DEVELOPING THE WHOLE CHILD",
+        "title": "Beyond Textbooks",
+        "desc": "Red Rose believes that education extends beyond textbooks. The school focuses on developing critical thinking, creativity, communication, collaboration, and strong moral values, helping students become confident, responsible, and compassionate learners prepared for an ever-changing world.",
+        "visible": true
+      },
+      {
+        "id": 1786945224004,
+        "year": "OUR JOURNEY CONTINUES",
+        "title": "For Knowledge and Virtue",
+        "desc": "Today, Red Rose English Boarding School remains committed to innovation, excellence, and the holistic development of every student. Guided by the motto \"For Knowledge and Virtue,\"** the school continues to empower young minds to become responsible citizens, lifelong learners, and future leaders, supported by students, parents, teachers, alumni, and the entire Red Rose family.",
         "visible": true
       }
     ],
     "ctaTitle": "Ready to Join Our Community?",
-    "ctaDescription": "Experience our School, meet our dedicated faculty, and see firsthand how we nurture the leaders of tomorrow.",
+    "ctaDescription": "Experience our campus, meet our dedicated faculty, and see firsthand how we nurture the leaders of tomorrow.",
     "ctaButtonText": "Schedule a Visit",
     "ctaButtonLink": "/contact",
     "storyImageAlt": ""

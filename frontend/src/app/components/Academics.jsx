@@ -1,58 +1,299 @@
-// AcademicsPage.jsx
-import { useEffect, useRef, useState } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  BookOpen,
-  Users,
-  Award,
-  GraduationCap,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  Target,
-  Sparkles,
-  Globe,
-  Layout,
-  FlaskConical,
-  Heart,
-  Trophy,
-  Zap,
-  Shield,
-  CheckCircle,
-  CheckCircle2,
-  Brain,
-  Lightbulb,
-  Clock,
-  FileText,
-  Compass,
-} from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { AnimatePresence, motion, useInView } from "framer-motion";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
-// ============ COLOR PALETTE ============
+// ============================================================
+// RED ROSE ACADEMICS PAGE
+// Simple editorial design — matched to the About page
+// ============================================================
+
 const theme = {
-  primary: "#1A5276",
-  secondary: "#1E8449",
-  accent1: "#D4AC0D",
-  accent2: "#E67E22",
-  accent3: "#7D3C98",
-  accent4: "#2E86C1",
-  light: "#F8F6F0",
-  dark: "#0A1628",
-  gray: "#5D6D7E",
-  lightGray: "#EAE5DE",
+  ink: "#1E1420",
+  paper: "#F5EEE2",
+  paperDeep: "#E9DCC4",
+  card: "#FBF7EE",
+  rose: "#9C2748",
+  roseDeep: "#6E1733",
+  roseBright: "#C6486B",
+  gold: "#B98A42",
+  goldSoft: "#E7CE9C",
+  moss: "#3F5B49",
+  text: "#2B1E23",
+  textMuted: "#7C6B6F",
   white: "#FFFFFF",
-  gradient1: "linear-gradient(135deg, #0A1628 0%, #1A5276 100%)",
-  gradient2: "linear-gradient(135deg, #D4AC0D 0%, #E67E22 100%)",
-  gradient3: "linear-gradient(135deg, #7D3C98 0%, #2E86C1 100%)",
-  gradient4: "linear-gradient(135deg, #1E8449 0%, #2E86C1 100%)",
-  gradient5: "linear-gradient(135deg, #FEF9E7 0%, #FDEBD0 100%)",
-  gradient6: "linear-gradient(135deg, #E8F8F5 0%, #D4EFDF 100%)",
-  gradient7: "linear-gradient(135deg, #F4ECF7 0%, #E8DAEF 100%)",
-  gradient8: "linear-gradient(135deg, #EBF5FB 0%, #D4E6F1 100%)",
 };
 
-// ============ CLASS LEVELS & DETAILED CURRICULUM DATA ============
+// ============================================================
+// GLOBAL STYLES
+// ============================================================
+
+function AcademicsStyles() {
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+      .rr-academics {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        color: ${theme.text};
+        background: ${theme.paper};
+      }
+
+      .rr-academics *,
+      .rr-academics *::before,
+      .rr-academics *::after {
+        box-sizing: border-box;
+      }
+
+      .rr-serif {
+        font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+      }
+
+      .rr-mono {
+        font-family: 'Space Grotesk', 'IBM Plex Mono', monospace;
+      }
+
+      .rr-academics button:focus-visible {
+        outline: 2px solid ${theme.gold};
+        outline-offset: 3px;
+      }
+
+      .rr-academics-panel-grid {
+        grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+      }
+
+      .rr-academics-hero-card::after {
+        content: "";
+        position: absolute;
+        z-index: 3;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 30px;
+        background: ${theme.paper};
+        clip-path: polygon(
+          0 38%, 2% 72%, 4% 38%, 6% 72%, 8% 38%, 10% 72%,
+          12% 38%, 14% 72%, 16% 38%, 18% 72%, 20% 38%, 22% 72%,
+          24% 38%, 26% 72%, 28% 38%, 30% 72%, 32% 38%, 34% 72%,
+          36% 38%, 38% 72%, 40% 38%, 42% 72%, 44% 38%, 46% 72%,
+          48% 38%, 50% 72%, 52% 38%, 54% 72%, 56% 38%, 58% 72%,
+          60% 38%, 62% 72%, 64% 38%, 66% 72%, 68% 38%, 70% 72%,
+          72% 38%, 74% 72%, 76% 38%, 78% 72%, 80% 38%, 82% 72%,
+          84% 38%, 86% 72%, 88% 38%, 90% 72%, 92% 38%, 94% 72%,
+          96% 38%, 98% 72%, 100% 38%, 100% 100%, 0 100%
+        );
+      }
+
+      .rr-strength-accent {
+        position: absolute;
+        top: 0;
+        left: 32px;
+        width: 42px;
+        height: 7px;
+        border-radius: 0 0 7px 7px;
+        z-index: 3;
+        transition: width 0.4s ease;
+      }
+
+      .rr-strength-card:hover .rr-strength-accent {
+        width: 70px;
+      }
+
+      .rr-strength-letter {
+        position: absolute;
+        top: -12px;
+        right: 16px;
+        z-index: 1;
+        color: rgba(156,39,72,0.055);
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: 118px;
+        line-height: 1;
+        font-weight: 600;
+        pointer-events: none;
+        transition: all 0.5s ease;
+      }
+
+      .rr-strength-card:hover .rr-strength-letter {
+        transform: scale(1.08) rotate(-2deg);
+        opacity: 0.12;
+      }
+
+      .rr-achievement-card {
+        transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .rr-achievement-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 50px rgba(30,20,32,0.10);
+        border-color: ${theme.gold}55;
+      }
+
+      .rr-achievement-card:hover .rr-achievement-line {
+        width: 70px;
+        opacity: 0.6;
+      }
+
+      .rr-achievement-line {
+        transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .rr-level-card {
+        transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .rr-level-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 40px rgba(30,20,32,0.08) !important;
+      }
+
+      .rr-level-card .rr-level-select {
+        transition: all 0.3s ease;
+      }
+
+      .rr-level-card:hover .rr-level-select {
+        transform: translateX(4px);
+      }
+
+      .rr-subject-row {
+        transition: all 0.3s ease;
+      }
+
+      .rr-subject-row:hover {
+        background: ${theme.paper};
+        border-color: ${theme.gold}30;
+        transform: translateX(4px);
+      }
+
+      .rr-strength-card {
+        transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .rr-strength-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 50px rgba(30,20,32,0.08);
+      }
+
+      .rr-strength-card:hover .rr-card-line {
+        width: 70px;
+      }
+
+      .rr-card-line {
+        transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .rr-assessment-method {
+        transition: all 0.3s ease;
+      }
+
+      .rr-assessment-method:hover {
+        background: ${theme.card};
+        transform: translateX(4px);
+        border-color: ${theme.gold}30;
+      }
+
+      .rr-class-tab {
+        transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .rr-class-tab:hover:not(.active) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30,20,32,0.06);
+      }
+
+      .rr-class-tab.active {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(156,39,72,0.20);
+      }
+
+      @media (max-width: 1000px) {
+        .rr-academics-strengths-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 900px) {
+        .rr-academics-panel-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .rr-academics-strengths-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .rr-academics-hero {
+          padding-top: 28px !important;
+          padding-bottom: 48px !important;
+        }
+
+        .rr-academics-hero-card {
+          min-height: 0 !important;
+          border-radius: 0 0 24px 24px !important;
+        }
+
+        .rr-academics-hero-inner {
+          padding: 54px 24px 72px !important;
+        }
+
+        .rr-academics-strengths-grid {
+          grid-template-columns: 1fr !important;
+        }
+
+        .rr-academics-levels,
+        .rr-academics-strengths,
+        .rr-academics-achievements,
+        .rr-academics-assessment {
+          padding-left: 18px !important;
+          padding-right: 18px !important;
+        }
+
+        .rr-academics-level-card {
+          padding: 20px !important;
+        }
+
+        .rr-academics-curriculum {
+          padding: 24px 18px !important;
+        }
+
+        .rr-academics-subject-row {
+          align-items: flex-start !important;
+          flex-direction: column !important;
+          gap: 8px !important;
+        }
+
+        .rr-academics-subject-right {
+          width: 100%;
+          justify-content: space-between !important;
+        }
+
+        .rr-achievements-grid {
+          grid-template-columns: 1fr !important;
+        }
+      }
+
+      @media (max-width: 500px) {
+        .rr-achievements-grid {
+          grid-template-columns: 1fr !important;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .rr-academics *,
+        .rr-academics *::before,
+        .rr-academics *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+    `}</style>
+  );
+}
+
+// ============================================================
+// CLASS LEVELS & CURRICULUM DATA
+// ============================================================
+
 const classLevelsData = [
   {
     id: "pre-primary",
@@ -60,11 +301,9 @@ const classLevelsData = [
     shortBadge: "Early Childhood",
     span: "Play Group, Nursery, LKG, UKG",
     ageGroup: "3 – 5.5 Years",
-    icon: Brain,
-    color: "#D4AC0D",
-    bgAccent: "rgba(212, 172, 13, 0.08)",
-    borderAccent: "rgba(212, 172, 13, 0.25)",
-    gradient: theme.gradient5,
+    color: theme.gold,
+    bgAccent: "rgba(185, 138, 66, 0.12)",
+    borderAccent: "rgba(185, 138, 66, 0.25)",
     tagline: "Foundation of Curiosity, Play-Based Learning & Motor Skills",
     description:
       "Our early childhood program nurtures young minds through playful exploration, sensory exercises, phonics, storytelling, and creative arts in a safe and supportive environment.",
@@ -115,11 +354,9 @@ const classLevelsData = [
     shortBadge: "Grades 1 – 5",
     span: "Class 1 to Class 5",
     ageGroup: "6 – 10 Years",
-    icon: BookOpen,
-    color: "#1E8449",
-    bgAccent: "rgba(30, 132, 73, 0.08)",
-    borderAccent: "rgba(30, 132, 73, 0.25)",
-    gradient: theme.gradient6,
+    color: theme.rose,
+    bgAccent: "rgba(156, 39, 72, 0.10)",
+    borderAccent: "rgba(156, 39, 72, 0.20)",
     tagline: "Core Academic Fundamentals & Integrated STEAM Activities",
     description:
       "Building strong intellectual foundations in languages, mathematics, general science, and social studies alongside computer literacy, art, and moral education.",
@@ -171,11 +408,9 @@ const classLevelsData = [
     shortBadge: "Grades 6 – 8",
     span: "Class 6 to Class 8",
     ageGroup: "11 – 13 Years",
-    icon: Lightbulb,
-    color: "#7D3C98",
-    bgAccent: "rgba(125, 60, 152, 0.08)",
-    borderAccent: "rgba(125, 60, 152, 0.25)",
-    gradient: theme.gradient7,
+    color: theme.moss,
+    bgAccent: "rgba(63, 91, 73, 0.10)",
+    borderAccent: "rgba(63, 91, 73, 0.20)",
     tagline: "Critical Thinking, Laboratory Science & District BLE Exam Prep",
     description:
       "Empowering students to think analytically, conduct laboratory experiments, build digital applications, and prepare for district-level Basic Level Examinations (BLE).",
@@ -210,11 +445,9 @@ const classLevelsData = [
     shortBadge: "Grades 9 – 10 (SEE)",
     span: "Class 9 & Class 10",
     ageGroup: "14 – 16 Years",
-    icon: GraduationCap,
-    color: "#2E86C1",
-    bgAccent: "rgba(46, 134, 193, 0.08)",
-    borderAccent: "rgba(46, 134, 193, 0.25)",
-    gradient: theme.gradient8,
+    color: "#4A2C6E",
+    bgAccent: "rgba(74, 44, 110, 0.10)",
+    borderAccent: "rgba(74, 44, 110, 0.20)",
     tagline: "Secondary Education Examination (SEE) Prep & Specialized Electives",
     description:
       "Intensive academic preparation for the National Examination Board (NEB) Secondary Education Examination (SEE), featuring specialized electives, advanced science labs, and career counseling.",
@@ -244,95 +477,78 @@ const classLevelsData = [
   },
 ];
 
-// ============ CONTENT ============
+// ============================================================
+// CONTENT
+// ============================================================
+
 const defaultAcademicsData = {
   hero: {
     badge: "Excellence in Education",
-    title: "Empowering Minds Shaping Futures",
+    title: "Empowering Minds, Shaping Futures.",
     subtitle: "Nurturing the next generation of thinkers, innovators, and leaders through quality education.",
     description:
       "At Red Rose Secondary English Boarding School, education extends beyond textbooks. Our comprehensive academic framework integrates intellectual rigor, creative exploration, ethical grounding, and real-world readiness from early childhood through secondary education.",
   },
   stats: [
-    { value: "1500", suffix: "+", label: "Active Learners", color: theme.accent1 },
-    { value: "85", suffix: "+", label: "Dedicated Educators", color: theme.accent2 },
-    { value: "35", suffix: "+", label: "Years of Impact", color: theme.secondary },
-    { value: "100", suffix: "%", label: "SEE Pass Rate", color: theme.primary },
+    { value: "1500", suffix: "+", label: "Active Learners", color: theme.rose },
+    { value: "85", suffix: "+", label: "Dedicated Educators", color: theme.gold },
+    { value: "55", suffix: "+", label: "Years of Impact", color: theme.moss },
+    { value: "100", suffix: "%", label: "SEE Pass Rate", color: "#4A2C6E" },
   ],
   strengths: [
     {
       id: 1,
       title: "Innovation Hub",
       description: "State-of-the-art learning spaces with interactive technology and collaborative zones.",
-      icon: Layout,
-      color: theme.primary,
-      gradient: theme.gradient5,
+      color: theme.rose,
     },
     {
       id: 2,
       title: "STEM Excellence",
       description: "Robust science, technology, engineering, and mathematics programs with hands-on experimentation.",
-      icon: FlaskConical,
-      color: theme.secondary,
-      gradient: theme.gradient6,
+      color: theme.moss,
     },
     {
       id: 3,
       title: "Global Perspective",
       description: "Integrated curriculum emphasizing critical thinking and cross-cultural communication.",
-      icon: Globe,
-      color: theme.accent1,
-      gradient: theme.gradient5,
+      color: theme.gold,
     },
     {
       id: 4,
       title: "Arts & Expression",
       description: "Comprehensive arts education nurturing creativity through visual arts, music, and performance.",
-      icon: Sparkles,
-      color: theme.accent2,
-      gradient: theme.gradient5,
+      color: "#C6486B",
     },
     {
       id: 5,
       title: "Character Development",
       description: "Values-based education cultivating integrity, empathy, and social responsibility.",
-      icon: Heart,
-      color: theme.accent3,
-      gradient: theme.gradient7,
+      color: "#4A2C6E",
     },
     {
       id: 6,
       title: "Future Ready",
       description: "Career and college counseling with mentorship pathways and leadership development.",
-      icon: Target,
-      color: theme.accent4,
-      gradient: theme.gradient8,
+      color: "#2D6A4F",
     },
   ],
   achievements: [
     {
       title: "Academic Excellence Awards",
       description: "Consistent top-tier SEE performance and regional academic honors in Makwanpur.",
-      icon: Trophy,
-      gradient: theme.gradient5,
     },
     {
       title: "Science & STEM Showcase",
       description: "Student science exhibition projects recognized at district and national youth fairs.",
-      icon: Zap,
-      gradient: theme.gradient6,
     },
     {
       title: "Community & Service",
       description: "Student-led service initiatives contributing to local literacy and environmental projects.",
-      icon: Shield,
-      gradient: theme.gradient7,
     },
     {
       title: "Co-Curricular Triumphs",
       description: "Championship trophies in inter-school football, athletics, and cultural dance competitions.",
-      icon: Globe,
-      gradient: theme.gradient8,
     },
   ],
   assessment: {
@@ -349,1279 +565,1367 @@ const defaultAcademicsData = {
   },
 };
 
-// ============ COMPONENT ============
+// ============================================================
+// SECTION INTRO
+// ============================================================
+
+function SectionIntro({ eyebrow, title, description, align = "left" }) {
+  const centered = align === "center";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6 }}
+      style={{
+        maxWidth: centered ? "720px" : "760px",
+        margin: centered ? "0 auto 42px" : "0 0 34px",
+        textAlign: centered ? "center" : "left",
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, x: -10 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: centered ? "center" : "flex-start",
+          gap: "12px",
+          marginBottom: "14px",
+        }}
+      >
+        <span
+          style={{
+            width: "34px",
+            height: "1px",
+            background: theme.gold,
+          }}
+        />
+        <span
+          className="rr-mono"
+          style={{
+            color: theme.rose,
+            fontSize: "11px",
+            fontWeight: 700,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+          }}
+        >
+          {eyebrow}
+        </span>
+      </motion.div>
+
+      <motion.h2
+        className="rr-serif"
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+        style={{
+          margin: 0,
+          color: theme.ink,
+          fontSize: "clamp(2rem, 4vw, 3.15rem)",
+          lineHeight: 1.05,
+          fontWeight: 600,
+          letterSpacing: "-0.025em",
+        }}
+        dangerouslySetInnerHTML={{ __html: title }}
+      />
+
+      {description && (
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          style={{
+            margin: "16px auto 0",
+            maxWidth: centered ? "650px" : "700px",
+            color: theme.textMuted,
+            fontSize: "15px",
+            lineHeight: 1.75,
+          }}
+        >
+          {description}
+        </motion.p>
+      )}
+    </motion.div>
+  );
+}
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
+
 const AcademicsPage = () => {
-  const [data] = useState(defaultAcademicsData);
   const [activeLevelId, setActiveLevelId] = useState("primary");
   const [activeClassIndex, setActiveClassIndex] = useState(0);
 
-  const statsRef = useRef(null);
-  const isStatsInView = useInView(statsRef, { once: true, amount: 0.3 });
+  const data = defaultAcademicsData;
 
-  const activeLevel = classLevelsData.find((lvl) => lvl.id === activeLevelId) || classLevelsData[1];
-  const activeClass = activeLevel.classes[activeClassIndex] || activeLevel.classes[0];
+  const activeLevel =
+    classLevelsData.find((level) => level.id === activeLevelId) ||
+    classLevelsData[1];
+
+  const activeClass =
+    activeLevel.classes[activeClassIndex] || activeLevel.classes[0];
 
   const handleSelectLevel = (levelId) => {
     setActiveLevelId(levelId);
     setActiveClassIndex(0);
   };
 
-  const Counter = ({ target, suffix, duration = 2000 }) => {
-    const [count, setCount] = useState(0);
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, amount: 0.5 });
-
-    useEffect(() => {
-      if (!isInView) return;
-      let start = 0;
-      const end = parseInt(target) || 0;
-      const increment = end / (duration / 16);
-
-      const timer = setInterval(() => {
-        start += increment;
-        if (start >= end) {
-          setCount(end);
-          clearInterval(timer);
-        } else {
-          setCount(Math.floor(start));
-        }
-      }, 16);
-
-      return () => clearInterval(timer);
-    }, [isInView, target, duration]);
-
-    return (
-      <span ref={ref}>
-        {count}
-        {suffix}
-      </span>
-    );
-  };
-
   return (
-    <div className="academics-page" style={styles.pageContainer}>
-      {/* ===== ACADEMICS INTRO SECTION ===== */}
-      <section className="academics-intro-section" style={styles.heroSection}>
-        <div className="academics-intro-container" style={styles.heroContainer}>
-          <div style={styles.heroGlowOne} />
-          <div style={styles.heroGlowTwo} />
-          <div style={styles.heroOrbOne} />
-          <div style={styles.heroOrbTwo} />
+    <div className="rr-academics" style={styles.page}>
+      <AcademicsStyles />
 
-          <div className="academics-intro-content" style={styles.heroContent}>
+      {/* ======================================================
+          HERO — compact single-container design like About page
+      ====================================================== */}
+      <section className="rr-academics-hero" style={styles.hero}>
+        <motion.div
+          className="rr-academics-hero-card"
+          initial={{ opacity: 0, y: 30, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          style={styles.heroCard}
+        >
+          <div className="rr-academics-hero-inner" style={styles.heroInner}>
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              style={styles.heroText}
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.1 }}
-                style={styles.heroBadge}
-              >
-                <Sparkles size={15} />
-                {data.hero.badge}
-              </motion.div>
-
-              <h1 style={styles.heroTitle}>
-                Empowering Minds,
-                <br />
-                <span style={styles.heroTitleHighlight}>Shaping Futures.</span>
-              </h1>
-
-              <div style={styles.heroRule} />
-
-              <div className="academics-intro-description" style={styles.heroDescriptionBlock}>
-                <p style={styles.heroSubtitle}>{data.hero.subtitle}</p>
-                <p style={styles.heroDescription}>{data.hero.description}</p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 35 }}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.75, delay: 0.15 }}
-              className="academics-intro-message"
-              style={styles.heroMessage}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              style={styles.eyebrow}
             >
-              <span style={styles.heroMessageNumber}>01</span>
-              <span style={styles.heroMessageLabel}>ACADEMIC FOUNDATION</span>
-              <div style={styles.heroMessageLine} />
-              <p style={styles.heroMessageText}>
-                A balanced academic journey built around knowledge,
-                curiosity, creativity, confidence and character.
-              </p>
-
-              <div style={styles.heroMessageDots}>
-                <span style={styles.heroMessageDotActive} />
-                <span style={styles.heroMessageDot} />
-                <span style={styles.heroMessageDot} />
-              </div>
+              <span style={styles.eyebrowLine} />
+              <span className="rr-mono">Excellence in Education</span>
             </motion.div>
+
+            <motion.h1
+              className="rr-serif"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              style={styles.heroTitle}
+            >
+              Empowering Minds,
+              <br />
+              <span style={{ color: theme.goldSoft }}>Shaping Futures.</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              style={styles.heroLead}
+            >
+              {data.hero.subtitle}
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              style={styles.heroDescription}
+            >
+              {data.hero.description}
+            </motion.p>
           </div>
-
-          <div style={styles.heroBottomWave} />
-          <div style={styles.heroGoldEdge} />
-        </div>
-
-        <style>{`
-          @media (max-width: 900px) {
-            .academics-intro-content {
-              grid-template-columns: 1fr !important;
-              gap: 28px !important;
-              height: auto !important;
-              min-height: 520px !important;
-              height: auto !important;
-              padding: 55px 28px !important;
-            }
-
-            .academics-intro-message {
-              border-left: 0 !important;
-              border-top: 1px solid rgba(255,255,255,0.2) !important;
-              padding: 28px 0 0 !important;
-            }
-
-            .academics-intro-message {
-              max-width: 100% !important;
-              border-left: 0 !important;
-              border-top: 1px solid rgba(255,255,255,0.22) !important;
-              padding-left: 0 !important;
-              padding-top: 24px !important;
-            }
-          }
-
-          @media (max-width: 600px) {
-            .academics-intro-section {
-              padding: 25px 14px !important;
-            }
-
-            .academics-intro-container {
-              border-radius: 25px !important;
-            }
-
-            .academics-intro-content {
-              padding: 38px 25px !important;
-            }
-
-            .academics-intro-message {
-              padding-top: 20px !important;
-            }
-          }
-        `}</style>
+        </motion.div>
       </section>
 
-      {/* ===== STATS SECTION ===== */}
-      <section ref={statsRef} style={styles.statsSection}>
-        <div style={styles.statsContainer}>
-          {data.stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isStatsInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              style={{ ...styles.statCard, borderTopColor: stat.color }}
-            >
-              <div style={{ ...styles.statBar, background: stat.color }} />
-              <div style={{ ...styles.statValue, color: stat.color }}>
-                <Counter target={stat.value} suffix={stat.suffix} />
-              </div>
-              <div style={styles.statLabel}>{stat.label}</div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      {/* ======================================================
+          CLASS LEVELS
+      ====================================================== */}
+      <section
+        id="class-levels"
+        className="rr-academics-levels"
+        style={styles.levelsSection}
+      >
+        <SectionIntro
+          eyebrow="Academic Structure"
+          title='Explore Our <span style="color: #9C2748;">Class Levels</span>'
+          description="Explore each academic stage to see the classes, subjects, weekly learning hours, curriculum highlights, and assessment structure."
+          align="center"
+        />
 
-      {/* ===== INTERACTIVE CLASS LEVELS & CURRICULUM EXPLORER ===== */}
-      <section style={styles.levelsSection} id="class-levels">
-        <div style={styles.sectionHeader}>
-          <span style={styles.sectionBadge}>Academic Structure & Curriculum</span>
-          <h2 style={styles.sectionTitle}>
-            Explore Our <span style={styles.sectionTitleHighlight}>Class Levels</span>
-          </h2>
-          <p style={styles.sectionDescription}>
-            Click on any academic level below to view the classes, subjects, weekly credit hours, curriculum highlights, and grading structure.
-          </p>
-          <div style={styles.sectionDivider} />
-        </div>
-
-        {/* 4 Class Level Cards Grid */}
-        <div style={styles.levelsGrid}>
-          {classLevelsData.map((level) => {
-            const Icon = level.icon;
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          style={styles.levelsGrid}
+        >
+          {classLevelsData.map((level, index) => {
             const isActive = level.id === activeLevelId;
 
             return (
               <motion.button
                 key={level.id}
                 type="button"
+                className="rr-level-card"
                 onClick={() => handleSelectLevel(level.id)}
-                whileHover={{ y: -4 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                whileHover={{ y: -5 }}
                 whileTap={{ scale: 0.98 }}
                 style={{
                   ...styles.levelCard,
-                  background: isActive ? "#FFFFFF" : level.gradient,
-                  border: isActive ? `2px solid ${level.color}` : "1px solid rgba(0,0,0,0.06)",
-                  boxShadow: isActive ? `0 12px 32px ${level.color}25` : "0 4px 16px rgba(0,0,0,0.04)",
+                  borderColor: isActive ? level.color : theme.paperDeep,
+                  boxShadow: isActive
+                    ? `0 12px 30px ${level.color}18`
+                    : "0 5px 18px rgba(30,20,32,0.035)",
                 }}
               >
-                <div style={{ ...styles.levelCardTop, background: level.bgAccent }}>
-                  <Icon size={26} color={level.color} />
-                  <span style={{ ...styles.levelSpanTag, color: level.color, background: "#FFFFFF" }}>
+                <div style={styles.levelCardNumber}>
+                  <span
+                    className="rr-mono"
+                    style={{
+                      color: isActive ? level.color : theme.textMuted,
+                    }}
+                  >
+                    0{index + 1}
+                  </span>
+
+                  <span
+                    style={{
+                      ...styles.levelBadge,
+                      color: level.color,
+                      background: level.bgAccent,
+                    }}
+                  >
                     {level.shortBadge}
                   </span>
                 </div>
 
-                <h3 style={{ ...styles.levelName, color: isActive ? level.color : theme.dark }}>
-                  {level.name}
-                </h3>
-                <p style={styles.levelSpan}>{level.span}</p>
-                <div style={styles.levelAgePill}>Age: {level.ageGroup}</div>
-
-                <div
+                <h3
+                  className="rr-serif"
                   style={{
-                    ...styles.levelSelectBtn,
-                    background: isActive ? level.color : "transparent",
-                    color: isActive ? "#FFFFFF" : level.color,
-                    border: `1px solid ${level.color}`,
+                    ...styles.levelName,
+                    color: isActive ? level.color : theme.ink,
                   }}
                 >
-                  <span>{isActive ? "Viewing Curriculum" : "Click to Explore"}</span>
-                  {isActive ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {level.name}
+                </h3>
+
+                <p style={styles.levelSpan}>{level.span}</p>
+
+                <span
+                  style={{
+                    ...styles.levelAgePill,
+                    color: level.color,
+                    background: level.bgAccent,
+                  }}
+                >
+                  Age {level.ageGroup}
+                </span>
+
+                <div
+                  className="rr-level-select"
+                  style={{
+                    ...styles.levelSelect,
+                    color: isActive ? theme.white : level.color,
+                    background: isActive ? level.color : "transparent",
+                    borderColor: level.color,
+                  }}
+                >
+                  <span>
+                    {isActive ? "Viewing Curriculum" : "Explore Level"}
+                  </span>
+                  {isActive ? (
+                    <ChevronDown size={15} />
+                  ) : (
+                    <ChevronRight size={15} />
+                  )}
                 </div>
               </motion.button>
             );
           })}
-        </div>
+        </motion.div>
 
-        {/* EXPANDED CURRICULUM VIEWER PANEL */}
+        {/* ====================================================
+            CURRICULUM DETAIL
+        ==================================================== */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeLevel.id}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.4 }}
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -15, scale: 0.96 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="rr-academics-curriculum"
             style={{
               ...styles.curriculumPanel,
-              borderTop: `4px solid ${activeLevel.color}`,
+              borderTopColor: activeLevel.color,
             }}
           >
-            {/* Panel Header */}
-            <div style={styles.panelHeader}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              style={styles.panelHeader}
+            >
               <div style={styles.panelHeaderLeft}>
                 <span
+                  className="rr-mono"
                   style={{
-                    ...styles.panelLevelBadge,
-                    background: activeLevel.bgAccent,
+                    ...styles.panelBadge,
                     color: activeLevel.color,
-                    border: `1px solid ${activeLevel.borderAccent}`,
+                    background: activeLevel.bgAccent,
+                    borderColor: activeLevel.borderAccent,
                   }}
                 >
-                  {activeLevel.name} • {activeLevel.span}
+                  {activeLevel.name} · {activeLevel.span}
                 </span>
-                <h3 style={styles.panelTitle}>{activeLevel.tagline}</h3>
-                <p style={styles.panelDescription}>{activeLevel.description}</p>
+
+                <h3 className="rr-serif" style={styles.panelTitle}>
+                  {activeLevel.tagline}
+                </h3>
+
+                <p style={styles.panelDescription}>
+                  {activeLevel.description}
+                </p>
               </div>
 
-              <div style={styles.panelHeaderRight}>
-                <div style={{ ...styles.ageCard, borderColor: activeLevel.borderAccent }}>
-                  <Clock size={18} color={activeLevel.color} />
-                  <div>
-                    <div style={styles.ageCardLabel}>Target Age</div>
-                    <div style={styles.ageCardValue}>{activeLevel.ageGroup}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              <motion.div
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                style={{
+                  ...styles.ageCard,
+                  borderColor: activeLevel.borderAccent,
+                }}
+              >
+                <span
+                  className="rr-mono"
+                  style={{
+                    color: theme.textMuted,
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                  }}
+                >
+                  Target Age                </span>
+                <strong style={{ color: activeLevel.color }}>
+                  {activeLevel.ageGroup}
+                </strong>
+              </motion.div>
+            </motion.div>
 
-            {/* Class Selector Tabs */}
             {activeLevel.classes.length > 1 && (
-              <div style={styles.classTabsContainer}>
-                <span style={styles.classTabLabel}>Select Class / Stream:</span>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.15 }}
+                style={styles.classTabsContainer}
+              >
+                <span
+                  className="rr-mono"
+                  style={styles.classTabLabel}
+                >
+                  Select Class / Stream
+                </span>
+
                 <div style={styles.classTabsGroup}>
-                  {activeLevel.classes.map((cls, idx) => (
-                    <button
+                  {activeLevel.classes.map((cls, index) => (
+                    <motion.button
                       key={cls.id}
                       type="button"
-                      onClick={() => setActiveClassIndex(idx)}
+                      className={`rr-class-tab ${activeClassIndex === index ? "active" : ""}`}
+                      onClick={() => setActiveClassIndex(index)}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
                       style={{
                         ...styles.classTabBtn,
-                        background: activeClassIndex === idx ? activeLevel.color : "#FFFFFF",
-                        color: activeClassIndex === idx ? "#FFFFFF" : theme.dark,
-                        border: `1px solid ${activeClassIndex === idx ? activeLevel.color : "rgba(0,0,0,0.1)"}`,
-                        fontWeight: activeClassIndex === idx ? "700" : "600",
+                        background:
+                          activeClassIndex === index
+                            ? activeLevel.color
+                            : theme.card,
+                        color:
+                          activeClassIndex === index
+                            ? theme.white
+                            : theme.ink,
+                        borderColor:
+                          activeClassIndex === index
+                            ? activeLevel.color
+                            : theme.paperDeep,
                       }}
                     >
                       {cls.name}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
 
-            {/* Active Class Curriculum Content */}
-            <div style={styles.curriculumContentGrid}>
-              {/* Left Column: Subjects Breakdown */}
-              <div style={styles.subjectsColumn}>
-                <div style={styles.subColumnHeader}>
-                  <BookOpen size={20} color={activeLevel.color} />
-                  <h4 style={styles.subColumnTitle}>
-                    Subject Breakdown & Credit Hours ({activeClass.name})
-                  </h4>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="rr-academics-panel-grid"
+              style={styles.curriculumGrid}
+            >
+              {/* SUBJECTS */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+                style={styles.innerCard}
+              >
+                <div style={styles.innerHeading}>
+                  <span
+                    style={{
+                      ...styles.headingDot,
+                      background: activeLevel.color,
+                    }}
+                  />
+                  <div>
+                    <span className="rr-mono" style={styles.headingEyebrow}>
+                      Curriculum
+                    </span>
+                    <h4 style={styles.innerTitle}>
+                      Subject Breakdown
+                    </h4>
+                  </div>
                 </div>
 
+                <p style={styles.innerSubtext}>{activeClass.name}</p>
+
                 <div style={styles.subjectsList}>
-                  {activeClass.subjects.map((sub, idx) => (
-                    <div key={idx} style={styles.subjectRow}>
-                      <div style={styles.subjectRowLeft}>
-                        <div
+                  {activeClass.subjects.map((subject, index) => (
+                    <motion.div
+                      key={index}
+                      className="rr-subject-row"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
+                      style={styles.subjectRow}
+                    >
+                      <div style={styles.subjectLeft}>
+                        <span
                           style={{
                             ...styles.subjectBullet,
                             background: activeLevel.color,
                           }}
                         />
-                        <span style={styles.subjectName}>{sub.name}</span>
+                        <span style={styles.subjectName}>
+                          {subject.name}
+                        </span>
                       </div>
 
-                      <div style={styles.subjectRowRight}>
+                      <div
+                        className="rr-academics-subject-right"
+                        style={styles.subjectRight}
+                      >
                         <span
                           style={{
-                            ...styles.subjectTypeTag,
-                            background:
-                              sub.type === "Compulsory" || sub.type === "Core" || sub.type === "Board Subject"
-                                ? "rgba(26, 82, 118, 0.08)"
-                                : "rgba(30, 132, 73, 0.08)",
+                            ...styles.subjectType,
                             color:
-                              sub.type === "Compulsory" || sub.type === "Core" || sub.type === "Board Subject"
-                                ? theme.primary
-                                : theme.secondary,
+                              subject.type === "Practical" ||
+                              subject.type === "Lab" ||
+                              subject.type === "Lab & Theory" ||
+                              subject.type === "Elective" ||
+                              subject.type === "Elective Lab"
+                                ? theme.moss
+                                : theme.rose,
+                            background:
+                              subject.type === "Practical" ||
+                              subject.type === "Lab" ||
+                              subject.type === "Lab & Theory" ||
+                              subject.type === "Elective" ||
+                              subject.type === "Elective Lab"
+                                ? `${theme.moss}0D`
+                                : `${theme.rose}0D`,
                           }}
                         >
-                          {sub.type}
+                          {subject.type}
                         </span>
-                        <span style={styles.subjectHours}>{sub.hours}</span>
+                        <span style={styles.subjectHours}>
+                          {subject.hours}
+                        </span>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
-              {/* Right Column: Highlights & Assessment */}
-              <div style={styles.detailsColumn}>
-                {/* Highlights Card */}
-                <div style={styles.detailsCard}>
-                  <div style={styles.subColumnHeader}>
-                    <Sparkles size={20} color={activeLevel.color} />
-                    <h4 style={styles.subColumnTitle}>Curriculum & Learning Highlights</h4>
+              {/* HIGHLIGHTS + ASSESSMENT */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                style={styles.detailsColumn}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.35 }}
+                  style={styles.innerCard}
+                >
+                  <div style={styles.innerHeading}>
+                    <span
+                      style={{
+                        ...styles.headingDot,
+                        background: activeLevel.color,
+                      }}
+                    />
+                    <div>
+                      <span className="rr-mono" style={styles.headingEyebrow}>
+                        Learning Experience
+                      </span>
+                      <h4 style={styles.innerTitle}>
+                        Curriculum Highlights
+                      </h4>
+                    </div>
                   </div>
+
                   <ul style={styles.highlightsList}>
-                    {activeClass.curriculumHighlights.map((hl, idx) => (
-                      <li key={idx} style={styles.highlightItem}>
-                        <CheckCircle2 size={16} color={activeLevel.color} style={{ flexShrink: 0 }} />
-                        <span>{hl}</span>
-                      </li>
+                    {activeClass.curriculumHighlights.map((item, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: 0.4 + index * 0.08 }}
+                        style={styles.highlightItem}
+                      >
+                        <span
+                          className="rr-mono"
+                          style={{
+                            ...styles.highlightNumber,
+                            color: activeLevel.color,
+                          }}
+                        >
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span>{item}</span>
+                      </motion.li>
                     ))}
                   </ul>
-                </div>
+                </motion.div>
 
-                {/* Assessment Card */}
-                <div style={styles.assessmentSchemeCard}>
-                  <div style={styles.subColumnHeader}>
-                    <Award size={20} color={activeLevel.color} />
-                    <h4 style={styles.subColumnTitle}>Evaluation & Assessment Pattern</h4>
-                  </div>
-                  <p style={styles.assessmentText}>{activeClass.assessmentMethod}</p>
-                </div>
-              </div>
-            </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.45 }}
+                  style={{
+                    ...styles.assessmentCard,
+                    borderLeftColor: activeLevel.color,
+                  }}
+                >
+                  <span className="rr-mono" style={styles.headingEyebrow}>
+                    Evaluation & Assessment
+                  </span>
+                  <p style={styles.assessmentText}>
+                    {activeClass.assessmentMethod}
+                  </p>
+                </motion.div>
+              </motion.div>
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </section>
 
-      {/* ===== STRENGTHS SECTION ===== */}
-      <section style={styles.strengthsSection}>
-        <div style={styles.strengthsContainer}>
-          <div style={styles.strengthsHeader}>
-            <span style={styles.sectionBadge}>What Sets Us Apart</span>
-            <h2 style={styles.sectionTitle}>
-              Our <span style={styles.sectionTitleHighlight}>Academic Strengths</span>
-            </h2>
-            <p style={styles.sectionDescription}>
-              A learning ecosystem built on innovation, expertise, and unwavering commitment to student success.
-            </p>
-            <div style={styles.sectionDivider} />
-          </div>
+      {/* ======================================================
+          ACADEMIC STRENGTHS — About-page inspired cards
+      ====================================================== */}
+      <section
+        className="rr-academics-strengths"
+        style={styles.strengthsSection}
+      >
+        <div style={styles.sectionContainer}>
+          <SectionIntro
+            eyebrow="What Sets Us Apart"
+            title='Our <span style="color: #9C2748;">Academic Strengths</span>'
+            description="A learning ecosystem built on innovation, expertise, and unwavering commitment to student success."
+            align="left"
+          />
 
-          <div style={styles.strengthsGrid}>
-            {data.strengths.map((strength, index) => {
-              const Icon = strength.icon;
-              return (
-                <motion.div
-                  key={strength.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.06 }}
-                  style={{ ...styles.strengthCard, background: strength.gradient }}
+          <div className="rr-academics-strengths-grid" style={styles.strengthsGrid}>
+            {data.strengths.map((strength, index) => (
+              <motion.article
+                key={strength.id}
+                className="rr-strength-card"
+                initial={{ opacity: 0, y: 20, scale: 0.96 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                style={styles.strengthCard}
+              >
+                <span
+                  className="rr-strength-accent"
+                  style={{ background: strength.color }}
+                />
+
+                <span
+                  className="rr-strength-letter"
+                  aria-hidden="true"
                 >
-                  <div style={{ ...styles.strengthIconWrapper, background: `${strength.color}18` }}>
-                    <Icon size={24} color={strength.color} />
-                  </div>
-                  <h4 style={styles.strengthTitle}>{strength.title}</h4>
-                  <p style={styles.strengthDescription}>{strength.description}</p>
-                </motion.div>
-              );
-            })}
+                  {strength.title.charAt(0)}
+                </span>
+
+                <div style={styles.strengthContent}>
+                  <h4 className="rr-serif" style={styles.strengthTitle}>
+                    {strength.title}
+                  </h4>
+
+                  <p style={styles.strengthDescription}>
+                    {strength.description}
+                  </p>
+                </div>
+
+                <span
+                  className="rr-card-line"
+                  style={{
+                    ...styles.cardLine,
+                    background: strength.color,
+                  }}
+                />
+              </motion.article>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ===== ACHIEVEMENTS SECTION ===== */}
-      <section style={styles.achievementsSection}>
-        <div style={styles.achievementsContainer}>
-          <div style={styles.sectionHeader}>
-            <span style={{ ...styles.sectionBadge, background: `${theme.accent1}18`, color: theme.accent1 }}>
-              Our Milestones
-            </span>
-            <h2 style={{ ...styles.sectionTitle, color: theme.dark }}>
-              Celebrating <span style={styles.sectionTitleHighlight}>Excellence</span>
-            </h2>
-            <p style={styles.sectionDescription}>
-              A legacy of achievement that reflects our commitment to quality education and student empowerment.
-            </p>
-            <div style={styles.sectionDivider} />
-          </div>
+      {/* ======================================================
+          ACHIEVEMENTS — Each in separate container/card, no arrow
+      ====================================================== */}
+      <section
+        className="rr-academics-achievements"
+        style={styles.achievementsSection}
+      >
+        <div style={styles.sectionContainer}>
+          <SectionIntro
+            eyebrow="Our Milestones"
+            title='Celebrating <span style="color: #9C2748;">Excellence</span>'
+            description="Achievements that reflect the effort of our students, teachers, and wider school community."
+            align="center"
+          />
 
-          <div style={styles.achievementsGrid}>
-            {data.achievements.map((achievement, index) => {
-              const Icon = achievement.icon;
-              return (
+          <div className="rr-achievements-grid" style={styles.achievementsGrid}>
+            {data.achievements.map((achievement, index) => (
+              <motion.article
+                key={index}
+                className="rr-achievement-card"
+                initial={{ opacity: 0, y: 25, scale: 0.97 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                style={styles.achievementCard}
+              >
+                <motion.span
+                  className="rr-mono"
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.08 + 0.1 }}
+                  style={styles.achievementNumber}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </motion.span>
+
                 <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.08 }}
-                  style={{ ...styles.achievementCard, background: achievement.gradient }}
+                  transition={{ duration: 0.4, delay: index * 0.08 + 0.15 }}
+                  style={styles.achievementContent}
                 >
-                  <div style={{ ...styles.achievementIconWrapper, background: theme.accent1 }}>
-                    <Icon size={24} color={theme.white} />
-                  </div>
-                  <h4 style={styles.achievementTitle}>{achievement.title}</h4>
-                  <p style={styles.achievementDescription}>{achievement.description}</p>
+                  <h4 className="rr-serif" style={styles.achievementTitle}>
+                    {achievement.title}
+                  </h4>
+                  <p style={styles.achievementDescription}>
+                    {achievement.description}
+                  </p>
                 </motion.div>
-              );
-            })}
+
+                <span
+                  className="rr-achievement-line"
+                  style={styles.achievementLine}
+                />
+              </motion.article>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ===== ASSESSMENT SECTION ===== */}
-      <section style={styles.assessmentSection}>
-        <div style={styles.assessmentContainer}>
-          <div style={styles.assessmentContent}>
+      {/* ======================================================
+          ASSESSMENT
+      ====================================================== */}
+      <section
+        className="rr-academics-assessment"
+        style={styles.assessmentSection}
+      >
+        <div style={styles.sectionContainer}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
+            style={styles.assessmentContent}
+          >
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
+              initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <span style={styles.assessmentBadge}>Assessment & Growth</span>
-              <h2 style={styles.assessmentTitle}>{data.assessment.title}</h2>
-              <p style={styles.assessmentDescription}>{data.assessment.description}</p>
+              <div style={styles.eyebrow}>
+                <span style={styles.eyebrowLine} />
+                <span className="rr-mono">Assessment & Growth</span>
+              </div>
+
+              <h2 className="rr-serif" style={styles.assessmentTitle}>
+                Holistic Assessment Framework
+              </h2>
+
+              <p style={styles.assessmentDescription}>
+                {data.assessment.description}
+              </p>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               style={styles.assessmentMethods}
             >
               {data.assessment.methods.map((method, index) => (
-                <div key={index} style={styles.assessmentMethod}>
-                  <CheckCircle size={18} color={theme.accent1} />
+                <motion.div
+                  key={index}
+                  className="rr-assessment-method"
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.3 + index * 0.06 }}
+                  style={styles.assessmentMethod}
+                >
+                  <span
+                    className="rr-mono"
+                    style={{
+                      color: theme.rose,
+                      fontSize: "11px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                   <span>{method}</span>
-                </div>
+                </motion.div>
               ))}
             </motion.div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>
   );
 };
 
-// ============ STYLES ============
+// ============================================================
+// STYLES
+// ============================================================
+
 const styles = {
-  pageContainer: {
+  page: {
     minHeight: "100vh",
-    background: "#F8F6F0",
+    background: theme.paper,
     overflowX: "hidden",
     paddingTop: "82px",
-    boxSizing: "border-box",
-  },
-  heroSection: {
-    position: "relative",
-    padding: "0 0 55px",
-    background: "linear-gradient(180deg, #F7FAFF 0%, #FFFFFF 100%)",
-    boxSizing: "border-box",
-    overflow: "hidden",
   },
 
-  heroContainer: {
+  // HERO
+  hero: {
+    background: theme.paper,
+    padding: "48px 24px 74px",
+  },
+
+  heroCard: {
     position: "relative",
-    width: "100%",
-    maxWidth: "none",
-    minHeight: "520px",
-    height: "auto",
-    margin: "0",
-    overflow: "visible",
+    maxWidth: "1180px",
+    minHeight: "390px",
+    margin: "0 auto",
+    overflow: "hidden",
     borderRadius: "0 0 34px 34px",
     background:
-      "linear-gradient(135deg, #104E78 0%, #176B99 48%, #2389B7 100%)",
-    boxShadow:
-      "0 30px 70px rgba(18, 82, 120, 0.22), 0 8px 25px rgba(15, 23, 42, 0.07)",
-    border: "1px solid rgba(255,255,255,0.28)",
+      "radial-gradient(circle at 85% 25%, rgba(156,39,72,0.28), transparent 28%), radial-gradient(circle at 15% 80%, rgba(185,138,66,0.08), transparent 24%), linear-gradient(135deg, #17101C 0%, #261521 55%, #341A2A 100%)",
+    boxShadow: "0 24px 55px rgba(30,20,32,0.16)",
   },
 
-  heroGlowOne: {
-    position: "absolute",
-    width: "520px",
-    height: "520px",
-    borderRadius: "50%",
-    background: "rgba(255, 211, 74, 0.15)",
-    filter: "blur(8px)",
-    top: "-300px",
-    right: "-120px",
-  },
-
-  heroGlowTwo: {
-    position: "absolute",
-    width: "420px",
-    height: "420px",
-    borderRadius: "50%",
-    background: "rgba(117, 215, 255, 0.13)",
-    filter: "blur(10px)",
-    bottom: "-270px",
-    left: "-130px",
-  },
-
-  heroOrbOne: {
-    position: "absolute",
-    width: "210px",
-    height: "210px",
-    borderRadius: "50%",
-    border: "1px solid rgba(255,255,255,0.14)",
-    right: "7%",
-    top: "-90px",
-  },
-
-  heroOrbTwo: {
-    position: "absolute",
-    width: "115px",
-    height: "115px",
-    borderRadius: "50%",
-    border: "1px solid rgba(255,220,110,0.2)",
-    right: "38%",
-    bottom: "-55px",
-  },
-
-  heroContent: {
+  heroInner: {
     position: "relative",
     zIndex: 2,
-    minHeight: "520px",
-    height: "auto",
-    width: "100%",
-    maxWidth: "1440px",
-    margin: "0 auto",
-    padding: "72px clamp(40px, 7vw, 110px) 68px",
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1.45fr) minmax(260px, 0.55fr)",
-    alignItems: "center",
-    gap: "clamp(35px, 5vw, 80px)",
-  },
-
-  heroText: {
-    width: "100%",
-    maxWidth: "820px",
-  },
-
-  heroBadge: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-    padding: "9px 18px",
-    borderRadius: "50px",
-    background: "rgba(255,255,255,0.12)",
-    border: "1px solid rgba(255,255,255,0.28)",
-    backdropFilter: "blur(14px)",
-    WebkitBackdropFilter: "blur(14px)",
-    color: "#FFE08A",
-    fontSize: "12px",
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: "0.14em",
-    marginTop: "8px",
-    marginBottom: "24px",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+    maxWidth: "800px",
+    padding: "72px clamp(32px, 6vw, 76px) 92px",
   },
 
   heroTitle: {
-    fontSize: "clamp(3rem, 6vw, 5.4rem)",
-    lineHeight: "0.98",
-    fontWeight: "900",
-    letterSpacing: "-0.055em",
-    color: "#FFFFFF",
-    margin: "0 0 24px",
+    margin: "18px 0 20px",
+    color: theme.white,
+    fontSize: "clamp(2.7rem, 5vw, 4.7rem)",
+    lineHeight: 1.01,
+    fontWeight: 600,
+    letterSpacing: "-0.045em",
   },
 
-  heroTitleHighlight: {
-    color: "#FFD85A",
-  },
-
-  heroRule: {
-    width: "92px",
-    height: "4px",
-    borderRadius: "10px",
-    background: "linear-gradient(90deg, #FFD85A, rgba(255,216,90,0.15))",
-    marginBottom: "24px",
-  },
-
-  heroDescriptionBlock: {
-    maxWidth: "800px",
-  },
-
-  heroSubtitle: {
-    fontSize: "clamp(1.05rem, 1.6vw, 1.3rem)",
-    color: "rgba(255,255,255,0.96)",
-    fontWeight: "700",
-    lineHeight: "1.55",
-    maxWidth: "760px",
+  heroLead: {
+    maxWidth: "720px",
     margin: "0 0 13px",
+    color: "rgba(255,255,255,0.88)",
+    fontSize: "clamp(1rem, 1.5vw, 1.2rem)",
+    fontWeight: 600,
+    lineHeight: 1.65,
   },
 
   heroDescription: {
-    fontSize: "15px",
-    color: "rgba(255,255,255,0.72)",
-    lineHeight: "1.8",
     maxWidth: "760px",
     margin: 0,
-  },
-
-  heroMessage: {
-    position: "relative",
-    alignSelf: "stretch",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    paddingLeft: "38px",
-    borderLeft: "1px solid rgba(255,255,255,0.2)",
-  },
-
-  heroMessageNumber: {
-    display: "block",
-    color: "#FFD85A",
-    fontSize: "48px",
-    lineHeight: "1",
-    fontWeight: "900",
-    letterSpacing: "-0.05em",
-    marginBottom: "7px",
-  },
-
-  heroMessageLabel: {
-    color: "rgba(255,255,255,0.65)",
-    fontSize: "10px",
-    fontWeight: "800",
-    letterSpacing: "0.17em",
-  },
-
-  heroMessageLine: {
-    width: "46px",
-    height: "3px",
-    borderRadius: "10px",
-    background: "#FFD85A",
-    margin: "24px 0 20px",
-  },
-
-  heroMessageText: {
-    color: "rgba(255,255,255,0.78)",
-    fontSize: "15px",
-    lineHeight: "1.75",
-    margin: 0,
-    maxWidth: "250px",
-  },
-
-  heroMessageDots: {
-    display: "flex",
-    alignItems: "center",
-    gap: "7px",
-    marginTop: "30px",
-  },
-
-  heroMessageDotActive: {
-    width: "30px",
-    height: "6px",
-    borderRadius: "20px",
-    background: "#FFD85A",
-  },
-
-  heroMessageDot: {
-    width: "6px",
-    height: "6px",
-    borderRadius: "50%",
-    background: "rgba(255,255,255,0.45)",
-  },
-
-  heroBottomWave: {
-    position: "absolute",
-    width: "520px",
-    height: "100px",
-    borderRadius: "50%",
-    background: "rgba(255,255,255,0.055)",
-    left: "-110px",
-    bottom: "-58px",
-    transform: "rotate(-5deg)",
-  },
-
-  heroGoldEdge: {
-    position: "absolute",
-    width: "35%",
-    height: "3px",
-    right: "8%",
-    bottom: 0,
-    borderRadius: "10px 10px 0 0",
-    background: "linear-gradient(90deg, transparent, #FFD85A, transparent)",
-    opacity: 0.8,
-  },
-
-  statsSection: {
-    padding: "40px 24px 60px",
-    background: "#FFFFFF",
-  },
-  statsContainer: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "20px",
-  },
-  statCard: {
-    position: "relative",
-    padding: "28px 20px",
-    borderRadius: "20px",
-    textAlign: "center",
-    background: "#F8F6F0",
-    border: "1px solid rgba(0,0,0,0.04)",
-    borderTop: "3px solid",
-    transition: "all 0.3s ease",
-    cursor: "default",
-  },
-  statBar: {
-    position: "absolute",
-    top: 0,
-    left: "50%",
-    transform: "translateX(-50%)",
-    width: "40px",
-    height: "3px",
-    borderRadius: "0 0 4px 4px",
-  },
-  statValue: {
-    fontSize: "clamp(2.2rem, 4vw, 3rem)",
-    fontWeight: "800",
-    letterSpacing: "-0.02em",
-    marginBottom: "4px",
-  },
-  statLabel: {
+    color: "rgba(245,238,226,0.68)",
     fontSize: "14px",
-    fontWeight: "600",
-    color: "#5D6D7E",
-    letterSpacing: "0.02em",
+    lineHeight: 1.8,
   },
-  sectionHeader: {
-    textAlign: "center",
-    maxWidth: "700px",
-    margin: "0 auto 48px",
-  },
-  sectionBadge: {
-    display: "inline-block",
-    padding: "5px 16px",
-    borderRadius: "50px",
-    fontSize: "12px",
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: "0.12em",
-    background: "rgba(26, 82, 118, 0.08)",
-    color: "#1A5276",
-    marginBottom: "16px",
-  },
-  sectionTitle: {
-    fontSize: "clamp(2rem, 3.5vw, 2.8rem)",
-    fontWeight: "800",
-    color: "#1C2833",
-    marginBottom: "12px",
-    letterSpacing: "-0.02em",
-    lineHeight: 1.1,
-  },
-  sectionTitleHighlight: {
-    color: "#D4AC0D",
-  },
-  sectionDescription: {
-    fontSize: "clamp(0.95rem, 1.1vw, 1.1rem)",
-    color: "#5D6D7E",
-    lineHeight: 1.7,
-    maxWidth: "600px",
-    margin: "0 auto",
-  },
-  sectionDivider: {
-    width: "60px",
-    height: "3px",
-    borderRadius: "4px",
-    background: "linear-gradient(135deg, #D4AC0D 0%, #E67E22 100%)",
-    margin: "20px auto 0",
-  },
-  levelsSection: {
-    padding: "80px 24px",
-    background: "#FFFFFF",
-    maxWidth: "1240px",
-    margin: "0 auto",
-  },
-  levelsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "20px",
-    marginBottom: "40px",
-  },
-  levelCard: {
-    padding: "24px 20px",
-    borderRadius: "20px",
-    textAlign: "left",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    display: "flex",
-    flexDirection: "column",
-    justify: "space-between",
-  },
-  levelCardTop: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "10px 14px",
-    borderRadius: "14px",
-    marginBottom: "16px",
-  },
-  levelSpanTag: {
-    fontSize: "11px",
-    fontWeight: "700",
-    padding: "4px 10px",
-    borderRadius: "20px",
-    textTransform: "uppercase",
-    letterSpacing: "0.08em",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-  },
-  levelName: {
-    fontSize: "19px",
-    fontWeight: "800",
-    marginBottom: "4px",
-    letterSpacing: "-0.01em",
-  },
-  levelSpan: {
-    fontSize: "13px",
-    color: "#5D6D7E",
-    fontWeight: "600",
-    marginBottom: "12px",
-  },
-  levelAgePill: {
-    fontSize: "12px",
-    fontWeight: "600",
-    color: "#1C2833",
-    background: "rgba(0,0,0,0.04)",
-    padding: "4px 10px",
-    borderRadius: "8px",
-    display: "inline-block",
-    marginBottom: "20px",
-    width: "fit-content",
-  },
-  levelSelectBtn: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "10px 16px",
-    borderRadius: "12px",
-    fontSize: "13px",
-    fontWeight: "700",
-    transition: "all 0.3s ease",
-  },
-  curriculumPanel: {
-    background: "rgba(255, 255, 255, 0.85)",
-    backdropFilter: "blur(16px)",
-    WebkitBackdropFilter: "blur(16px)",
-    borderRadius: "24px",
-    padding: "36px 32px",
-    boxShadow: "0 12px 40px rgba(15, 23, 42, 0.08)",
-    border: "1px solid rgba(0, 0, 0, 0.06)",
-  },
-  panelHeader: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: "24px",
-    paddingBottom: "24px",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
-    marginBottom: "24px",
-  },
-  panelHeaderLeft: {
-    maxWidth: "750px",
-  },
-  panelLevelBadge: {
-    display: "inline-block",
-    fontSize: "12px",
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: "0.12em",
-    padding: "6px 16px",
-    borderRadius: "50px",
-    marginBottom: "12px",
-  },
-  panelTitle: {
-    fontSize: "26px",
-    fontWeight: "900",
-    color: "#0A1628",
-    marginBottom: "8px",
-    letterSpacing: "-0.02em",
-  },
-  panelDescription: {
-    fontSize: "15px",
-    color: "#5D6D7E",
-    lineHeight: "1.7",
-  },
-  panelHeaderRight: {
-    display: "flex",
-    alignItems: "center",
-  },
-  ageCard: {
+
+  eyebrow: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "12px 20px",
-    borderRadius: "16px",
-    background: "#FFFFFF",
-    border: "1px solid rgba(0,0,0,0.08)",
-    boxShadow: "0 4px 14px rgba(0,0,0,0.04)",
   },
-  ageCardLabel: {
-    fontSize: "11px",
-    fontWeight: "700",
-    textTransform: "uppercase",
-    color: "#5D6D7E",
+
+  eyebrowLine: {
+    width: "34px",
+    height: "1px",
+    background: theme.gold,
+  },
+
+  // LEVELS
+  levelsSection: {
+    background: theme.paper,
+    padding: "82px 24px 90px",
+    maxWidth: "1280px",
+    margin: "0 auto",
+  },
+
+  levelsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(235px, 1fr))",
+    gap: "18px",
+    marginBottom: "38px",
+  },
+
+  levelCard: {
+    padding: "24px",
+    borderRadius: "18px",
+    border: "1px solid",
+    background: theme.card,
+    textAlign: "left",
+    cursor: "pointer",
+    transition: "border-color 0.25s ease, box-shadow 0.25s ease",
+    color: theme.ink,
+  },
+
+  levelCardNumber: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "10px",
+    marginBottom: "25px",
+  },
+
+  levelBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "5px 10px",
+    borderRadius: "30px",
+    fontSize: "10px",
+    fontWeight: 700,
     letterSpacing: "0.08em",
+    textTransform: "uppercase",
   },
-  ageCardValue: {
-    fontSize: "15px",
-    fontWeight: "800",
-    color: "#0A1628",
+
+  levelName: {
+    margin: "0 0 8px",
+    fontSize: "22px",
+    lineHeight: 1.12,
+    fontWeight: 600,
   },
+
+  levelSpan: {
+    margin: "0 0 15px",
+    color: theme.textMuted,
+    fontSize: "13px",
+    fontWeight: 600,
+    lineHeight: 1.5,
+  },
+
+  levelAgePill: {
+    display: "inline-block",
+    padding: "6px 10px",
+    borderRadius: "8px",
+    fontSize: "11px",
+    fontWeight: 700,
+    marginBottom: "22px",
+  },
+
+  levelSelect: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "10px",
+    width: "100%",
+    padding: "11px 14px",
+    borderRadius: "11px",
+    border: "1px solid",
+    fontSize: "12px",
+    fontWeight: 700,
+    transition: "all 0.3s ease",
+  },
+
+  // CURRICULUM PANEL
+  curriculumPanel: {
+    background: theme.card,
+    border: `1px solid ${theme.paperDeep}`,
+    borderTop: "4px solid",
+    borderRadius: "22px",
+    padding: "34px",
+    boxShadow: "0 12px 35px rgba(30,20,32,0.055)",
+  },
+
+  panelHeader: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: "28px",
+    paddingBottom: "26px",
+    marginBottom: "26px",
+    borderBottom: `1px solid ${theme.paperDeep}`,
+  },
+
+  panelHeaderLeft: {
+    maxWidth: "780px",
+  },
+
+  panelBadge: {
+    display: "inline-block",
+    padding: "6px 12px",
+    border: "1px solid",
+    borderRadius: "30px",
+    fontSize: "10px",
+    fontWeight: 700,
+    letterSpacing: "0.11em",
+    textTransform: "uppercase",
+    marginBottom: "14px",
+  },
+
+  panelTitle: {
+    margin: "0 0 10px",
+    color: theme.ink,
+    fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+    lineHeight: 1.1,
+    fontWeight: 600,
+  },
+
+  panelDescription: {
+    margin: 0,
+    color: theme.textMuted,
+    fontSize: "14px",
+    lineHeight: 1.75,
+  },
+
+  ageCard: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "5px",
+    minWidth: "150px",
+    padding: "14px 16px",
+    border: "1px solid",
+    borderRadius: "14px",
+    background: theme.paper,
+  },
+
   classTabsContainer: {
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
-    gap: "16px",
-    marginBottom: "28px",
-    padding: "16px 20px",
-    borderRadius: "16px",
-    background: "rgba(0, 0, 0, 0.02)",
-    border: "1px solid rgba(0, 0, 0, 0.04)",
+    gap: "14px",
+    padding: "13px 15px",
+    marginBottom: "26px",
+    border: `1px solid ${theme.paperDeep}`,
+    borderRadius: "13px",
+    background: theme.paper,
   },
+
   classTabLabel: {
-    fontSize: "13px",
-    fontWeight: "700",
-    color: "#5D6D7E",
+    color: theme.textMuted,
+    fontSize: "10px",
+    fontWeight: 700,
+    letterSpacing: "0.12em",
     textTransform: "uppercase",
-    letterSpacing: "0.06em",
   },
+
   classTabsGroup: {
     display: "flex",
     flexWrap: "wrap",
-    gap: "10px",
+    gap: "8px",
   },
+
   classTabBtn: {
-    padding: "8px 18px",
-    borderRadius: "12px",
-    fontSize: "13px",
+    padding: "8px 14px",
+    border: "1px solid",
+    borderRadius: "9px",
+    fontSize: "12px",
+    fontWeight: 700,
     cursor: "pointer",
-    transition: "all 0.25s ease",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+    transition: "all 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
   },
-  curriculumContentGrid: {
+
+  curriculumGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-    gap: "28px",
+    gap: "22px",
   },
-  subjectsColumn: {
-    background: "#FFFFFF",
+
+  innerCard: {
+    background: theme.paper,
+    border: `1px solid ${theme.paperDeep}`,
+    borderRadius: "17px",
     padding: "24px",
-    borderRadius: "20px",
-    border: "1px solid rgba(0,0,0,0.06)",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
   },
-  subColumnHeader: {
+
+  innerHeading: {
     display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    marginBottom: "20px",
+    alignItems: "flex-start",
+    gap: "12px",
+    marginBottom: "6px",
   },
-  subColumnTitle: {
-    fontSize: "17px",
-    fontWeight: "800",
-    color: "#0A1628",
+
+  headingDot: {
+    width: "7px",
+    height: "7px",
+    borderRadius: "50%",
+    marginTop: "7px",
+    flexShrink: 0,
   },
+
+  headingEyebrow: {
+    display: "block",
+    color: theme.textMuted,
+    fontSize: "9px",
+    fontWeight: 700,
+    letterSpacing: "0.14em",
+    textTransform: "uppercase",
+    marginBottom: "4px",
+  },
+
+  innerTitle: {
+    margin: 0,
+    color: theme.ink,
+    fontSize: "18px",
+    lineHeight: 1.25,
+    fontWeight: 800,
+  },
+
+  innerSubtext: {
+    margin: "0 0 18px 19px",
+    color: theme.textMuted,
+    fontSize: "12px",
+    fontWeight: 600,
+  },
+
   subjectsList: {
     display: "flex",
     flexDirection: "column",
-    gap: "12px",
+    gap: "8px",
   },
+
   subjectRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "12px 16px",
-    borderRadius: "14px",
-    background: "rgba(0, 0, 0, 0.02)",
-    border: "1px solid rgba(0, 0, 0, 0.04)",
+    gap: "14px",
+    padding: "12px 13px",
+    borderRadius: "10px",
+    background: theme.card,
+    border: `1px solid ${theme.paperDeep}`,
+    transition: "all 0.3s ease",
   },
-  subjectRowLeft: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-  subjectBullet: {
-    width: "8px",
-    height: "8px",
-    borderRadius: "50%",
-    flexShrink: 0,
-  },
-  subjectName: {
-    fontSize: "14px",
-    fontWeight: "700",
-    color: "#1C2833",
-  },
-  subjectRowRight: {
+
+  subjectLeft: {
     display: "flex",
     alignItems: "center",
     gap: "10px",
+    minWidth: 0,
   },
-  subjectTypeTag: {
-    fontSize: "11px",
-    fontWeight: "700",
-    padding: "3px 10px",
-    borderRadius: "12px",
+
+  subjectBullet: {
+    width: "6px",
+    height: "6px",
+    borderRadius: "50%",
+    flexShrink: 0,
+  },
+
+  subjectName: {
+    color: theme.ink,
+    fontSize: "13px",
+    fontWeight: 700,
+    lineHeight: 1.45,
+  },
+
+  subjectRight: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: "10px",
+    flexShrink: 0,
+  },
+
+  subjectType: {
+    padding: "4px 8px",
+    borderRadius: "7px",
+    fontSize: "9px",
+    fontWeight: 700,
+    letterSpacing: "0.04em",
     textTransform: "uppercase",
-    letterSpacing: "0.05em",
+    whiteSpace: "nowrap",
   },
+
   subjectHours: {
-    fontSize: "12px",
-    fontWeight: "600",
-    color: "#5D6D7E",
+    color: theme.textMuted,
+    fontSize: "11px",
+    fontWeight: 700,
+    whiteSpace: "nowrap",
   },
+
   detailsColumn: {
     display: "flex",
     flexDirection: "column",
-    gap: "24px",
+    gap: "22px",
   },
-  detailsCard: {
-    background: "#FFFFFF",
-    padding: "24px",
-    borderRadius: "20px",
-    border: "1px solid rgba(0,0,0,0.06)",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
-  },
+
   highlightsList: {
+    listStyle: "none",
+    padding: 0,
+    margin: "20px 0 0",
     display: "flex",
     flexDirection: "column",
     gap: "14px",
-    listStyle: "none",
-    padding: 0,
-    margin: 0,
   },
+
   highlightItem: {
     display: "flex",
     alignItems: "flex-start",
     gap: "12px",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#2C3E50",
-    lineHeight: "1.6",
+    color: theme.text,
+    fontSize: "13px",
+    lineHeight: 1.65,
   },
-  assessmentSchemeCard: {
-    background: "#FFFFFF",
-    padding: "24px",
-    borderRadius: "20px",
-    border: "1px solid rgba(0,0,0,0.06)",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
+
+  highlightNumber: {
+    fontSize: "10px",
+    fontWeight: 700,
+    letterSpacing: "0.08em",
+    paddingTop: "2px",
+    flexShrink: 0,
   },
+
+  assessmentCard: {
+    padding: "21px 22px",
+    background: theme.paper,
+    border: `1px solid ${theme.paperDeep}`,
+    borderLeft: "3px solid",
+    borderRadius: "13px",
+  },
+
   assessmentText: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#1A5276",
-    background: "rgba(26, 82, 118, 0.06)",
-    padding: "14px 18px",
-    borderRadius: "14px",
-    border: "1px solid rgba(26, 82, 118, 0.12)",
-    lineHeight: "1.6",
+    margin: "8px 0 0",
+    color: theme.rose,
+    fontSize: "13px",
+    fontWeight: 700,
+    lineHeight: 1.65,
   },
+
+  // STRENGTHS
   strengthsSection: {
-    padding: "80px 24px",
-    background: "#F8F6F0",
+    background: theme.paper,
+    padding: "76px 24px 88px",
   },
-  strengthsContainer: {
-    maxWidth: "1200px",
+
+  sectionContainer: {
+    maxWidth: "1180px",
     margin: "0 auto",
   },
-  strengthsHeader: {
-    textAlign: "center",
-    maxWidth: "700px",
-    margin: "0 auto 48px",
-  },
+
   strengthsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: "20px",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: "22px",
+    marginTop: "44px",
   },
+
   strengthCard: {
-    padding: "28px 24px",
-    borderRadius: "20px",
-    border: "1px solid rgba(0,0,0,0.04)",
-    transition: "all 0.3s ease",
+    position: "relative",
+    minHeight: "230px",
+    padding: "34px 28px 32px",
+    overflow: "hidden",
+    background: theme.card,
+    border: `1px solid ${theme.paperDeep}`,
+    borderRadius: "24px",
+    boxShadow: "0 12px 30px rgba(30,20,32,0.055)",
+    transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
   },
-  strengthIconWrapper: {
-    width: "48px",
-    height: "48px",
-    borderRadius: "14px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: "16px",
+
+  strengthContent: {
+    position: "relative",
+    zIndex: 2,
+    maxWidth: "390px",
   },
+
   strengthTitle: {
-    fontSize: "18px",
-    fontWeight: "700",
-    color: "#1C2833",
-    marginBottom: "8px",
+    margin: "40px 0 12px",
+    color: theme.ink,
+    fontSize: "21px",
+    lineHeight: 1.15,
+    fontWeight: 600,
   },
+
   strengthDescription: {
-    fontSize: "14px",
-    color: "#5D6D7E",
-    lineHeight: 1.6,
+    margin: 0,
+    color: theme.textMuted,
+    fontSize: "13.5px",
+    lineHeight: 1.75,
+    maxWidth: "370px",
   },
+
+  cardLine: {
+    position: "absolute",
+    left: "28px",
+    bottom: "22px",
+    width: "40px",
+    height: "3px",
+    borderRadius: "4px",
+    transition: "all 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+  },
+
+  // ACHIEVEMENTS
   achievementsSection: {
-    padding: "80px 24px",
-    background: "#FFFFFF",
+    background: theme.paper,
+    padding: "84px 24px 90px",
   },
-  achievementsContainer: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-  },
+
   achievementsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     gap: "24px",
+    marginTop: "10px",
   },
+
   achievementCard: {
-    padding: "32px 24px",
-    borderRadius: "24px",
-    border: "1px solid rgba(0,0,0,0.04)",
-    transition: "all 0.3s ease",
-    textAlign: "center",
-  },
-  achievementIconWrapper: {
-    width: "56px",
-    height: "56px",
-    borderRadius: "18px",
+    position: "relative",
+    padding: "32px 28px 28px",
+    background: theme.card,
+    border: `1px solid ${theme.paperDeep}`,
+    borderRadius: "20px",
+    boxShadow: "0 12px 30px rgba(30,20,32,0.055)",
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "0 auto 20px",
-    boxShadow: "0 8px 20px rgba(212, 172, 13, 0.3)",
+    flexDirection: "column",
+    minHeight: "180px",
+    transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
   },
+
+  achievementNumber: {
+    color: theme.gold,
+    fontSize: "11px",
+    fontWeight: 700,
+    letterSpacing: "0.12em",
+    marginBottom: "12px",
+  },
+
+  achievementContent: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+  },
+
   achievementTitle: {
-    fontSize: "18px",
-    fontWeight: "700",
-    color: "#1C2833",
-    marginBottom: "8px",
+    margin: "0 0 10px",
+    color: theme.ink,
+    fontSize: "20px",
+    lineHeight: 1.2,
+    fontWeight: 600,
   },
+
   achievementDescription: {
+    margin: 0,
+    color: theme.textMuted,
     fontSize: "14px",
-    color: "#5D6D7E",
-    lineHeight: 1.6,
+    lineHeight: 1.7,
+    maxWidth: "100%",
   },
+
+  achievementLine: {
+    position: "absolute",
+    left: "28px",
+    bottom: "0",
+    width: "40px",
+    height: "3px",
+    borderRadius: "4px",
+    background: theme.gold,
+    opacity: 0.3,
+  },
+
+  // ASSESSMENT
   assessmentSection: {
-    padding: "80px 24px",
-    background: "linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%)",
-    borderTop: "1px solid #E2E8F0",
-    color: "#0F172A",
+    background: theme.paperDeep,
+    padding: "84px 24px 90px",
+    borderTop: `1px solid ${theme.paperDeep}`,
   },
-  assessmentContainer: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-  },
+
   assessmentContent: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-    gap: "48px",
-    alignItems: "center",
+    gridTemplateColumns: "minmax(0, 0.9fr) minmax(320px, 1.1fr)",
+    gap: "60px",
+    alignItems: "start",
   },
-  assessmentBadge: {
-    display: "inline-block",
-    padding: "5px 16px",
-    borderRadius: "50px",
-    fontSize: "12px",
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: "0.12em",
-    background: "rgba(26, 82, 118, 0.08)",
-    color: "#1A5276",
-    border: "1px solid rgba(26, 82, 118, 0.2)",
-    marginBottom: "16px",
-  },
+
   assessmentTitle: {
-    fontSize: "clamp(2rem, 3.5vw, 2.8rem)",
-    fontWeight: "800",
-    color: "#0F172A",
-    marginBottom: "16px",
-    letterSpacing: "-0.02em",
+    margin: "18px 0 13px",
+    color: theme.ink,
+    fontSize: "clamp(2rem, 4vw, 3.2rem)",
+    lineHeight: 1.04,
+    fontWeight: 600,
+    letterSpacing: "-0.03em",
   },
+
   assessmentDescription: {
-    fontSize: "16px",
-    color: "#475569",
-    lineHeight: 1.7,
+    maxWidth: "500px",
+    margin: 0,
+    color: theme.textMuted,
+    fontSize: "15px",
+    lineHeight: 1.75,
   },
+
   assessmentMethods: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "16px",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    borderTop: `1px solid rgba(30,20,32,0.14)`,
   },
+
   assessmentMethod: {
     display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    padding: "16px 20px",
-    borderRadius: "16px",
-    background: "#FFFFFF",
-    border: "1px solid #E2E8F0",
-    boxShadow: "0 4px 14px rgba(0,0,0,0.03)",
-    fontSize: "14px",
-    fontWeight: "700",
-    color: "#1E293B",
+    alignItems: "flex-start",
+    gap: "13px",
+    padding: "17px 14px",
+    borderBottom: `1px solid rgba(30,20,32,0.14)`,
+    color: theme.text,
+    fontSize: "13px",
+    fontWeight: 600,
+    lineHeight: 1.5,
+    transition: "all 0.3s ease",
   },
 };
 
-const AcademicsPageWithStyles = () => (
-  <>
-    <AcademicsPage />
-  </>
-);
-
-export default AcademicsPageWithStyles;
+export default AcademicsPage;
