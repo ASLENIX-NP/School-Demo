@@ -427,25 +427,10 @@
         "content": "Write the full blog content here.",
         "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1787288223852_20260624_161357_p3N7IBP6N.jpg",
         "imageAlt": "New Blog Post",
-        "pinned": false,
+        "pinned": true,
         "visible": true,
         "author": "Smriti Team",
         "authorRole": "School Administration"
-      },
-      {
-        "id": "post-1",
-        "title": "Annual Sports Day 2026: Celebrating Athletic Excellence & Team Spirit",
-        "slug": "annual-sports-day-2026-celebrating-athletic-excellence-team-spirit-post-1",
-        "category": "Sports",
-        "date": "2026-07-28",
-        "excerpt": "Our annual school sports meet brought together students, teachers, and parents for an unforgettable day of track and field competitions, inter-house matches, and sportsmanship awards.",
-        "content": "Red Rose Secondary English School hosted its grand Annual Sports Day with unmatched enthusiasm and high-level athletic performance. Students across all grade levels competed in sprint races, relay competitions, long jump, chess, and football tournament finals. The Blue House claimed the overall championship trophy after an intense series of matches.",
-        "imageUrl": "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=1200",
-        "imageAlt": "Annual Sports Day",
-        "pinned": true,
-        "visible": true,
-        "author": "Sports Department",
-        "authorRole": "Physical Education"
       },
       {
         "id": "post-2",
@@ -461,51 +446,6 @@
         "visible": true,
         "author": "Academic Council",
         "authorRole": "STEM Department"
-      },
-      {
-        "id": "post-3",
-        "title": "Red Rose Academic Excellence & Honor Roll Ceremony Announced",
-        "slug": "academic-excellence-awards-2026",
-        "category": "Academics",
-        "date": "2026-07-02",
-        "excerpt": "We proudly recognize our top academic achievers across primary and secondary levels for outstanding performance in term assessments, leadership, and community service.",
-        "content": "Academic dedication and consistent effort deserve celebration. During our special morning assembly, over forty students were awarded merit certificates and scholarships for achieving top percentile grades and demonstrating peer mentorship.",
-        "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800",
-        "imageAlt": "Academic Excellence Awards",
-        "pinned": false,
-        "visible": true,
-        "author": "Principal's Desk",
-        "authorRole": "School Leadership"
-      },
-      {
-        "id": "post-4",
-        "title": "Grand Cultural Festival & Fine Arts Exhibition Highlights",
-        "slug": "cultural-festival-arts-exhibition",
-        "category": "Events",
-        "date": "2026-06-20",
-        "excerpt": "A vibrant showcase of traditional music, drama performances, and student art galleries celebrating national heritage and creative expression.",
-        "content": "The annual Red Rose Cultural Extravaganza transformed our school campus into a colorful hub of music, theatrical plays, folk dance, and fine art displays created by students from Grade 1 to Grade 10.",
-        "imageUrl": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800",
-        "imageAlt": "Cultural Festival",
-        "pinned": false,
-        "visible": true,
-        "author": "Cultural Committee",
-        "authorRole": "Arts & Culture"
-      },
-      {
-        "id": "post-5",
-        "title": "Notice: Parent-Teacher Progress Review & Interaction Conference",
-        "slug": "parent-teacher-interaction-notice",
-        "category": "Notice",
-        "date": "2026-06-10",
-        "excerpt": "Inviting all parents and guardians to join our upcoming term evaluation and progress review meeting with class teachers and subject coordinators.",
-        "content": "Parental engagement is key to student success. All parents are requested to attend the interactive progress review session on Saturday between 10:00 AM and 2:00 PM.",
-        "imageUrl": "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&q=80&w=800",
-        "imageAlt": "Parent Teacher Meeting",
-        "pinned": false,
-        "visible": true,
-        "author": "School Administration",
-        "authorRole": "Administration"
       }
     ]
   },
@@ -1105,18 +1045,26 @@
   },
   "facilities": {
     "badgeText": "Our School",
-    "title": "Spaces Built For How Students Actually Learn smriti",
-    "highlightedText": "Learn from sonicaa",
-    "subtitle": "Red Rose Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student. smriti",
-    "learnMoreText": "Learn More aboutus ",
-    "highlightsTitle": "Facility Highlights heyyeye",
+    "title": "Spaces Built For How Students Actually Learn ",
+    "highlightedText": "Learn from the environment.",
+    "subtitle": "Red Rose Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
+    "learnMoreText": "Learn More about us ",
+    "highlightsTitle": "Facility Highlights ",
+    "introBadge": "Life Beyond The Classroom",
+    "introTitle": "Places that make learning feel real.",
+    "introHighlightedText": "learning",
+    "introDescription": "Our campus is designed as more than a collection of rooms. Each space gives students an opportunity to read, experiment, create, perform, travel safely, stay active, and discover the confidence that comes from doing things for themselves.",
+    "sectionKicker": "Explore Our Campus",
+    "sectionTitle": "Facility Highlights",
+    "sectionHighlightedText": "Highlights",
+    "sectionSubtitle": "Explore the spaces and services that support the academic, creative, physical, and social development of our students.",
     "facilities": [
       {
         "id": 1,
         "title": "Digital Library",
         "category": "Knowledge Hub",
         "description": "A quiet, well-stocked reading room alongside e-books, journals, and research databases students can reach from any classroom.",
-        "details": "Students can browse physical shelves or sign into digital collections — e-books, academic journals, reference databases, and curated learning platforms — all from a single login.",
+        "details": "Students can browse physical shelves or sign into digital collections e-books, academic journals, reference databases, and curated learning platforms  all from a single login.",
         "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425954108_Screenshot__5__CyYwJdNjm.png",
         "imageZoom": 1.08,
         "imageOffsetX": 3.4603963513153895,
@@ -1129,7 +1077,7 @@
         "id": 2,
         "title": "Tech Lab",
         "category": "Innovation",
-        "description": "A 40-seat computer lab where students get hands-on with the software and skills their exams — and future jobs — will actually ask for.",
+        "description": "A 40-seat computer lab where students get hands-on with the software and skills their exams and future jobs will actually ask for.",
         "details": "40+ networked computers, programming environments, office software, and multimedia tools, with a teacher-led session every week from Grade 6 upward.",
         "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786426007258_Screenshot_2026-07-10_234100_IO843eGhs.png",
         "imageZoom": 1,
@@ -1170,25 +1118,32 @@
             "id": 1,
             "name": "Route 1",
             "from": "Hetauda – New Bus Park",
-            "to": "School School",
+            "to": "School Campus",
             "stops": [
               "New Bus Park",
               "Chandranagar",
               "Bhanu Chowk",
-              "School School"
+              "School Campus"
             ]
           },
           {
             "id": 2,
             "name": "Route 2",
             "from": "Hetauda – Old Bus Park",
-            "to": "School School",
+            "to": "School Campus",
             "stops": [
               "Old Bus Park",
               "Milan Chowk",
               "Bishnupur",
-              "School School"
+              "School Campus"
             ]
+          },
+          {
+            "name": "route 3",
+            "from": "hetauda",
+            "to": "school",
+            "stops": [],
+            "id": 1787666178936
           }
         ]
       },
