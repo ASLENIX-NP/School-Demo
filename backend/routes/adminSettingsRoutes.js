@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   getAdminSettings,
   updateAdminSettings,
@@ -6,33 +7,48 @@ import {
   uploadAdminPhoto,
   updateAdminEmail,
   changeAdminPassword,
+  logoutDevice,
+  logoutOtherDevices,
   forgotPassword,
   verifyForgotPasswordOtp,
   resetPassword,
 } from "../controllers/adminSettingsController.js";
 
+import { protectAdmin } from "../middleware/adminAuthMiddleware.js";
+
 const router = express.Router();
 
 // =====================================================
-// ADMIN SETTINGS
+// PASSWORD RECOVERY
+// These routes do not require an existing login.
 // =====================================================
-router.get("/", getAdminSettings);
-router.post("/", updateAdminSettings);
+
+router.post("/forgot-password", forgotPassword);
+router.post("/verify-otp", verifyForgotPasswordOtp);
+router.post("/reset-password", resetPassword);
+
+// =====================================================
+// PROTECTED ADMIN SETTINGS
+// Everything below requires a valid admin session.
+// =====================================================
+
+router.use(protectAdmin);
+
+// =====================================================
+// ADMIN PROFILE
+// =====================================================
 
 router.get("/", getAdminSettings);
-
-router.post("/", updateAdminSettings);
-
 router.put("/", updateAdminSettings);
 
 // =====================================================
-// LOGIN ACTIVITY
+// LOGIN / DEVICE SESSIONS
 // =====================================================
 
 router.get("/login-activity", getLoginActivity);
 
 // =====================================================
-// ADMIN PHOTO
+// PROFILE PHOTO
 // =====================================================
 
 router.post("/upload-photo", uploadAdminPhoto);
@@ -40,32 +56,24 @@ router.post("/upload-photo", uploadAdminPhoto);
 // =====================================================
 // ADMIN EMAIL
 // =====================================================
-router.post("/email", updateAdminEmail);
-router.put("/email", updateAdminEmail);
 
-router.post("/email", updateAdminEmail);
+router.put("/email", updateAdminEmail);
 
 // =====================================================
 // CHANGE PASSWORD
 // =====================================================
-router.post("/change-password", changeAdminPassword);
+
 router.put("/change-password", changeAdminPassword);
 
-router.post("/change-password", changeAdminPassword);
-
 // =====================================================
-// FORGOT PASSWORD / OTP RECOVERY
+// DEVICE MANAGEMENT
 // =====================================================
-router.post("/forgot-password", forgotPassword);
-router.post("/verify-otp", verifyForgotPasswordOtp);
 
-// Send OTP
-router.post("/forgot-password", forgotPassword);
+router.delete("/sessions/:id", logoutDevice);
 
-// Verify OTP
-router.post("/verify-otp", verifyForgotPasswordOtp);
-
-// Reset password after OTP verification
-router.post("/reset-password", resetPassword);
+router.post(
+  "/sessions/logout-others",
+  logoutOtherDevices
+);
 
 export default router;

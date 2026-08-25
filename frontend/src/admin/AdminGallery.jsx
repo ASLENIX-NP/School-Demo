@@ -1,3816 +1,2521 @@
-import { useEffect, useMemo, useState } from "react";
-import api from "../lib/api";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "motion/react";
+import api from "../lib/api";
 import {
   ArrowLeft,
-  Save,
-  Upload,
-  Trash2,
+  Award,
+  Camera,
+  Check,
+  ChevronDown,
+  Edit3,
   Eye,
   EyeOff,
-  CheckCircle2,
-  Plus,
-  Image as ImageIcon,
-  AlertTriangle,
-  Camera,
-  Edit3,
-  X,
-  Trophy,
-  Award,
-  Star,
-  BookOpen,
-  CalendarDays,
-  Grid3X3,
-  Sparkles,
-  Layers,
   ExternalLink,
+  Image as ImageIcon,
+  Plus,
+  Save,
+  Star,
+  Trash2,
+  Trophy,
+  Upload,
+  X,
 } from "lucide-react";
-
-/*
-|--------------------------------------------------------------------------
-| ADMIN GALLERY - SINGLE PAGE
-|--------------------------------------------------------------------------
-| Everything is edited from this page:
-|
-| 1. Hero
-| 2. Achievements
-| 3. Gallery heading
-| 4. Categories
-| 5. Subcategories
-| 6. Upload images
-| 7. Replace images
-| 8. Move images between categories/subcategories
-| 9. Hide/show images
-| 10. Delete one/multiple images
-| 11. Bottom section
-|
-| IMPORTANT:
-| - The separate /admin/gallery-images page is no longer required.
-| - Images are managed directly below the gallery preview.
-| - Existing backend endpoints are preserved:
-|       GET /api/site-content/gallery
-|       PUT /api/site-content/gallery
-|       POST /api/upload
-|--------------------------------------------------------------------------
-*/
 
 const DEFAULT_CATEGORIES = ["Classroom", "Events", "Certificate"];
 
-const fallbackCategoryDescriptions = {
-  Classroom:
-    "Classroom moments show students learning, discussing, writing, presenting, and growing through daily academic activities.",
-  Events:
-    "School events highlight celebrations, programs, competitions, cultural activities, student participation, and community moments.",
-  Certificate:
-    "Certificates and awards recognize student achievement, participation, discipline, excellence, and school accomplishments.",
+const DEFAULT_CATEGORY_DESCRIPTIONS = {
+  Classroom: "Classroom moments show students learning, discussing, writing, presenting, and growing through daily academic activities.",
+  Events: "School events highlight celebrations, programs, competitions, cultural activities, student participation, and memorable school occasions.",
+  Certificate: "Certificates and awards recognize student achievement, participation, discipline, excellence, and school accomplishments.",
 };
 
-const fallbackSubcategories = {
+const DEFAULT_SUBCATEGORIES = {
+  Classroom: [],
   Events: [
-    {
-      id: "annual-program",
-      name: "Annual Program",
-      description:
-        "Photos from annual programs, performances, celebrations, and school-wide events.",
-      visible: true,
-    },
-    {
-      id: "sports-events",
-      name: "Sports Events",
-      description:
-        "Photos from sports competitions, games, student teamwork, and athletic participation.",
-      visible: true,
-    },
+    { id: "annual-program", name: "Annual Program", description: "Annual programs, performances, celebrations, and school-wide events.", visible: true },
+    { id: "sports-events", name: "Sports Events", description: "Sports competitions, games, teamwork, and athletic participation.", visible: true },
   ],
   Certificate: [
-    {
-      id: "student-certificates",
-      name: "Student Certificates",
-      description:
-        "Certificates awarded to students for academic, creative, sports, and extracurricular achievements.",
-      visible: true,
-    },
-    {
-      id: "school-awards",
-      name: "School Awards",
-      description:
-        "Awards and recognitions received by the school, staff, and student groups.",
-      visible: true,
-    },
+    { id: "student-certificates", name: "Student Certificates", description: "Certificates awarded to students for academic, creative, sports, and extracurricular achievements.", visible: true },
+    { id: "school-awards", name: "School Awards", description: "Awards and recognitions received by the school, staff, and student groups.", visible: true },
   ],
 };
 
-const defaultAchievements = [
-  { id: "1", title: "Top School Award", year: "2024", icon: "Trophy" },
-  { id: "2", title: "STEM Excellence", year: "2023", icon: "Award" },
-  { id: "3", title: "Sports Champion", year: "2024", icon: "Trophy" },
-  { id: "4", title: "Community Service", year: "2023", icon: "Star" },
-];
-
-const defaultContent = {
-  heroBadge: "INTERACTIVE GALLERY",
-  heroTitle: "Red Rose School",
-  heroHighlightedText: "Red Rose",
-  heroSubtitle: "Moments that become memories",
-  heroExploreText: "Explore Moments",
-  heroAchievementText: "Celebrate Achievements",
-
-  badge: "School Gallery",
-  title: "Stories",
-  highlightedText: "Stories",
-  description:
-    "Explore classroom learning, school events, certificates, achievements, and student life at Red Rose Secondary English Boarding School.",
-
+const DEFAULT_CONTENT = {
+  heroBadge: "SCHOOL GALLERY",
+  heroTitle: "Moments That Become Memories",
+  heroHighlightedText: "Memories",
+  heroSubtitle: "A visual collection of learning, celebrations, achievements, and everyday moments from Red Rose Secondary English Boarding School.",
+  heroExploreText: "Explore Gallery",
+  heroAchievementText: "Celebrating Our Students",
+  badge: "OUR GALLERY",
+  title: "School Life in Pictures",
+  highlightedText: "Pictures",
+  description: "Explore classroom learning, school events, certificates, achievements, and the moments that make our school community special.",
   categories: DEFAULT_CATEGORIES,
-  categoryDescriptions: fallbackCategoryDescriptions,
-  subcategories: fallbackSubcategories,
-  achievements: defaultAchievements,
-
+  categoryDescriptions: DEFAULT_CATEGORY_DESCRIPTIONS,
+  subcategories: DEFAULT_SUBCATEGORIES,
+  achievements: [
+    { id: "achievement-1", title: "Top School Award", year: "2024", icon: "Trophy", visible: true },
+    { id: "achievement-2", title: "STEM Excellence", year: "2023", icon: "Award", visible: true },
+    { id: "achievement-3", title: "Sports Champion", year: "2024", icon: "Trophy", visible: true },
+    { id: "achievement-4", title: "Community Service", year: "2023", icon: "Star", visible: true },
+  ],
   images: [],
-
   bottomTitle: "Every picture tells a story.",
-  bottomDescription:
-    "Explore the moments, celebrate the achievements, and remember the journey.",
+  bottomDescription: "Explore the moments, celebrate the achievements, and remember the journey.",
   bottomNote: "Gallery is managed by the school administration.",
 };
 
 function normalizeCategories(value) {
-  const source = Array.isArray(value) ? value : DEFAULT_CATEGORIES;
+  const list = Array.isArray(value)
+    ? value.map((item) => String(item || "").trim()).filter(Boolean).filter((item) => item.toLowerCase() !== "all")
+    : [];
+  const unique = [...new Set(list)];
+  return unique.length ? unique : [...DEFAULT_CATEGORIES];
+}
 
-  const result = [
-    ...new Set(
-      source
-        .map((item) => String(item || "").trim())
-        .filter(Boolean)
-        .filter((item) => item.toLowerCase() !== "all")
-    ),
-  ];
+function normalizeImages(value, categories) {
+  if (!Array.isArray(value)) return [];
 
-  return result.length ? result : [...DEFAULT_CATEGORIES];
+  return value.map((item, index) => {
+    const urls = Array.isArray(item?.images) ? item.images.filter(Boolean) : item?.image ? [item.image] : [];
+    const category = categories.includes(item?.category) ? item.category : categories[0];
+    return {
+      id: item?.id || `gallery-image-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 7)}`,
+      title: String(item?.title || "Gallery Image"),
+      description: String(item?.description || ""),
+      date: String(item?.date || "School Activity"),
+      category,
+      subcategory: String(item?.subcategory || ""),
+      image: urls[0] || "",
+      images: urls,
+      visible: item?.visible !== false,
+    };
+  }).filter((item) => item.image);
 }
 
 function normalizeSubcategories(value, categories) {
-  const cats = normalizeCategories(categories);
+  const output = {};
 
-  return cats.reduce((output, category) => {
-    const source = Array.isArray(value?.[category])
-      ? value[category]
-      : fallbackSubcategories[category] || [];
+  categories.forEach((category) => {
+    const list = Array.isArray(value?.[category]) ? value[category] : DEFAULT_SUBCATEGORIES[category] || [];
 
-    output[category] = source
-      .map((item, index) => {
-        const name =
-          typeof item === "string"
-            ? item.trim()
-            : String(item?.name || "").trim();
+    output[category] = list.map((item, index) => {
+      if (typeof item === "string") {
+        return { id: `${category}-${index}`, name: item, description: "", visible: true };
+      }
+      return {
+        id: item?.id || `${category}-${index}`,
+        name: String(item?.name || "").trim(),
+        description: String(item?.description || ""),
+        visible: item?.visible !== false,
+      };
+    }).filter((item) => item.name);
+  });
 
-        if (!name) return null;
-
-        return {
-          id:
-            item?.id ||
-            `${category}-${index}-${name
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-")}`,
-          name,
-          description:
-            typeof item === "string"
-              ? ""
-              : item?.description || "",
-          visible: item?.visible !== false,
-        };
-      })
-      .filter(Boolean);
-
-    return output;
-  }, {});
+  return output;
 }
 
-function normalizeImages(images, categories) {
-  const cats = normalizeCategories(categories);
-
-  if (!Array.isArray(images)) return [];
-
-  return images.map((item, index) => ({
-    ...item,
-    id: item?.id || `gallery-${index}`,
-    category: cats.includes(item?.category)
-      ? item.category
-      : cats[0],
-    subcategory: item?.subcategory || "",
-    visible: item?.visible !== false,
-    images:
-      Array.isArray(item?.images) && item.images.length
-        ? item.images.filter(Boolean)
-        : item?.image
-        ? [item.image]
-        : [],
-  }));
-}
-
-function mergeContent(saved = {}) {
-  const categories = normalizeCategories(saved.categories);
-
-  const categoryDescriptions = categories.reduce(
-    (output, category) => {
-      output[category] =
-        saved?.categoryDescriptions?.[category] ||
-        fallbackCategoryDescriptions[category] ||
-        "";
-      return output;
-    },
-    {}
-  );
+function normalizeContent(value = {}) {
+  const categories = normalizeCategories(value.categories);
 
   return {
-    ...defaultContent,
-    ...saved,
+    ...DEFAULT_CONTENT,
+    ...value,
     categories,
-    categoryDescriptions,
-    subcategories: normalizeSubcategories(
-      saved.subcategories,
-      categories
-    ),
-    achievements: Array.isArray(saved.achievements)
-      ? saved.achievements
-      : defaultAchievements,
-    images: normalizeImages(saved.images, categories),
+    categoryDescriptions: categories.reduce((result, category) => {
+      result[category] = value?.categoryDescriptions?.[category] || DEFAULT_CATEGORY_DESCRIPTIONS[category] || "";
+      return result;
+    }, {}),
+    subcategories: normalizeSubcategories(value.subcategories, categories),
+    achievements: Array.isArray(value.achievements)
+      ? value.achievements.map((item, index) => ({
+          id: item?.id || `achievement-${index}`,
+          title: String(item?.title || "Achievement"),
+          year: String(item?.year || ""),
+          icon: item?.icon || "Trophy",
+          visible: item?.visible !== false,
+        }))
+      : [...DEFAULT_CONTENT.achievements],
+    images: normalizeImages(value.images, categories),
   };
 }
 
-function getUrls(item) {
-  if (Array.isArray(item?.images) && item.images.length) {
-    return item.images.filter(Boolean);
-  }
-
-  return item?.image ? [item.image] : [];
+function getAuthHeaders() {
+  const token = localStorage.getItem("adminToken") || localStorage.getItem("token") || localStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-function buildAlbums(content, activeCategory) {
-  const visibleImages = (content.images || []).filter(
-    (item) => item.visible !== false
-  );
-
-  const categories = normalizeCategories(content.categories);
-
-  const makeAlbum = (category, subcategory = "") => {
-    const items = visibleImages.filter(
-      (item) =>
-        item.category === category &&
-        (!subcategory || item.subcategory === subcategory)
-    );
-
-    const seen = new Set();
-    const photos = [];
-
-    items.forEach((item) => {
-      getUrls(item).forEach((url) => {
-        if (!url || seen.has(url)) return;
-        seen.add(url);
-
-        photos.push({
-          url,
-          title: item.title || subcategory || category,
-          date: item.date || "School Activity",
-        });
-      });
-    });
-
-    const sub = content.subcategories?.[category]?.find(
-      (item) => item.name === subcategory
-    );
-
-    return {
-      category,
-      subcategory,
-      title: subcategory || category,
-      description: subcategory
-        ? sub?.description || ""
-        : content.categoryDescriptions?.[category] || "",
-      date: items[0]?.date || "School Gallery",
-      photos,
-      cover: photos[0]?.url || "",
-      total: photos.length,
-    };
-  };
-
-  if (activeCategory === "All") {
-    return categories.map((category) => makeAlbum(category));
-  }
-
-  const subs = (content.subcategories?.[activeCategory] || []).filter(
-    (item) => item.visible !== false
-  );
-
-  if (!subs.length) return [makeAlbum(activeCategory)];
-
-  const albums = subs.map((sub) =>
-    makeAlbum(activeCategory, sub.name)
-  );
-
-  const hasGeneralImages = visibleImages.some(
-    (item) =>
-      item.category === activeCategory && !item.subcategory
-  );
-
-  if (hasGeneralImages) albums.push(makeAlbum(activeCategory));
-
-  return albums;
+function AchievementIcon({ type = "Trophy", size = 22 }) {
+  if (type === "Award") return <Award size={size} />;
+  if (type === "Star") return <Star size={size} />;
+  return <Trophy size={size} />;
 }
 
-function IconFor({ name, size = 22 }) {
-  const icons = { Trophy, Award, Star };
-  const Icon = icons[name] || Trophy;
-  return <Icon size={size} />;
-}
-
-function Button({
-  children,
-  onClick,
-  tone = "dark",
-  icon: Icon,
-  disabled = false,
-}) {
-  const tones = {
-    dark: "bg-slate-900 text-white hover:bg-slate-800",
-    green: "bg-emerald-700 text-white hover:bg-emerald-800",
-    gold: "bg-amber-400 text-slate-900 hover:bg-amber-300",
-    red: "bg-red-600 text-white hover:bg-red-700",
-    white:
-      "bg-white text-slate-800 hover:bg-slate-50 border border-slate-200",
-    purple: "bg-violet-600 text-white hover:bg-violet-700",
-  };
-
+function Field({ label, value, onChange, textarea = false, placeholder = "" }) {
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={`inline-flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-black shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone]}`}
-    >
-      {Icon && <Icon size={15} />}
-      {children}
-    </button>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder = "",
-  type = "text",
-}) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-black text-slate-700">
-        {label}
-      </span>
-      <input
-        type={type}
-        value={value ?? ""}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
-      />
+    <label className="ag-field">
+      <span>{label}</span>
+      {textarea ? (
+        <textarea
+          value={value ?? ""}
+          placeholder={placeholder}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      ) : (
+        <input
+          value={value ?? ""}
+          placeholder={placeholder}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      )}
     </label>
   );
 }
 
-function TextArea({ label, value, onChange, rows = 4 }) {
+function Modal({ title, subtitle, children, onClose, onSave }) {
   return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-black text-slate-700">
-        {label}
-      </span>
-      <textarea
-        value={value ?? ""}
-        rows={rows}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
-      />
-    </label>
-  );
-}
-
-function EditModal({
-  title,
-  children,
-  onClose,
-  onSave,
-}) {
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-md"
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 25 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 25 }}
-          onClick={(e) => e.stopPropagation()}
-          className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-white shadow-2xl"
-        >
-          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 py-5 backdrop-blur">
-            <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">
-                Gallery Editor
-              </div>
-              <h2 className="mt-1 text-2xl font-black text-slate-950">
-                {title}
-              </h2>
-            </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:rotate-90 hover:bg-red-50 hover:text-red-600"
-            >
-              <X size={19} />
-            </button>
-          </div>
-
-          <div className="space-y-5 p-6">{children}</div>
-
-          <div className="sticky bottom-0 flex justify-end gap-3 border-t border-slate-100 bg-white/95 px-6 py-4 backdrop-blur">
-            <Button tone="white" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button tone="green" onClick={onSave} icon={Save}>
-              Apply Changes
-            </Button>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-}
-
-function ConfirmModal({ target, onClose, onConfirm }) {
-  if (!target) return null;
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 z-[100000] flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-md"
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md rounded-[28px] bg-white p-7 shadow-2xl"
-        >
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-            <AlertTriangle size={25} />
-          </div>
-
-          <h3 className="mt-5 text-2xl font-black text-slate-950">
-            {target.title || "Are you sure?"}
-          </h3>
-
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            {target.message}
-          </p>
-
-          {target.name && (
-            <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm font-black text-slate-900">
-              {target.name}
-            </div>
-          )}
-
-          <div className="mt-7 flex justify-end gap-3">
-            <Button tone="white" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button tone="red" onClick={onConfirm} icon={Trash2}>
-              Delete
-            </Button>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-}
-
-function AdminHero({ content, onEdit }) {
-  return (
-    <section className="relative min-h-[340px] sm:min-h-[400px] overflow-hidden bg-[linear-gradient(135deg,#102B45,#1D4C6D_45%,#173C58)]">
-      <div className="absolute inset-0 opacity-30">
-        <motion.div
-          animate={{ x: [0, 45, 0], y: [0, -30, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -left-20 top-20 h-80 w-80 rounded-full bg-amber-300/20 blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, -40, 0], y: [0, 30, 0], scale: [1, 1.12, 1] }}
-          transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-emerald-400/20 blur-3xl"
-        />
-      </div>
-
-      <div
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px)",
-          backgroundSize: "70px 70px",
-        }}
-      />
-
-      <button
-        type="button"
-        onClick={onEdit}
-        className="absolute right-4 top-4 z-30 inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs sm:text-sm font-black text-slate-800 shadow-xl transition hover:-translate-y-0.5"
-      >
-        <Edit3 size={15} />
-        Edit Hero
-      </button>
-
-      <div className="relative z-10 mx-auto flex min-h-[340px] sm:min-h-[400px] max-w-4xl flex-col items-center justify-center px-4 py-12 sm:py-16 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/30 bg-amber-300/10 px-3.5 py-1.5 text-xs font-black tracking-wide text-amber-300 backdrop-blur"
-        >
-          <Sparkles size={14} />
-          {content.heroBadge}
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="mt-4 text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight text-white"
-        >
-          <span className="text-amber-300">
-            {content.heroHighlightedText}
-          </span>
-          {content.heroTitle.replace(content.heroHighlightedText, "")}
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-3 max-w-xl text-xs sm:text-sm md:text-base leading-relaxed text-white/70"
-        >
-          {content.heroSubtitle}
-        </motion.p>
-
-        <div className="mt-6 flex items-center gap-6 text-white">
+    <div className="ag-modal-backdrop" onMouseDown={onClose}>
+      <div className="ag-modal" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="ag-modal-head">
           <div>
-            <div className="text-xl font-black">
-              {(content.images || []).reduce(
-                (total, item) => total + getUrls(item).length,
-                0
-              )}
-            </div>
-            <div className="text-[10px] uppercase tracking-wider text-white/45">
-              Photos
-            </div>
+            <div className="ag-modal-kicker">Gallery Editor</div>
+            <h2>{title}</h2>
+            {subtitle && <p>{subtitle}</p>}
           </div>
-
-          <div className="h-7 w-px bg-white/15" />
-
-          <div>
-            <div className="text-xl font-black">
-              {content.categories.length}
-            </div>
-            <div className="text-[10px] uppercase tracking-wider text-white/45">
-              Collections
-            </div>
-          </div>
-
-          <div className="h-7 w-px bg-white/15" />
-
-          <div>
-            <div className="text-xl font-black">
-              {content.achievements.length}
-            </div>
-            <div className="text-[10px] uppercase tracking-wider text-white/45">
-              Achievements
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function AchievementSection({ content, onAdd, onEdit, onDelete }) {
-  return (
-    <section className="bg-[#F7F8FA] px-4 py-8 sm:py-10">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
-              <Trophy size={14} />
-              OUR ACHIEVEMENTS
-            </span>
-
-            <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-950">
-              Celebrating{" "}
-              <span className="bg-gradient-to-r from-emerald-700 to-orange-400 bg-clip-text text-transparent">
-                Excellence
-              </span>
-            </h2>
-          </div>
-
-          <Button tone="green" icon={Plus} onClick={onAdd}>
-            Add Achievement
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {(content.achievements || []).map((item) => (
-            <motion.div
-              key={item.id}
-              whileHover={{ y: -4 }}
-              className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 text-center shadow-sm transition hover:shadow-lg"
-            >
-              <div className="absolute right-2.5 top-2.5 flex gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
-                <button
-                  type="button"
-                  onClick={() => onEdit(item)}
-                  className="rounded-full bg-violet-600 p-1.5 text-white"
-                >
-                  <Edit3 size={12} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDelete(item)}
-                  className="rounded-full bg-red-600 p-1.5 text-white"
-                >
-                  <Trash2 size={12} />
-                </button>
-              </div>
-
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-50 to-amber-50 text-emerald-700 transition group-hover:scale-105">
-                <IconFor name={item.icon} size={22} />
-              </div>
-
-              <div className="mt-3 text-[10px] font-black uppercase tracking-wider text-orange-500">
-                {item.year}
-              </div>
-
-              <h3 className="mt-1 text-sm font-black text-slate-950">
-                {item.title}
-              </h3>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function GalleryPreviewCard({
-  album,
-  index,
-  onManage,
-  onEditCategory,
-  onDeleteCategory,
-}) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: Math.min(index * 0.04, 0.2) }}
-      whileHover={{ y: -4 }}
-      className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-xl"
-    >
-      <div className="relative h-[200px] sm:h-[220px] overflow-hidden bg-slate-100">
-        {album.cover ? (
-          <img
-            src={album.cover}
-            alt={album.title}
-            className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-1.5 text-slate-300">
-            <ImageIcon size={40} />
-            <span className="text-xs font-bold">No images yet</span>
-          </div>
-        )}
-
-        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/70" />
-
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-          <span className="rounded-full border border-white/15 bg-slate-950/45 px-2.5 py-1 text-[10px] font-black text-white backdrop-blur">
-            {album.category}
-          </span>
-
-          {album.subcategory && (
-            <span className="rounded-full bg-amber-300 px-2.5 py-1 text-[10px] font-black text-slate-900">
-              {album.subcategory}
-            </span>
-          )}
-        </div>
-
-        <div className="absolute bottom-3 right-3 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-black text-white backdrop-blur">
-          {album.total} photos
-        </div>
-
-        <div className="absolute right-3 top-3 flex gap-1.5 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
-          {!album.subcategory && (
-            <>
-              <button
-                type="button"
-                onClick={() => onEditCategory(album.category)}
-                className="rounded-full bg-violet-600 p-2 text-white shadow-md"
-              >
-                <Edit3 size={13} />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onDeleteCategory(album.category)}
-                className="rounded-full bg-red-600 p-2 text-white shadow-md"
-              >
-                <Trash2 size={13} />
-              </button>
-            </>
-          )}
-
-          <button
-            type="button"
-            onClick={() =>
-              onManage(album.category, album.subcategory)
-            }
-            className="rounded-full bg-emerald-600 p-2 text-white shadow-md"
-          >
-            <Upload size={13} />
+          <button className="ag-icon-button" onClick={onClose} aria-label="Close">
+            <X size={18} />
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={() =>
-            onManage(album.category, album.subcategory)
-          }
-          className="absolute bottom-1/2 left-1/2 flex translate-x-[-50%] translate-y-1/2 items-center gap-1.5 rounded-xl bg-white/95 px-3 py-2 text-xs font-black text-slate-900 opacity-0 shadow-xl transition group-hover:opacity-100"
-        >
-          <Camera size={14} />
-          Manage Photos
-        </button>
-      </div>
+        <div className="ag-modal-body">{children}</div>
 
-      <div className="p-4">
-        <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-          {album.date}
-        </div>
-
-        <h3 className="mt-1 text-base sm:text-lg font-black tracking-tight text-slate-950">
-          {album.title}
-        </h3>
-
-        <p className="mt-1 line-clamp-2 min-h-[38px] text-xs leading-5 text-slate-500">
-          {album.description || "No description added yet."}
-        </p>
-
-        <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-          <span className="text-xs font-black text-slate-400">
-            {album.total} {album.total === 1 ? "memory" : "memories"}
-          </span>
-
-          <button
-            type="button"
-            onClick={() =>
-              onManage(album.category, album.subcategory)
-            }
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white transition hover:bg-emerald-700"
-          >
-            <ExternalLink size={14} />
+        <div className="ag-modal-foot">
+          <button className="ag-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="ag-primary" onClick={onSave}>
+            <Check size={16} />
+            Done Editing
           </button>
         </div>
       </div>
-    </motion.article>
-  );
-}
-
-function GalleryPreview({
-  content,
-  activeCategory,
-  setActiveCategory,
-  onEditHeading,
-  onManage,
-  onEditCategory,
-  onDeleteCategory,
-}) {
-  const categories = ["All", ...normalizeCategories(content.categories)];
-
-  const albums = useMemo(
-    () => buildAlbums(content, activeCategory),
-    [content, activeCategory]
-  );
-
-  const iconFor = (category) => {
-    if (category === "All") return Grid3X3;
-    if (category === "Classroom") return BookOpen;
-    if (category === "Events") return CalendarDays;
-    if (category === "Certificate") return Award;
-    return Camera;
-  };
-
-  return (
-    <section className="bg-white px-4 py-8 sm:py-10">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
-            <Camera size={14} />
-            {content.badge}
-          </span>
-
-          <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-950">
-            {content.title}
-          </h2>
-
-          <p className="mx-auto mt-2 max-w-2xl text-xs sm:text-sm text-slate-500">
-            {content.description}
-          </p>
-
-          <div className="mt-3">
-            <Button tone="white" icon={Edit3} onClick={onEditHeading}>
-              Edit Gallery Heading
-            </Button>
-          </div>
-        </div>
-
-        <div className="mb-6 flex justify-center gap-2 overflow-x-auto pb-2">
-          {categories.map((category) => {
-            const Icon = iconFor(category);
-            const active = category === activeCategory;
-
-            return (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setActiveCategory(category)}
-                className={`inline-flex flex-none items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-black transition ${
-                  active
-                    ? "bg-[linear-gradient(135deg,#173B5F,#2D6A4F)] text-white shadow-md"
-                    : "border border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-sm"
-                }`}
-              >
-                <Icon size={14} />
-                {category}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {albums.map((album, index) => (
-            <GalleryPreviewCard
-              key={`${album.category}-${album.subcategory || album.title}`}
-              album={album}
-              index={index}
-              onManage={onManage}
-              onEditCategory={onEditCategory}
-              onDeleteCategory={onDeleteCategory}
-            />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BottomPreview({ content, onEdit }) {
-  return (
-    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#112F49,#1D536F)] px-4 py-10 text-center text-white">
-      <div className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300/10 blur-3xl" />
-
-      <div className="relative mx-auto max-w-xl">
-        <button
-          type="button"
-          onClick={onEdit}
-          className="absolute -right-2 -top-2 rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-900 shadow-lg"
-        >
-          <Edit3 size={13} className="mr-1 inline" />
-          Edit
-        </button>
-
-        <Sparkles size={20} className="mx-auto text-amber-300" />
-
-        <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight">
-          {content.bottomTitle}
-        </h2>
-
-        <p className="mx-auto mt-2 max-w-lg text-xs sm:text-sm text-white/70">
-          {content.bottomDescription}
-        </p>
-
-        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/60">
-          <Sparkles size={13} className="text-amber-300" />
-          {content.bottomNote}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ImageManager({
-  content,
-  selectedCategory,
-  setSelectedCategory,
-  selectedSubcategory,
-  setSelectedSubcategory,
-  selectedIds,
-  setSelectedIds,
-  onUpload,
-  onReplace,
-  onDeleteOne,
-  onDeleteSelected,
-  onUpdateImage,
-  onMoveImage,
-  onAddSubcategory,
-  onUpdateSubcategory,
-  onDeleteSubcategory,
-  onCategoryName,
-  onCategoryDescription,
-  uploading,
-  onAddCategory,
-  onEditCategory,
-  onDeleteCategory,
-}) {
-  const categories = normalizeCategories(content.categories);
-
-  const subcategories =
-    normalizeSubcategories(
-      content.subcategories,
-      content.categories
-    )[selectedCategory] || [];
-
-  const categoryImages = (content.images || []).filter(
-    (item) => item.category === selectedCategory
-  );
-
-  const allSelected =
-    categoryImages.length > 0 &&
-    categoryImages.every((item) =>
-      selectedIds.includes(item.id)
-    );
-
-  const toggleSelectAll = () => {
-    if (allSelected) {
-      setSelectedIds((prev) =>
-        prev.filter(
-          (id) =>
-            !categoryImages.some(
-              (item) => item.id === id
-            )
-        )
-      );
-      return;
-    }
-
-    setSelectedIds((prev) => [
-      ...new Set([
-        ...prev,
-        ...categoryImages.map(
-          (item) => item.id
-        ),
-      ]),
-    ]);
-  };
-
-  return (
-    <section
-      id="image-manager"
-      className="scroll-mt-24 bg-[#F7F8FA] px-4 py-8 sm:py-10"
-    >
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1 text-xs font-black text-violet-700">
-              <Layers size={14} />
-              EDIT IMAGES HERE
-            </span>
-
-            <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-950">
-              Gallery Images
-            </h2>
-
-            <p className="mt-1 max-w-xl text-xs sm:text-sm text-slate-500">
-              Upload, replace, move, hide, or delete images without opening
-              another admin page.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Button
-              tone="white"
-              icon={Plus}
-              onClick={onAddCategory}
-            >
-              Add Category
-            </Button>
-
-            <Button
-              tone="white"
-              icon={Edit3}
-              onClick={() =>
-                onEditCategory(selectedCategory)
-              }
-            >
-              Edit Category
-            </Button>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-          <div className="grid gap-5 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
-            <label className="block">
-              <span className="mb-2 block text-sm font-black text-slate-700">
-                Category
-              </span>
-
-              <select
-                value={selectedCategory}
-                onChange={(e) => {
-                  setSelectedCategory(e.target.value);
-                  const nextSubs =
-                    normalizeSubcategories(
-                      content.subcategories,
-                      content.categories
-                    )[e.target.value] || [];
-                  setSelectedSubcategory(
-                    nextSubs[0]?.name || ""
-                  );
-                  setSelectedIds([]);
-                }}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
-              >
-                {categories.map(
-                  (category) => (
-                    <option
-                      key={category}
-                      value={category}
-                    >
-                      {category}
-                    </option>
-                  )
-                )}
-              </select>
-            </label>
-
-            <label className="block">
-              <span className="mb-2 block text-sm font-black text-slate-700">
-                Subcategory
-              </span>
-
-              <select
-                value={selectedSubcategory}
-                onChange={(e) =>
-                  setSelectedSubcategory(
-                    e.target.value
-                  )
-                }
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
-              >
-                <option value="">
-                  General {selectedCategory}
-                </option>
-
-                {subcategories.map(
-                  (sub) => (
-                    <option
-                      key={sub.id}
-                      value={sub.name}
-                    >
-                      {sub.name}
-                      {sub.visible ===
-                      false
-                        ? " (Hidden)"
-                        : ""}
-                    </option>
-                  )
-                )}
-              </select>
-            </label>
-
-            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 text-sm font-black text-white transition hover:bg-emerald-800">
-              <Upload size={17} />
-              {uploading
-                ? "Uploading..."
-                : "Upload Images"}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                disabled={uploading}
-                className="hidden"
-                onChange={(e) => {
-                  onUpload(
-                    e.target.files
-                  );
-                  e.target.value = "";
-                }}
-              />
-            </label>
-          </div>
-
-          <div className="mt-5 grid gap-5 md:grid-cols-2">
-            <Field
-              label="Category Name"
-              value={selectedCategory}
-              onChange={onCategoryName}
-            />
-
-            <TextArea
-              label="Category Description"
-              value={
-                content
-                  .categoryDescriptions?.[
-                  selectedCategory
-                ] || ""
-              }
-              onChange={
-                onCategoryDescription
-              }
-              rows={3}
-            />
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h3 className="font-black text-slate-900">
-                  Subcategories
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  Manage collections for{" "}
-                  {selectedCategory}.
-                </p>
-              </div>
-
-              <Button
-                tone="purple"
-                icon={Plus}
-                onClick={onAddSubcategory}
-              >
-                Add Subcategory
-              </Button>
-            </div>
-
-            <div className="mt-4 grid gap-3">
-              {subcategories.map(
-                (sub) => (
-                  <div
-                    key={sub.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4"
-                  >
-                    <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end">
-                      <Field
-                        label="Name"
-                        value={sub.name}
-                        onChange={(value) =>
-                          onUpdateSubcategory(
-                            sub.id,
-                            "name",
-                            value
-                          )
-                        }
-                      />
-
-                      <Field
-                        label="Description"
-                        value={
-                          sub.description
-                        }
-                        onChange={(value) =>
-                          onUpdateSubcategory(
-                            sub.id,
-                            "description",
-                            value
-                          )
-                        }
-                      />
-
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            onUpdateSubcategory(
-                              sub.id,
-                              "visible",
-                              !sub.visible
-                            )
-                          }
-                          className="rounded-xl bg-slate-100 p-3 text-slate-700"
-                          title={
-                            sub.visible
-                              ? "Hide"
-                              : "Show"
-                          }
-                        >
-                          {sub.visible ? (
-                            <Eye size={17} />
-                          ) : (
-                            <EyeOff
-                              size={17}
-                            />
-                          )}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            onDeleteSubcategory(
-                              sub
-                            )
-                          }
-                          className="rounded-xl bg-red-50 p-3 text-red-600"
-                          title="Delete"
-                        >
-                          <Trash2
-                            size={17}
-                          />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )
-              )}
-
-              {!subcategories.length && (
-                <div className="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-center text-xs font-bold text-slate-400">
-                  No subcategories. Click
-                  "Add Subcategory".
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h3 className="text-2xl font-black text-slate-950">
-              {selectedCategory} Images
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              {categoryImages.length} images •{" "}
-              {selectedIds.length} selected
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Button
-              tone="white"
-              onClick={toggleSelectAll}
-            >
-              {allSelected
-                ? "Unselect All"
-                : "Select All"}
-            </Button>
-
-            <Button
-              tone="red"
-              icon={Trash2}
-              disabled={!selectedIds.length}
-              onClick={onDeleteSelected}
-            >
-              Delete Selected
-            </Button>
-          </div>
-        </div>
-
-        {!categoryImages.length ? (
-          <div className="mt-6 rounded-[28px] border-2 border-dashed border-slate-200 bg-white p-16 text-center">
-            <ImageIcon
-              size={50}
-              className="mx-auto text-slate-300"
-            />
-
-            <h3 className="mt-4 text-xl font-black text-slate-800">
-              No images yet
-            </h3>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Upload images using the button
-              above.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-6 grid gap-5 xl:grid-cols-2">
-            {categoryImages.map(
-              (item) => {
-                const image =
-                  item.image ||
-                  item.images?.[0];
-
-                const selected =
-                  selectedIds.includes(
-                    item.id
-                  );
-
-                const itemSubs =
-                  normalizeSubcategories(
-                    content.subcategories,
-                    content.categories
-                  )[item.category] ||
-                  [];
-
-                return (
-                  <motion.div
-                    key={item.id}
-                    layout
-                    className={`rounded-[26px] border bg-white p-5 shadow-sm transition ${
-                      selected
-                        ? "border-emerald-400 ring-4 ring-emerald-500/10"
-                        : "border-slate-200"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <label className="flex min-w-0 items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={
-                            selected
-                          }
-                          onChange={() =>
-                            setSelectedIds(
-                              (prev) =>
-                                selected
-                                  ? prev.filter(
-                                      (id) =>
-                                        id !==
-                                        item.id
-                                    )
-                                  : [
-                                      ...prev,
-                                      item.id,
-                                    ]
-                            )
-                          }
-                          className="h-5 w-5"
-                        />
-
-                        <span className="truncate text-sm font-black text-slate-900">
-                          {item.title ||
-                            "Untitled Image"}
-                        </span>
-                      </label>
-
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            onUpdateImage(
-                              item.id,
-                              "visible",
-                              !item.visible
-                            )
-                          }
-                          className="rounded-xl bg-slate-100 p-2.5 text-slate-700"
-                          title={
-                            item.visible
-                              ? "Hide"
-                              : "Show"
-                          }
-                        >
-                          {item.visible ? (
-                            <Eye
-                              size={16}
-                            />
-                          ) : (
-                            <EyeOff
-                              size={16}
-                            />
-                          )}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            onDeleteOne(
-                              item.id
-                            )
-                          }
-                          className="rounded-xl bg-red-50 p-2.5 text-red-600"
-                          title="Delete"
-                        >
-                          <Trash2
-                            size={16}
-                          />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-5 md:grid-cols-[220px_1fr]">
-                      <div>
-                        <div className="h-44 overflow-hidden rounded-2xl bg-slate-100">
-                          {image ? (
-                            <img
-                              src={image}
-                              alt={
-                                item.title ||
-                                "Gallery image"
-                              }
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center">
-                              <ImageIcon
-                                size={42}
-                                className="text-slate-300"
-                              />
-                            </div>
-                          )}
-                        </div>
-
-                        <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-black text-white transition hover:bg-emerald-700">
-                          <Upload
-                            size={15}
-                          />
-                          Replace Image
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            disabled={
-                              uploading
-                            }
-                            onChange={(
-                              e
-                            ) => {
-                              onReplace(
-                                item.id,
-                                e.target
-                                  .files?.[0]
-                              );
-                              e.target.value =
-                                "";
-                            }}
-                          />
-                        </label>
-                      </div>
-
-                      <div className="grid gap-4">
-                        <Field
-                          label="Image Title"
-                          value={
-                            item.title
-                          }
-                          onChange={(
-                            value
-                          ) =>
-                            onUpdateImage(
-                              item.id,
-                              "title",
-                              value
-                            )
-                          }
-                        />
-
-                        <label className="block">
-                          <span className="mb-2 block text-sm font-black text-slate-700">
-                            Category
-                          </span>
-
-                          <select
-                            value={
-                              item.category
-                            }
-                            onChange={(
-                              e
-                            ) =>
-                              onMoveImage(
-                                item.id,
-                                e.target
-                                  .value
-                              )
-                            }
-                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
-                          >
-                            {categories.map(
-                              (
-                                category
-                              ) => (
-                                <option
-                                  key={
-                                    category
-                                  }
-                                  value={
-                                    category
-                                  }
-                                >
-                                  {
-                                    category
-                                  }
-                                </option>
-                              )
-                            )}
-                          </select>
-                        </label>
-
-                        {itemSubs.length >
-                          0 && (
-                          <label className="block">
-                            <span className="mb-2 block text-sm font-black text-slate-700">
-                              Subcategory
-                            </span>
-
-                            <select
-                              value={
-                                item.subcategory ||
-                                ""
-                              }
-                              onChange={(
-                                e
-                              ) =>
-                                onUpdateImage(
-                                  item.id,
-                                  "subcategory",
-                                  e
-                                    .target
-                                    .value
-                                )
-                              }
-                              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
-                            >
-                              <option value="">
-                                General
-                              </option>
-
-                              {itemSubs.map(
-                                (
-                                  sub
-                                ) => (
-                                  <option
-                                    key={
-                                      sub.id
-                                    }
-                                    value={
-                                      sub.name
-                                    }
-                                  >
-                                    {
-                                      sub.name
-                                    }
-                                  </option>
-                                )
-                              )}
-                            </select>
-                          </label>
-                        )}
-
-                        <Field
-                          label="Date / Label"
-                          value={
-                            item.date
-                          }
-                          onChange={(
-                            value
-                          ) =>
-                            onUpdateImage(
-                              item.id,
-                              "date",
-                              value
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              }
-            )}
-          </div>
-        )}
-      </div>
-    </section>
+    </div>
   );
 }
 
 export default function AdminGallery() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const replaceInputRefs = useRef({});
+  
+  const [content, setContent] = useState(normalizeContent());
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("Classroom");
+  const [activeSubcategory, setActiveSubcategory] = useState("");
+  const [search, setSearch] = useState("");
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [modal, setModal] = useState(null);
+  const [draft, setDraft] = useState({});
+  const [notice, setNotice] = useState(null);
 
-  const [content, setContent] =
-    useState(defaultContent);
-
-  const [activeCategory, setActiveCategory] =
-    useState("All");
-
-  const [selectedCategory, setSelectedCategory] =
-    useState("Classroom");
-
-  const [selectedSubcategory, setSelectedSubcategory] =
-    useState("");
-
-  const [selectedIds, setSelectedIds] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [uploading, setUploading] =
-    useState(false);
-
-  const [message, setMessage] =
-    useState({
-      type: "",
-      text: "",
-    });
-
-  const [modal, setModal] =
-    useState(null);
-
-  const [draft, setDraft] =
-    useState({});
-
-  const [confirmTarget, setConfirmTarget] =
-    useState(null);
-
-  const token =
-    localStorage.getItem("adminToken");
+  const showNotice = (message, type = "success") => {
+    setNotice({ message, type });
+    window.setTimeout(() => setNotice(null), 4000);
+  };
 
   useEffect(() => {
     let mounted = true;
 
-    const load = async () => {
+    async function loadGallery() {
       try {
-        const response =
-          await api.get(
-            "/api/site-content/gallery",
-            { timeout: 15000 }
-          );
-
+        const response = await api.get("/api/site-content/gallery", { timeout: 20000 });
         if (!mounted) return;
-
-        const merged = mergeContent(
-          response.data?.data?.content || {}
-        );
-
-        setContent(merged);
-
-        const firstCategory =
-          merged.categories[0] ||
-          "Classroom";
-
-        setSelectedCategory(
-          firstCategory
-        );
-
-        const firstSub =
-          merged.subcategories?.[
-            firstCategory
-          ]?.find(
-            (item) =>
-              item.visible !== false
-          );
-
-        setSelectedSubcategory(
-          firstSub?.name || ""
-        );
+        
+        const saved = normalizeContent(response?.data?.data?.content || {});
+        setContent(saved);
+        setActiveCategory(saved.categories[0] || "Classroom");
       } catch (error) {
-        console.error(
-          "Gallery load error:",
-          error
-        );
-
-        if (mounted) {
-          setMessage({
-            type: "error",
-            text: "Could not load saved gallery. Default content is being shown.",
-          });
-        }
+        console.error("Admin Gallery load error:", error);
+        if (mounted) showNotice("Saved gallery could not be loaded. Default content is being shown.", "error");
       } finally {
-        if (mounted)
-          setLoading(false);
+        if (mounted) setLoading(false);
       }
-    };
+    }
 
-    load();
+    loadGallery();
 
     return () => {
       mounted = false;
     };
   }, []);
 
-  const showMessage = (
-    type,
-    text
-  ) => {
-    setMessage({
-      type,
-      text,
+  const currentSubcategories = content.subcategories?.[activeCategory] || [];
+
+  const visibleImages = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return content.images.filter((item) => {
+      const categoryMatch = item.category === activeCategory;
+      const subcategoryMatch = !activeSubcategory || item.subcategory === activeSubcategory;
+      const searchMatch = !query ||
+        item.title.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query) ||
+        item.subcategory.toLowerCase().includes(query);
+      
+      return categoryMatch && subcategoryMatch && searchMatch;
     });
+  }, [content.images, activeCategory, activeSubcategory, search]);
+
+  const updateContent = (changes) => {
+    setContent((previous) => normalizeContent({ ...previous, ...changes }));
   };
 
-  const save = async (
-    nextContent = content,
-    successText = "Gallery changes saved successfully."
-  ) => {
+  const saveGallery = async () => {
     setSaving(true);
-    setMessage({
-      type: "",
-      text: "",
-    });
-
-    const categories =
-      normalizeCategories(
-        nextContent.categories
-      );
-
-    const cleaned = {
-      ...nextContent,
-      categories,
-      categoryDescriptions:
-        categories.reduce(
-          (output, category) => {
-            output[category] =
-              nextContent
-                .categoryDescriptions?.[
-                category
-              ] || "";
-            return output;
-          },
-          {}
-        ),
-      subcategories:
-        normalizeSubcategories(
-          nextContent.subcategories,
-          categories
-        ),
-      images:
-        normalizeImages(
-          nextContent.images,
-          categories
-        ),
-    };
-
     try {
-      await api.put(
-        "/api/site-content/gallery",
-        { content: cleaned },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: 30000,
-        }
-      );
-
-      setContent(
-        mergeContent(cleaned)
-      );
-
-      showMessage(
-        "success",
-        successText
-      );
+      const clean = normalizeContent(content);
+      await api.put("/api/site-content/gallery", { content: clean }, { headers: getAuthHeaders(), timeout: 30000 });
+      setContent(clean);
+      showNotice("Gallery changes saved successfully.");
     } catch (error) {
-      console.error(
-        "Gallery save error:",
-        error
-      );
-
-      showMessage(
-        "error",
-        error.response?.data
-          ?.message ||
-          "Could not save gallery changes."
-      );
+      console.error("Gallery save error:", error);
+      showNotice(error?.response?.data?.message || "Could not save Gallery changes.", "error");
     } finally {
       setSaving(false);
     }
   };
 
-  const openHeroEditor =
-    () => {
-      setDraft({
-        heroBadge:
-          content.heroBadge,
-        heroTitle:
-          content.heroTitle,
-        heroHighlightedText:
-          content.heroHighlightedText,
-        heroSubtitle:
-          content.heroSubtitle,
-        heroExploreText:
-          content.heroExploreText,
-        heroAchievementText:
-          content.heroAchievementText,
-      });
-
-      setModal("hero");
-    };
-
-  const openMainEditor =
-    () => {
-      setDraft({
-        badge: content.badge,
-        title: content.title,
-        highlightedText:
-          content.highlightedText,
-        description:
-          content.description,
-      });
-
-      setModal("main");
-    };
-
-  const openBottomEditor =
-    () => {
-      setDraft({
-        bottomTitle:
-          content.bottomTitle,
-        bottomDescription:
-          content.bottomDescription,
-        bottomNote:
-          content.bottomNote,
-      });
-
-      setModal("bottom");
-    };
-
-  const openAchievement =
-    (item = null) => {
-      setDraft(
-        item || {
-          id: String(Date.now()),
-          title: "",
-          year:
-            new Date()
-              .getFullYear()
-              .toString(),
-          icon: "Trophy",
-        }
-      );
-
-      setModal(
-        item
-          ? "achievement-edit"
-          : "achievement-add"
-      );
-    };
-
-  const openCategory =
-    (category) => {
-      setDraft({
-        oldName: category,
-        name: category,
-        description:
-          content
-            .categoryDescriptions?.[
-            category
-          ] || "",
-        subcategories: (
-          content
-            .subcategories?.[
-            category
-          ] || []
-        ).map((item) => ({
-          ...item,
-        })),
-      });
-
-      setModal("category");
-    };
-
-  const applyModal =
-    () => {
-      let next = {
-        ...content,
-      };
-
-      if (
-        modal === "hero" ||
-        modal === "main" ||
-        modal === "bottom"
-      ) {
-        next = {
-          ...next,
-          ...draft,
-        };
-      }
-
-      if (
-        modal ===
-          "achievement-add" ||
-        modal ===
-          "achievement-edit"
-      ) {
-        const list = [
-          ...(next.achievements || []),
-        ];
-
-        const index =
-          list.findIndex(
-            (item) =>
-              item.id === draft.id
-          );
-
-        if (index >= 0)
-          list[index] = draft;
-        else list.push(draft);
-
-        next.achievements = list;
-      }
-
-      if (modal === "category") {
-        const oldName =
-          draft.oldName;
-
-        const newName =
-          String(
-            draft.name || ""
-          ).trim();
-
-        if (!newName) {
-          showMessage(
-            "error",
-            "Category name cannot be empty."
-          );
-          return;
-        }
-
-        const categories =
-          normalizeCategories(
-            next.categories
-          ).map(
-            (category) =>
-              category ===
-              oldName
-                ? newName
-                : category
-          );
-
-        const descriptions = {
-          ...next.categoryDescriptions,
-        };
-
-        delete descriptions[
-          oldName
-        ];
-
-        descriptions[newName] =
-          draft.description || "";
-
-        const subcategories = {
-          ...next.subcategories,
-        };
-
-        delete subcategories[
-          oldName
-        ];
-
-        subcategories[newName] =
-          (
-            draft.subcategories ||
-            []
-          ).filter((item) =>
-            String(
-              item.name || ""
-            ).trim()
-          );
-
-        const images = (
-          next.images || []
-        ).map((item) => ({
-          ...item,
-          category:
-            item.category ===
-            oldName
-              ? newName
-              : item.category,
-        }));
-
-        next = {
-          ...next,
-          categories: [
-            ...new Set(categories),
-          ],
-          categoryDescriptions:
-            descriptions,
-          subcategories,
-          images,
-        };
-
-        if (
-          selectedCategory ===
-          oldName
-        ) {
-          setSelectedCategory(
-            newName
-          );
-        }
-      }
-
-      setContent(
-        mergeContent(next)
-      );
-
-      setModal(null);
-
-      showMessage(
-        "success",
-        "Changes applied. Click Save Changes to publish them."
-      );
-    };
-
-  const addCategory =
-    () => {
-      let name = "New Category";
-      let count = 1;
-
-      while (
-        content.categories.includes(
-          name
-        )
-      ) {
-        count += 1;
-        name = `New Category ${count}`;
-      }
-
-      const next = {
-        ...content,
-        categories: [
-          ...content.categories,
-          name,
-        ],
-        categoryDescriptions: {
-          ...content.categoryDescriptions,
-          [name]: "",
-        },
-        subcategories: {
-          ...content.subcategories,
-          [name]: [],
-        },
-      };
-
-      setContent(
-        mergeContent(next)
-      );
-
-      setActiveCategory(
-        name
-      );
-      setSelectedCategory(
-        name
-      );
-      setSelectedSubcategory(
-        ""
-      );
-
-      showMessage(
-        "success",
-        `"${name}" added. Click Save Changes to publish.`
-      );
-    };
-
-  const requestDeleteCategory =
-    (category) => {
-      if (
-        content.categories
-          .length <= 1
-      ) {
-        showMessage(
-          "error",
-          "At least one gallery category is required."
-        );
-        return;
-      }
-
-      const fallback =
-        content.categories.find(
-          (item) =>
-            item !== category
-        );
-
-      setConfirmTarget({
-        type: "category",
-        category,
-        title:
-          "Delete category?",
-        name: category,
-        message: `Its images will be moved to "${fallback}".`,
-      });
-    };
-
-  const deleteCategory =
-    () => {
-      const category =
-        confirmTarget?.category;
-
-      if (!category) return;
-
-      const categories =
-        content.categories.filter(
-          (item) =>
-            item !== category
-        );
-
-      const fallback =
-        categories[0];
-
-      const descriptions = {
-        ...content.categoryDescriptions,
-      };
-
-      delete descriptions[
-        category
-      ];
-
-      const subcategories = {
-        ...content.subcategories,
-      };
-
-      delete subcategories[
-        category
-      ];
-
-      const images = (
-        content.images || []
-      ).map((item) =>
-        item.category === category
-          ? {
-              ...item,
-              category: fallback,
-              subcategory: "",
-            }
-          : item
-      );
-
-      const next = {
-        ...content,
-        categories,
-        categoryDescriptions:
-          descriptions,
-        subcategories,
-        images,
-      };
-
-      setContent(
-        mergeContent(next)
-      );
-
-      setActiveCategory(
-        "All"
-      );
-      setSelectedCategory(
-        fallback
-      );
-      setSelectedSubcategory(
-        ""
-      );
-
-      setConfirmTarget(null);
-
-      showMessage(
-        "success",
-        `"${category}" deleted. Click Save Changes to publish.`
-      );
-    };
-
-  const deleteAchievement =
-    () => {
-      const id =
-        confirmTarget?.id;
-
-      if (!id) return;
-
-      setContent(
-        (previous) => ({
-          ...previous,
-          achievements: (
-            previous.achievements ||
-            []
-          ).filter(
-            (item) =>
-              item.id !== id
-          ),
-        })
-      );
-
-      setConfirmTarget(null);
-
-      showMessage(
-        "success",
-        "Achievement deleted. Click Save Changes to publish."
-      );
-    };
-
-  const uploadImage = async (
-    file
-  ) => {
-    const formData =
-      new FormData();
-
-    formData.append(
-      "file",
-      file
-    );
-
-    const uploadToken =
-      localStorage.getItem(
-        "adminToken"
-      );
-
-    const response =
-      await api.post(
-        "/api/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type":
-              "multipart/form-data",
-            ...(uploadToken
-              ? {
-                  Authorization: `Bearer ${uploadToken}`,
-                }
-              : {}),
-          },
-          timeout: 20000,
-        }
-      );
-
-    const url =
-      response.data?.url ||
-      response.data
-        ?.imageUrl ||
-      response.data?.fileUrl ||
-      response.data?.data?.url ||
-      response.data?.data
-        ?.imageUrl ||
-      response.data?.data
-        ?.fileUrl;
-
-    if (!url) {
-      throw new Error(
-        "Image uploaded but backend did not return an image URL."
-      );
-    }
-
-    return url;
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post("/api/upload", formData, {
+      headers: { ...getAuthHeaders(), "Content-Type": "multipart/form-data" },
+      timeout: 30000,
+    });
+    return response?.data?.url || response?.data?.imageUrl || response?.data?.fileUrl || response?.data?.data?.url || response?.data?.data?.imageUrl || response?.data?.data?.fileUrl || "";
   };
 
-  const cleanFileName =
-    (fileName = "") =>
-      fileName
-        .replace(
-          /\.[^/.]+$/,
-          ""
-        )
-        .replace(
-          /[-_]+/g,
-          " "
-        )
-        .replace(
-          /\s+/g,
-          " "
-        )
-        .trim()
-        .replace(
-          /\b\w/g,
-          (char) =>
-            char.toUpperCase()
-        );
+  const handleAddImages = async (event) => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = "";
 
-  const validateImage =
-    (file) => {
-      if (
-        !file.type.startsWith(
-          "image/"
-        )
-      ) {
-        return "Please upload only image files.";
+    if (!files.length) return;
+    setUploading(true);
+
+    try {
+      const uploaded = [];
+      for (let index = 0; index < files.length; index += 1) {
+        const file = files[index];
+        if (file.size > 6 * 1024 * 1024) throw new Error(`"${file.name}" is larger than 6 MB.`);
+        if (!file.type.startsWith("image/")) throw new Error(`"${file.name}" is not an image file.`);
+        
+        const url = await uploadFile(file);
+        if (!url) throw new Error(`No image URL was returned for "${file.name}".`);
+        
+        uploaded.push({
+          id: `gallery-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 7)}`,
+          title: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]+/g, " "),
+          description: "",
+          date: "School Activity",
+          category: activeCategory,
+          subcategory: activeSubcategory,
+          image: url,
+          images: [url],
+          visible: true,
+        });
       }
 
-      if (
-        file.size >
-        6 * 1024 * 1024
-      ) {
-        return "Image is too large. Please use an image under 6 MB.";
-      }
+      updateContent({ images: [...uploaded, ...content.images] });
+      showNotice(`${uploaded.length} image${uploaded.length > 1 ? "s" : ""} uploaded. Click Save Changes to publish them.`);
+    } catch (error) {
+      console.error("Gallery image upload error:", error);
+      showNotice(error?.message || "Image upload failed.", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
 
-      return "";
-    };
+  const handleReplaceImage = async (imageId, file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      if (file.size > 6 * 1024 * 1024) throw new Error("Image must be smaller than 6 MB.");
+      const url = await uploadFile(file);
+      if (!url) throw new Error("No image URL was returned.");
 
-  const handleUpload =
-    async (files) => {
-      const selectedFiles =
-        Array.from(
-          files || []
-        );
-
-      if (!selectedFiles.length)
-        return;
-
-      const validation =
-        selectedFiles
-          .map(validateImage)
-          .find(Boolean);
-
-      if (validation) {
-        showMessage(
-          "error",
-          validation
-        );
-        return;
-      }
-
-      setUploading(true);
-      setMessage({
-        type: "",
-        text: "",
+      updateContent({
+        images: content.images.map((item) =>
+          item.id === imageId ? { ...item, image: url, images: [url] } : item
+        ),
       });
+      showNotice("Image replaced. Click Save Changes to publish it.");
+    } catch (error) {
+      console.error("Replace image error:", error);
+      showNotice(error?.message || "Could not replace image.", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
 
-      try {
-        const selectedSub =
-          selectedSubcategory &&
-          (
-            content
-              .subcategories?.[
-              selectedCategory
-            ] || []
-          ).some(
-            (item) =>
-              item.name ===
-              selectedSubcategory
-          )
-            ? selectedSubcategory
-            : "";
+  const updateImage = (id, field, value) => {
+    updateContent({
+      images: content.images.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
+    });
+  };
 
-        const uploaded =
-          await Promise.all(
-            selectedFiles.map(
-              async (
-                file,
-                index
-              ) => {
-                const url =
-                  await uploadImage(
-                    file
-                  );
+  const deleteImage = (id) => {
+    updateContent({ images: content.images.filter((item) => item.id !== id) });
+    setSelectedImages((items) => items.filter((item) => item !== id));
+    showNotice("Image deleted locally. Click Save Changes to publish.");
+  };
 
-                return {
-                  id: `${Date.now()}-${index}-${Math.random()
-                    .toString(36)
-                    .slice(2)}`,
-                  title:
-                    cleanFileName(
-                      file.name
-                    ) ||
-                    `Gallery Image ${
-                      index + 1
-                    }`,
-                  category:
-                    selectedCategory,
-                  subcategory:
-                    selectedSub,
-                  date: "School Activity",
-                  description:
-                    "",
-                  image: url,
-                  images: [url],
-                  visible: true,
-                };
-              }
-            )
-          );
+  const toggleImageSelection = (id) => {
+    setSelectedImages((previous) =>
+      previous.includes(id) ? previous.filter((item) => item !== id) : [...previous, id]
+    );
+  };
 
-        setContent(
-          (previous) => ({
-            ...previous,
-            images: [
-              ...uploaded,
-              ...previous.images,
-            ],
-          })
-        );
+  const deleteSelected = () => {
+    if (!selectedImages.length) return;
+    updateContent({ images: content.images.filter((item) => !selectedImages.includes(item.id)) });
+    setSelectedImages([]);
+    showNotice("Selected images deleted locally. Click Save Changes to publish.");
+  };
 
-        showMessage(
-          "success",
-          `${uploaded.length} image${
-            uploaded.length ===
-            1
-              ? ""
-              : "s"
-          } uploaded. Click Save Changes to publish.`
-        );
-      } catch (error) {
-        console.error(
-          "Gallery upload error:",
-          error
-        );
+  const toggleImageVisibility = (id) => {
+    updateContent({
+      images: content.images.map((item) => (item.id === id ? { ...item, visible: !item.visible } : item)),
+    });
+  };
 
-        showMessage(
-          "error",
-          error.response?.data
-            ?.message ||
-            error.message ||
-            "Could not upload images. Check that the backend is running."
-        );
-      } finally {
-        setUploading(false);
-      }
-    };
+  const openHeroEditor = () => {
+    setDraft({
+      heroBadge: content.heroBadge,
+      heroTitle: content.heroTitle,
+      heroHighlightedText: content.heroHighlightedText,
+      heroSubtitle: content.heroSubtitle,
+      heroExploreText: content.heroExploreText,
+      heroAchievementText: content.heroAchievementText,
+    });
+    setModal("hero");
+  };
 
-  const replaceImage =
-    async (
-      id,
-      file
-    ) => {
-      if (!file) return;
+  const openMainEditor = () => {
+    setDraft({
+      badge: content.badge,
+      title: content.title,
+      highlightedText: content.highlightedText,
+      description: content.description,
+    });
+    setModal("main");
+  };
 
-      const validation =
-        validateImage(file);
+  const openBottomEditor = () => {
+    setDraft({
+      bottomTitle: content.bottomTitle,
+      bottomDescription: content.bottomDescription,
+      bottomNote: content.bottomNote,
+    });
+    setModal("bottom");
+  };
 
-      if (validation) {
-        showMessage(
-          "error",
-          validation
-        );
-        return;
-      }
+  const openCategoryEditor = (category) => {
+    setDraft({
+      oldName: category,
+      name: category,
+      description: content.categoryDescriptions?.[category] || "",
+      subcategories: (content.subcategories?.[category] || []).map((item) => ({ ...item })),
+    });
+    setModal("category");
+  };
 
-      setUploading(true);
-
-      try {
-        const url =
-          await uploadImage(
-            file
-          );
-
-        setContent(
-          (previous) => ({
-            ...previous,
-            images:
-              previous.images.map(
-                (item) =>
-                  item.id === id
-                    ? {
-                        ...item,
-                        image: url,
-                        images: [url],
-                      }
-                    : item
-              ),
-          })
-        );
-
-        showMessage(
-          "success",
-          "Image replaced. Click Save Changes to publish."
-        );
-      } catch (error) {
-        console.error(
-          "Replace image error:",
-          error
-        );
-
-        showMessage(
-          "error",
-          error.response?.data
-            ?.message ||
-            error.message ||
-            "Could not replace image."
-        );
-      } finally {
-        setUploading(false);
-      }
-    };
-
-  const updateImage =
-    (
-      id,
-      field,
-      value
-    ) => {
-      setContent(
-        (previous) => ({
-          ...previous,
-          images:
-            previous.images.map(
-              (item) =>
-                item.id === id
-                  ? {
-                      ...item,
-                      [field]:
-                        value,
-                    }
-                  : item
-            ),
-        })
-      );
-    };
-
-  const moveImage =
-    (
-      id,
-      category
-    ) => {
-      const subcategories =
-        content.subcategories?.[
-          category
-        ] || [];
-
-      setContent(
-        (previous) => ({
-          ...previous,
-          images:
-            previous.images.map(
-              (item) =>
-                item.id === id
-                  ? {
-                      ...item,
-                      category,
-                      subcategory:
-                        subcategories[0]
-                          ?.name ||
-                        "",
-                    }
-                  : item
-            ),
-        })
-      );
-    };
-
-  const deleteOne =
-    (id) => {
-      const image =
-        content.images.find(
-          (item) =>
-            item.id === id
-        );
-
-      setConfirmTarget({
-        type: "image",
-        id,
-        title:
-          "Delete image?",
-        name:
-          image?.title ||
-          "This image",
-        message:
-          "The image will be removed from the gallery. Click Save Changes to publish.",
-      });
-    };
-
-  const deleteSelected =
-    () => {
-      if (
-        !selectedIds.length
-      ) {
-        showMessage(
-          "error",
-          "Select at least one image first."
-        );
-        return;
-      }
-
-      setConfirmTarget({
-        type: "images",
-        title:
-          "Delete selected images?",
-        name: `${selectedIds.length} selected image${
-          selectedIds.length ===
-          1
-            ? ""
-            : "s"
-        }`,
-        message:
-          "The selected images will be removed from the gallery. Click Save Changes to publish.",
-      });
-    };
-
-  const confirmDelete =
-    () => {
-      if (
-        confirmTarget?.type ===
-        "category"
-      ) {
-        deleteCategory();
-        return;
-      }
-
-      if (
-        confirmTarget?.type ===
-        "achievement"
-      ) {
-        deleteAchievement();
-        return;
-      }
-
-      if (
-        confirmTarget?.type ===
-        "image"
-      ) {
-        const id =
-          confirmTarget.id;
-
-        setContent(
-          (previous) => ({
-            ...previous,
-            images:
-              previous.images.filter(
-                (item) =>
-                  item.id !== id
-              ),
-          })
-        );
-
-        setSelectedIds(
-          (previous) =>
-            previous.filter(
-              (item) =>
-                item !== id
-            )
-        );
-
-        setConfirmTarget(null);
-
-        showMessage(
-          "success",
-          "Image deleted. Click Save Changes to publish."
-        );
-        return;
-      }
-
-      if (
-        confirmTarget?.type ===
-        "images"
-      ) {
-        setContent(
-          (previous) => ({
-            ...previous,
-            images:
-              previous.images.filter(
-                (item) =>
-                  !selectedIds.includes(
-                    item.id
-                  )
-              ),
-          })
-        );
-
-        setSelectedIds([]);
-        setConfirmTarget(null);
-
-        showMessage(
-          "success",
-          "Selected images deleted. Click Save Changes to publish."
-        );
-      }
-    };
-
-  const addSubcategory =
-    () => {
-      const current =
-        content.subcategories?.[
-          selectedCategory
-        ] || [];
-
-      const names = new Set(
-        current.map(
-          (item) =>
-            item.name
-        )
-      );
-
-      let name = `New ${selectedCategory} Subcategory`;
-      let count = 1;
-
-      while (
-        names.has(name)
-      ) {
-        count += 1;
-        name = `New ${selectedCategory} Subcategory ${count}`;
-      }
-
-      const newSub = {
-        id: `${selectedCategory}-${Date.now()}`,
-        name,
-        description: "",
+  const openAchievementEditor = (achievement = null) => {
+    setDraft(
+      achievement || {
+        id: `achievement-${Date.now()}`,
+        title: "",
+        year: new Date().getFullYear().toString(),
+        icon: "Trophy",
         visible: true,
-      };
-
-      setContent(
-        (previous) => ({
-          ...previous,
-          subcategories: {
-            ...previous.subcategories,
-            [selectedCategory]: [
-              ...(previous
-                .subcategories?.[
-                selectedCategory
-              ] || []),
-              newSub,
-            ],
-          },
-        })
-      );
-
-      setSelectedSubcategory(
-        name
-      );
-
-      showMessage(
-        "success",
-        `Subcategory "${name}" added. Click Save Changes to publish.`
-      );
-    };
-
-  const updateSubcategory =
-    (
-      id,
-      field,
-      value
-    ) => {
-      setContent(
-        (previous) => {
-          const current =
-            previous
-              .subcategories?.[
-              selectedCategory
-            ] || [];
-
-          const old =
-            current.find(
-              (item) =>
-                item.id === id
-            );
-
-          const updated =
-            current.map(
-              (item) =>
-                item.id === id
-                  ? {
-                      ...item,
-                      [field]:
-                        value,
-                    }
-                  : item
-            );
-
-          const images =
-            field === "name" &&
-            old
-              ? previous.images.map(
-                  (image) =>
-                    image.category ===
-                      selectedCategory &&
-                    image.subcategory ===
-                      old.name
-                      ? {
-                          ...image,
-                          subcategory:
-                            value,
-                        }
-                      : image
-                )
-              : previous.images;
-
-          return {
-            ...previous,
-            subcategories: {
-              ...previous.subcategories,
-              [selectedCategory]:
-                updated,
-            },
-            images,
-          };
-        }
-      );
-
-      if (
-        field === "name" &&
-        selectedSubcategory ===
-          content.subcategories?.[
-            selectedCategory
-          ]?.find(
-            (item) =>
-              item.id === id
-          )?.name
-      ) {
-        setSelectedSubcategory(
-          value
-        );
       }
-    };
+    );
+    setModal("achievement");
+  };
 
-  const deleteSubcategory =
-    (subcategory) => {
-      setConfirmTarget({
-        type: "subcategory",
-        subcategory,
-        title:
-          "Delete subcategory?",
-        name:
-          subcategory.name,
-        message:
-          "Images inside this subcategory will move to the general category.",
+  const openImageEditor = (image) => {
+    setDraft({ ...image });
+    setModal("image");
+  };
+
+  const closeModal = () => {
+    if (uploading) return;
+    setModal(null);
+    setDraft({});
+  };
+
+  const saveModal = () => {
+    if (modal === "hero" || modal === "main" || modal === "bottom") {
+      updateContent(draft);
+      closeModal();
+      return;
+    }
+
+    if (modal === "image") {
+      if (!draft.title?.trim()) {
+        showNotice("Image title is required.", "error");
+        return;
+      }
+      updateContent({
+        images: content.images.map((item) => (item.id === draft.id ? { ...item, ...draft } : item)),
       });
-    };
+      closeModal();
+      return;
+    }
 
-  const confirmDeleteSubcategory =
-    () => {
-      const sub =
-        confirmTarget?.subcategory;
-
-      if (!sub) return;
-
-      setContent(
-        (previous) => ({
-          ...previous,
-          subcategories: {
-            ...previous.subcategories,
-            [selectedCategory]: (
-              previous
-                .subcategories?.[
-                selectedCategory
-              ] || []
-            ).filter(
-              (item) =>
-                item.id !==
-                sub.id
-            ),
-          },
-          images:
-            previous.images.map(
-              (image) =>
-                image.category ===
-                  selectedCategory &&
-                image.subcategory ===
-                  sub.name
-                  ? {
-                      ...image,
-                      subcategory:
-                        "",
-                    }
-                  : image
-            ),
-        })
-      );
-
-      if (
-        selectedSubcategory ===
-        sub.name
-      ) {
-        setSelectedSubcategory(
-          ""
-        );
+    if (modal === "achievement") {
+      if (!draft.title?.trim()) {
+        showNotice("Achievement title is required.", "error");
+        return;
       }
+      const exists = content.achievements.some((item) => item.id === draft.id);
+      updateContent({
+        achievements: exists
+          ? content.achievements.map((item) => (item.id === draft.id ? { ...draft } : item))
+          : [...content.achievements, { ...draft }],
+      });
+      closeModal();
+      return;
+    }
 
-      setConfirmTarget(null);
+    if (modal === "category") {
+      const oldName = draft.oldName;
+      const newName = draft.name?.trim();
 
-      showMessage(
-        "success",
-        "Subcategory deleted. Click Save Changes to publish."
-      );
-    };
-
-  const updateCategoryName =
-    (value) => {
-      const newName =
-        String(
-          value || ""
-        ).trimStart();
-
-      if (!newName) return;
-
-      if (
-        content.categories.some(
-          (category) =>
-            category !==
-              selectedCategory &&
-            category ===
-              newName
-        )
-      ) {
-        showMessage(
-          "error",
-          `Category "${newName}" already exists.`
-        );
+      if (!newName) {
+        showNotice("Category name cannot be empty.", "error");
         return;
       }
 
-      const oldName =
-        selectedCategory;
+      const duplicate = content.categories.some(
+        (item) => item !== oldName && item.toLowerCase() === newName.toLowerCase()
+      );
+      if (duplicate) {
+        showNotice("That category already exists.", "error");
+        return;
+      }
 
-      setContent(
-        (previous) => {
-          const categories =
-            previous.categories.map(
-              (category) =>
-                category ===
-                oldName
-                  ? newName
-                  : category
-            );
+      const categories = content.categories.map((item) => (item === oldName ? newName : item));
+      const categoryDescriptions = { ...content.categoryDescriptions };
+      delete categoryDescriptions[oldName];
+      categoryDescriptions[newName] = draft.description || "";
 
-          const descriptions =
-            {
-              ...previous.categoryDescriptions,
-            };
+      const subcategories = { ...content.subcategories };
+      delete subcategories[oldName];
+      subcategories[newName] = (draft.subcategories || []).filter((item) => item.name?.trim());
 
-          descriptions[
-            newName
-          ] =
-            descriptions[
-              oldName
-            ] || "";
-
-          delete descriptions[
-            oldName
-          ];
-
-          const subcategories =
-            {
-              ...previous.subcategories,
-            };
-
-          subcategories[
-            newName
-          ] =
-            subcategories[
-              oldName
-            ] || [];
-
-          delete subcategories[
-            oldName
-          ];
-
-          return {
-            ...previous,
-            categories,
-            categoryDescriptions:
-              descriptions,
-            subcategories,
-            images:
-              previous.images.map(
-                (image) =>
-                  image.category ===
-                  oldName
-                    ? {
-                        ...image,
-                        category:
-                          newName,
-                      }
-                    : image
-              ),
-          };
-        }
+      const images = content.images.map((item) =>
+        item.category === oldName ? { ...item, category: newName, subcategory: "" } : item
       );
 
-      setSelectedCategory(
-        newName
-      );
+      updateContent({ categories, categoryDescriptions, subcategories, images });
+      if (activeCategory === oldName) setActiveCategory(newName);
+      closeModal();
+    }
+  };
 
-      showMessage(
-        "success",
-        "Category renamed. Click Save Changes to publish."
-      );
-    };
+  const addCategory = () => {
+    let name = "New Category";
+    let counter = 1;
 
-  const updateCategoryDescription =
-    (value) => {
-      setContent(
-        (previous) => ({
-          ...previous,
-          categoryDescriptions:
-            {
-              ...previous.categoryDescriptions,
-              [selectedCategory]:
-                value,
-            },
-        })
-      );
-    };
+    while (content.categories.includes(name)) {
+      counter += 1;
+      name = `New Category ${counter}`;
+    }
+
+    updateContent({
+      categories: [...content.categories, name],
+      categoryDescriptions: { ...content.categoryDescriptions, [name]: "" },
+      subcategories: { ...content.subcategories, [name]: [] },
+    });
+
+    setActiveCategory(name);
+    setActiveSubcategory("");
+    showNotice(`${name} added. Click Save Changes to publish.`);
+  };
+
+  const deleteCategory = (category) => {
+    if (content.categories.length <= 1) {
+      showNotice("At least one category must remain.", "error");
+      return;
+    }
+
+    const remaining = content.categories.filter((item) => item !== category);
+    const replacement = remaining[0];
+    const categoryDescriptions = { ...content.categoryDescriptions };
+    delete categoryDescriptions[category];
+    const subcategories = { ...content.subcategories };
+    delete subcategories[category];
+
+    updateContent({
+      categories: remaining,
+      categoryDescriptions,
+      subcategories,
+      images: content.images.map((item) =>
+        item.category === category ? { ...item, category: replacement, subcategory: "" } : item
+      ),
+    });
+
+    setActiveCategory(replacement);
+    setActiveSubcategory("");
+    showNotice("Category deleted locally. Click Save Changes to publish.");
+  };
+
+  const addSubcategory = () => {
+    const name = window.prompt(`New subcategory for ${activeCategory}:`);
+    if (!name?.trim()) return;
+    const cleanName = name.trim();
+    const list = content.subcategories?.[activeCategory] || [];
+
+    if (list.some((item) => item.name.toLowerCase() === cleanName.toLowerCase())) {
+      showNotice("That subcategory already exists.", "error");
+      return;
+    }
+
+    updateContent({
+      subcategories: {
+        ...content.subcategories,
+        [activeCategory]: [
+          ...list,
+          { id: `${activeCategory}-${Date.now()}`, name: cleanName, description: "", visible: true },
+        ],
+      },
+    });
+    setActiveSubcategory(cleanName);
+    showNotice("Subcategory added. Click Save Changes to publish.");
+  };
+
+  const editSubcategory = (subcategory) => {
+    const name = window.prompt("Subcategory name:", subcategory.name);
+    if (!name?.trim()) return;
+    const description = window.prompt("Subcategory description:", subcategory.description || "");
+
+    const updated = (content.subcategories?.[activeCategory] || []).map((item) =>
+      item.id === subcategory.id
+        ? { ...item, name: name.trim(), description: description ?? item.description }
+        : item
+    );
+
+    updateContent({ subcategories: { ...content.subcategories, [activeCategory]: updated } });
+    if (activeSubcategory === subcategory.name) setActiveSubcategory(name.trim());
+    showNotice("Subcategory updated. Click Save Changes to publish.");
+  };
+
+  const deleteSubcategory = (subcategory) => {
+    const updated = (content.subcategories?.[activeCategory] || []).filter((item) => item.id !== subcategory.id);
+
+    updateContent({
+      subcategories: { ...content.subcategories, [activeCategory]: updated },
+      images: content.images.map((item) =>
+        item.subcategory === subcategory.name ? { ...item, subcategory: "" } : item
+      ),
+    });
+
+    if (activeSubcategory === subcategory.name) setActiveSubcategory("");
+    showNotice("Subcategory deleted locally. Click Save Changes to publish.");
+  };
+
+  const deleteAchievement = (id) => {
+    updateContent({ achievements: content.achievements.filter((item) => item.id !== id) });
+    showNotice("Achievement deleted locally. Click Save Changes to publish.");
+  };
+
+  const toggleAchievement = (id) => {
+    updateContent({
+      achievements: content.achievements.map((item) => (item.id === id ? { ...item, visible: !item.visible } : item)),
+    });
+  };
 
   if (loading) {
     return (
-      <div
-        className="flex min-h-screen items-center justify-center"
-        style={{
-          background:
-            "radial-gradient(circle at 10% 15%, rgba(45,106,79,0.10), transparent 28%), radial-gradient(circle at 90% 75%, rgba(233,196,106,0.12), transparent 28%), #F5F8F6",
-        }}
-      >
-        <div className="rounded-2xl bg-white px-6 py-4 font-black text-slate-700 shadow-xl">
-          Loading Gallery Editor...
+      <>
+        <style>{ADMIN_CSS}</style>
+        <div className="ag-loading">
+          <div className="ag-spinner" />
+          <strong>Loading Gallery Manager...</strong>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div
-      className="min-h-screen overflow-x-hidden"
-      style={{
-        backgroundImage:
-          "radial-gradient(circle at 8% 12%, rgba(45,106,79,0.10), transparent 25%), radial-gradient(circle at 92% 45%, rgba(233,196,106,0.12), transparent 28%), radial-gradient(circle at 50% 95%, rgba(126,155,190,0.08), transparent 30%), radial-gradient(rgba(45,106,79,0.08) 1px, transparent 1px), linear-gradient(180deg, #F7FAF8 0%, #F1F7F4 100%)",
-        backgroundSize:
-          "auto, auto, auto, 30px 30px, auto",
-      }}
-    >
-      {/* TOP ADMIN BAR */}
-      <header className="sticky top-0 z-[100] border-b border-slate-200 bg-white/90 px-4 py-2.5 sm:py-3 shadow-sm backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2.5">
-          <button
-            type="button"
-            onClick={() =>
-              navigate(
-                "/admin/dashboard"
-              )
-            }
-            className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs sm:text-sm font-black text-slate-800 transition hover:bg-slate-100"
-          >
-            <ArrowLeft size={16} />
-            Dashboard
-          </button>
+    <>
+      <style>{ADMIN_CSS}</style>
 
-          <div className="flex flex-wrap gap-2">
-            <Button
-              tone="white"
-              icon={Upload}
-              onClick={() =>
-                document
-                  .getElementById(
-                    "image-manager"
-                  )
-                  ?.scrollIntoView({
-                    behavior:
-                      "smooth",
-                  })
-              }
-            >
-              Manage Images
-            </Button>
-
-            <a
-              href="/gallery"
-              target="_blank"
-              rel="noreferrer"
-              className="hidden items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-black text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:inline-flex"
-            >
-              <ExternalLink size={15} />
-              View Gallery
-            </a>
-
-            <Button
-              tone="green"
-              icon={Save}
-              disabled={saving || uploading}
-              onClick={() =>
-                save()
-              }
-            >
-              {saving
-                ? "Saving..."
-                : "Save Changes"}
-            </Button>
-          </div>
+      {notice && (
+        <div className={`ag-notice ${notice.type}`}>
+          <div>{notice.type === "success" ? <Check size={17} /> : <X size={17} />}</div>
+          <span>{notice.message}</span>
         </div>
-      </header>
-
-      {/* PAGE INTRO */}
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:py-5">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
-              <Sparkles size={13} />
-              ONE PAGE GALLERY ADMIN
-            </span>
-
-            <h1 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-950">
-              Edit Gallery
-            </h1>
-
-            <p className="mt-1 max-w-xl text-xs sm:text-sm text-slate-500">
-              You no longer need to open a separate
-              Image Manager page. Edit the complete
-              gallery from this one page.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Button
-              tone="white"
-              icon={Edit3}
-              onClick={
-                openMainEditor
-              }
-            >
-              Edit Heading
-            </Button>
-
-            <Button
-              tone="white"
-              icon={Plus}
-              onClick={
-                addCategory
-              }
-            >
-              Add Category
-            </Button>
-
-            <Button
-              tone="white"
-              icon={Layers}
-              onClick={
-                openBottomEditor
-              }
-            >
-              Edit Bottom
-            </Button>
-          </div>
-        </div>
-
-        {message.text && (
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: -10,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            className={`mt-4 flex items-center gap-2 rounded-xl px-4 py-3 text-xs sm:text-sm font-black ${
-              message.type ===
-              "error"
-                ? "bg-red-50 text-red-700"
-                : "bg-emerald-50 text-emerald-700"
-            }`}
-          >
-            {message.type ===
-            "error" ? (
-              <AlertTriangle
-                size={16}
-              />
-            ) : (
-              <CheckCircle2
-                size={16}
-              />
-            )}
-
-            {message.text}
-          </motion.div>
-        )}
-      </div>
-
-      {/* HERO */}
-      <AdminHero
-        content={content}
-        onEdit={
-          openHeroEditor
-        }
-      />
-
-      {/* ACHIEVEMENTS */}
-      <AchievementSection
-        content={content}
-        onAdd={() =>
-          openAchievement()
-        }
-        onEdit={
-          openAchievement
-        }
-        onDelete={(item) =>
-          setConfirmTarget({
-            type: "achievement",
-            id: item.id,
-            title:
-              "Delete achievement?",
-            name: item.title,
-            message:
-              "This achievement will be removed from the gallery page.",
-          })
-        }
-      />
-
-      {/* GALLERY PREVIEW */}
-      <GalleryPreview
-        content={content}
-        activeCategory={
-          activeCategory
-        }
-        setActiveCategory={
-          setActiveCategory
-        }
-        onEditHeading={
-          openMainEditor
-        }
-        onManage={(
-          category,
-          subcategory
-        ) => {
-          setSelectedCategory(
-            category
-          );
-          setSelectedSubcategory(
-            subcategory || ""
-          );
-
-          setTimeout(() => {
-            document
-              .getElementById(
-                "image-manager"
-              )
-              ?.scrollIntoView({
-                behavior:
-                  "smooth",
-              });
-          }, 50);
-        }}
-        onEditCategory={
-          openCategory
-        }
-        onDeleteCategory={
-          requestDeleteCategory
-        }
-      />
-
-      {/* IMAGE MANAGEMENT - SAME PAGE */}
-      <ImageManager
-        content={content}
-        selectedCategory={
-          selectedCategory
-        }
-        setSelectedCategory={
-          setSelectedCategory
-        }
-        selectedSubcategory={
-          selectedSubcategory
-        }
-        setSelectedSubcategory={
-          setSelectedSubcategory
-        }
-        selectedIds={selectedIds}
-        setSelectedIds={
-          setSelectedIds
-        }
-        onUpload={
-          handleUpload
-        }
-        onReplace={
-          replaceImage
-        }
-        onDeleteOne={
-          deleteOne
-        }
-        onDeleteSelected={
-          deleteSelected
-        }
-        onUpdateImage={
-          updateImage
-        }
-        onMoveImage={
-          moveImage
-        }
-        onAddSubcategory={
-          addSubcategory
-        }
-        onUpdateSubcategory={
-          updateSubcategory
-        }
-        onDeleteSubcategory={
-          deleteSubcategory
-        }
-        onCategoryName={
-          updateCategoryName
-        }
-        onCategoryDescription={
-          updateCategoryDescription
-        }
-        uploading={uploading}
-        onAddCategory={
-          addCategory
-        }
-        onEditCategory={
-          openCategory
-        }
-        onDeleteCategory={
-          requestDeleteCategory
-        }
-      />
-
-      {/* BOTTOM PREVIEW */}
-      <BottomPreview
-        content={content}
-        onEdit={
-          openBottomEditor
-        }
-      />
-
-      {/* HERO MODAL */}
-      {modal === "hero" && (
-        <EditModal
-          title="Edit Gallery Hero"
-          onClose={() =>
-            setModal(null)
-          }
-          onSave={
-            applyModal
-          }
-        >
-          <Field
-            label="Hero Badge"
-            value={
-              draft.heroBadge
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                heroBadge:
-                  value,
-              })
-            }
-          />
-
-          <Field
-            label="Hero Title"
-            value={
-              draft.heroTitle
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                heroTitle:
-                  value,
-              })
-            }
-          />
-
-          <Field
-            label="Highlighted Text"
-            value={
-              draft.heroHighlightedText
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                heroHighlightedText:
-                  value,
-              })
-            }
-          />
-
-          <TextArea
-            label="Hero Subtitle"
-            value={
-              draft.heroSubtitle
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                heroSubtitle:
-                  value,
-              })
-            }
-          />
-
-          <Field
-            label="Explore Button Text"
-            value={
-              draft.heroExploreText
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                heroExploreText:
-                  value,
-              })
-            }
-          />
-
-          <Field
-            label="Achievement Button Text"
-            value={
-              draft.heroAchievementText
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                heroAchievementText:
-                  value,
-              })
-            }
-          />
-        </EditModal>
       )}
 
-      {/* MAIN HEADING MODAL */}
-      {modal === "main" && (
-        <EditModal
-          title="Edit Gallery Heading"
-          onClose={() =>
-            setModal(null)
-          }
-          onSave={
-            applyModal
-          }
-        >
-          <Field
-            label="Badge"
-            value={draft.badge}
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                badge: value,
-              })
-            }
-          />
+      <div className="ag-page">
+        <header className="ag-topbar">
+          <div className="ag-topbar-inner">
+            <button className="ag-secondary" onClick={() => navigate("/admin/dashboard")}>
+              <ArrowLeft size={16} />
+              Back to Dashboard
+            </button>
 
-          <Field
-            label="Title"
-            value={draft.title}
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                title: value,
-              })
-            }
-          />
-
-          <Field
-            label="Highlighted Text"
-            value={
-              draft.highlightedText
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                highlightedText:
-                  value,
-              })
-            }
-          />
-
-          <TextArea
-            label="Description"
-            value={
-              draft.description
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                description:
-                  value,
-              })
-            }
-            rows={5}
-          />
-        </EditModal>
-      )}
-
-      {/* BOTTOM MODAL */}
-      {modal === "bottom" && (
-        <EditModal
-          title="Edit Bottom Section"
-          onClose={() =>
-            setModal(null)
-          }
-          onSave={
-            applyModal
-          }
-        >
-          <Field
-            label="Bottom Title"
-            value={
-              draft.bottomTitle
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                bottomTitle:
-                  value,
-              })
-            }
-          />
-
-          <TextArea
-            label="Bottom Description"
-            value={
-              draft.bottomDescription
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                bottomDescription:
-                  value,
-              })
-            }
-          />
-
-          <Field
-            label="Bottom Note"
-            value={
-              draft.bottomNote
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                bottomNote:
-                  value,
-              })
-            }
-          />
-        </EditModal>
-      )}
-
-      {/* ACHIEVEMENT MODAL */}
-      {(modal ===
-        "achievement-add" ||
-        modal ===
-          "achievement-edit") && (
-        <EditModal
-          title={
-            modal ===
-            "achievement-add"
-              ? "Add Achievement"
-              : "Edit Achievement"
-          }
-          onClose={() =>
-            setModal(null)
-          }
-          onSave={
-            applyModal
-          }
-        >
-          <Field
-            label="Achievement Title"
-            value={
-              draft.title
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                title: value,
-              })
-            }
-          />
-
-          <Field
-            label="Year"
-            value={draft.year}
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                year: value,
-              })
-            }
-          />
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-black text-slate-700">
-              Icon
-            </span>
-
-            <select
-              value={
-                draft.icon ||
-                "Trophy"
-              }
-              onChange={(e) =>
-                setDraft({
-                  ...draft,
-                  icon: e.target
-                    .value,
-                })
-              }
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
-            >
-              <option value="Trophy">
-                Trophy
-              </option>
-              <option value="Award">
-                Award
-              </option>
-              <option value="Star">
-                Star
-              </option>
-            </select>
-          </label>
-        </EditModal>
-      )}
-
-      {/* CATEGORY MODAL */}
-      {modal ===
-        "category" && (
-        <EditModal
-          title={`Edit ${draft.oldName}`}
-          onClose={() =>
-            setModal(null)
-          }
-          onSave={
-            applyModal
-          }
-        >
-          <Field
-            label="Category Name"
-            value={draft.name}
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                name: value,
-              })
-            }
-          />
-
-          <TextArea
-            label="Category Description"
-            value={
-              draft.description
-            }
-            onChange={(value) =>
-              setDraft({
-                ...draft,
-                description:
-                  value,
-              })
-            }
-          />
-
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="ag-brand">
+              <div className="ag-brand-icon">
+                <Camera size={19} />
+              </div>
               <div>
-                <h3 className="font-black text-slate-900">
-                  Subcategories
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  These appear as collections
-                  in the public gallery.
-                </p>
+                <strong>Gallery Manager</strong>
+                <small>Red Rose Admin Panel</small>
+              </div>
+            </div>
+
+            <div className="ag-top-actions">
+              <a className="ag-secondary ag-link-button" href="/gallery" target="_blank" rel="noreferrer">
+                <ExternalLink size={15} />
+                View Gallery
+              </a>
+
+              <button className="ag-primary" onClick={saveGallery} disabled={saving || uploading}>
+                <Save size={16} />
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="ag-container">
+          <section className="ag-hero">
+            <div>
+              <span className="ag-kicker">
+                <Camera size={14} />
+                Gallery Manager
+              </span>
+              <h1>Manage School Gallery</h1>
+              <p>
+                Edit the complete public Gallery page from one place. Add photos, change titles, manage categories, achievements, and publish everything to the user website.
+              </p>
+            </div>
+
+            <div className="ag-hero-stat">
+              <strong>{content.images.length}</strong>
+              <span>Total Images</span>
+            </div>
+          </section>
+
+          <section className="ag-grid-two">
+            <div className="ag-card">
+              <div className="ag-card-head">
+                <div>
+                  <span className="ag-section-label">Hero Section</span>
+                  <h2>Gallery landing section</h2>
+                </div>
+                <button className="ag-edit" onClick={openHeroEditor}>
+                  <Edit3 size={15} />
+                  Edit
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setDraft({
-                    ...draft,
-                    subcategories: [
-                      ...(draft.subcategories ||
-                        []),
-                      {
-                        id: String(
-                          Date.now()
-                        ),
-                        name: "New Subcategory",
-                        description:
-                          "",
-                        visible: true,
-                      },
-                    ],
-                  })
-                }
-                className="inline-flex items-center gap-1 rounded-xl bg-emerald-700 px-3 py-2 text-xs font-black text-white"
-              >
-                <Plus size={14} />
-                Add
+              <div className="ag-preview-dark">
+                <small>{content.heroBadge}</small>
+                <h3>{content.heroTitle} <em>{content.heroHighlightedText}</em></h3>
+                <p>{content.heroSubtitle}</p>
+                <div className="ag-preview-buttons">
+                  <span>{content.heroExploreText}</span>
+                  <span>{content.heroAchievementText}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="ag-card">
+              <div className="ag-card-head">
+                <div>
+                  <span className="ag-section-label">Main Gallery</span>
+                  <h2>Heading and introduction</h2>
+                </div>
+                <button className="ag-edit" onClick={openMainEditor}>
+                  <Edit3 size={15} />
+                  Edit
+                </button>
+              </div>
+
+              <div className="ag-main-preview">
+                <span>{content.badge}</span>
+                <h3>{content.title} <em>{content.highlightedText}</em></h3>
+                <p>{content.description}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="ag-card">
+            <div className="ag-card-head ag-wrap-head">
+              <div>
+                <span className="ag-section-label">Categories</span>
+                <h2>Organize the gallery</h2>
+                <p>Categories and subcategories are shown on the public Gallery page.</p>
+              </div>
+
+              <button className="ag-primary" onClick={addCategory}>
+                <Plus size={16} />
+                Add Category
               </button>
             </div>
 
-            <div className="space-y-3">
-              {(
-                draft.subcategories ||
-                []
-              ).map(
-                (
-                  sub,
-                  index
-                ) => (
-                  <div
-                    key={
-                      sub.id
-                    }
-                    className="rounded-2xl border border-slate-200 bg-white p-4"
-                  >
-                    <div className="mb-3 flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-[.12em] text-slate-400">
-                        Subcategory{" "}
-                        {index +
-                          1}
-                      </span>
+            <div className="ag-category-tabs">
+              {content.categories.map((category) => (
+                <button
+                  key={category}
+                  className={activeCategory === category ? "active" : ""}
+                  onClick={() => {
+                    setActiveCategory(category);
+                    setActiveSubcategory("");
+                  }}
+                >
+                  <ImageIcon size={14} />
+                  {category}
+                </button>
+              ))}
+            </div>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setDraft({
-                            ...draft,
-                            subcategories:
-                              draft.subcategories.filter(
-                                (
-                                  item
-                                ) =>
-                                  item.id !==
-                                  sub.id
-                              ),
-                          })
-                        }
-                        className="rounded-full p-2 text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2
-                          size={15}
-                        />
-                      </button>
-                    </div>
+            <div className="ag-category-content">
+              <div className="ag-category-info">
+                <div>
+                  <span className="ag-section-label">Selected Category</span>
+                  <h3>{activeCategory}</h3>
+                  <p>{content.categoryDescriptions?.[activeCategory] || "No description added yet."}</p>
+                </div>
 
-                    <Field
-                      label="Name"
-                      value={
-                        sub.name
-                      }
-                      onChange={(
-                        value
-                      ) =>
-                        setDraft({
-                          ...draft,
-                          subcategories:
-                            draft.subcategories.map(
-                              (
-                                item
-                              ) =>
-                                item.id ===
-                                sub.id
-                                  ? {
-                                      ...item,
-                                      name: value,
-                                    }
-                                  : item
-                            ),
-                        })
-                      }
-                    />
+                <div className="ag-category-actions">
+                  <button className="ag-edit" onClick={() => openCategoryEditor(activeCategory)}>
+                    <Edit3 size={15} />
+                    Edit Category
+                  </button>
 
-                    <div className="mt-3">
-                      <TextArea
-                        label="Description"
-                        value={
-                          sub.description
-                        }
-                        onChange={(
-                          value
-                        ) =>
-                          setDraft({
-                            ...draft,
-                            subcategories:
-                              draft.subcategories.map(
-                                (
-                                  item
-                                ) =>
-                                  item.id ===
-                                  sub.id
-                                    ? {
-                                        ...item,
-                                        description:
-                                          value,
-                                      }
-                                    : item
-                              ),
-                          })
-                        }
-                        rows={
-                          3
-                        }
-                      />
-                    </div>
+                  <button className="ag-danger-outline" onClick={() => deleteCategory(activeCategory)}>
+                    <Trash2 size={15} />
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              <div className="ag-sub-head">
+                <div>
+                  <strong>Subcategories</strong>
+                  <span>{currentSubcategories.length} available</span>
+                </div>
+                <button className="ag-small-button" onClick={addSubcategory}>
+                  <Plus size={14} />
+                  Add Subcategory
+                </button>
+              </div>
+
+              <div className="ag-sub-list">
+                <button className={!activeSubcategory ? "selected" : ""} onClick={() => setActiveSubcategory("")}>
+                  <span>All {activeCategory}</span>
+                  <small>All photos</small>
+                </button>
+
+                {currentSubcategories.map((subcategory) => (
+                  <div className="ag-sub-row" key={subcategory.id}>
+                    <button
+                      className={activeSubcategory === subcategory.name ? "selected" : ""}
+                      onClick={() => setActiveSubcategory(subcategory.name)}
+                    >
+                      <span>{subcategory.name}</span>
+                      <small>{subcategory.visible ? "Visible" : "Hidden"}</small>
+                    </button>
+
+                    <button className="ag-row-icon" title="Edit subcategory" onClick={() => editSubcategory(subcategory)}>
+                      <Edit3 size={14} />
+                    </button>
+
+                    <button className="ag-row-icon danger" title="Delete subcategory" onClick={() => deleteSubcategory(subcategory)}>
+                      <Trash2 size={14} />
+                    </button>
                   </div>
-                )
-              )}
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="ag-card">
+            <div className="ag-card-head ag-wrap-head">
+              <div>
+                <span className="ag-section-label">Photo Manager</span>
+                <h2>{activeCategory}{activeSubcategory ? ` / ${activeSubcategory}` : ""}</h2>
+                <p>Upload, edit, hide, replace, or delete individual gallery images.</p>
+              </div>
+
+              <div className="ag-upload-actions">
+                {selectedImages.length > 0 && (
+                  <button className="ag-danger" onClick={deleteSelected}>
+                    <Trash2 size={15} />
+                    Delete Selected ({selectedImages.length})
+                  </button>
+                )}
+
+                <button className="ag-primary" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                  <Upload size={16} />
+                  {uploading ? "Uploading..." : "Upload Images"}
+                </button>
+
+                <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden onChange={handleAddImages} />
+              </div>
+            </div>
+
+            <div className="ag-toolbar">
+              <div className="ag-toolbar-left">
+                <button className={!activeSubcategory ? "active" : ""} onClick={() => setActiveSubcategory("")}>
+                  All
+                </button>
+
+                {currentSubcategories.map((subcategory) => (
+                  <button
+                    key={subcategory.id}
+                    className={activeSubcategory === subcategory.name ? "active" : ""}
+                    onClick={() => setActiveSubcategory(subcategory.name)}
+                  >
+                    {subcategory.name}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                className="ag-search"
+                placeholder="Search gallery images..."
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </div>
+
+            {visibleImages.length === 0 ? (
+              <div className="ag-empty">
+                <ImageIcon size={38} />
+                <h3>No images in this selection</h3>
+                <p>Upload images to {activeSubcategory || activeCategory} to start building the gallery.</p>
+                <button className="ag-primary" onClick={() => fileInputRef.current?.click()}>
+                  <Upload size={15} />
+                  Upload Image
+                </button>
+              </div>
+            ) : (
+              <div className="ag-image-grid">
+                {visibleImages.map((image) => (
+                  <article key={image.id} className={`ag-image-card ${!image.visible ? "hidden-card" : ""}`}>
+                    <div className="ag-image-check">
+                      <input type="checkbox" checked={selectedImages.includes(image.id)} onChange={() => toggleImageSelection(image.id)} />
+                    </div>
+
+                    <div className="ag-image-preview">
+                      {image.image ? <img src={image.image} alt={image.title} /> : <div className="ag-no-image"><ImageIcon size={32} /></div>}
+
+                      {!image.visible && (
+                        <div className="ag-hidden-label">
+                          <EyeOff size={13} />
+                          Hidden
+                        </div>
+                      )}
+
+                      <div className="ag-image-overlay">
+                        <button className="ag-overlay-button" onClick={() => openImageEditor(image)}>
+                          <Edit3 size={14} />
+                          Edit
+                        </button>
+
+                        <button className="ag-overlay-button" onClick={() => replaceInputRefs.current[image.id]?.click()}>
+                          <Upload size={14} />
+                          Replace
+                        </button>
+
+                        <input
+                          ref={(element) => {
+                            replaceInputRefs.current[image.id] = element;
+                          }}
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            event.target.value = "";
+                            handleReplaceImage(image.id, file);
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="ag-image-body">
+                      <div className="ag-image-tags">
+                        <span>{image.category}</span>
+                        {image.subcategory && <span>{image.subcategory}</span>}
+                      </div>
+
+                      <h3>{image.title}</h3>
+                      <p>{image.description || "No description added."}</p>
+
+                      <div className="ag-image-meta">
+                        <small>{image.date}</small>
+
+                        <div>
+                          <button title={image.visible ? "Hide image" : "Show image"} onClick={() => toggleImageVisibility(image.id)}>
+                            {image.visible ? <Eye size={15} /> : <EyeOff size={15} />}
+                          </button>
+
+                          <button title="Edit image" onClick={() => openImageEditor(image)}>
+                            <Edit3 size={15} />
+                          </button>
+
+                          <button className="danger" title="Delete image" onClick={() => deleteImage(image.id)}>
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="ag-card">
+            <div className="ag-card-head ag-wrap-head">
+              <div>
+                <span className="ag-section-label">Achievements</span>
+                <h2>Manage achievement cards</h2>
+                <p>These cards are displayed on the public Gallery page.</p>
+              </div>
+
+              <button className="ag-primary" onClick={() => openAchievementEditor()}>
+                <Plus size={16} />
+                Add Achievement
+              </button>
+            </div>
+
+            <div className="ag-achievement-grid">
+              {content.achievements.map((achievement) => (
+                <article className={`ag-achievement-card ${!achievement.visible ? "hidden-card" : ""}`} key={achievement.id}>
+                  <div className="ag-achievement-icon">
+                    <AchievementIcon type={achievement.icon} size={22} />
+                  </div>
+
+                  <div className="ag-achievement-copy">
+                    <span>{achievement.year}</span>
+                    <h3>{achievement.title}</h3>
+                  </div>
+
+                  <div className="ag-achievement-actions">
+                    <button onClick={() => toggleAchievement(achievement.id)}>
+                      {achievement.visible ? <Eye size={15} /> : <EyeOff size={15} />}
+                    </button>
+
+                    <button onClick={() => openAchievementEditor(achievement)}>
+                      <Edit3 size={15} />
+                    </button>
+
+                    <button className="danger" onClick={() => deleteAchievement(achievement.id)}>
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="ag-card">
+            <div className="ag-card-head">
+              <div>
+                <span className="ag-section-label">Bottom Section</span>
+                <h2>Closing Gallery message</h2>
+              </div>
+              <button className="ag-edit" onClick={openBottomEditor}>
+                <Edit3 size={15} />
+                Edit
+              </button>
+            </div>
+
+            <div className="ag-bottom-preview">
+              <strong>{content.bottomTitle}</strong>
+              <p>{content.bottomDescription}</p>
+              <small>{content.bottomNote}</small>
+            </div>
+          </section>
+
+          <div className="ag-save-bar">
+            <div>
+              <strong>Ready to publish your Gallery?</strong>
+              <span>Changes are local until you click Save Changes.</span>
+            </div>
+
+            <button className="ag-primary" onClick={saveGallery} disabled={saving || uploading}>
+              <Save size={16} />
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </main>
+      </div>
+
+      {modal === "hero" && (
+        <Modal title="Edit Hero Section" subtitle="These values control the top section of the public Gallery page." onClose={closeModal} onSave={saveModal}>
+          <Field label="Hero Badge" value={draft.heroBadge} onChange={(value) => setDraft({ ...draft, heroBadge: value })} />
+          <Field label="Hero Title" value={draft.heroTitle} onChange={(value) => setDraft({ ...draft, heroTitle: value })} />
+          <Field label="Highlighted Text" value={draft.heroHighlightedText} onChange={(value) => setDraft({ ...draft, heroHighlightedText: value })} />
+          <Field label="Hero Description" value={draft.heroSubtitle} textarea onChange={(value) => setDraft({ ...draft, heroSubtitle: value })} />
+          <Field label="Explore Button Text" value={draft.heroExploreText} onChange={(value) => setDraft({ ...draft, heroExploreText: value })} />
+          <Field label="Achievement Button Text" value={draft.heroAchievementText} onChange={(value) => setDraft({ ...draft, heroAchievementText: value })} />
+        </Modal>
+      )}
+
+      {modal === "main" && (
+        <Modal title="Edit Main Gallery Section" subtitle="Change the badge, title, highlighted word, and description." onClose={closeModal} onSave={saveModal}>
+          <Field label="Badge" value={draft.badge} onChange={(value) => setDraft({ ...draft, badge: value })} />
+          <Field label="Title" value={draft.title} onChange={(value) => setDraft({ ...draft, title: value })} />
+          <Field label="Highlighted Text" value={draft.highlightedText} onChange={(value) => setDraft({ ...draft, highlightedText: value })} />
+          <Field label="Description" value={draft.description} textarea onChange={(value) => setDraft({ ...draft, description: value })} />
+        </Modal>
+      )}
+
+      {modal === "bottom" && (
+        <Modal title="Edit Bottom Section" subtitle="Control the final message shown below the Gallery." onClose={closeModal} onSave={saveModal}>
+          <Field label="Bottom Title" value={draft.bottomTitle} onChange={(value) => setDraft({ ...draft, bottomTitle: value })} />
+          <Field label="Bottom Description" value={draft.bottomDescription} textarea onChange={(value) => setDraft({ ...draft, bottomDescription: value })} />
+          <Field label="Bottom Note" value={draft.bottomNote} onChange={(value) => setDraft({ ...draft, bottomNote: value })} />
+        </Modal>
+      )}
+
+      {modal === "category" && (
+        <Modal title="Edit Category" subtitle="Rename the category and manage its description." onClose={closeModal} onSave={saveModal}>
+          <Field label="Category Name" value={draft.name} onChange={(value) => setDraft({ ...draft, name: value })} />
+          <Field label="Category Description" value={draft.description} textarea onChange={(value) => setDraft({ ...draft, description: value })} />
+
+          <div className="ag-modal-subtitle-row">
+            <strong>Subcategories</strong>
+            <span>{draft.subcategories?.length || 0}</span>
+          </div>
+
+          <div className="ag-modal-subcategories">
+            {(draft.subcategories || []).map((item) => (
+              <div className="ag-modal-subcategory" key={item.id}>
+                <div>
+                  <strong>{item.name}</strong>
+                  <small>{item.description || "No description"}</small>
+                </div>
+                <button className="ag-row-icon danger" onClick={() => setDraft({ ...draft, subcategories: draft.subcategories.filter((subItem) => subItem.id !== item.id) })}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+
+            {!draft.subcategories?.length && <div className="ag-modal-empty">No subcategories.</div>}
+          </div>
+        </Modal>
+      )}
+
+      {modal === "achievement" && (
+        <Modal title="Edit Achievement" subtitle="This card will appear in the public Gallery achievement section." onClose={closeModal} onSave={saveModal}>
+          <Field label="Achievement Title" value={draft.title} onChange={(value) => setDraft({ ...draft, title: value })} />
+          <Field label="Year" value={draft.year} onChange={(value) => setDraft({ ...draft, year: value })} />
+
+          <label className="ag-field">
+            <span>Icon</span>
+            <div className="ag-select-wrap">
+              <select value={draft.icon || "Trophy"} onChange={(event) => setDraft({ ...draft, icon: event.target.value })}>
+                <option value="Trophy">Trophy</option>
+                <option value="Award">Award</option>
+                <option value="Star">Star</option>
+              </select>
+              <ChevronDown size={15} />
+            </div>
+          </label>
+
+          <label className="ag-check-field">
+            <input type="checkbox" checked={draft.visible !== false} onChange={(event) => setDraft({ ...draft, visible: event.target.checked })} />
+            <span>Show this achievement on the public Gallery</span>
+          </label>
+        </Modal>
+      )}
+
+      {modal === "image" && (
+        <Modal title="Edit Gallery Image" subtitle="All of these fields are shown/used by the public Gallery." onClose={closeModal} onSave={saveModal}>
+          <div className="ag-edit-image">
+            <div className="ag-edit-image-preview">
+              {draft.image ? <img src={draft.image} alt={draft.title || "Gallery"} /> : <ImageIcon size={34} />}
+            </div>
+
+            <div>
+              <strong>{draft.title || "Gallery Image"}</strong>
+              <small>{draft.category}</small>
             </div>
           </div>
-        </EditModal>
-      )}
 
-      {/* CONFIRM DELETE */}
-      {confirmTarget && (
-        <ConfirmModal
-          target={
-            confirmTarget
-          }
-          onClose={() =>
-            setConfirmTarget(
-              null
-            )
-          }
-          onConfirm={() => {
-            if (
-              confirmTarget.type ===
-              "subcategory"
-            ) {
-              confirmDeleteSubcategory();
-            } else {
-              confirmDelete();
-            }
-          }}
-        />
+          <Field label="Image Title" value={draft.title} onChange={(value) => setDraft({ ...draft, title: value })} />
+          <Field label="Description" value={draft.description} textarea onChange={(value) => setDraft({ ...draft, description: value })} />
+          <Field label="Date / Label" value={draft.date} onChange={(value) => setDraft({ ...draft, date: value })} />
+
+          <label className="ag-field">
+            <span>Category</span>
+            <div className="ag-select-wrap">
+              <select value={draft.category || activeCategory} onChange={(event) => setDraft({ ...draft, category: event.target.value, subcategory: "" })}>
+                {content.categories.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              <ChevronDown size={15} />
+            </div>
+          </label>
+
+          <label className="ag-field">
+            <span>Subcategory</span>
+            <div className="ag-select-wrap">
+              <select value={draft.subcategory || ""} onChange={(event) => setDraft({ ...draft, subcategory: event.target.value })}>
+                <option value="">No subcategory</option>
+                {(content.subcategories?.[draft.category] || []).map((subcategory) => (
+                  <option key={subcategory.id} value={subcategory.name}>{subcategory.name}</option>
+                ))}
+              </select>
+              <ChevronDown size={15} />
+            </div>
+          </label>
+
+          <label className="ag-check-field">
+            <input type="checkbox" checked={draft.visible !== false} onChange={(event) => setDraft({ ...draft, visible: event.target.checked })} />
+            <span>Show this image on the public Gallery</span>
+          </label>
+        </Modal>
       )}
-    </div>
+    </>
   );
 }
+
+const ADMIN_CSS = `
+  :root {
+    --ag-bg: #f2eee9;
+    --ag-card: #ffffff;
+    --ag-dark: #1c121c;
+    --ag-maroon: #531d35;
+    --ag-maroon-2: #6d2845;
+    --ag-gold: #e5c36e;
+    --ag-cyan: #49bddd;
+    --ag-text: #171525;
+    --ag-muted: #6c6876;
+    --ag-border: #e5ddd7;
+    --ag-soft: #faf7f3;
+    --ag-danger: #d94d58;
+    --ag-shadow: 0 18px 50px rgba(40, 25, 30, .08);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .ag-page {
+    min-height: 100vh;
+    background: radial-gradient(circle at 12% 0%, rgba(229, 195, 110, .13), transparent 28%), radial-gradient(circle at 90% 15%, rgba(73, 189, 221, .10), transparent 25%), var(--ag-bg);
+    color: var(--ag-text);
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding-bottom: 70px;
+  }
+
+  .ag-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(28, 18, 28, .96);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    backdrop-filter: blur(16px);
+  }
+
+  .ag-topbar-inner {
+    width: min(1440px, calc(100% - 36px));
+    min-height: 76px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .ag-brand {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    color: white;
+  }
+
+  .ag-brand-icon {
+    width: 39px;
+    height: 39px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--ag-gold), #f5e0a2);
+    color: #34231d;
+  }
+
+  .ag-brand strong {
+    display: block;
+    font-size: 14px;
+  }
+
+  .ag-brand small {
+    display: block;
+    color: #c9b8c3;
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  .ag-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .ag-secondary,
+  .ag-primary,
+  .ag-edit,
+  .ag-danger,
+  .ag-danger-outline,
+  .ag-small-button,
+  .ag-icon-button,
+  .ag-row-icon {
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+    transition: .2s ease;
+  }
+
+  .ag-secondary {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 13px;
+    border: 1px solid var(--ag-border);
+    border-radius: 11px;
+    background: white;
+    color: #4e4a56;
+    text-decoration: none;
+  }
+
+  .ag-secondary:hover {
+    transform: translateY(-1px);
+    border-color: #cdbfb7;
+  }
+
+  .ag-primary {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 15px;
+    border-radius: 11px;
+    background: linear-gradient(100deg, #e9c718, #58c4dc);
+    color: #17151b;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(70, 60, 30, .12);
+  }
+
+  .ag-primary:hover {
+    transform: translateY(-1px);
+  }
+
+  .ag-primary:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .ag-topbar .ag-secondary {
+    background: transparent;
+    border-color: rgba(255, 255, 255, .15);
+    color: #eee8ef;
+  }
+
+  .ag-container {
+    width: min(1440px, calc(100% - 36px));
+    margin: 28px auto 0;
+  }
+
+  .ag-hero {
+    min-height: 210px;
+    padding: 34px 38px;
+    border: 1px solid rgba(255, 255, 255, .7);
+    border-radius: 27px;
+    background: linear-gradient(120deg, #fffdf8, #eef8f7);
+    box-shadow: var(--ag-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+  }
+
+  .ag-kicker,
+  .ag-section-label {
+    color: var(--ag-maroon);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+  }
+
+  .ag-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #f5e8ef;
+  }
+
+  .ag-hero h1 {
+    margin: 13px 0 7px;
+    font-family: Georgia, serif;
+    font-size: clamp(36px, 4vw, 58px);
+    line-height: .98;
+  }
+
+  .ag-hero p {
+    max-width: 780px;
+    margin: 0;
+    color: #5e5b69;
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .ag-hero-stat {
+    min-width: 145px;
+    padding: 22px;
+    border-radius: 19px;
+    background: var(--ag-dark);
+    color: white;
+    text-align: center;
+  }
+
+  .ag-hero-stat strong {
+    display: block;
+    color: var(--ag-gold);
+    font-size: 38px;
+    line-height: 1;
+  }
+
+  .ag-hero-stat span {
+    display: block;
+    margin-top: 8px;
+    color: #d8cbd5;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .ag-grid-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .ag-card {
+    margin-top: 20px;
+    padding: 25px;
+    border: 1px solid var(--ag-border);
+    border-radius: 22px;
+    background: var(--ag-card);
+    box-shadow: var(--ag-shadow);
+  }
+
+  .ag-grid-two .ag-card {
+    margin-top: 0;
+  }
+
+  .ag-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 19px;
+  }
+
+  .ag-wrap-head {
+    align-items: flex-start;
+  }
+
+  .ag-card-head h2 {
+    margin: 6px 0 0;
+    font-family: Georgia, serif;
+    font-size: 25px;
+  }
+
+  .ag-card-head p {
+    margin: 7px 0 0;
+    color: var(--ag-muted);
+    font-size: 11px;
+  }
+
+  .ag-edit,
+  .ag-small-button {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 11px;
+    border: 1px solid var(--ag-border);
+    border-radius: 10px;
+    background: white;
+    color: #4d4855;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .ag-edit:hover,
+  .ag-small-button:hover {
+    border-color: #c8b9b1;
+    transform: translateY(-1px);
+  }
+
+  .ag-preview-dark {
+    min-height: 235px;
+    padding: 30px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: radial-gradient(circle at 80% 20%, rgba(229, 195, 110, .2), transparent 24%), linear-gradient(135deg, #21131f, #541d35);
+    color: white;
+  }
+
+  .ag-preview-dark small {
+    color: var(--ag-gold);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .16em;
+  }
+
+  .ag-preview-dark h3 {
+    max-width: 570px;
+    margin: 13px 0;
+    font-family: Georgia, serif;
+    font-size: 32px;
+    line-height: 1.04;
+  }
+
+  .ag-preview-dark h3 em {
+    color: #e8c96f;
+    font-style: normal;
+  }
+
+  .ag-preview-dark p {
+    max-width: 600px;
+    margin: 0;
+    color: #eee0e6;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+
+  .ag-preview-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .ag-preview-buttons span {
+    padding: 8px 11px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 999px;
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+  }
+
+  .ag-main-preview {
+    min-height: 235px;
+    padding: 30px;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #faf7f2, #f4edf0);
+    border: 1px solid #eee5de;
+  }
+
+  .ag-main-preview span {
+    color: #8b6c2c;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .14em;
+  }
+
+  .ag-main-preview h3 {
+    margin: 13px 0 10px;
+    font-family: Georgia, serif;
+    font-size: 32px;
+    line-height: 1.05;
+  }
+
+  .ag-main-preview h3 em {
+    color: var(--ag-maroon-2);
+    font-style: normal;
+  }
+
+  .ag-main-preview p {
+    max-width: 650px;
+    color: var(--ag-muted);
+    font-size: 11px;
+    line-height: 1.8;
+  }
+
+  .ag-category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 19px;
+  }
+
+  .ag-category-tabs button,
+  .ag-toolbar-left button {
+    min-height: 38px;
+    padding: 0 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--ag-border);
+    border-radius: 10px;
+    background: #fff;
+    color: #625c67;
+    font-size: 10px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .ag-category-tabs button.active,
+  .ag-toolbar-left button.active {
+    background: var(--ag-dark);
+    border-color: var(--ag-dark);
+    color: white;
+  }
+
+  .ag-category-content {
+    padding: 20px;
+    border-radius: 17px;
+    background: #faf8f5;
+    border: 1px solid #ece4dd;
+  }
+
+  .ag-category-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e7ded6;
+  }
+
+  .ag-category-info h3 {
+    margin: 5px 0 6px;
+    font-family: Georgia, serif;
+    font-size: 25px;
+  }
+
+  .ag-category-info p {
+    max-width: 800px;
+    margin: 0;
+    color: var(--ag-muted);
+    font-size: 11px;
+    line-height: 1.7;
+  }
+
+  .ag-category-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+  }
+
+  .ag-danger,
+  .ag-danger-outline {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 11px;
+    border-radius: 10px;
+    background: #fff1f1;
+    color: var(--ag-danger);
+    border: 1px solid #f5d3d5;
+    font-size: 10px;
+    font-weight: 900;
+  }
+
+  .ag-danger:hover,
+  .ag-danger-outline:hover {
+    background: #ffe7e8;
+  }
+
+  .ag-sub-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 18px 0 10px;
+  }
+
+  .ag-sub-head div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ag-sub-head strong {
+    font-size: 12px;
+  }
+
+  .ag-sub-head span {
+    color: #948b93;
+    font-size: 10px;
+  }
+
+  .ag-sub-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .ag-sub-list > button,
+  .ag-sub-row > button {
+    min-height: 57px;
+    padding: 10px 12px;
+    text-align: left;
+    border: 1px solid var(--ag-border);
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+  }
+
+  .ag-sub-list > button.selected,
+  .ag-sub-row > button.selected {
+    border-color: #6e3150;
+    background: #f6edf2;
+  }
+
+  .ag-sub-list button span,
+  .ag-sub-row button span {
+    display: block;
+    font-size: 10px;
+    font-weight: 900;
+    color: #37323b;
+  }
+
+  .ag-sub-list button small,
+  .ag-sub-row button small {
+    display: block;
+    margin-top: 4px;
+    color: #918891;
+    font-size: 8px;
+  }
+
+  .ag-sub-row {
+    display: grid;
+    grid-template-columns: 1fr 35px 35px;
+    gap: 5px;
+  }
+
+  .ag-row-icon {
+    width: 35px;
+    height: 35px;
+    align-self: center;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--ag-border);
+    border-radius: 9px;
+    background: white;
+    color: #645c66;
+  }
+
+  .ag-row-icon:hover {
+    background: #f6f2ee;
+  }
+
+  .ag-row-icon.danger {
+    color: var(--ag-danger);
+  }
+
+  .ag-upload-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .ag-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 13px;
+    margin-bottom: 18px;
+    border: 1px solid var(--ag-border);
+    border-radius: 13px;
+    background: #faf8f5;
+  }
+
+  .ag-toolbar-left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .ag-toolbar-left button {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 9px;
+  }
+
+  .ag-search {
+    width: min(300px, 100%);
+    min-height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--ag-border);
+    border-radius: 10px;
+    background: white;
+    outline: none;
+    font: inherit;
+    font-size: 11px;
+  }
+
+  .ag-search:focus {
+    border-color: #9c6a7f;
+  }
+
+  .ag-image-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .ag-image-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--ag-border);
+    border-radius: 17px;
+    background: white;
+    transition: .2s ease;
+  }
+
+  .ag-image-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 35px rgba(40, 25, 30, .09);
+  }
+
+  .ag-image-card.hidden-card {
+    opacity: .62;
+  }
+
+  .ag-image-check {
+    position: absolute;
+    z-index: 3;
+    left: 11px;
+    top: 11px;
+  }
+
+  .ag-image-check input {
+    width: 17px;
+    height: 17px;
+    accent-color: #63213e;
+  }
+
+  .ag-image-preview {
+    height: 225px;
+    position: relative;
+    overflow: hidden;
+    background: #eae2da;
+  }
+
+  .ag-image-preview img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  .ag-no-image {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: #9e9289;
+  }
+
+  .ag-hidden-label {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 8px;
+    border-radius: 999px;
+    background: #24131dcc;
+    color: white;
+    font-size: 8px;
+    font-weight: 900;
+  }
+
+  .ag-image-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 7px;
+    padding: 13px;
+    opacity: 0;
+    background: linear-gradient(transparent, rgba(20, 10, 18, .78));
+    transition: .2s ease;
+  }
+
+  .ag-image-card:hover .ag-image-overlay {
+    opacity: 1;
+  }
+
+  .ag-overlay-button {
+    min-height: 32px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .94);
+    color: #291c24;
+    font-size: 9px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .ag-image-body {
+    padding: 15px;
+  }
+
+  .ag-image-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .ag-image-tags span {
+    padding: 5px 7px;
+    border-radius: 999px;
+    background: #f2e8ee;
+    color: #6e3450;
+    font-size: 8px;
+    font-weight: 900;
+  }
+
+  .ag-image-body h3 {
+    margin: 9px 0 5px;
+    font-family: Georgia, serif;
+    font-size: 18px;
+    line-height: 1.12;
+  }
+
+  .ag-image-body p {
+    min-height: 34px;
+    margin: 0;
+    color: var(--ag-muted);
+    font-size: 10px;
+    line-height: 1.6;
+  }
+
+  .ag-image-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 13px;
+    padding-top: 10px;
+    border-top: 1px solid #eee6df;
+  }
+
+  .ag-image-meta small {
+    color: #958b91;
+    font-size: 8px;
+    font-weight: 800;
+  }
+
+  .ag-image-meta div {
+    display: flex;
+    gap: 4px;
+  }
+
+  .ag-image-meta button,
+  .ag-achievement-actions button {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--ag-border);
+    border-radius: 8px;
+    background: white;
+    color: #5d5660;
+    cursor: pointer;
+  }
+
+  .ag-image-meta button:hover,
+  .ag-achievement-actions button:hover {
+    background: #f5f1ed;
+  }
+
+  .ag-image-meta button.danger,
+  .ag-achievement-actions button.danger {
+    color: var(--ag-danger);
+  }
+
+  .ag-empty {
+    padding: 65px 20px;
+    text-align: center;
+    border: 1px dashed #d7ccc4;
+    border-radius: 17px;
+    color: #988e95;
+  }
+
+  .ag-empty h3 {
+    margin: 10px 0 5px;
+    color: #3c3540;
+    font-family: Georgia, serif;
+  }
+
+  .ag-empty p {
+    max-width: 520px;
+    margin: 0 auto 16px;
+    font-size: 10px;
+    line-height: 1.6;
+  }
+
+  .ag-achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .ag-achievement-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--ag-border);
+    border-radius: 14px;
+    background: #faf8f5;
+  }
+
+  .ag-achievement-card.hidden-card {
+    opacity: .55;
+  }
+
+  .ag-achievement-icon {
+    width: 43px;
+    height: 43px;
+    flex: 0 0 43px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: #f1e2e8;
+    color: #712947;
+  }
+
+  .ag-achievement-copy {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ag-achievement-copy span {
+    color: #9a762d;
+    font-size: 8px;
+    font-weight: 900;
+  }
+
+  .ag-achievement-copy h3 {
+    margin: 3px 0 0;
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .ag-achievement-actions {
+    display: flex;
+    gap: 3px;
+  }
+
+  .ag-bottom-preview {
+    padding: 28px;
+    text-align: center;
+    border-radius: 18px;
+    color: white;
+    background: linear-gradient(135deg, #291321, #682641);
+  }
+
+  .ag-bottom-preview strong {
+    display: block;
+    font-family: Georgia, serif;
+    font-size: 30px;
+  }
+
+  .ag-bottom-preview p {
+    margin: 8px auto;
+    color: #f4e8ed;
+    font-size: 11px;
+  }
+
+  .ag-bottom-preview small {
+    color: #e6c875;
+    font-size: 9px;
+    font-weight: 800;
+  }
+
+  .ag-save-bar {
+    position: sticky;
+    bottom: 16px;
+    z-index: 20;
+    margin-top: 22px;
+    padding: 15px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    border: 1px solid rgba(255, 255, 255, .7);
+    border-radius: 17px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 18px 50px rgba(30, 20, 25, .14);
+    backdrop-filter: blur(14px);
+  }
+
+  .ag-save-bar strong {
+    display: block;
+    font-size: 12px;
+  }
+
+  .ag-save-bar span {
+    display: block;
+    margin-top: 3px;
+    color: #8a8188;
+    font-size: 9px;
+  }
+
+  .ag-notice {
+    position: fixed;
+    z-index: 100;
+    right: 20px;
+    top: 90px;
+    max-width: 420px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    border-radius: 12px;
+    color: white;
+    background: #24131f;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, .18);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .ag-notice > div {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .12);
+  }
+
+  .ag-notice.error {
+    background: #8d2734;
+  }
+
+  .ag-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    background: rgba(20, 10, 18, .72);
+    backdrop-filter: blur(9px);
+  }
+
+  .ag-modal {
+    width: min(720px, 100%);
+    max-height: min(88vh, 850px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 35px 100px rgba(0, 0, 0, .3);
+  }
+
+  .ag-modal-head {
+    padding: 20px 22px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    border-bottom: 1px solid #eee6df;
+  }
+
+  .ag-modal-kicker {
+    color: #8d6b2b;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .ag-modal-head h2 {
+    margin: 5px 0 0;
+    font-family: Georgia, serif;
+    font-size: 25px;
+  }
+
+  .ag-modal-head p {
+    margin: 5px 0 0;
+    color: #88808a;
+    font-size: 10px;
+  }
+
+  .ag-icon-button {
+    width: 35px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: #f5f1ed;
+    color: #5b535c;
+  }
+
+  .ag-modal-body {
+    padding: 22px;
+    overflow: auto;
+  }
+
+  .ag-modal-foot {
+    padding: 14px 22px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid #eee6df;
+    background: #faf8f5;
+  }
+
+  .ag-field {
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .ag-field > span {
+    display: block;
+    margin-bottom: 6px;
+    color: #4a4450;
+    font-size: 10px;
+    font-weight: 900;
+  }
+
+  .ag-field input,
+  .ag-field textarea,
+  .ag-field select {
+    width: 100%;
+    border: 1px solid #ddd4cd;
+    border-radius: 10px;
+    outline: none;
+    background: white;
+    color: #27222b;
+    font: inherit;
+    font-size: 11px;
+  }
+
+  .ag-field input,
+  .ag-field select {
+    min-height: 42px;
+    padding: 0 11px;
+  }
+
+  .ag-field textarea {
+    min-height: 100px;
+    padding: 11px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .ag-field input:focus,
+  .ag-field textarea:focus,
+  .ag-field select:focus {
+    border-color: #8b5169;
+    box-shadow: 0 0 0 3px #8b516915;
+  }
+
+  .ag-select-wrap {
+    position: relative;
+  }
+
+  .ag-select-wrap select {
+    appearance: none;
+    padding-right: 34px;
+  }
+
+  .ag-select-wrap svg {
+    position: absolute;
+    right: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #847b83;
+  }
+
+  .ag-check-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px;
+    border: 1px solid #e8dfd8;
+    border-radius: 10px;
+    background: #faf8f5;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .ag-check-field input {
+    width: 16px;
+    height: 16px;
+    accent-color: #672441;
+  }
+
+  .ag-modal-subtitle-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 18px 0 8px;
+    color: #4a4450;
+    font-size: 10px;
+  }
+
+  .ag-modal-subtitle-row span {
+    width: 23px;
+    height: 23px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #f2e8ed;
+    color: #6d2846;
+    font-size: 9px;
+    font-weight: 900;
+  }
+
+  .ag-modal-subcategories {
+    display: grid;
+    gap: 7px;
+  }
+
+  .ag-modal-subcategory {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #e6ddd6;
+    border-radius: 10px;
+  }
+
+  .ag-modal-subcategory strong {
+    display: block;
+    font-size: 10px;
+  }
+
+  .ag-modal-subcategory small {
+    display: block;
+    margin-top: 3px;
+    color: #938a91;
+    font-size: 8px;
+  }
+
+  .ag-modal-empty {
+    padding: 20px;
+    text-align: center;
+    color: #958b92;
+    border: 1px dashed #ddd2ca;
+    border-radius: 10px;
+    font-size: 9px;
+  }
+
+  .ag-edit-image {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    margin-bottom: 17px;
+    border: 1px solid #e8dfd8;
+    border-radius: 12px;
+    background: #faf8f5;
+  }
+
+  .ag-edit-image-preview {
+    width: 80px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #e8dfd8;
+    color: #988d93;
+  }
+
+  .ag-edit-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ag-edit-image strong {
+    display: block;
+    font-size: 11px;
+  }
+
+  .ag-edit-image small {
+    display: block;
+    margin-top: 3px;
+    color: #91878e;
+    font-size: 8px;
+  }
+
+  .ag-loading {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 12px;
+    background: var(--ag-bg);
+    color: #4f4851;
+  }
+
+  .ag-spinner {
+    width: 38px;
+    height: 38px;
+    border: 4px solid #ddd2ca;
+    border-top-color: #6a2847;
+    border-radius: 50%;
+    animation: ag-spin .8s linear infinite;
+  }
+
+  @keyframes ag-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .ag-image-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ag-achievement-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ag-sub-list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 850px) {
+    .ag-grid-two {
+      grid-template-columns: 1fr;
+    }
+
+    .ag-topbar-inner {
+      flex-wrap: wrap;
+      padding: 10px 0;
+    }
+
+    .ag-brand {
+      order: -1;
+      flex-basis: 100%;
+    }
+
+    .ag-top-actions {
+      margin-left: auto;
+    }
+
+    .ag-hero {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .ag-category-info {
+      flex-direction: column;
+    }
+  }
+
+  @media (max-width: 650px) {
+    .ag-container,
+    .ag-topbar-inner {
+      width: min(100% - 20px, 1440px);
+    }
+
+    .ag-card {
+      padding: 17px;
+    }
+
+    .ag-hero {
+      padding: 25px 20px;
+    }
+
+    .ag-image-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ag-achievement-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ag-sub-list {
+      grid-template-columns: 1fr;
+    }
+
+    .ag-toolbar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .ag-search {
+      width: 100%;
+    }
+
+    .ag-top-actions {
+      width: 100%;
+    }
+
+    .ag-top-actions > * {
+      flex: 1;
+    }
+
+    .ag-category-actions {
+      width: 100%;
+    }
+
+    .ag-category-actions > * {
+      flex: 1;
+    }
+
+    .ag-save-bar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .ag-save-bar .ag-primary {
+      width: 100%;
+    }
+  }
+`;

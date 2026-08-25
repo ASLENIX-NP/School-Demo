@@ -629,6 +629,7 @@ function AboutImageAdjustPage({
 function getDeleteName(target) {
   if (!target) return "this item";
 
+  if (target.type === "statsCard") return "this statistic card";
   if (target.type === "pillarCard") return "this core value card";
   if (target.type === "leadershipMessage") return "this leadership message";
   if (target.type === "missionVision") return "this mission / vision card";
@@ -680,6 +681,9 @@ export default function AdminAbout() {
         pageBadge: form.pageBadge || "",
         pageTitle: form.pageTitle || "",
         pageSubtitle: form.pageSubtitle || "",
+        storyBadgeYear: form.storyBadgeYear || "",
+        heroEmblemText: form.heroEmblemText || "",
+        heroEmblemLabel: form.heroEmblemLabel || "",
       });
       return;
     }
@@ -833,6 +837,20 @@ export default function AdminAbout() {
       });
       return;
     }
+
+    // Stats Card
+    if (target.type === "statsCard") {
+      const stat = form.stats?.[target.index];
+
+      setModalForm({
+        value: stat?.value !== undefined ? stat.value : "",
+        suffix: stat?.suffix || "",
+        label: stat?.label || "",
+        decimals: stat?.decimals !== undefined ? stat.decimals : 0,
+        visible: stat?.visible !== false,
+      });
+      return;
+    }
   };
 
   const closeEditor = () => {
@@ -968,6 +986,9 @@ export default function AdminAbout() {
           pageBadge: modalForm.pageBadge || "",
           pageTitle: modalForm.pageTitle || "",
           pageSubtitle: modalForm.pageSubtitle || "",
+          storyBadgeYear: modalForm.storyBadgeYear || "",
+          heroEmblemText: modalForm.heroEmblemText || "",
+          heroEmblemLabel: modalForm.heroEmblemLabel || "",
         };
       }
 
@@ -1148,6 +1169,29 @@ export default function AdminAbout() {
         };
       }
 
+      // Stats Card
+      if (editingTarget.type === "statsCard") {
+        const stats = [...nextForm.stats];
+
+        const updatedStat = {
+          ...(stats[editingTarget.index] || {}),
+          id: stats[editingTarget.index]?.id || Date.now(),
+          value: modalForm.value === "" ? 0 : Number(modalForm.value),
+          suffix: modalForm.suffix || "",
+          label: modalForm.label || "",
+          decimals: Number(modalForm.decimals) || 0,
+          visible: modalForm.visible !== false,
+        };
+
+        if (editingTarget.isNew) {
+          stats.push(updatedStat);
+        } else {
+          stats[editingTarget.index] = updatedStat;
+        }
+
+        nextForm.stats = stats;
+      }
+
       const cleanContent = mergeAboutContent(nextForm);
       await saveContentToBackend(
         cleanContent,
@@ -1174,6 +1218,7 @@ export default function AdminAbout() {
     if (!target) return;
 
     const deletableTypes = [
+      "statsCard",
       "pillarCard",
       "leadershipMessage",
       "missionVision",
@@ -1189,34 +1234,26 @@ export default function AdminAbout() {
     try {
       let nextForm = mergeAboutContent(form);
 
+      if (target.type === "statsCard") {
+        nextForm.stats = nextForm.stats.filter((_, index) => index !== target.index);
+      }
+
       if (target.type === "pillarCard") {
-        nextForm = {
-          ...nextForm,
-          pillars: nextForm.pillars.filter((_, index) => index !== target.index),
-        };
+        nextForm.pillars = nextForm.pillars.filter((_, index) => index !== target.index);
       }
 
       if (target.type === "leadershipMessage") {
-        nextForm = {
-          ...nextForm,
-          messages: nextForm.messages.filter((_, index) => index !== target.index),
-        };
+        nextForm.messages = nextForm.messages.filter((_, index) => index !== target.index);
       }
 
       if (target.type === "missionVision") {
-        nextForm = {
-          ...nextForm,
-          missionVision: nextForm.missionVision.filter(
-            (_, index) => index !== target.index
-          ),
-        };
+        nextForm.missionVision = nextForm.missionVision.filter(
+          (_, index) => index !== target.index
+        );
       }
 
       if (target.type === "journeyItem") {
-        nextForm = {
-          ...nextForm,
-          journey: nextForm.journey.filter((_, index) => index !== target.index),
-        };
+        nextForm.journey = nextForm.journey.filter((_, index) => index !== target.index);
       }
 
       const cleanContent = mergeAboutContent(nextForm);
@@ -1241,6 +1278,23 @@ export default function AdminAbout() {
     try {
       let nextForm = mergeAboutContent(form);
 
+      if (type === "stat") {
+        nextForm = {
+          ...nextForm,
+          stats: [
+            ...nextForm.stats,
+            {
+              id: Date.now(),
+              value: 0,
+              suffix: "",
+              decimals: 0,
+              label: "New Statistic",
+              visible: true,
+            },
+          ],
+        };
+      }
+
       if (type === "pillar") {
         const nextColor = cardColors[nextForm.pillars.length % cardColors.length];
 
@@ -1250,7 +1304,6 @@ export default function AdminAbout() {
             ...nextForm.pillars,
             {
               id: Date.now(),
-              icon: "award",
               label: "New Core Value",
               desc: "Write a short description for this core value.",
               color: nextColor,
@@ -1282,8 +1335,7 @@ export default function AdminAbout() {
       }
 
       if (type === "missionVision") {
-        const nextColor =
-          cardColors[nextForm.missionVision.length % cardColors.length];
+        const nextColor = cardColors[nextForm.missionVision.length % cardColors.length];
 
         nextForm = {
           ...nextForm,
@@ -1291,7 +1343,6 @@ export default function AdminAbout() {
             ...nextForm.missionVision,
             {
               id: Date.now(),
-              icon: "target",
               title: "New Section",
               desc: "Write the section description here.",
               color: nextColor,
@@ -1345,6 +1396,7 @@ export default function AdminAbout() {
       journeyBadge: "Edit Journey Badge",
       journeyItem: "Edit Journey Item",
       ctaBand: "Edit Call to Action",
+      statsCard: "Edit Statistic Card",
     };
 
     return titles[editingTarget.type] || "Edit About Page";
@@ -1374,6 +1426,7 @@ export default function AdminAbout() {
     if (!editingTarget) return false;
 
     return [
+      "statsCard",
       "pillarCard",
       "leadershipMessage",
       "missionVision",
@@ -1475,7 +1528,7 @@ export default function AdminAbout() {
             </h2>
 
             <p className="text-sm text-slate-500 mt-1">
-              Hover content to edit. Core values, messages, mission cards, journey items, and CTA are all editable.
+              Hover content to edit. Stats, core values, messages, mission cards, journey items, and CTA are all editable.
             </p>
           </div>
         </div>
@@ -1680,6 +1733,43 @@ export default function AdminAbout() {
                     </>
                   )}
 
+                  {/* Stats Card */}
+                  {editingTarget.type === "statsCard" && (
+                    <>
+                      <Field
+                        label="Stat Value (number)"
+                        value={modalForm.value}
+                        onChange={(value) => updateModalField("value", value)}
+                        type="number"
+                        placeholder="2500"
+                      />
+                      <Field
+                        label="Suffix (e.g. +, %, yrs)"
+                        value={modalForm.suffix}
+                        onChange={(value) => updateModalField("suffix", value)}
+                        placeholder="+"
+                      />
+                      <Field
+                        label="Label"
+                        value={modalForm.label}
+                        onChange={(value) => updateModalField("label", value)}
+                        placeholder="Students Enrolled"
+                      />
+                      <Field
+                        label="Decimal Places"
+                        value={modalForm.decimals}
+                        onChange={(value) => updateModalField("decimals", value)}
+                        type="number"
+                        placeholder="0"
+                      />
+                      <Toggle
+                        label="Show this statistic on website"
+                        checked={modalForm.visible !== false}
+                        onChange={(value) => updateModalField("visible", value)}
+                      />
+                    </>
+                  )}
+
                   {/* Page Header */}
                   {editingTarget.type === "pageHeader" && (
                     <>
@@ -1698,6 +1788,24 @@ export default function AdminAbout() {
                         value={modalForm.pageSubtitle}
                         onChange={(value) => updateModalField("pageSubtitle", value)}
                         textarea
+                      />
+                      <Field
+                        label="Established Date / Year"
+                        value={modalForm.storyBadgeYear}
+                        placeholder="Est. 2010 AD"
+                        onChange={(value) => updateModalField("storyBadgeYear", value)}
+                      />
+                      <Field
+                        label="Emblem Text (e.g. RR)"
+                        value={modalForm.heroEmblemText}
+                        placeholder="RR"
+                        onChange={(value) => updateModalField("heroEmblemText", value)}
+                      />
+                      <Field
+                        label="Emblem Label (e.g. Red Rose)"
+                        value={modalForm.heroEmblemLabel}
+                        placeholder="Red Rose"
+                        onChange={(value) => updateModalField("heroEmblemLabel", value)}
                       />
                     </>
                   )}

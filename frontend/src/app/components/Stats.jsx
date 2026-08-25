@@ -244,8 +244,9 @@ const defaultStatsData = {
   title:
     "Creating Futures, One Student at a Time",
 
-  description:
-    "Real numbers that reflect our commitment to excellence and holistic education in the Makwanpur region.",
+  // Keep this empty by default. If the admin deletes the description,
+  // the user website must not restore the old hard-coded sentence.
+  description: "",
 
   stats: [
     {
@@ -417,8 +418,12 @@ function normalizeExcellence(savedExcellence = {}) {
         .excellence.title;
   }
 
+  // Only use the default when the field is actually missing.
+  // An empty string is a valid admin choice because it means the
+  // administrator intentionally removed the text.
   if (
-    !description ||
+    description === undefined ||
+    description === null ||
     description === oldDescription
   ) {
     description =

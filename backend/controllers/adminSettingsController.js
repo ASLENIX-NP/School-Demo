@@ -1,1008 +1,812 @@
 import "dotenv/config";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
+import { UAParser } from "ua-parser-js";
 import { supabase } from "../config/supabase.js";
-import {
-  getFallbackData,
-  setFallbackData,
-} from "../utils/storageHelper.js";
 
-// =====================================================
-// EMAIL CONFIGURATION
-// =====================================================
+const SESSION_DAYS = 7;
+const OTP_MINUTES = 10;
 
-const MAIL_USER =
-  process.env.MAIL_USER || "edutaskcalendar@gmail.com";
+const MAIL_USER = process.env.MAIL_USER || "";
+const MAIL_PASS = process.env.MAIL_PASS || "";
 
-const MAIL_PASS = process.env.MAIL_PASS;
-
-// =====================================================
-// NODEMAILER
-// =====================================================
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: MAIL_USER,
-    pass: MAIL_PASS,
-  },
-});
-
-// =====================================================
-// PASSWORD RECOVERY EMAILS
-// =====================================================
-// Only these emails are allowed to request
-// password recovery.
-
-const ALLOWED_PASSWORD_RESET_EMAILS = [
-  "admin@school.com",
-  "adhikarisonica88@gmail.com",
-];
-
-// =====================================================
-// OTP STORAGE
-// =====================================================
+const transporter =
+  MAIL_USER && MAIL_PASS
+    ? nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: MAIL_USER,
+          pass: MAIL_PASS,
+        },
+      })
+    : null;
 
 const otpStore = new Map();
 
-// =====================================================
-// DEFAULT ADMIN SETTINGS
-// =====================================================
+const PUBLIC_SETTINGS_COLUMNS = `
+  id,
+  school_name,
+  school_email,
+  phone,
+  address,
+  institution_name,
+  school_location,
+  academic_session,
+  timezone,
+  admin_name,
+  username,
+  admin_email,
+  profile_photo,
+  lock_account,
+  two_factor,
+  session_timeout,
+  max_login_attempts,
+  created_at
+`;
 
-const DEFAULT_ADMIN_SETTINGS = {
-  id: 1,
+function sanitizeSettings(row) {
+  if (!row) return null;
+  const safe = { ...row };
+  delete safe.password;
+  delete safe.admin_password;
+  return safe;
+}
 
-  school_name:
-    "Red Rose Secondary English Boarding School",
+function serverError(res, message, error) {
+  console.error(message, error);
+  return res.status(500).json({
+    success: false,
+    message,
+  });
+}
 
-  institution_name:
-    "Red Rose Secondary English Boarding School",
+function getClientIp(req) {
+  return (
+    String(req.headers["x-forwarded-for"] || "")
+      .split(",")[0]
+      .trim() ||
+    req.ip ||
+    req.socket?.remoteAddress ||
+    ""
+  );
+}
 
-  School_location:
-    "Basudev Marga, Hetauda-2, Makwanpur",
+function getLocation(ip) {
+  if (!ip) return "Unknown";
+  if (
+    ip === "127.0.0.1" ||
+    ip === "::1" ||
+    ip.startsWith("192.168.") ||
+    ip.startsWith("10.") ||
+    ip.startsWith("172.")
+  ) {
+    return "Local network";
+  }
+  return "Unknown";
+}
 
-  address:
-    "Basudev Marga, Hetauda-2, Makwanpur",
+function isBcrypt(value) {
+  const clean = String(value || "");
+  return (
+    clean.startsWith("$2a$") ||
+    clean.startsWith("$2b$") ||
+    clean.startsWith("$2y$")
+  );
+}
 
-  academic_session:
-    "2081 / 2082 B.S.",
+async function passwordMatches(plain, stored) {
+  if (!stored) return false;
+  if (isBcrypt(stored)) {
+    return bcrypt.compare(String(plain), String(stored));
+  }
+  return String(plain) === String(stored);
+}
 
-  timezone:
-    "Asia/Kathmandu (UTC +05:45)",
+function getDeviceData(req) {
+  const userAgent = String(req.headers["user-agent"] || "");
+  const parser = new UAParser(userAgent);
+  const parsed = parser.getResult();
 
-  school_email:
-    "admin@school.com",
+  const deviceType =
+    parsed.device?.type === "mobile"
+      ? "Mobile"
+      : parsed.device?.type === "tablet"
+        ? "Tablet"
+        : "Desktop";
 
-  admin_email:
-    "admin@school.com",
+  const deviceName =
+    parsed.device?.model ||
+    parsed.os?.name ||
+    "Unknown Device";
 
-  phone:
-    "+977 057-590146",
+  const browser = parsed.browser?.name || "Unknown Browser";
 
-  logo: "",
+  const os = parsed.os?.name
+    ? `${parsed.os.name}${parsed.os.version ? ` ${parsed.os.version}` : ""}`
+    : "Unknown OS";
 
-  profile_photo: "",
+  const ip = getClientIp(req);
 
-  lock_account: true,
-
-  two_factor: false,
-
-  session_timeout: "30",
-
-  max_login_attempts: "5",
-
-  // Default admin password.
-  // adminAuthController should read this same value.
-  admin_password: "admin123",
-};
-
-// =====================================================
-// DEFAULT LOGIN ACTIVITY
-// =====================================================
-
-const DEFAULT_LOGIN_ACTIVITY = [
-  {
-    id: 1,
-    device: "Chrome / Windows 11",
-    browser: "Chrome",
-    ip: "127.0.0.1",
-    location: "Hetauda, Nepal",
-    login_time: new Date().toISOString(),
-    status: "Active Session",
-  },
-
-  {
-    id: 2,
-    device: "Safari / iPhone 15",
-    browser: "Safari",
-    ip: "110.44.112.5",
-    location: "Kathmandu, Nepal",
-    login_time: new Date(
-      Date.now() - 2 * 60 * 60 * 1000
-    ).toISOString(),
-    status: "Successful",
-  },
-];
-
-// =====================================================
-// GET ADMIN SETTINGS
-// =====================================================
+  return {
+    deviceType,
+    deviceName,
+    browser,
+    os,
+    ip,
+    location: getLocation(ip),
+  };
+}
 
 export const getAdminSettings = async (req, res) => {
   try {
-    const {
-      data,
-      error,
-    } = await supabase
+    const { data, error } = await supabase
       .from("admin_settings")
-      .select("*")
+      .select(PUBLIC_SETTINGS_COLUMNS)
       .eq("id", 1)
       .maybeSingle();
 
-    if (!error && data) {
-      return res.json({
-        success: true,
-        data,
+    if (error) throw error;
+
+    if (!data) {
+      return res.status(404).json({
+        success: false,
+        message: "Administrator settings were not found.",
       });
     }
-
-    if (error) {
-      console.warn(
-        "Supabase admin settings fetch error:",
-        error.message
-      );
-    }
-  } catch (error) {
-    console.warn(
-      "Admin settings fetch error:",
-      error.message
-    );
-  }
-
-  const settings = getFallbackData(
-    "admin_settings",
-    DEFAULT_ADMIN_SETTINGS
-  );
-
-  return res.json({
-    success: true,
-    data: settings,
-  });
-};
-
-// =====================================================
-// UPDATE ADMIN SETTINGS
-// =====================================================
-
-export const updateAdminSettings = async (
-  req,
-  res
-) => {
-  try {
-    const updates = req.body || {};
-
-    const currentSettings = getFallbackData(
-      "admin_settings",
-      DEFAULT_ADMIN_SETTINGS
-    );
-
-    const merged = {
-      ...currentSettings,
-      ...updates,
-    };
-
-    // Always save locally.
-    setFallbackData(
-      "admin_settings",
-      merged
-    );
-
-    // Try Supabase.
-    try {
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("admin_settings")
-        .upsert({
-          id: 1,
-          ...updates,
-        })
-        .select();
-
-      if (error) {
-        console.warn(
-          "Supabase update admin settings error:",
-          error.message
-        );
-      }
-
-      return res.json({
-        success: true,
-        message:
-          "Admin settings updated successfully.",
-        data: data?.[0] || merged,
-      });
-    } catch (supabaseError) {
-      console.warn(
-        "Supabase update admin settings error:",
-        supabaseError.message
-      );
-
-      return res.json({
-        success: true,
-        message:
-          "Admin settings updated successfully.",
-        data: merged,
-      });
-    }
-  } catch (error) {
-    console.error(
-      "Update admin settings error:",
-      error
-    );
-
-    return res.status(500).json({
-      success: false,
-      message:
-        "Unable to update admin settings.",
-    });
-  }
-};
-
-// =====================================================
-// GET LOGIN ACTIVITY
-// =====================================================
-
-export const getLoginActivity = async (
-  req,
-  res
-) => {
-  try {
-    const activity = getFallbackData(
-      "login_activity",
-      DEFAULT_LOGIN_ACTIVITY
-    );
 
     return res.json({
       success: true,
-      data: activity,
+      data: sanitizeSettings(data),
     });
   } catch (error) {
-    console.error(
-      "Get login activity error:",
+    return serverError(
+      res,
+      "Unable to load administrator settings.",
       error
     );
-
-    return res.status(500).json({
-      success: false,
-      message:
-        "Unable to load login activity.",
-    });
   }
 };
 
-// =====================================================
-// UPLOAD ADMIN PHOTO
-// =====================================================
-
-export const uploadAdminPhoto = async (
-  req,
-  res
-) => {
+export const updateAdminSettings = async (req, res) => {
   try {
-    const {
-      photo_url,
-      image,
-    } = req.body;
+    const body = req.body || {};
 
-    const url = photo_url || image;
+    const updates = {};
 
-    const settings = getFallbackData(
-      "admin_settings",
-      DEFAULT_ADMIN_SETTINGS
-    );
+    if (body.admin_name !== undefined) {
+      const value = String(body.admin_name).trim();
 
-    const updated = {
-      ...settings,
-
-      profile_photo:
-        url || settings.profile_photo || "",
-
-      logo:
-        url || settings.logo || "",
-    };
-
-    setFallbackData(
-      "admin_settings",
-      updated
-    );
-
-    // Try saving to Supabase.
-    try {
-      const {
-        error,
-      } = await supabase
-        .from("admin_settings")
-        .upsert({
-          id: 1,
-          logo:
-            url || settings.logo || "",
+      if (!value || value.length > 120) {
+        return res.status(400).json({
+          success: false,
+          message: "Administrator name is invalid.",
         });
-
-      if (error) {
-        console.warn(
-          "Could not save photo to Supabase:",
-          error.message
-        );
       }
-    } catch (supabaseError) {
-      console.warn(
-        "Supabase photo update error:",
-        supabaseError.message
-      );
+
+      updates.admin_name = value;
     }
+
+    if (body.username !== undefined) {
+      const value = String(body.username).trim();
+
+      if (!/^[a-zA-Z0-9._-]{3,40}$/.test(value)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Username must be 3–40 characters and contain only letters, numbers, dots, underscores or hyphens.",
+        });
+      }
+
+      updates.username = value;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid profile changes were provided.",
+      });
+    }
+
+    const { data, error } = await supabase
+      .from("admin_settings")
+      .update(updates)
+      .eq("id", 1)
+      .select(PUBLIC_SETTINGS_COLUMNS)
+      .single();
+
+    if (error) throw error;
 
     return res.json({
       success: true,
-      message:
-        "Admin photo updated successfully.",
-      data: updated,
+      message: "Administrator profile updated successfully.",
+      data: sanitizeSettings(data),
     });
   } catch (error) {
-    console.error(
-      "Upload admin photo error:",
+    return serverError(
+      res,
+      "Unable to update administrator profile.",
       error
     );
-
-    return res.status(500).json({
-      success: false,
-      message:
-        "Unable to update admin photo.",
-    });
   }
 };
 
-// =====================================================
-// UPDATE ADMIN EMAIL
-// =====================================================
-
-export const updateAdminEmail = async (
-  req,
-  res
-) => {
+export const updateAdminEmail = async (req, res) => {
   try {
-    const {
-      school_email,
-      email,
-    } = req.body;
-
-    const newEmail = String(
-      email || school_email || ""
+    const email = String(
+      req.body?.email ||
+        req.body?.admin_email ||
+        req.body?.school_email ||
+        ""
     )
       .trim()
       .toLowerCase();
 
-    if (!newEmail) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({
         success: false,
-        message: "Email is required.",
+        message: "Please enter a valid email address.",
       });
     }
 
-    const settings = getFallbackData(
-      "admin_settings",
-      DEFAULT_ADMIN_SETTINGS
-    );
+    const { data: existing, error: lookupError } = await supabase
+      .from("admin_settings")
+      .select("id")
+      .eq("admin_email", email)
+      .neq("id", 1)
+      .limit(1);
 
-    const updated = {
-      ...settings,
-      school_email: newEmail,
-      admin_email: newEmail,
-    };
+    if (lookupError) throw lookupError;
 
-    setFallbackData(
-      "admin_settings",
-      updated
-    );
-
-    try {
-      const {
-        error,
-      } = await supabase
-        .from("admin_settings")
-        .upsert({
-          id: 1,
-          school_email: newEmail,
-        });
-
-      if (error) {
-        console.warn(
-          "Could not save admin email to Supabase:",
-          error.message
-        );
-      }
-    } catch (supabaseError) {
-      console.warn(
-        "Admin email Supabase error:",
-        supabaseError.message
-      );
+    if (existing?.length) {
+      return res.status(409).json({
+        success: false,
+        message: "That administrator email is already in use.",
+      });
     }
+
+    const { data, error } = await supabase
+      .from("admin_settings")
+      .update({
+        admin_email: email,
+        school_email: email,
+      })
+      .eq("id", 1)
+      .select(PUBLIC_SETTINGS_COLUMNS)
+      .single();
+
+    if (error) throw error;
+
+    // Existing sessions continue to work because their JWT carries
+    // the old email. Revoke them so the admin must authenticate again
+    // with the new email.
+    await supabase
+      .from("admin_sessions")
+      .update({ revoked_at: new Date().toISOString() })
+      .eq("admin_email", req.admin.email)
+      .is("revoked_at", null);
 
     return res.json({
       success: true,
       message:
-        "Email updated successfully.",
-      data: updated,
+        "Administrator email updated. Please log in again with the new email.",
+      data: sanitizeSettings(data),
+      requiresLogin: true,
     });
   } catch (error) {
-    console.error(
-      "Update admin email error:",
+    return serverError(
+      res,
+      "Unable to update administrator email.",
       error
     );
-
-    return res.status(500).json({
-      success: false,
-      message:
-        "Unable to update email.",
-    });
   }
 };
 
-// =====================================================
-// CHANGE ADMIN PASSWORD
-// =====================================================
-
-export const changeAdminPassword = async (
-  req,
-  res
-) => {
+export const changeAdminPassword = async (req, res) => {
   try {
-    const {
-      newPassword,
-      password,
-    } = req.body;
+    const currentPassword = String(req.body?.currentPassword || "");
+    const newPassword = String(req.body?.newPassword || "");
 
-    const finalPassword =
-      newPassword || password;
-
-    if (!finalPassword) {
+    if (!currentPassword) {
       return res.status(400).json({
         success: false,
-        message:
-          "New password is required.",
+        message: "Current password is required.",
       });
     }
 
-    if (finalPassword.length < 8) {
+    if (!newPassword) {
       return res.status(400).json({
         success: false,
-        message:
-          "Password must be at least 8 characters long.",
+        message: "New password is required.",
       });
     }
 
-    const settings = getFallbackData(
-      "admin_settings",
-      DEFAULT_ADMIN_SETTINGS
-    );
-
-    const updated = {
-      ...settings,
-      admin_password: finalPassword,
-    };
-
-    setFallbackData(
-      "admin_settings",
-      updated
-    );
-
-    try {
-      const {
-        error,
-      } = await supabase
-        .from("admin_settings")
-        .update({
-          admin_password: finalPassword,
-        })
-        .eq("id", 1);
-
-      if (error) {
-        console.warn(
-          "Could not save password to Supabase:",
-          error.message
-        );
-      }
-    } catch (supabaseError) {
-      console.warn(
-        "Supabase password update error:",
-        supabaseError.message
-      );
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters.",
+      });
     }
+
+    if (newPassword.length > 128) {
+      return res.status(400).json({
+        success: false,
+        message: "New password is too long.",
+      });
+    }
+
+    if (newPassword === currentPassword) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "New password must be different from your current password.",
+      });
+    }
+
+    const { data: admin, error: readError } = await supabase
+      .from("admin_settings")
+      .select("id, password")
+      .eq("id", 1)
+      .single();
+
+    if (readError) throw readError;
+
+    const valid = await passwordMatches(
+      currentPassword,
+      admin.password
+    );
+
+    if (!valid) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect.",
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    const now = new Date().toISOString();
+
+    const { error: updateError } = await supabase
+      .from("admin_settings")
+      .update({ password: passwordHash })
+      .eq("id", 1);
+
+    if (updateError) throw updateError;
+
+    // Password changes invalidate every other device immediately.
+    await supabase
+      .from("admin_sessions")
+      .update({ revoked_at: now })
+      .eq("admin_email", req.admin.email)
+      .neq("token_id", req.admin.tokenId)
+      .is("revoked_at", null);
+
+    // Keep the current session alive and update it.
+    await supabase
+      .from("admin_sessions")
+      .update({ last_seen_at: now })
+      .eq("token_id", req.admin.tokenId)
+      .is("revoked_at", null);
 
     return res.json({
       success: true,
       message:
-        "Password changed successfully.",
+        "Password changed successfully. Other devices were signed out for security.",
     });
   } catch (error) {
-    console.error(
-      "Change password error:",
+    return serverError(
+      res,
+      "Unable to change administrator password.",
       error
     );
-
-    return res.status(500).json({
-      success: false,
-      message:
-        "Unable to change password.",
-    });
   }
 };
 
-// =====================================================
-// FORGOT PASSWORD - SEND OTP
-// =====================================================
-
-export const forgotPassword = async (
-  req,
-  res
-) => {
+export const getLoginActivity = async (req, res) => {
   try {
-    const { email } = req.body;
+    const now = new Date().toISOString();
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Admin email address is required.",
-      });
-    }
+    await supabase
+      .from("admin_sessions")
+      .update({ revoked_at: now })
+      .eq("admin_email", req.admin.email)
+      .is("revoked_at", null)
+      .lte("expires_at", now);
 
-    const submittedEmail = email
-      .trim()
-      .toLowerCase();
-
-    // Only these two emails can use forgot password.
-    if (
-      !ALLOWED_PASSWORD_RESET_EMAILS.includes(
-        submittedEmail
+    const { data, error } = await supabase
+      .from("admin_sessions")
+      .select(
+        "id, admin_email, token_id, device_type, device_name, browser, os, user_agent, ip_address, location, created_at, last_seen_at, expires_at, revoked_at"
       )
+      .eq("admin_email", req.admin.email)
+      .is("revoked_at", null)
+      .gt("expires_at", now)
+      .order("last_seen_at", { ascending: false });
+
+    if (error) throw error;
+
+    const sessions = (data || []).map((session) => ({
+      id: session.id,
+      device_type: session.device_type,
+      device: session.device_name,
+      browser: session.browser,
+      os: session.os,
+      ip: session.ip_address || "",
+      location: session.location || "Unknown",
+      login_time: session.created_at,
+      last_active: session.last_seen_at,
+      expires_at: session.expires_at,
+      is_active: true,
+      is_current:
+        String(session.token_id) === String(req.admin.tokenId),
+      status:
+        String(session.token_id) === String(req.admin.tokenId)
+          ? "Current session"
+          : "Active session",
+    }));
+
+    return res.json({
+      success: true,
+      data: sessions,
+      current_session_id: req.admin.sessionId,
+      max_devices: 4,
+    });
+  } catch (error) {
+    return serverError(
+      res,
+      "Unable to load login sessions.",
+      error
+    );
+  }
+};
+
+export const logoutDevice = async (req, res) => {
+  try {
+    const sessionId = String(req.params.id || "").trim();
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Session id is required.",
+      });
+    }
+
+    const { data: session, error: readError } = await supabase
+      .from("admin_sessions")
+      .select("id, admin_email, token_id, revoked_at")
+      .eq("id", sessionId)
+      .eq("admin_email", req.admin.email)
+      .maybeSingle();
+
+    if (readError) throw readError;
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "Session not found.",
+      });
+    }
+
+    if (String(session.token_id) === String(req.admin.tokenId)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "You cannot log out the current device from this list.",
+      });
+    }
+
+    if (session.revoked_at) {
+      return res.json({
+        success: true,
+        message: "That device is already logged out.",
+      });
+    }
+
+    const { error } = await supabase
+      .from("admin_sessions")
+      .update({ revoked_at: new Date().toISOString() })
+      .eq("id", sessionId)
+      .eq("admin_email", req.admin.email);
+
+    if (error) throw error;
+
+    return res.json({
+      success: true,
+      message: "Device logged out successfully.",
+    });
+  } catch (error) {
+    return serverError(
+      res,
+      "Unable to log out the selected device.",
+      error
+    );
+  }
+};
+
+export const logoutOtherDevices = async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from("admin_sessions")
+      .update({ revoked_at: new Date().toISOString() })
+      .eq("admin_email", req.admin.email)
+      .neq("token_id", req.admin.tokenId)
+      .is("revoked_at", null);
+
+    if (error) throw error;
+
+    return res.json({
+      success: true,
+      message: "All other devices have been logged out.",
+    });
+  } catch (error) {
+    return serverError(
+      res,
+      "Unable to log out other devices.",
+      error
+    );
+  }
+};
+
+export const uploadAdminPhoto = async (req, res) => {
+  try {
+    const photo = String(
+      req.body?.photo_url ||
+        req.body?.profile_photo ||
+        req.body?.image ||
+        ""
+    ).trim();
+
+    if (!photo) {
+      return res.status(400).json({
+        success: false,
+        message: "Profile photo is required.",
+      });
+    }
+
+    if (
+      !photo.startsWith("http://") &&
+      !photo.startsWith("https://") &&
+      !photo.startsWith("data:image/")
     ) {
       return res.status(400).json({
         success: false,
-        message:
-          "This email is not registered for password recovery.",
+        message: "Invalid profile photo format.",
       });
     }
 
-    if (!MAIL_USER || !MAIL_PASS) {
-      console.error(
-        "MAIL_USER or MAIL_PASS is missing."
-      );
+    // Limit base64 uploads so a huge request cannot fill the database.
+    if (photo.startsWith("data:image/") && photo.length > 8_000_000) {
+      return res.status(413).json({
+        success: false,
+        message: "Profile photo is too large.",
+      });
+    }
 
+    const { data, error } = await supabase
+      .from("admin_settings")
+      .update({ profile_photo: photo })
+      .eq("id", 1)
+      .select(PUBLIC_SETTINGS_COLUMNS)
+      .single();
+
+    if (error) throw error;
+
+    return res.json({
+      success: true,
+      message: "Profile photo updated successfully.",
+      data: sanitizeSettings(data),
+    });
+  } catch (error) {
+    return serverError(
+      res,
+      "Unable to update profile photo.",
+      error
+    );
+  }
+};
+
+// ------------------------------------------------------------
+// OPTIONAL PASSWORD RECOVERY
+// Kept because your current frontend/routes already use these.
+// ------------------------------------------------------------
+
+export const forgotPassword = async (req, res) => {
+  const genericMessage =
+    "If that administrator email exists, a verification code has been sent.";
+
+  try {
+    const email = String(req.body?.email || "")
+      .trim()
+      .toLowerCase();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid administrator email.",
+      });
+    }
+
+    const { data: admin, error } = await supabase
+      .from("admin_settings")
+      .select("id, admin_email")
+      .eq("admin_email", email)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!admin) {
+      return res.json({
+        success: true,
+        message: genericMessage,
+      });
+    }
+
+    if (!transporter) {
       return res.status(500).json({
         success: false,
         message:
-          "Email service is not configured. Check MAIL_USER and MAIL_PASS in .env.",
+          "Email recovery is not configured. Set MAIL_USER and MAIL_PASS in .env.",
       });
     }
 
-    // Generate 6-digit OTP.
-    const otp = Math.floor(
-      100000 +
-        Math.random() * 900000
-    ).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
 
-    // OTP valid for 10 minutes.
-    const expiresAt =
-      Date.now() +
-      10 * 60 * 1000;
-
-    otpStore.set(
-      submittedEmail,
-      {
-        otp,
-        expiresAt,
-        verified: false,
-      }
-    );
-
-    console.log(
-      `OTP generated for ${submittedEmail}: ${otp}`
-    );
+    otpStore.set(email, {
+      hash: crypto
+        .createHash("sha256")
+        .update(otp)
+        .digest("hex"),
+      expiresAt: Date.now() + OTP_MINUTES * 60 * 1000,
+      verified: false,
+    });
 
     await transporter.sendMail({
       from: `"Red Rose School" <${MAIL_USER}>`,
-      to: submittedEmail,
-      subject:
-        "Red Rose School - Password Reset OTP",
-
-      html: `
-        <div style="
-          margin:0;
-          padding:40px 20px;
-          background:#f1f5f9;
-          font-family:Arial,Helvetica,sans-serif;
-        ">
-          <div style="
-            max-width:600px;
-            margin:auto;
-            background:#ffffff;
-            border-radius:20px;
-            overflow:hidden;
-            box-shadow:0 10px 30px rgba(0,0,0,0.08);
-          ">
-
-            <div style="
-              padding:30px;
-              text-align:center;
-              color:white;
-              background:linear-gradient(
-                135deg,
-                #2563eb,
-                #38bdf8
-              );
-            ">
-              <h1 style="
-                margin:0;
-                font-size:28px;
-              ">
-                Red Rose School
-              </h1>
-
-              <p style="
-                margin:8px 0 0;
-                opacity:0.9;
-              ">
-                School Management Portal
-              </p>
-            </div>
-
-            <div style="padding:35px;">
-
-              <h2 style="
-                color:#0f172a;
-                margin-top:0;
-              ">
-                Password Reset
-              </h2>
-
-              <p style="
-                color:#475569;
-                line-height:1.7;
-              ">
-                We received a request to reset
-                your administrator password.
-              </p>
-
-              <p style="
-                color:#475569;
-              ">
-                Your verification OTP is:
-              </p>
-
-              <div style="
-                margin:25px 0;
-                padding:20px;
-                text-align:center;
-                background:#eff6ff;
-                border-radius:15px;
-                border:1px solid #bfdbfe;
-              ">
-                <span style="
-                  font-size:38px;
-                  font-weight:bold;
-                  letter-spacing:10px;
-                  color:#2563eb;
-                ">
-                  ${otp}
-                </span>
-              </div>
-
-              <p style="
-                color:#64748b;
-                line-height:1.6;
-              ">
-                This OTP will expire in
-                <strong>10 minutes</strong>.
-              </p>
-
-              <p style="
-                color:#64748b;
-                line-height:1.6;
-              ">
-                If you did not request this,
-                you can safely ignore this email.
-              </p>
-
-            </div>
-
-            <div style="
-              padding:20px;
-              text-align:center;
-              background:#f8fafc;
-              color:#94a3b8;
-              font-size:13px;
-            ">
-              © 2026 Red Rose School.
-              All Rights Reserved.
-            </div>
-
-          </div>
-        </div>
-      `,
+      to: email,
+      subject: "Red Rose School - Administrator Password Reset",
+      text:
+        `Your password reset verification code is ${otp}. ` +
+        `It expires in ${OTP_MINUTES} minutes.`,
     });
 
     return res.json({
       success: true,
-      message:
-        `OTP has been sent to ${submittedEmail}.`,
+      message: genericMessage,
     });
   } catch (error) {
-    console.error(
-      "Forgot password error:",
+    return serverError(
+      res,
+      "Unable to start password recovery.",
       error
     );
-
-    return res.status(500).json({
-      success: false,
-      message:
-        "Unable to send OTP. Please check your email configuration.",
-    });
   }
 };
 
-// =====================================================
-// VERIFY OTP
-// =====================================================
-
-export const verifyForgotPasswordOtp = async (
-  req,
-  res
-) => {
+export const verifyForgotPasswordOtp = async (req, res) => {
   try {
-    const {
-      email,
-      otp,
-    } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Email and OTP are required.",
-      });
-    }
-
-    const submittedEmail = email
+    const email = String(req.body?.email || "")
       .trim()
       .toLowerCase();
 
-    const submittedOtp =
-      otp.toString().trim();
+    const otp = String(req.body?.otp || "").trim();
 
-    if (
-      !ALLOWED_PASSWORD_RESET_EMAILS.includes(
-        submittedEmail
-      )
-    ) {
+    const record = otpStore.get(email);
+
+    if (!email || !otp || !record) {
       return res.status(400).json({
         success: false,
-        message:
-          "This email is not registered for password recovery.",
+        message: "Invalid or expired verification code.",
       });
     }
 
-    const storedData =
-      otpStore.get(submittedEmail);
-
-    if (!storedData) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "OTP not found. Please request a new OTP.",
-      });
-    }
-
-    if (
-      Date.now() >
-      storedData.expiresAt
-    ) {
-      otpStore.delete(
-        submittedEmail
-      );
+    if (Date.now() > record.expiresAt) {
+      otpStore.delete(email);
 
       return res.status(400).json({
         success: false,
-        message:
-          "OTP has expired. Please request a new OTP.",
+        message: "Verification code has expired.",
       });
     }
 
-    if (
-      storedData.otp !==
-      submittedOtp
-    ) {
+    const hash = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    if (hash !== record.hash) {
       return res.status(400).json({
         success: false,
-        message:
-          "Invalid OTP.",
+        message: "Invalid verification code.",
       });
     }
 
-    storedData.verified = true;
-
-    otpStore.set(
-      submittedEmail,
-      storedData
-    );
+    otpStore.set(email, {
+      ...record,
+      verified: true,
+    });
 
     return res.json({
       success: true,
-      message:
-        "OTP verified successfully.",
+      message: "Verification code accepted.",
     });
   } catch (error) {
-    console.error(
-      "OTP verification error:",
+    return serverError(
+      res,
+      "Unable to verify the recovery code.",
       error
     );
-
-    return res.status(500).json({
-      success: false,
-      message:
-        "Unable to verify OTP.",
-    });
   }
 };
 
-// =====================================================
-// RESET PASSWORD
-// =====================================================
-
-export const resetPassword = async (
-  req,
-  res
-) => {
+export const resetPassword = async (req, res) => {
   try {
-    const {
-      email,
-      password,
-    } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Email and new password are required.",
-      });
-    }
-
-    const submittedEmail = email
+    const email = String(req.body?.email || "")
       .trim()
       .toLowerCase();
 
-    if (
-      !ALLOWED_PASSWORD_RESET_EMAILS.includes(
-        submittedEmail
-      )
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "This email is not registered for password recovery.",
-      });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Password must be at least 8 characters long.",
-      });
-    }
-
-    const storedData =
-      otpStore.get(submittedEmail);
-
-    if (!storedData) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Password reset session not found. Please request a new OTP.",
-      });
-    }
-
-    if (!storedData.verified) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Please verify the OTP before resetting your password.",
-      });
-    }
-
-    if (
-      Date.now() >
-      storedData.expiresAt
-    ) {
-      otpStore.delete(
-        submittedEmail
-      );
-
-      return res.status(400).json({
-        success: false,
-        message:
-          "OTP session has expired. Please request a new OTP.",
-      });
-    }
-
-    // Get current settings.
-    const settings = getFallbackData(
-      "admin_settings",
-      DEFAULT_ADMIN_SETTINGS
+    const newPassword = String(
+      req.body?.newPassword ||
+        req.body?.password ||
+        ""
     );
 
-    // Save the new password.
-    const updatedSettings = {
-      ...settings,
-      admin_password: password,
-    };
+    const record = otpStore.get(email);
 
-    // IMPORTANT:
-    // Save locally so adminAuthController can
-    // read the changed password.
-    setFallbackData(
-      "admin_settings",
-      updatedSettings
-    );
-
-    console.log(
-      `Password successfully changed for ${submittedEmail}`
-    );
-
-    // Try Supabase too.
-    try {
-      const {
-        error: supabaseError,
-      } = await supabase
-        .from("admin_settings")
-        .update({
-          admin_password: password,
-        })
-        .eq("id", 1);
-
-      if (supabaseError) {
-        console.warn(
-          "Could not save new password to Supabase:",
-          supabaseError.message
-        );
-      }
-    } catch (supabaseError) {
-      console.warn(
-        "Supabase password update failed:",
-        supabaseError.message
-      );
+    if (!record?.verified) {
+      return res.status(400).json({
+        success: false,
+        message: "Verify the recovery code first.",
+      });
     }
 
-    // OTP can no longer be reused.
-    otpStore.delete(
-      submittedEmail
-    );
+    if (Date.now() > record.expiresAt) {
+      otpStore.delete(email);
+
+      return res.status(400).json({
+        success: false,
+        message: "Recovery session has expired.",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters.",
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    const now = new Date().toISOString();
+
+    const { error } = await supabase
+      .from("admin_settings")
+      .update({
+        password: passwordHash,
+        admin_email: email,
+        school_email: email,
+      })
+      .eq("id", 1);
+
+    if (error) throw error;
+
+    await supabase
+      .from("admin_sessions")
+      .update({ revoked_at: now })
+      .eq("admin_email", email)
+      .is("revoked_at", null);
+
+    otpStore.delete(email);
 
     return res.json({
       success: true,
       message:
-        "Password reset successful. You can now log in with your new password.",
+        "Password reset successfully. Please log in again.",
     });
   } catch (error) {
-    console.error(
-      "Reset password error:",
+    return serverError(
+      res,
+      "Unable to reset administrator password.",
       error
     );
-
-    return res.status(500).json({
-      success: false,
-      message:
-        "Unable to reset password. Please try again.",
-    });
   }
 };

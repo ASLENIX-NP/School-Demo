@@ -39,7 +39,7 @@
     "statsSection": {
       "eyebrow": "Our Impact",
       "title": "Creating Futures, One Student at a Time",
-      "description": "",
+      "description": "Real numbers that reflect our commitment to excellence and holistic education in the Makwanpur region.",
       "stats": [
         {
           "value": "3800",
@@ -183,35 +183,44 @@
     "pageBadge": "About Our School",
     "pageTitle": "Nurturing Minds, Inspiring Futures",
     "pageSubtitle": "Where curiosity becomes confidence, values become character, and every child discovers the courage to shape tomorrow.",
+    "heroEmblemText": "RR",
+    "heroEmblemLabel": "Red Rose",
     "stats": [
       {
         "id": 1,
-        "icon": "users",
         "value": 2500,
         "suffix": "+",
-        "label": "Students Enrolled"
+        "decimals": 0,
+        "label": "Students Enrolled",
+        "visible": true,
+        "icon": "users"
       },
       {
         "id": 2,
-        "icon": "trophy",
         "value": 98.5,
         "suffix": "%",
         "decimals": 1,
-        "label": "Board Success Rate"
+        "label": "Board Success Rate",
+        "visible": true,
+        "icon": "trophy"
       },
       {
         "id": 3,
-        "icon": "graduation",
         "value": 15,
         "suffix": " yrs",
-        "label": "Excellence in Education"
+        "decimals": 0,
+        "label": "Excellence in Education",
+        "visible": true,
+        "icon": "graduation"
       },
       {
         "id": 4,
-        "icon": "heart",
         "value": 180,
         "suffix": "+",
-        "label": "Dedicated Faculty"
+        "decimals": 0,
+        "label": "Dedicated Faculty",
+        "visible": true,
+        "icon": "heart"
       }
     ],
     "storyBadge": "Our Story",
@@ -221,38 +230,39 @@
       "Our approach goes beyond textbooks, combining strong academics with practical learning, technology, sports, arts, leadership, and extracurricular opportunities. Through dedicated teachers, personalized guidance, and strong collaboration among parents, school, and community, we support the intellectual, emotional, physical, and social development of every learner. We strive to develop critical thinking, communication, collaboration, resilience, and problem-solving skills while inspiring curiosity and lifelong learning. At Red Rose English Boarding School, we don't just educate students—we inspire lifelong learners, responsible citizens, and future leaders."
     ],
     "storyImageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786944758191_WhatsApp_Image_2026-08-13_at_11.09.06_ALZ9eL40f7.jpeg",
+    "storyImageAlt": "",
     "storyImageZoom": 1,
     "storyImageOffsetX": 0,
     "storyImageOffsetY": 0,
     "storyImageTopTitle": "Our Main Campus",
     "storyImageTopSubtitle": "A Hub of Innovation & Learning",
-    "storyBadgeYear": "Est. 2010 AD",
+    "storyBadgeYear": "Est. 2010",
     "pillarBadge": "Our Core Values",
     "pillarTitle": "The Principles That Guide Our Community",
     "pillarDescription": "",
     "pillars": [
       {
         "id": 1,
-        "icon": "trophy",
         "label": "Academic Excellence",
         "desc": "Our academic programs go beyond textbooks they cultivate deep thinking, creative problem-solving, and a lifelong love for learning that prepares students for excellence in every endeavor.\n\n\n\n\n",
         "visible": true,
+        "icon": "trophy",
         "color": "#168A3A"
       },
       {
         "id": 2,
-        "icon": "heart",
         "label": "Character and Integrity",
         "desc": "We build character through everyday actions teaching our students that real success is measured not by achievement alone, but by the strength of their principles and the depth of their compassion.",
         "visible": true,
+        "icon": "heart",
         "color": "#168A3A"
       },
       {
         "id": 3,
-        "icon": "globe",
         "label": "Global Readiness",
         "desc": "We prepare students to thrive in an interconnected world—equipping them with adaptable thinking, cultural awareness, and the confidence to embrace diverse perspectives and new opportunities.",
         "visible": true,
+        "icon": "globe",
         "color": "#168A3A"
       }
     ],
@@ -283,23 +293,71 @@
         "imageOffsetX": 0,
         "imageOffsetY": 0,
         "visible": true
+      },
+      {
+        "id": 1787115748941,
+        "name": "Leader Name",
+        "role": "Post / Designation",
+        "title": "Message Title",
+        "message": "Write the leadership message here.",
+        "image": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true
+      },
+      {
+        "id": 1787115750225,
+        "name": "Leader Name",
+        "role": "Post / Designation",
+        "title": "Message Title",
+        "message": "Write the leadership message here.",
+        "image": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true
+      },
+      {
+        "id": 1787115751457,
+        "name": "Leader Name",
+        "role": "Post / Designation",
+        "title": "Message Title",
+        "message": "Write the leadership message here.",
+        "image": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true
+      },
+      {
+        "id": 1787115756876,
+        "name": "Leader Name",
+        "role": "Post / Designation",
+        "title": "Message Title",
+        "message": "Write the leadership message here.",
+        "image": "",
+        "imageZoom": 1,
+        "imageOffsetX": 0,
+        "imageOffsetY": 0,
+        "visible": true
       }
     ],
     "missionVisionBadge": "Our Focus",
     "missionVision": [
       {
         "id": 1,
-        "icon": "target",
         "title": "Our Mission",
         "desc": "To cultivate a love for learning in every student by providing a challenging, inclusive, and innovative educational environment that promotes academic achievement and personal growth.",
-        "visible": true
+        "visible": true,
+        "icon": "target"
       },
       {
         "id": 2,
-        "icon": "compass",
         "title": "Our Vision",
         "desc": "To be recognized as a beacon of educational excellence, producing well-rounded, compassionate, and future-ready graduates who lead with confidence and integrity.",
-        "visible": true
+        "visible": true,
+        "icon": "compass"
       }
     ],
     "journeyBadge": "Our Journey",
@@ -344,8 +402,7 @@
     "ctaTitle": "Ready to Join Our Community?",
     "ctaDescription": "Experience our campus, meet our dedicated faculty, and see firsthand how we nurture the leaders of tomorrow.",
     "ctaButtonText": "Schedule a Visit",
-    "ctaButtonLink": "/contact",
-    "storyImageAlt": ""
+    "ctaButtonLink": "/contact"
   },
   "blogs": {
     "pageBadge": "Knowledge Hub",
@@ -361,18 +418,18 @@
     ],
     "posts": [
       {
-        "id": 1786086330515,
+        "id": 1787288202421,
         "title": "New Blog Post",
-        "slug": "new-blog-post-1786086330515",
+        "slug": "new-blog-post-1787288202421",
         "category": "Academics",
-        "date": "2026-08-07",
-        "excerpt": "Short summary for this blog post.owowwowowowowoqwp'wdweoidwe[oief",
+        "date": "2026-08-21",
+        "excerpt": "Short summary for this blog post.",
         "content": "Write the full blog content here.",
-        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786086336420_maths_2iRtaaYEW.jpg",
+        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1787288223852_20260624_161357_p3N7IBP6N.jpg",
         "imageAlt": "New Blog Post",
         "pinned": false,
         "visible": true,
-        "author": "Red Rose Team",
+        "author": "Smriti Team",
         "authorRole": "School Administration"
       },
       {
@@ -427,7 +484,7 @@
         "category": "Events",
         "date": "2026-06-20",
         "excerpt": "A vibrant showcase of traditional music, drama performances, and student art galleries celebrating national heritage and creative expression.",
-        "content": "The annual Red Rose Cultural Extravaganza transformed our school School into a colorful hub of music, theatrical plays, folk dance, and fine art displays created by students from Grade 1 to Grade 10.",
+        "content": "The annual Red Rose Cultural Extravaganza transformed our school campus into a colorful hub of music, theatrical plays, folk dance, and fine art displays created by students from Grade 1 to Grade 10.",
         "imageUrl": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800",
         "imageAlt": "Cultural Festival",
         "pinned": false,
@@ -527,29 +584,16 @@
       "badge": "Excellence in Education",
       "title": "Empowering Minds Shaping Futures",
       "subtitle": "Nurturing the next generation of thinkers.",
-      "description": "At Red Rose Secondary English Boarding School, education extends beyond textbooks."
-    },
-    "levelsHeading": {
-      "badge": "Academic Structure",
-      "title": "Explore Our Class Levels",
-      "description": "Click on any academic level below to view the classes, subjects, curriculum, and grading structure."
-    },
-    "strengthsHeading": {
-      "badge": "What Sets Us Apart",
-      "title": "Our Academic Strengths",
-      "description": "A learning ecosystem built on innovation, expertise, and unwavering commitment to student success."
-    },
-    "achievementsHeading": {
-      "badge": "Our Milestones",
-      "title": "Celebrating Excellence",
-      "description": "A legacy of achievement that reflects our commitment to quality education."
+      "description": "At Red Rose Secondary English Boarding School, education extends beyond textbooks. Our comprehensive academic framework integrates intellectual rigor, creative exploration, ethical grounding, and real-world readiness from early childhood through secondary education."
     },
     "stats": [
       {
         "value": "1500",
         "suffix": "+",
         "label": "Active Learners",
-        "color": "#D4AC0D"
+        "color": "#D4AC0D",
+        "id": "stat-1787118356040",
+        "visible": true
       },
       {
         "value": "85",
@@ -612,7 +656,8 @@
       {
         "id": 1,
         "title": "Academic Excellence Awards",
-        "description": "Consistent top-tier SEE performance."
+        "description": "Consistent top-tier SEE performance.",
+        "visible": true
       },
       {
         "id": 2,
@@ -642,7 +687,100 @@
         "Co-curricular & Moral Progress Logs"
       ]
     },
-    "levels": [
+    "classLevels": [
+      {
+        "id": "pre-primary",
+        "name": "Pre-Primary / Early Years",
+        "shortBadge": "Early Childhood",
+        "span": "Play Group, Nursery, LKG, UKG",
+        "ageGroup": "3 – 5.5 Years",
+        "color": "#D4AC0D",
+        "tagline": "Foundation of Curiosity, Play-Based Learning",
+        "description": "Our early childhood program nurtures young minds through playful exploration, phonics, storytelling, and creative arts.",
+        "classes": [
+          {
+            "id": "pg-nursery",
+            "name": "Play Group & Nursery",
+            "focus": "Sensory, Language Readiness & Social Interaction",
+            "subjects": [
+              {
+                "name": "Phonics & Rhymes",
+                "type": "Core",
+                "hours": "5 hrs/wk"
+              },
+              {
+                "name": "Picture Reading & Storytelling",
+                "type": "Core",
+                "hours": "4 hrs/wk"
+              },
+              {
+                "name": "Number Games & Counting",
+                "type": "Core",
+                "hours": "4 hrs/wk"
+              },
+              {
+                "name": "Creative Arts & Craft",
+                "type": "Activity",
+                "hours": "5 hrs/wk"
+              },
+              {
+                "name": "Play & Motor Skills",
+                "type": "Activity",
+                "hours": "4 hrs/wk"
+              }
+            ],
+            "curriculumHighlights": [
+              "Montessori-inspired tactile learning corners",
+              "Daily storytelling sessions in English & Nepali",
+              "Zero exam pressure",
+              "Color & pattern recognition"
+            ],
+            "assessmentMethod": "Continuous Activity Milestone Logs"
+          },
+          {
+            "id": "lkg-ukg",
+            "name": "LKG & UKG",
+            "focus": "Early Literacy, Numeracy & Environmental Awareness",
+            "subjects": [
+              {
+                "name": "English Reading & Writing",
+                "type": "Core",
+                "hours": "6 hrs/wk"
+              },
+              {
+                "name": "Nepali Barnamala & Words",
+                "type": "Core",
+                "hours": "5 hrs/wk"
+              },
+              {
+                "name": "Elementary Mathematics",
+                "type": "Core",
+                "hours": "5 hrs/wk"
+              },
+              {
+                "name": "General Knowledge & Nature",
+                "type": "Core",
+                "hours": "3 hrs/wk"
+              },
+              {
+                "name": "Drawing, Color & Music",
+                "type": "Activity",
+                "hours": "4 hrs/wk"
+              }
+            ],
+            "curriculumHighlights": [
+              "Phonics-based English reading",
+              "Nepali alphabet recognition",
+              "Basic addition & subtraction",
+              "Group & team building activities"
+            ],
+            "assessmentMethod": "Playful Classroom Assessments & Progress Certificates"
+          }
+        ],
+        "bgAccent": "#D4AC0D18",
+        "borderAccent": "#D4AC0D40",
+        "visible": true
+      },
       {
         "id": "primary",
         "name": "Primary Level",
@@ -650,7 +788,7 @@
         "span": "Class 1 to Class 5",
         "ageGroup": "6 – 10 Years",
         "color": "#1E8449",
-        "tagline": "Core Academic Fundamentals & STEAM",
+        "tagline": "Core Academic Fundamentals  And Steam",
         "description": "Building strong intellectual foundations in languages, mathematics, and science alongside computer literacy.",
         "classes": [
           {
@@ -690,53 +828,13 @@
               "Hands-on science experiments",
               "Continuous Assessment System (CAS)"
             ],
-            "assessmentMethod": "40% CAS + 60% Terminal Examinations"
-          },
-          {
-            "id": "grade-4-5",
-            "name": "Grade 4 – 5 (Upper Primary)",
-            "focus": "Analytical Reasoning, Science Exploration & Digital Basics",
-            "subjects": [
-              {
-                "name": "English Language & Literature",
-                "type": "Compulsory",
-                "hours": "6 hrs/wk"
-              },
-              {
-                "name": "Nepali Bhasa & Vyakaran",
-                "type": "Compulsory",
-                "hours": "6 hrs/wk"
-              },
-              {
-                "name": "Mathematics & Geometry",
-                "type": "Compulsory",
-                "hours": "6 hrs/wk"
-              },
-              {
-                "name": "General Science & Environment",
-                "type": "Compulsory",
-                "hours": "5 hrs/wk"
-              },
-              {
-                "name": "Social Studies & Local Culture",
-                "type": "Compulsory",
-                "hours": "4 hrs/wk"
-              },
-              {
-                "name": "Computer Science & ICT Lab",
-                "type": "Practical",
-                "hours": "3 hrs/wk"
-              }
-            ],
-            "curriculumHighlights": [
-              "Structured problem-solving in Arithmetic & Geometry",
-              "Introductory computer lab sessions",
-              "Project work & chart presentations",
-              "Inter-house competitions"
-            ],
-            "assessmentMethod": "30% Practical/Project Work + 70% Terminal Examinations"
+            "assessmentMethod": "40% CAS + 60% Terminal Examinations",
+            "visible": true
           }
-        ]
+        ],
+        "bgAccent": "#1E844918",
+        "borderAccent": "#1E844940",
+        "visible": true
       },
       {
         "id": "middle",
@@ -745,7 +843,7 @@
         "span": "Class 6 to Class 8",
         "ageGroup": "11 – 13 Years",
         "color": "#7D3C98",
-        "tagline": "Critical Thinking, Laboratory Science & BLE Prep",
+        "tagline": "Critical Thinking, Laboratory Science And BLE Prep",
         "description": "Empowering students to think analytically, conduct laboratory experiments, and build digital applications.",
         "classes": [
           {
@@ -797,7 +895,10 @@
             ],
             "assessmentMethod": "Grade 8 BLE: 25% Practical/Internal + 75% Written Examinations"
           }
-        ]
+        ],
+        "bgAccent": "#7D3C9818",
+        "borderAccent": "#7D3C9840",
+        "visible": true
       },
       {
         "id": "high",
@@ -806,7 +907,7 @@
         "span": "Class 9 & Class 10",
         "ageGroup": "14 – 16 Years",
         "color": "#2E86C1",
-        "tagline": "SEE Exam Excellence, Electives & Career Guidance",
+        "tagline": "SEE Exam Excellence, Electives and Career Guidance",
         "description": "Intensive academic preparation for the SEE examination with specialized electives and science labs.",
         "classes": [
           {
@@ -858,9 +959,16 @@
             ],
             "assessmentMethod": "NEB SEE: 25% Internal Practical + 75% Final SEE Examination"
           }
-        ]
+        ],
+        "bgAccent": "#2E86C118",
+        "borderAccent": "#2E86C140",
+        "visible": true
       }
-    ]
+    ],
+    "levelsHeading": {},
+    "strengthsHeading": {},
+    "achievementsHeading": {},
+    "assessmentHeading": {}
   },
   "staff": {
     "badgeText": "Faculty & Team",
@@ -1185,36 +1293,40 @@
       {
         "id": "1",
         "title": "Top School Award",
-        "year": "2024",
-        "icon": "Trophy"
+        "year": "2025",
+        "icon": "Trophy",
+        "visible": true
       },
       {
         "id": "2",
         "title": "STEM Excellence",
         "year": "2023",
-        "icon": "Award"
+        "icon": "Award",
+        "visible": true
       },
       {
         "id": "3",
         "title": "Sports Champion",
         "year": "2024",
-        "icon": "Trophy"
+        "icon": "Trophy",
+        "visible": true
       },
       {
         "id": "4",
         "title": "Community Service",
         "year": "2023",
-        "icon": "Star"
+        "icon": "Star",
+        "visible": true
       }
     ],
     "images": [
       {
         "id": "1786425525155-0-qn50bbi5xjo",
         "title": "Screenshot 2026 01 31 222824",
+        "description": "",
+        "date": "School Activity",
         "category": "Activity",
         "subcategory": "",
-        "date": "School Activity",
-        "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425523678_Screenshot_2026-01-31_222824_ydbIFfcoI.png",
         "images": [
           "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425523678_Screenshot_2026-01-31_222824_ydbIFfcoI.png"
@@ -1224,10 +1336,10 @@
       {
         "id": "1786425495798-0-8qqow8i5kvp",
         "title": "Screenshot 2026 08 10 131136",
+        "description": "",
+        "date": "School Activity",
         "category": "Certificate",
         "subcategory": "Student Certificates",
-        "date": "School Activity",
-        "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425493922_Screenshot_2026-08-10_131136_furQXS-dh.png",
         "images": [
           "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786425493922_Screenshot_2026-08-10_131136_furQXS-dh.png"
@@ -1237,10 +1349,10 @@
       {
         "id": "1786344660373-g5bdxk1nocr",
         "title": "20260624 161357",
+        "description": "",
+        "date": "School Activity",
         "category": "Certificate",
         "subcategory": "",
-        "date": "School Activity",
-        "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344656473_20260624_161357_Elo7Ys_u_.jpg",
         "images": [
           "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344656473_20260624_161357_Elo7Ys_u_.jpg"
@@ -1250,10 +1362,10 @@
       {
         "id": "1786344664603-9gu3t1b9xa5",
         "title": "20260624 161346(1)",
+        "description": "",
+        "date": "School Activity",
         "category": "Events",
         "subcategory": "Annual Program",
-        "date": "School Activity",
-        "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344660398_20260624_161346_1__LXLNl-Qef.jpg",
         "images": [
           "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344660398_20260624_161346_1__LXLNl-Qef.jpg"
@@ -1263,10 +1375,10 @@
       {
         "id": "1786344667681-sm8vntr24dl",
         "title": "20260624 161346",
+        "description": "",
+        "date": "School Activity",
         "category": "Activity",
         "subcategory": "",
-        "date": "School Activity",
-        "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344664631_20260624_161346_ty3aBwz_V.jpg",
         "images": [
           "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344664631_20260624_161346_ty3aBwz_V.jpg"
@@ -1276,10 +1388,10 @@
       {
         "id": "1786344649697-ae16jd5sj5t",
         "title": "20260624 161346",
+        "description": "",
+        "date": "School Activity",
         "category": "Activity",
         "subcategory": "",
-        "date": "School Activity",
-        "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344644761_20260624_161346_Sm42o2a_c.jpg",
         "images": [
           "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344644761_20260624_161346_Sm42o2a_c.jpg"
@@ -1289,10 +1401,10 @@
       {
         "id": "1786344169506-0-0qez7gdmmz5f",
         "title": "School Logo",
+        "description": "",
+        "date": "School Activity",
         "category": "Certificate",
         "subcategory": "Student Certificates",
-        "date": "School Activity",
-        "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344168027_unnamed_TdM9BnWuQ.png",
         "images": [
           "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344168027_unnamed_TdM9BnWuQ.png"
@@ -1302,10 +1414,10 @@
       {
         "id": "1786344133133-0-rqahydvvz7g",
         "title": "Images",
+        "description": "",
+        "date": "School Activity",
         "category": "Activity",
         "subcategory": "",
-        "date": "School Activity",
-        "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344131528_images_z-ZV4LJO0.jpeg",
         "images": [
           "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344131528_images_z-ZV4LJO0.jpeg"
@@ -1315,10 +1427,10 @@
       {
         "id": "1786344133087-1-uy7y25t85uf",
         "title": "Images (1)",
+        "description": "",
+        "date": "School Activity",
         "category": "Certificate",
         "subcategory": "Student Certificates",
-        "date": "School Activity",
-        "description": "",
         "image": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344131542_images__1__LJkf1r2vd.jpeg",
         "images": [
           "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786344131542_images__1__LJkf1r2vd.jpeg"
@@ -1612,5 +1724,61 @@
         "visible": true
       }
     ]
+  },
+  "contact": {
+    "badgeText": "Get In Touch",
+    "title": "Let's Connect",
+    "highlightedText": "Red Rose School",
+    "subtitle": "Have questions about admissions, curriculum, or tuition? Our team is ready to assist you with any inquiry.",
+    "contactInfo": [
+      {
+        "id": "address",
+        "icon": "map",
+        "label": "School Address",
+        "value": "Hatiya, Hetauda-16",
+        "color": "#2563EB"
+      },
+      {
+        "id": "phone",
+        "icon": "phone",
+        "label": "Call Us Directly",
+        "value": "057-590144, 057-590145 98106767676",
+        "color": "#16A34A"
+      },
+      {
+        "id": "email",
+        "icon": "mail",
+        "label": "Email Inquiries",
+        "value": "inforedroseschool@gmail.com",
+        "color": "#7C3AED"
+      },
+      {
+        "id": "hours",
+        "icon": "clock",
+        "label": "Office Hours",
+        "value": "Sun - Fri: 9:00 AM - 4:00 PM",
+        "color": "#EA580C"
+      }
+    ],
+    "mapCard": {
+      "title": "Red Rose Secondary English Boarding School",
+      "address": "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
+      "buttonText": "Open in Google Maps",
+      "mapUrl": "https://www.google.com/maps/place/Bal+Jagriti+Boarding+School/@27.4312792,85.0379093,19z/data=!4m6!3m5!1s0x39eb4991159e4289:0x8707a51c9add8d8e!8m2!3d27.4312792!4d85.0379093!16s%2Fg%2F11bw3f8rbl"
+    },
+    "form": {
+      "title": "Send Us a Message",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "e.g. Ram Shrestha",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "ram@example.com",
+      "phoneLabel": "Phone Number",
+      "phonePlaceholder": "98XXXXXXXX",
+      "subjectLabel": "Inquiry Category",
+      "subjectPlaceholder": "Admissions Inquiry",
+      "messageLabel": "Your Message",
+      "messagePlaceholder": "Write your message or inquiry details here...",
+      "buttonText": "Send Message"
+    }
   }
 }

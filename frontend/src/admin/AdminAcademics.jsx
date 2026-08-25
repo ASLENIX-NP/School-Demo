@@ -1,99 +1,355 @@
-import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import api from "../lib/api";
+import { motion, AnimatePresence } from "motion/react";
 import {
   AlertCircle,
+  Camera,
   CheckCircle2,
-  ExternalLink,
   Eye,
-  Save,
-  X,
-  ArrowLeft,
-  Plus,
+  Image as ImageIcon,
   Pencil,
+  Save,
   Trash2,
-  BookOpen,
-  Award,
-  Sparkles,
-  CheckCircle2 as CheckCircle2Icon,
-  Brain,
-  Lightbulb,
-  GraduationCap,
-  Layout,
-  FlaskConical,
-  Globe,
-  Heart,
-  Target,
-  Trophy,
-  Zap,
-  Shield,
-  Clock,
-  ChevronRight,
-  ChevronDown,
-  Layers,
+  UploadCloud,
+  X,
+  Plus,
 } from "lucide-react";
 
-// ─── Small helpers ───
-function withAlpha(hex, alpha) {
-  if (!hex) return `rgba(26,82,118,${alpha})`;
-  const h = hex.replace("#", "");
-  const bigint = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
+import AcademicsPage from "../app/components/Academics";
 
-function slugify(str) {
-  return (str || "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+// ============================================================
+// DEFAULT CONTENT (matching AcademicsPage)
+// ============================================================
 
-function uniqueId(prefix, existingIds = []) {
-  let base = slugify(prefix) || "item";
-  let id = base;
-  let n = 1;
-  while (existingIds.includes(id)) {
-    id = `${base}-${n}`;
-    n += 1;
-  }
-  return id;
-}
-
-function deepClone(obj) {
-  return typeof structuredClone === "function"
-    ? structuredClone(obj)
-    : JSON.parse(JSON.stringify(obj));
-}
-
-// Icons are React components and cannot be persisted to the database.
-// Map level id -> icon here, with a safe fallback for newly created levels.
-const LEVEL_ICON_MAP = {
-  "pre-primary": Brain,
-  primary: BookOpen,
-  middle: Lightbulb,
-  high: GraduationCap,
+const defaultHeroContent = {
+  badge: "Excellence in Education",
+  title: "Empowering Minds, Shaping Futures.",
+  subtitle: "Nurturing the next generation of thinkers, innovators, and leaders through quality education.",
+  description:
+    "At Red Rose Secondary English Boarding School, education extends beyond textbooks. Our comprehensive academic framework integrates intellectual rigor, creative exploration, ethical grounding, and real-world readiness from early childhood through secondary education.",
 };
-function getLevelIcon(levelId) {
-  return LEVEL_ICON_MAP[levelId] || Layers;
+
+const defaultStats = [
+  { id: "stat-1", value: "1500", suffix: "+", label: "Active Learners", color: "#9C2748" },
+  { id: "stat-2", value: "85", suffix: "+", label: "Dedicated Educators", color: "#B98A42" },
+  { id: "stat-3", value: "55", suffix: "+", label: "Years of Impact", color: "#3F5B49" },
+  { id: "stat-4", value: "100", suffix: "%", label: "SEE Pass Rate", color: "#4A2C6E" },
+];
+
+const defaultStrengths = [
+  {
+    id: "strength-1",
+    title: "Innovation Hub",
+    description: "State-of-the-art learning spaces with interactive technology and collaborative zones.",
+    color: "#9C2748",
+  },
+  {
+    id: "strength-2",
+    title: "STEM Excellence",
+    description: "Robust science, technology, engineering, and mathematics programs with hands-on experimentation.",
+    color: "#3F5B49",
+  },
+  {
+    id: "strength-3",
+    title: "Global Perspective",
+    description: "Integrated curriculum emphasizing critical thinking and cross-cultural communication.",
+    color: "#B98A42",
+  },
+  {
+    id: "strength-4",
+    title: "Arts & Expression",
+    description: "Comprehensive arts education nurturing creativity through visual arts, music, and performance.",
+    color: "#C6486B",
+  },
+  {
+    id: "strength-5",
+    title: "Character Development",
+    description: "Values-based education cultivating integrity, empathy, and social responsibility.",
+    color: "#4A2C6E",
+  },
+  {
+    id: "strength-6",
+    title: "Future Ready",
+    description: "Career and college counseling with mentorship pathways and leadership development.",
+    color: "#2D6A4F",
+  },
+];
+
+const defaultAchievements = [
+  {
+    id: "ach-1",
+    title: "Academic Excellence Awards",
+    description: "Consistent top-tier SEE performance and regional academic honors in Makwanpur.",
+  },
+  {
+    id: "ach-2",
+    title: "Science & STEM Showcase",
+    description: "Student science exhibition projects recognized at district and national youth fairs.",
+  },
+  {
+    id: "ach-3",
+    title: "Community & Service",
+    description: "Student-led service initiatives contributing to local literacy and environmental projects.",
+  },
+  {
+    id: "ach-4",
+    title: "Co-Curricular Triumphs",
+    description: "Championship trophies in inter-school football, athletics, and cultural dance competitions.",
+  },
+];
+
+const defaultAssessment = {
+  title: "Holistic Assessment Framework",
+  description: "Our evaluation system celebrates growth through multiple dimensions of student development.",
+  methods: [
+    "Continuous Assessment System (CAS)",
+    "Laboratory Practical Examinations",
+    "Project-Based & Group Presentations",
+    "Periodic Diagnostic Unit Tests",
+    "Terminal Examinations & SEE Model Series",
+    "Co-curricular & Moral Progress Logs",
+  ],
+};
+
+const defaultClassLevels = [
+  {
+    id: "pre-primary",
+    name: "Pre-Primary / Early Years",
+    shortBadge: "Early Childhood",
+    span: "Play Group, Nursery, LKG, UKG",
+    ageGroup: "3 – 5.5 Years",
+    color: "#B98A42",
+    bgAccent: "rgba(185, 138, 66, 0.12)",
+    borderAccent: "rgba(185, 138, 66, 0.25)",
+    tagline: "Foundation of Curiosity, Play-Based Learning & Motor Skills",
+    description:
+      "Our early childhood program nurtures young minds through playful exploration, sensory exercises, phonics, storytelling, and creative arts in a safe and supportive environment.",
+    classes: [
+      {
+        id: "pg-nursery",
+        name: "Play Group & Nursery",
+        focus: "Sensory, Language Readiness & Social Interaction",
+        subjects: [
+          { name: "Phonics & Rhymes", type: "Core", hours: "5 hrs/wk" },
+          { name: "Picture Reading & Storytelling", type: "Core", hours: "4 hrs/wk" },
+          { name: "Number Games & Counting", type: "Core", hours: "4 hrs/wk" },
+          { name: "Creative Arts & Craft", type: "Activity", hours: "5 hrs/wk" },
+          { name: "Play & Motor Skills", type: "Activity", hours: "4 hrs/wk" },
+        ],
+        curriculumHighlights: [
+          "Montessori-inspired tactile learning corners & play zones",
+          "Daily storytelling sessions in conversational English & Nepali",
+          "Zero exam pressure: Individual progress tracked via monthly milestone logs",
+          "Basic color identification, pattern recognition, and fine motor development",
+        ],
+        assessmentMethod: "Continuous Activity Milestone Logs & Parent Progress Conferences",
+      },
+      {
+        id: "lkg-ukg",
+        name: "LKG & UKG",
+        focus: "Early Literacy, Numeracy & Environmental Awareness",
+        subjects: [
+          { name: "English Reading & Writing", type: "Core", hours: "6 hrs/wk" },
+          { name: "Nepali Barnamala & Words", type: "Core", hours: "5 hrs/wk" },
+          { name: "Elementary Mathematics", type: "Core", hours: "5 hrs/wk" },
+          { name: "General Knowledge & Nature", type: "Core", hours: "3 hrs/wk" },
+          { name: "Drawing, Color & Music", type: "Activity", hours: "4 hrs/wk" },
+        ],
+        curriculumHighlights: [
+          "Phonics-based English reading and neat print handwriting practice",
+          "Nepali alphabet recognition and simple sentence formation",
+          "Basic addition and subtraction concepts using visual counters",
+          "Group activities encouraging confidence, manners, and team building",
+        ],
+        assessmentMethod: "Playful Classroom Assessments & Progress Evaluation Certificates",
+      },
+    ],
+  },
+  {
+    id: "primary",
+    name: "Primary Level",
+    shortBadge: "Grades 1 – 5",
+    span: "Class 1 to Class 5",
+    ageGroup: "6 – 10 Years",
+    color: "#9C2748",
+    bgAccent: "rgba(156, 39, 72, 0.10)",
+    borderAccent: "rgba(156, 39, 72, 0.20)",
+    tagline: "Core Academic Fundamentals & Integrated STEAM Activities",
+    description:
+      "Building strong intellectual foundations in languages, mathematics, general science, and social studies alongside computer literacy, art, and moral education.",
+    classes: [
+      {
+        id: "grade-1-3",
+        name: "Grade 1 – 3 (Lower Primary)",
+        focus: "Foundational Literacy, Numeracy & Scientific Inquiry",
+        subjects: [
+          { name: "English Grammar & Reader", type: "Compulsory", hours: "6 hrs/wk" },
+          { name: "Nepali Bhasa & Vyakaran", type: "Compulsory", hours: "6 hrs/wk" },
+          { name: "Mathematics & Reasoning", type: "Compulsory", hours: "6 hrs/wk" },
+          { name: "Our Surroundings (Science & Social)", type: "Compulsory", hours: "5 hrs/wk" },
+          { name: "Computer Literacy & Drawing", type: "Practical", hours: "3 hrs/wk" },
+        ],
+        curriculumHighlights: [
+          "Fully aligned with Government of Nepal CDC Primary Curriculum standards",
+          "Equal mastery in English and Nepali written and oral communication",
+          "Hands-on science experiments and interactive math manipulative kits",
+          "Continuous Assessment System (CAS) with periodic diagnostic unit tests",
+        ],
+        assessmentMethod: "40% Continuous Assessment (CAS) + 60% Terminal Examinations",
+      },
+      {
+        id: "grade-4-5",
+        name: "Grade 4 – 5 (Upper Primary)",
+        focus: "Analytical Reasoning, Science Exploration & Digital Basics",
+        subjects: [
+          { name: "English Language & Literature", type: "Compulsory", hours: "6 hrs/wk" },
+          { name: "Nepali Bhasa & Vyakaran", type: "Compulsory", hours: "6 hrs/wk" },
+          { name: "Mathematics & Geometry", type: "Compulsory", hours: "6 hrs/wk" },
+          { name: "General Science & Environment", type: "Compulsory", hours: "5 hrs/wk" },
+          { name: "Social Studies & Local Culture", type: "Compulsory", hours: "4 hrs/wk" },
+          { name: "Computer Science & ICT Lab", type: "Practical", hours: "3 hrs/wk" },
+        ],
+        curriculumHighlights: [
+          "Structured problem-solving in Arithmetic, Algebra, and Geometry",
+          "Introductory computer lab sessions covering typing, MS Office, and internet safety",
+          "Project work, chart presentations, and local educational excursions",
+          "Inter-house spelling bee, speech contests, and science fair participation",
+        ],
+        assessmentMethod: "30% Practical/Project Work + 70% Terminal Examinations",
+      },
+    ],
+  },
+  {
+    id: "middle",
+    name: "Middle Level (Lower Secondary)",
+    shortBadge: "Grades 6 – 8",
+    span: "Class 6 to Class 8",
+    ageGroup: "11 – 13 Years",
+    color: "#3F5B49",
+    bgAccent: "rgba(63, 91, 73, 0.10)",
+    borderAccent: "rgba(63, 91, 73, 0.20)",
+    tagline: "Critical Thinking, Laboratory Science & District BLE Exam Prep",
+    description:
+      "Empowering students to think analytically, conduct laboratory experiments, build digital applications, and prepare for district-level Basic Level Examinations (BLE).",
+    classes: [
+      {
+        id: "grade-6-8",
+        name: "Grade 6 – 8 (Class 6, 7 & 8)",
+        focus: "Conceptual Mastery, Practical Science & BLE Board Readiness",
+        subjects: [
+          { name: "English Language & Composition", type: "Compulsory", hours: "6 hrs/wk" },
+          { name: "Nepali Bhasa & Sahitya", type: "Compulsory", hours: "6 hrs/wk" },
+          { name: "Compulsory Mathematics", type: "Compulsory", hours: "6 hrs/wk" },
+          { name: "Science & Technology", type: "Lab & Theory", hours: "6 hrs/wk" },
+          { name: "Social Studies & Population", type: "Compulsory", hours: "5 hrs/wk" },
+          { name: "Health, Physical & Creative Arts", type: "Practical", hours: "3 hrs/wk" },
+          { name: "Computer Science & Coding", type: "Lab", hours: "3 hrs/wk" },
+        ],
+        curriculumHighlights: [
+          "Physics, Chemistry, and Biology lab experiments in dedicated science laboratories",
+          "Basic computer programming, web concepts, and office productivity tools",
+          "Grade 8 Basic Level Examination (BLE) district-level model test prep",
+          "Inter-school debate competitions, science quizzes, and sports tournaments",
+        ],
+        assessmentMethod: "Grade 8 BLE Board Standards: 25% Practical/Internal + 75% Written Examinations",
+      },
+    ],
+  },
+  {
+    id: "high",
+    name: "High / Secondary Level",
+    shortBadge: "Grades 9 – 10 (SEE)",
+    span: "Class 9 & Class 10",
+    ageGroup: "14 – 16 Years",
+    color: "#4A2C6E",
+    bgAccent: "rgba(74, 44, 110, 0.10)",
+    borderAccent: "rgba(74, 44, 110, 0.20)",
+    tagline: "Secondary Education Examination (SEE) Prep & Specialized Electives",
+    description:
+      "Intensive academic preparation for the National Examination Board (NEB) Secondary Education Examination (SEE), featuring specialized electives, advanced science labs, and career counseling.",
+    classes: [
+      {
+        id: "grade-9-10",
+        name: "Grade 9 & Grade 10 (SEE Stream)",
+        focus: "SEE Board Examination Mastery & Advanced Elective Options",
+        subjects: [
+          { name: "Compulsory English", type: "Board Subject", hours: "6 hrs/wk" },
+          { name: "Compulsory Nepali", type: "Board Subject", hours: "6 hrs/wk" },
+          { name: "Compulsory Mathematics", type: "Board Subject", hours: "6 hrs/wk" },
+          { name: "Science & Technology (Phys, Chem, Bio)", type: "Lab & Board", hours: "6 hrs/wk" },
+          { name: "Social Studies", type: "Board Subject", hours: "5 hrs/wk" },
+          { name: "Optional Math (Opt. Math) / Economics", type: "Elective", hours: "5 hrs/wk" },
+          { name: "Accountancy / Computer Science", type: "Elective Lab", hours: "4 hrs/wk" },
+        ],
+        curriculumHighlights: [
+          "Rigorous SEE curriculum fully aligned with NEB CDC specifications",
+          "Weekly SEE model examination series with detailed marking feedback",
+          "Dedicated practical sessions for Science & Computer Science board evaluations",
+          "Individual academic coaching, doubt-clearing clinics, and career counseling",
+        ],
+        assessmentMethod: "NEB SEE Board Pattern: 25% Internal Practical Assessment + 75% Final SEE Examination",
+      },
+    ],
+  },
+];
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function clampNumber(value, min, max, fallback) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) return fallback;
+  return Math.min(max, Math.max(min, numberValue));
 }
 
-// ─── Admin Editing Helpers ───
-function Field({ label, value, onChange, placeholder = "", textarea = false, type = "text", rows = 4 }) {
+function getAuthHeaders() {
+  const token = localStorage.getItem("adminToken");
+  if (!token) return null;
+  return { Authorization: `Bearer ${token}` };
+}
+
+function getUploadUrl(payload) {
+  return (
+    payload?.url ||
+    payload?.imageUrl ||
+    payload?.fileUrl ||
+    payload?.data?.url ||
+    payload?.data?.imageUrl ||
+    payload?.data?.fileUrl ||
+    payload?.data?.secure_url ||
+    payload?.file?.url ||
+    ""
+  );
+}
+
+function clampImageOffset(value) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) return 0;
+  return Math.min(60, Math.max(-60, numberValue));
+}
+
+function clampImageZoom(value) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) return 1;
+  return Math.min(3, Math.max(1, numberValue));
+}
+
+// ============================================================
+// FIELD COMPONENT (for modals)
+// ============================================================
+
+function Field({ label, value, onChange, placeholder = "", textarea = false, type = "text", rows = 3 }) {
   return (
     <div>
-      <label className="block text-sm font-bold mb-1.5 text-slate-700">{label}</label>
+      <label className="block text-xs font-bold text-slate-700 mb-1">{label}</label>
       {textarea ? (
         <textarea
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={rows}
-          className="w-full px-4 py-2.5 rounded-xl outline-none text-sm resize-none transition-all border border-slate-300 bg-slate-50 text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs outline-none focus:bg-white focus:border-amber-500 resize-none"
         />
       ) : (
         <input
@@ -101,1037 +357,1113 @@ function Field({ label, value, onChange, placeholder = "", textarea = false, typ
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full px-4 py-2.5 rounded-xl outline-none text-sm transition-all border border-slate-300 bg-slate-50 text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs outline-none focus:bg-white focus:border-amber-500"
         />
       )}
     </div>
   );
 }
 
-function ModalShell({ title, onClose, children, onSave, saving, saveLabel = "Save" }) {
-  if (!onSave) return null;
+function Toggle({ checked, onChange, label }) {
   return (
-    <motion.div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-5" style={{ background: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(8px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
-      <motion.div initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 14, scale: 0.96 }} className="w-full max-w-2xl rounded-2xl overflow-hidden max-h-[85vh] flex flex-col bg-white border border-slate-200 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="p-5 border-b border-slate-100 flex justify-between items-center shrink-0">
-          <h3 className="text-lg font-bold text-slate-900">{title}</h3>
-          <button onClick={onClose} disabled={saving} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"><X className="w-5 h-5" /></button>
-        </div>
-        <div className="p-6 overflow-y-auto space-y-4">{children}</div>
-        <div className="p-5 border-t border-slate-100 bg-slate-50 flex gap-3 shrink-0">
-          <button onClick={onClose} disabled={saving} className="flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-60">Cancel</button>
-          <button onClick={onSave} disabled={saving} className="flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 flex justify-center gap-2 items-center shadow-md">
-            <Save className="w-4 h-4" /> {saving ? "Saving..." : saveLabel}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className="w-full flex items-center justify-between gap-4 rounded-xl px-4 py-2.5 text-left"
+      style={{
+        background: checked ? "rgba(22,138,58,0.08)" : "rgba(100,116,139,0.08)",
+        border: checked ? "1px solid rgba(22,138,58,0.18)" : "1px solid rgba(100,116,139,0.18)",
+      }}
+    >
+      <span className="text-xs font-bold text-slate-700">{label}</span>
+      <span
+        className="relative w-10 h-6 rounded-full transition-all"
+        style={{ background: checked ? "#168A3A" : "#CBD5E1" }}
+      >
+        <span
+          className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow"
+          style={{ left: checked ? "20px" : "4px" }}
+        />
+      </span>
+    </button>
   );
 }
 
-function EditableWrap({ editMode, target, onEditTarget, onDeleteTarget, canDelete = false, children }) {
-  if (!editMode) return children;
+function ColorPicker({ label, value, onChange }) {
+  const colors = [
+    { label: "Rose", value: "#9C2748" },
+    { label: "Gold", value: "#B98A42" },
+    { label: "Moss", value: "#3F5B49" },
+    { label: "Rose Bright", value: "#C6486B" },
+    { label: "Plum", value: "#4A2C6E" },
+    { label: "Forest Green", value: "#2D6A4F" },
+    { label: "Deep Navy", value: "#1E2A4F" },
+    { label: "Burgundy", value: "#6E1733" },
+  ];
+
   return (
-    <div className="relative group cursor-pointer">
-      {children}
-      <div className="absolute -top-2 -right-2 z-40 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-1.5">
-        <button onClick={(e) => { e.stopPropagation(); onEditTarget(target); }} className="p-1.5 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700">
-          <Pencil className="w-3.5 h-3.5" />
-        </button>
-        {canDelete && (
-          <button onClick={(e) => { e.stopPropagation(); onDeleteTarget(target); }} className="p-1.5 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700">
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        )}
+    <div>
+      <label className="block text-xs font-bold text-slate-700 mb-1">{label}</label>
+      <div className="flex flex-wrap gap-2">
+        {colors.map((c) => (
+          <button
+            key={c.value}
+            type="button"
+            onClick={() => onChange(c.value)}
+            className={`w-8 h-8 rounded-full border-2 transition-all ${
+              value === c.value ? "border-slate-900 scale-110" : "border-transparent"
+            }`}
+            style={{ background: c.value }}
+            title={c.label}
+          />
+        ))}
+        <input
+          type="text"
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="#HEX"
+          className="w-24 px-2 py-1 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs font-mono outline-none focus:border-amber-500"
+        />
       </div>
     </div>
   );
 }
 
-// A small standalone "Add" button used outside of EditableWrap (not tied to an existing item)
-function AddButton({ editMode, label, onClick }) {
+// ============================================================
+// EDITING CHROME (matching About page style)
+// ============================================================
+
+function EditIconButton({ editMode, target, onEditTarget, icon: Icon = Pencil, label = "Edit" }) {
   if (!editMode) return null;
   return (
     <button
-      onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold border-2 border-dashed transition-all hover:bg-blue-50"
-      style={{ borderColor: "#1A5276", color: "#1A5276" }}
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onEditTarget(target);
+      }}
+      className="absolute -top-2 -right-2 z-[90] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-lg backdrop-blur-md"
+      style={{ background: "rgba(255,255,255,0.9)", color: "#9C2748", border: "1px solid rgba(185,138,66,0.33)" }}
+      title={label}
     >
-      <Plus size={16} /> {label}
+      <Icon className="w-3.5 h-3.5" />
     </button>
   );
 }
 
-// ─── THE ACTUAL ACADEMICS PAGE (Embedded directly to fix import errors) ───
-const theme = {
-  primary: "#1A5276", secondary: "#1E8449", accent1: "#D4AC0D", accent2: "#E67E22",
-  accent3: "#7D3C98", accent4: "#2E86C1", light: "#F8F6F0", dark: "#0A1628", gray: "#5D6D7E",
-  white: "#FFFFFF",
-};
+function DeleteIconButton({ editMode, target, onDeleteTarget, label = "Delete" }) {
+  if (!editMode) return null;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDeleteTarget(target);
+      }}
+      className="absolute -top-2 -right-12 z-[90] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
+      style={{ background: "#FBE3E7", color: "#9C2748", border: "2px solid #FFFFFF" }}
+      title={label}
+    >
+      <Trash2 className="w-3.5 h-3.5" />
+    </button>
+  );
+}
 
-// This is now only a SEED / FALLBACK. Once the backend has saved `classLevels`,
-// the live page reads exclusively from the saved database content — never from
-// this constant. It exists so a brand-new site has sensible starting content.
-const classLevelsData = [
-  {
-    id: "pre-primary", name: "Pre-Primary / Early Years", shortBadge: "Early Childhood", span: "Play Group, Nursery, LKG, UKG", ageGroup: "3 – 5.5 Years", color: "#D4AC0D",
-    tagline: "Foundation of Curiosity, Play-Based Learning", description: "Our early childhood program nurtures young minds through playful exploration, phonics, storytelling, and creative arts.",
-    classes: [
-      {
-        id: "pg-nursery", name: "Play Group & Nursery", focus: "Sensory, Language Readiness & Social Interaction",
-        subjects: [{ name: "Phonics & Rhymes", type: "Core", hours: "5 hrs/wk" }, { name: "Picture Reading & Storytelling", type: "Core", hours: "4 hrs/wk" }, { name: "Number Games & Counting", type: "Core", hours: "4 hrs/wk" }, { name: "Creative Arts & Craft", type: "Activity", hours: "5 hrs/wk" }, { name: "Play & Motor Skills", type: "Activity", hours: "4 hrs/wk" }],
-        curriculumHighlights: ["Montessori-inspired tactile learning corners", "Daily storytelling sessions in English & Nepali", "Zero exam pressure", "Color & pattern recognition"],
-        assessmentMethod: "Continuous Activity Milestone Logs"
-      },
-      {
-        id: "lkg-ukg", name: "LKG & UKG", focus: "Early Literacy, Numeracy & Environmental Awareness",
-        subjects: [{ name: "English Reading & Writing", type: "Core", hours: "6 hrs/wk" }, { name: "Nepali Barnamala & Words", type: "Core", hours: "5 hrs/wk" }, { name: "Elementary Mathematics", type: "Core", hours: "5 hrs/wk" }, { name: "General Knowledge & Nature", type: "Core", hours: "3 hrs/wk" }, { name: "Drawing, Color & Music", type: "Activity", hours: "4 hrs/wk" }],
-        curriculumHighlights: ["Phonics-based English reading", "Nepali alphabet recognition", "Basic addition & subtraction", "Group & team building activities"],
-        assessmentMethod: "Playful Classroom Assessments & Progress Certificates"
-      },
-    ],
-  },
-  {
-    id: "primary", name: "Primary Level", shortBadge: "Grades 1 – 5", span: "Class 1 to Class 5", ageGroup: "6 – 10 Years", color: "#1E8449",
-    tagline: "Core Academic Fundamentals & STEAM", description: "Building strong intellectual foundations in languages, mathematics, and science alongside computer literacy.",
-    classes: [
-      {
-        id: "grade-1-3", name: "Grade 1 – 3 (Lower Primary)", focus: "Foundational Literacy, Numeracy & Scientific Inquiry",
-        subjects: [{ name: "English Grammar & Reader", type: "Compulsory", hours: "6 hrs/wk" }, { name: "Nepali Bhasa & Vyakaran", type: "Compulsory", hours: "6 hrs/wk" }, { name: "Mathematics & Reasoning", type: "Compulsory", hours: "6 hrs/wk" }, { name: "Our Surroundings (Science & Social)", type: "Compulsory", hours: "5 hrs/wk" }, { name: "Computer Literacy & Drawing", type: "Practical", hours: "3 hrs/wk" }],
-        curriculumHighlights: ["Aligned with CDC Primary Curriculum", "Equal mastery in English and Nepali", "Hands-on science experiments", "Continuous Assessment System (CAS)"],
-        assessmentMethod: "40% CAS + 60% Terminal Examinations"
-      },
-      {
-        id: "grade-4-5", name: "Grade 4 – 5 (Upper Primary)", focus: "Analytical Reasoning, Science Exploration & Digital Basics",
-        subjects: [{ name: "English Language & Literature", type: "Compulsory", hours: "6 hrs/wk" }, { name: "Nepali Bhasa & Vyakaran", type: "Compulsory", hours: "6 hrs/wk" }, { name: "Mathematics & Geometry", type: "Compulsory", hours: "6 hrs/wk" }, { name: "General Science & Environment", type: "Compulsory", hours: "5 hrs/wk" }, { name: "Social Studies & Local Culture", type: "Compulsory", hours: "4 hrs/wk" }, { name: "Computer Science & ICT Lab", type: "Practical", hours: "3 hrs/wk" }],
-        curriculumHighlights: ["Structured problem-solving in Arithmetic & Geometry", "Introductory computer lab sessions", "Project work & chart presentations", "Inter-house competitions"],
-        assessmentMethod: "30% Practical/Project Work + 70% Terminal Examinations"
-      },
-    ],
-  },
-  {
-    id: "middle", name: "Middle Level (Lower Secondary)", shortBadge: "Grades 6 – 8", span: "Class 6 to Class 8", ageGroup: "11 – 13 Years", color: "#7D3C98",
-    tagline: "Critical Thinking, Laboratory Science & BLE Prep", description: "Empowering students to think analytically, conduct laboratory experiments, and build digital applications.",
-    classes: [
-      {
-        id: "grade-6-8", name: "Grade 6 – 8 (Class 6, 7 & 8)", focus: "Conceptual Mastery, Practical Science & BLE Board Readiness",
-        subjects: [{ name: "English Language & Composition", type: "Compulsory", hours: "6 hrs/wk" }, { name: "Nepali Bhasa & Sahitya", type: "Compulsory", hours: "6 hrs/wk" }, { name: "Compulsory Mathematics", type: "Compulsory", hours: "6 hrs/wk" }, { name: "Science & Technology", type: "Lab & Theory", hours: "6 hrs/wk" }, { name: "Social Studies & Population", type: "Compulsory", hours: "5 hrs/wk" }, { name: "Health, Physical & Creative Arts", type: "Practical", hours: "3 hrs/wk" }, { name: "Computer Science & Coding", type: "Lab", hours: "3 hrs/wk" }],
-        curriculumHighlights: ["Physics, Chemistry, and Biology lab experiments", "Basic computer programming", "Grade 8 BLE district-level model test prep", "Science quizzes and debates"],
-        assessmentMethod: "Grade 8 BLE: 25% Practical/Internal + 75% Written Examinations"
-      },
-    ],
-  },
-  {
-    id: "high", name: "High / Secondary Level", shortBadge: "Grades 9 – 10 (SEE)", span: "Class 9 & Class 10", ageGroup: "14 – 16 Years", color: "#2E86C1",
-    tagline: "SEE Exam Excellence, Electives & Career Guidance", description: "Intensive academic preparation for the SEE examination with specialized electives and science labs.",
-    classes: [
-      {
-        id: "grade-9-10", name: "Grade 9 & Grade 10 (SEE Stream)", focus: "SEE Board Examination Mastery",
-        subjects: [{ name: "Compulsory English", type: "Board Subject", hours: "6 hrs/wk" }, { name: "Compulsory Nepali", type: "Board Subject", hours: "6 hrs/wk" }, { name: "Compulsory Mathematics", type: "Board Subject", hours: "6 hrs/wk" }, { name: "Science & Technology (Phys, Chem, Bio)", type: "Lab & Board", hours: "6 hrs/wk" }, { name: "Social Studies", type: "Board Subject", hours: "5 hrs/wk" }, { name: "Optional Math / Economics", type: "Elective", hours: "5 hrs/wk" }, { name: "Accountancy / Computer Science", type: "Elective Lab", hours: "4 hrs/wk" }],
-        curriculumHighlights: ["Rigorous SEE curriculum aligned with NEB", "Weekly SEE model examination series", "Dedicated practical sessions for Science & Computer Science", "Career counseling"],
-        assessmentMethod: "NEB SEE: 25% Internal Practical + 75% Final SEE Examination"
-      },
-    ],
-  },
-];
-
-function AcademicsPage({
-  adminEditMode = false,
-  contentOverride = null,
-  onEditTarget = () => {},
+function EditableWrap({
+  editMode,
+  target,
+  onEditTarget,
   onDeleteTarget = () => {},
-  onAddLevel = () => {},
-  onAddClass = () => {},
-  onAddStrength = () => {},
-  onAddAchievement = () => {},
+  icon = Pencil,
+  label = "Edit",
+  canDelete = false,
+  className = "",
+  children,
 }) {
-  const data = contentOverride || defaultAcademicsContent;
-  const levels = Array.isArray(data.classLevels) && data.classLevels.length ? data.classLevels : classLevelsData;
+  if (!editMode) return children;
+  return (
+    <div className={`relative group ${className}`}>
+      {children}
+      <EditIconButton editMode={editMode} target={target} onEditTarget={onEditTarget} icon={icon} label={label} />
+      {canDelete && (
+        <DeleteIconButton editMode={editMode} target={target} onDeleteTarget={onDeleteTarget} label="Delete" />
+      )}
+    </div>
+  );
+}
 
-  const [activeLevelId, setActiveLevelId] = useState(levels[1]?.id || levels[0]?.id);
-  const [activeClassIndex, setActiveClassIndex] = useState(0);
+function SectionAddButton({ editMode, label, type, onAddTarget }) {
+  if (!editMode) return null;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onAddTarget(type);
+      }}
+      className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
+      style={{ color: "#FFFFFF", background: "linear-gradient(135deg, #6E1733 0%, #9C2748 55%, #C6486B 100%)", boxShadow: "0 10px 24px rgba(156,39,72,0.25)" }}
+    >
+      <Plus className="w-4 h-4" />
+      {label}
+    </button>
+  );
+}
 
-  // Keep the selected level valid if content changes underneath us (e.g. after a save/delete)
+// ============================================================
+// MAIN ADMIN COMPONENT
+// ============================================================
+
+export default function AdminAcademics() {
+  // State - Added Headings
+  const [form, setForm] = useState({
+    hero: defaultHeroContent,
+    stats: defaultStats,
+    strengths: defaultStrengths,
+    achievements: defaultAchievements,
+    assessment: defaultAssessment,
+    classLevels: defaultClassLevels,
+    levelsHeading: {},
+    strengthsHeading: {},
+    achievementsHeading: {},
+    assessmentHeading: {},
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [editingTarget, setEditingTarget] = useState(null);
+  const [modalForm, setModalForm] = useState({});
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [imageAdjustOpen, setImageAdjustOpen] = useState(false);
+
+  // Fetch data - FIXED DEEP MERGE
   useEffect(() => {
-    if (!levels.find((lvl) => lvl.id === activeLevelId)) {
-      setActiveLevelId(levels[0]?.id);
-      setActiveClassIndex(0);
+    const loadData = async () => {
+      try {
+        const res = await api.get("/api/site-content/academics", { timeout: 12000 });
+        const saved = res.data?.data?.content || {};
+
+        setForm({
+          hero: {
+            ...defaultHeroContent,
+            ...(saved.hero || {})
+          },
+          stats: Array.isArray(saved.stats) ? saved.stats : defaultStats,
+          strengths: Array.isArray(saved.strengths) ? saved.strengths : defaultStrengths,
+          achievements: Array.isArray(saved.achievements) ? saved.achievements : defaultAchievements,
+          assessment: {
+            ...defaultAssessment,
+            ...(saved.assessment || {}),
+            methods: Array.isArray(saved.assessment?.methods) ? saved.assessment.methods : defaultAssessment.methods,
+          },
+          classLevels: Array.isArray(saved.classLevels) ? saved.classLevels : defaultClassLevels,
+          levelsHeading: saved.levelsHeading || {},
+          strengthsHeading: saved.strengthsHeading || {},
+          achievementsHeading: saved.achievementsHeading || {},
+          assessmentHeading: saved.assessmentHeading || {},
+        });
+      } catch (err) {
+        console.error("Load academics error:", err);
+        setError("Could not load saved content. Default content shown.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const saveContent = async (updatedForm, message) => {
+    setSaving(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      const headers = getAuthHeaders();
+      if (!headers) {
+        setError("Admin login expired. Please logout and login again.");
+        return false;
+      }
+
+      await api.put(
+        "/api/site-content/academics",
+        { content: updatedForm },
+        { headers }
+      );
+
+      setForm(updatedForm);
+      setSuccess(message || "Academics content saved successfully!");
+      return true;
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to save content.");
+      return false;
+    } finally {
+      setSaving(false);
     }
-  }, [levels, activeLevelId]);
+  };
 
-  const activeLevel = levels.find((lvl) => lvl.id === activeLevelId) || levels[0];
-  const activeClass = activeLevel?.classes?.[activeClassIndex] || activeLevel?.classes?.[0];
+  // ============================================================
+  // OPEN EDITOR - matches About page pattern
+  // ============================================================
 
-  const handleSelectLevel = (levelId) => { setActiveLevelId(levelId); setActiveClassIndex(0); };
+  const openEditor = (target) => {
+    setSuccess("");
+    setError("");
+    setImageAdjustOpen(false);
+    setEditingTarget(target);
 
-  if (!activeLevel || !activeClass) {
+    // Hero
+    if (target.type === "hero") {
+      setModalForm({
+        badge: form.hero.badge || "",
+        title: form.hero.title || "",
+        subtitle: form.hero.subtitle || "",
+        description: form.hero.description || "",
+      });
+      return;
+    }
+
+    // Stat
+    if (target.type === "statsCard") {
+      const stat = form.stats?.[target.index];
+      setModalForm({
+        value: stat?.value !== undefined ? stat.value : "",
+        suffix: stat?.suffix || "",
+        label: stat?.label || "",
+        color: stat?.color || "#9C2748",
+        visible: stat?.visible !== false,
+      });
+      return;
+    }
+
+    // Strength
+    if (target.type === "strengthCard") {
+      const strength = form.strengths?.[target.index];
+      setModalForm({
+        title: strength?.title || "",
+        description: strength?.description || "",
+        color: strength?.color || "#9C2748",
+        visible: strength?.visible !== false,
+      });
+      return;
+    }
+
+    // Achievement
+    if (target.type === "achievementCard") {
+      const ach = form.achievements?.[target.index];
+      setModalForm({
+        title: ach?.title || "",
+        description: ach?.description || "",
+        visible: ach?.visible !== false,
+      });
+      return;
+    }
+
+    // Assessment
+    if (target.type === "assessment") {
+      setModalForm({
+        title: form.assessment.title || "",
+        description: form.assessment.description || "",
+        methods: (form.assessment.methods || []).join("\n"),
+      });
+      return;
+    }
+
+    // Class Level
+    if (target.type === "classLevel") {
+      const level = form.classLevels?.[target.index];
+      setModalForm({
+        name: level?.name || "",
+        shortBadge: level?.shortBadge || "",
+        span: level?.span || "",
+        ageGroup: level?.ageGroup || "",
+        tagline: level?.tagline || "",
+        description: level?.description || "",
+        color: level?.color || "#9C2748",
+        visible: level?.visible !== false,
+      });
+      return;
+    }
+
+    // Class (within a level)
+    if (target.type === "classItem") {
+      const level = form.classLevels?.[target.levelIndex];
+      const cls = level?.classes?.[target.classIndex];
+      setModalForm({
+        name: cls?.name || "",
+        focus: cls?.focus || "",
+        subjects: cls?.subjects?.map((s) => `${s.name}|${s.type}|${s.hours}`).join("\n") || "",
+        curriculumHighlights: cls?.curriculumHighlights?.join("\n") || "",
+        assessmentMethod: cls?.assessmentMethod || "",
+        visible: cls?.visible !== false,
+      });
+      return;
+    }
+  };
+
+  // ============================================================
+  // SAVE SELECTED PART
+  // ============================================================
+
+  const saveSelectedPart = async () => {
+    if (!editingTarget) return;
+
+    setSaving(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      let nextForm = { ...form };
+
+      // Hero
+      if (editingTarget.type === "hero") {
+        nextForm.hero = {
+          badge: modalForm.badge || "",
+          title: modalForm.title || "",
+          subtitle: modalForm.subtitle || "",
+          description: modalForm.description || "",
+        };
+      }
+
+      // Stat
+      if (editingTarget.type === "statsCard") {
+        const stats = [...nextForm.stats];
+        const updatedStat = {
+          ...(stats[editingTarget.index] || {}),
+          id: stats[editingTarget.index]?.id || `stat-${Date.now()}`,
+          value: modalForm.value || "0",
+          suffix: modalForm.suffix || "",
+          label: modalForm.label || "",
+          color: modalForm.color || "#9C2748",
+          visible: modalForm.visible !== false,
+        };
+        stats[editingTarget.index] = updatedStat;
+        nextForm.stats = stats;
+      }
+
+      // Strength
+      if (editingTarget.type === "strengthCard") {
+        const strengths = [...nextForm.strengths];
+        strengths[editingTarget.index] = {
+          ...(strengths[editingTarget.index] || {}),
+          id: strengths[editingTarget.index]?.id || `strength-${Date.now()}`,
+          title: modalForm.title || "",
+          description: modalForm.description || "",
+          color: modalForm.color || "#9C2748",
+          visible: modalForm.visible !== false,
+        };
+        nextForm.strengths = strengths;
+      }
+
+      // Achievement
+      if (editingTarget.type === "achievementCard") {
+        const achievements = [...nextForm.achievements];
+        achievements[editingTarget.index] = {
+          ...(achievements[editingTarget.index] || {}),
+          id: achievements[editingTarget.index]?.id || `ach-${Date.now()}`,
+          title: modalForm.title || "",
+          description: modalForm.description || "",
+          visible: modalForm.visible !== false,
+        };
+        nextForm.achievements = achievements;
+      }
+
+      // Assessment
+      if (editingTarget.type === "assessment") {
+        const methods = modalForm.methods
+          ? modalForm.methods.split("\n").filter((m) => m.trim())
+          : defaultAssessment.methods;
+
+        nextForm.assessment = {
+          title: modalForm.title || "",
+          description: modalForm.description || "",
+          methods: methods.length ? methods : defaultAssessment.methods,
+        };
+      }
+
+      // Class Level - FIXED TO PRESERVE CHILDREN
+      if (editingTarget.type === "classLevel") {
+        const levels = [...nextForm.classLevels];
+        const existing = levels[editingTarget.index] || {};
+        levels[editingTarget.index] = {
+          ...existing,
+          id: existing.id || `level-${Date.now()}`,
+          name: modalForm.name || "",
+          shortBadge: modalForm.shortBadge || "",
+          span: modalForm.span || "",
+          ageGroup: modalForm.ageGroup || "",
+          tagline: modalForm.tagline || "",
+          description: modalForm.description || "",
+          color: modalForm.color || "#9C2748",
+          bgAccent: `${modalForm.color || "#9C2748"}18`,
+          borderAccent: `${modalForm.color || "#9C2748"}40`,
+          visible: modalForm.visible !== false,
+          classes: existing.classes || [],
+        };
+        nextForm.classLevels = levels;
+      }
+
+      // Class Item
+      if (editingTarget.type === "classItem") {
+        const levels = [...nextForm.classLevels];
+        const level = { ...levels[editingTarget.levelIndex] };
+        const classes = [...(level.classes || [])];
+        const existing = classes[editingTarget.classIndex] || {};
+
+        const subjectLines = modalForm.subjects
+          ? modalForm.subjects.split("\n").filter((s) => s.trim())
+          : [];
+        const subjects = subjectLines.map((line) => {
+          const parts = line.split("|").map((p) => p.trim());
+          return {
+            name: parts[0] || "Subject",
+            type: parts[1] || "Core",
+            hours: parts[2] || "5 hrs/wk",
+          };
+        });
+
+        const highlights = modalForm.curriculumHighlights
+          ? modalForm.curriculumHighlights.split("\n").filter((h) => h.trim())
+          : [];
+
+        classes[editingTarget.classIndex] = {
+          id: existing.id || `class-${Date.now()}`,
+          name: modalForm.name || "",
+          focus: modalForm.focus || "",
+          subjects: subjects.length ? subjects : existing.subjects || [],
+          curriculumHighlights: highlights.length ? highlights : existing.curriculumHighlights || [],
+          assessmentMethod: modalForm.assessmentMethod || "",
+          visible: modalForm.visible !== false,
+        };
+
+        level.classes = classes;
+        levels[editingTarget.levelIndex] = level;
+        nextForm.classLevels = levels;
+      }
+
+      const saved = await saveContent(nextForm, "Selected item saved successfully.");
+      if (saved) {
+        setEditingTarget(null);
+        setModalForm({});
+      }
+    } catch (err) {
+      console.error("Save selected item error:", err);
+      setError(err.response?.data?.message || "Could not save selected item.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ============================================================
+  // ADD ITEMS
+  // ============================================================
+
+  const addItem = async (target) => {
+    setSaving(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      let type = typeof target === "string" ? target : target?.type;
+      const targetLevelIndex = typeof target === "object" && Number.isInteger(target?.levelIndex)
+        ? target.levelIndex
+        : 0;
+
+      let nextForm = {
+        ...form,
+        stats: [...(form.stats || [])],
+        strengths: [...(form.strengths || [])],
+        achievements: [...(form.achievements || [])],
+        classLevels: [...(form.classLevels || [])],
+      };
+
+      /* =========================
+         ADD STAT
+      ========================= */
+      if (type === "stat") {
+        nextForm.stats.push({
+          id: `stat-${Date.now()}`,
+          value: "100",
+          suffix: "+",
+          label: "New Statistic",
+          color: "#9C2748",
+          visible: true,
+        });
+      }
+
+      /* =========================
+         ADD STRENGTH
+      ========================= */
+      if (type === "strength") {
+        nextForm.strengths.push({
+          id: `strength-${Date.now()}`,
+          title: "New Strength",
+          description: "Describe the academic strength of the school.",
+          color: "#9C2748",
+          visible: true,
+        });
+      }
+
+      /* =========================
+         ADD ACHIEVEMENT
+      ========================= */
+      if (type === "achievement") {
+        nextForm.achievements.push({
+          id: `achievement-${Date.now()}`,
+          title: "New Achievement",
+          description: "Describe the achievement of the school.",
+          visible: true,
+        });
+      }
+
+      /* =========================
+         ADD CLASS LEVEL
+      ========================= */
+      if (type === "classLevel") {
+        nextForm.classLevels.push({
+          id: `level-${Date.now()}`,
+          name: "New Academic Level",
+          shortBadge: "New",
+          span: "Class Range",
+          ageGroup: "Age Range",
+          color: "#9C2748",
+          bgAccent: "rgba(156,39,72,0.10)",
+          borderAccent: "rgba(156,39,72,0.20)",
+          tagline: "New Academic Level Tagline",
+          description: "Write the description for this academic level.",
+          visible: true,
+          classes: [
+            {
+              id: `class-${Date.now()}`,
+              name: "New Class",
+              focus: "Class focus description",
+              subjects: [{ name: "Subject Name", type: "Core", hours: "5 hrs/wk" }],
+              curriculumHighlights: ["Curriculum highlight"],
+              assessmentMethod: "Assessment method description",
+              visible: true,
+            },
+          ],
+        });
+      }
+
+      /* =========================
+         ADD CLASS (TO SPECIFIC LEVEL)
+      ========================= */
+      if (type === "classItem") {
+        const levels = [...nextForm.classLevels];
+        const levelIndex = Number.isInteger(targetLevelIndex) && targetLevelIndex >= 0 && targetLevelIndex < levels.length
+          ? targetLevelIndex
+          : 0;
+
+        const level = { ...levels[levelIndex] };
+        level.classes = [
+          ...(level.classes || []),
+          {
+            id: `class-${Date.now()}`,
+            name: "New Class",
+            focus: "Class focus description",
+            subjects: [{ name: "Subject Name", type: "Core", hours: "5 hrs/wk" }],
+            curriculumHighlights: ["Curriculum highlight"],
+            assessmentMethod: "Assessment method description",
+            visible: true,
+          },
+        ];
+
+        levels[levelIndex] = level;
+        nextForm.classLevels = levels;
+      }
+
+      await saveContent(nextForm, "New item added successfully.");
+    } catch (err) {
+      console.error("Add item error:", err);
+      setError(err.response?.data?.message || "Could not add item.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ============================================================
+  // DELETE ITEMS
+  // ============================================================
+
+  const deleteTargetItem = async (target) => {
+    if (!target) return;
+
+    const deletableTypes = ["statsCard", "strengthCard", "achievementCard", "classLevel", "classItem"];
+    if (!deletableTypes.includes(target.type)) return;
+
+    setSaving(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      let nextForm = { ...form };
+
+      if (target.type === "statsCard") {
+        if (nextForm.stats.length <= 1) {
+          setError("Cannot delete the last statistic.");
+          return;
+        }
+        nextForm.stats = nextForm.stats.filter((_, i) => i !== target.index);
+      }
+
+      if (target.type === "strengthCard") {
+        if (nextForm.strengths.length <= 1) {
+          setError("Cannot delete the last strength.");
+          return;
+        }
+        nextForm.strengths = nextForm.strengths.filter((_, i) => i !== target.index);
+      }
+
+      if (target.type === "achievementCard") {
+        if (nextForm.achievements.length <= 1) {
+          setError("Cannot delete the last achievement.");
+          return;
+        }
+        nextForm.achievements = nextForm.achievements.filter((_, i) => i !== target.index);
+      }
+
+      if (target.type === "classLevel") {
+        if (nextForm.classLevels.length <= 1) {
+          setError("Cannot delete the last class level.");
+          return;
+        }
+        nextForm.classLevels = nextForm.classLevels.filter((_, i) => i !== target.index);
+      }
+
+      if (target.type === "classItem") {
+        const levels = [...nextForm.classLevels];
+        const level = { ...levels[target.levelIndex] };
+        if ((level.classes || []).length <= 1) {
+          setError("Cannot delete the last class in this level.");
+          return;
+        }
+        level.classes = level.classes.filter((_, i) => i !== target.classIndex);
+        levels[target.levelIndex] = level;
+        nextForm.classLevels = levels;
+      }
+
+      await saveContent(nextForm, "Item deleted successfully.");
+      setDeleteTarget(null);
+      setEditingTarget(null);
+      setModalForm({});
+    } catch (err) {
+      console.error("Delete item error:", err);
+      setError(err.response?.data?.message || "Could not delete item.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ============================================================
+  // MODAL TITLE HELPER
+  // ============================================================
+
+  const modalTitle = useMemo(() => {
+    if (!editingTarget) return "";
+
+    const titles = {
+      hero: "Edit Hero Banner",
+      statsCard: "Edit Statistic",
+      strengthCard: "Edit Strength",
+      achievementCard: "Edit Achievement",
+      assessment: "Edit Assessment Framework",
+      classLevel: "Edit Class Level",
+      classItem: "Edit Class",
+    };
+
+    return titles[editingTarget.type] || "Edit Item";
+  }, [editingTarget]);
+
+  const canDeleteSelected = useMemo(() => {
+    if (!editingTarget) return false;
+    return ["statsCard", "strengthCard", "achievementCard", "classLevel", "classItem"].includes(editingTarget.type);
+  }, [editingTarget]);
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F6F0] flex items-center justify-center p-10">
-        {adminEditMode ? (
-          <AddButton editMode={adminEditMode} label="Add the first Class Level" onClick={onAddLevel} />
-        ) : (
-          <p className="text-[#5D6D7E]">Academic content coming soon.</p>
-        )}
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-bold text-slate-600">Loading Academics Editor...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] overflow-x-hidden">
-      {/* Hero */}
-      <section className="relative pt-[80px] min-h-[85vh] flex items-center overflow-hidden border-b border-slate-200" style={{ background: "linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 50%, #EFF6FF 100%)" }}>
-        <div className="relative w-full max-w-[1200px] mx-auto px-6 z-10">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-[700px]">
-            <EditableWrap editMode={adminEditMode} target={{ type: "hero" }} onEditTarget={onEditTarget}>
-              <div className="inline-block px-5 py-1.5 rounded-full text-sm font-bold uppercase tracking-widest bg-[rgba(212,172,13,0.12)] text-[#B7950B] border border-[rgba(212,172,13,0.3)] mb-6">
-                {data.hero.badge}
-              </div>
-              <h1 className="text-[clamp(2.8rem,6vw,4.5rem)] font-extrabold leading-[1.05] text-[#0F172A] mb-5">
-                <span className="font-semibold text-[#1E293B]">Empowering Minds</span><br />
-                <span className="bg-gradient-to-r from-[#D4AC0D] to-[#E67E22] bg-clip-text text-transparent">Shaping Futures</span>
-              </h1>
-              <p className="text-[clamp(1.1rem,1.8vw,1.4rem)] text-[#1E293B] font-semibold mb-4">{data.hero.subtitle}</p>
-              <p className="text-[clamp(0.95rem,1.2vw,1.1rem)] text-[#475569] leading-relaxed max-w-[560px]">{data.hero.description}</p>
-            </EditableWrap>
-          </motion.div>
-        </div>
-      </section>
+    <div className="space-y-6">
+      <style>
+        {`
+          @media (max-width: 767px) {
+            .admin-academics-preview-frame .group .opacity-0,
+            .admin-academics-preview-frame .group [class*="opacity-0"],
+            .admin-academics-preview-frame .group [class*="group-hover:opacity"],
+            .admin-academics-preview-frame [class*="group-hover:opacity"] {
+              opacity: 1 !important;
+              visibility: visible !important;
+              pointer-events: auto !important;
+            }
 
-      {/* Stats */}
-      <section className="py-10 px-6 bg-white">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-5">
-          {data.stats.map((stat, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: i * 0.1 }} className="relative p-7 rounded-2xl text-center bg-[#F8F6F0] border border-black/5" style={{ borderTop: `3px solid ${stat.color || theme.accent1}` }}>
-              <EditableWrap editMode={adminEditMode} target={{ type: "stat", index: i }} onEditTarget={onEditTarget}>
-                <div className="text-[clamp(2.2rem,4vw,3rem)] font-extrabold tracking-tight mb-1" style={{ color: stat.color || theme.accent1 }}>
-                  <Counter target={stat.value} suffix={stat.suffix} />
-                </div>
-                <div className="text-sm font-semibold text-[#5D6D7E]">{stat.label}</div>
-              </EditableWrap>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+            .admin-academics-preview-frame .group .pointer-events-none,
+            .admin-academics-preview-frame .group [class*="pointer-events-none"] {
+              pointer-events: auto !important;
+            }
 
-      {/* Levels */}
-      <section className="py-20 px-6 bg-white max-w-[1240px] mx-auto">
-        <EditableWrap editMode={adminEditMode} target={{ type: "levelsHeading" }} onEditTarget={onEditTarget}>
-          <div className="text-center max-w-[700px] mx-auto mb-12">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(26,82,118,0.08)] text-[#1A5276] mb-4">Academic Structure</span>
-            <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#1C2833] mb-3">Explore Our <span className="text-[#D4AC0D]">Class Levels</span></h2>
-            <p className="text-[#5D6D7E] leading-relaxed">Click on any academic level below to view the classes, subjects, curriculum, and grading structure.</p>
-            <div className="w-[60px] h-1 mx-auto mt-5 rounded-full bg-gradient-to-r from-[#D4AC0D] to-[#E67E22]" />
-          </div>
-        </EditableWrap>
+            .admin-academics-preview-frame .group button[class*="opacity-0"],
+            .admin-academics-preview-frame button[class*="group-hover:opacity"],
+            .admin-academics-preview-frame button[class*="opacity-0"] {
+              opacity: 1 !important;
+              visibility: visible !important;
+              pointer-events: auto !important;
+            }
 
-        {/* All 4+ Class Cards are fully editable and driven by saved data */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
-          {levels.map((level, index) => {
-            const Icon = getLevelIcon(level.id);
-            const isActive = level.id === activeLevelId;
-            return (
-              <EditableWrap key={level.id} editMode={adminEditMode} target={{ type: "levelCard", index }} onEditTarget={onEditTarget} canDelete={true} onDeleteTarget={onDeleteTarget}>
-                <motion.button onClick={() => handleSelectLevel(level.id)} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} className="w-full p-6 rounded-2xl text-left flex flex-col justify-between transition-all" style={{ borderColor: isActive ? level.color : "transparent", border: `2px solid ${isActive ? level.color : "transparent"}`, background: isActive ? "#FFFFFF" : withAlpha(level.color, 0.06), boxShadow: isActive ? "0 12px 30px rgba(0,0,0,0.08)" : "none" }}>
-                  <div className="flex justify-between items-center p-3 rounded-xl mb-4" style={{ background: withAlpha(level.color, 0.12) }}>
-                    <Icon size={26} color={level.color} />
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-white uppercase tracking-wider" style={{ color: level.color }}>{level.shortBadge}</span>
-                  </div>
-                  <h3 className="text-[19px] font-extrabold mb-1" style={{ color: isActive ? level.color : theme.dark }}>{level.name}</h3>
-                  <p className="text-[13px] font-semibold text-[#5D6D7E] mb-3">{level.span}</p>
-                  <div className="text-[12px] font-semibold bg-black/5 px-3 py-1.5 rounded-lg inline-block w-fit mb-5 text-[#1C2833]">Age: {level.ageGroup}</div>
-                  <div className={`flex justify-between items-center px-4 py-2.5 rounded-xl text-[13px] font-bold transition-all ${isActive ? "text-white" : "text-[#5D6D7E]"}`} style={{ background: isActive ? level.color : "transparent", border: `1px solid ${isActive ? level.color : "rgba(0,0,0,0.1)"}` }}>
-                    <span>{isActive ? "Viewing Curriculum" : "Click to Explore"}</span>
-                    {isActive ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                  </div>
-                </motion.button>
-              </EditableWrap>
-            );
-          })}
-        </div>
+            .admin-academics-preview-frame .group .hidden,
+            .admin-academics-preview-frame .group [class*="hidden"] {
+              display: inline-flex !important;
+            }
 
-        <div className="flex justify-center mb-10">
-          <AddButton editMode={adminEditMode} label="Add Class Level" onClick={onAddLevel} />
-        </div>
+            .admin-academics-preview-frame [class*="absolute"] button,
+            .admin-academics-preview-frame button[class*="rounded-full"] {
+              min-width: 2.25rem !important;
+              min-height: 2.25rem !important;
+              max-width: calc(100vw - 2rem) !important;
+              white-space: nowrap !important;
+              z-index: 30 !important;
+              pointer-events: auto !important;
+            }
 
-        <AnimatePresence mode="wait">
-          <motion.div key={activeLevel.id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="bg-white/85 backdrop-blur-md rounded-3xl p-8 shadow-lg border border-black/5" style={{ borderTop: `4px solid ${activeLevel.color}` }}>
+            .admin-academics-preview-frame [class*="absolute"][class*="z-50"],
+            .admin-academics-preview-frame [class*="absolute"][class*="z-[50]"],
+            .admin-academics-preview-frame [class*="absolute"][class*="z-[60]"],
+            .admin-academics-preview-frame [class*="absolute"][class*="z-[70]"],
+            .admin-academics-preview-frame [class*="absolute"][class*="z-[80]"],
+            .admin-academics-preview-frame [class*="absolute"][class*="z-[90]"],
+            .admin-academics-preview-frame [class*="absolute"][class*="z-[999]"] {
+              z-index: 30 !important;
+            }
+          }
+        `}
+      </style>
 
-            <EditableWrap editMode={adminEditMode} target={{ type: "curriculumPanel", levelId: activeLevel.id }} onEditTarget={onEditTarget}>
-              <div className="flex flex-wrap justify-between gap-6 pb-6 border-b border-black/5 mb-6">
-                <div className="max-w-[750px]">
-                  <span className="inline-block text-[12px] font-extrabold uppercase tracking-wider px-4 py-1.5 rounded-full mb-3" style={{ background: withAlpha(activeLevel.color, 0.1), color: activeLevel.color, border: `1px solid ${withAlpha(activeLevel.color, 0.25)}` }}>{activeLevel.name} • {activeLevel.span}</span>
-                  <h3 className="text-[26px] font-black text-[#0A1628] mb-2">{activeLevel.tagline}</h3>
-                  <p className="text-[15px] text-[#5D6D7E] leading-relaxed">{activeLevel.description}</p>
-                </div>
-                <div className="flex items-center p-3 rounded-2xl bg-white border border-black/5 shadow-sm gap-3">
-                  <Clock size={18} color={activeLevel.color} />
-                  <div><div className="text-[11px] font-bold uppercase tracking-wider text-[#5D6D7E]">Target Age</div><div className="text-[15px] font-bold text-[#0A1628]">{activeLevel.ageGroup}</div></div>
-                </div>
-              </div>
-            </EditableWrap>
-
-            <div className="flex flex-wrap items-center gap-4 p-4 rounded-2xl bg-black/5 border border-black/5 mb-6">
-              <span className="text-[13px] font-bold text-[#5D6D7E] uppercase tracking-wider">Select Class:</span>
-              <div className="flex flex-wrap gap-2 items-center">
-                {activeLevel.classes.map((cls, idx) => (
-                  <EditableWrap key={cls.id} editMode={adminEditMode} target={{ type: "className", levelId: activeLevel.id, classId: cls.id }} onEditTarget={onEditTarget} canDelete={activeLevel.classes.length > 1} onDeleteTarget={onDeleteTarget}>
-                    <button onClick={() => setActiveClassIndex(idx)} className="px-4 py-2 rounded-xl text-[13px] font-bold transition-all shadow-sm" style={{ background: activeClassIndex === idx ? activeLevel.color : "#FFFFFF", color: activeClassIndex === idx ? "#FFFFFF" : "#0A1628", border: `1px solid ${activeClassIndex === idx ? activeLevel.color : "rgba(0,0,0,0.1)"}` }}>{cls.name}</button>
-                  </EditableWrap>
-                ))}
-                <AddButton editMode={adminEditMode} label="Add Class" onClick={() => onAddClass(activeLevel.id)} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-
-              <EditableWrap editMode={adminEditMode} target={{ type: "subjectBreakdown", levelId: activeLevel.id, classId: activeClass.id }} onEditTarget={onEditTarget}>
-                <div className="bg-white p-6 rounded-2xl border border-black/5">
-                  <div className="flex items-center gap-3 mb-5"><BookOpen size={20} color={activeLevel.color} /><h4 className="text-[17px] font-extrabold text-[#0A1628]">Subject Breakdown ({activeClass.name})</h4></div>
-                  <div className="flex flex-col gap-3">
-                    {activeClass.subjects.map((sub, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-black/5 border border-black/5">
-                        <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full" style={{ background: activeLevel.color }} /><span className="text-[14px] font-bold text-[#1C2833]">{sub.name}</span></div>
-                        <div className="flex items-center gap-2"><span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-xl" style={{ background: sub.type === "Compulsory" || sub.type === "Core" || sub.type === "Board Subject" ? "rgba(26,82,118,0.08)" : "rgba(30,132,73,0.08)", color: sub.type === "Compulsory" || sub.type === "Core" || sub.type === "Board Subject" ? theme.primary : theme.secondary }}>{sub.type}</span><span className="text-[12px] font-semibold text-[#5D6D7E]">{sub.hours}</span></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </EditableWrap>
-
-              <EditableWrap editMode={adminEditMode} target={{ type: "highlightsAndAssessment", levelId: activeLevel.id, classId: activeClass.id }} onEditTarget={onEditTarget}>
-                <div className="flex flex-col gap-6">
-                  <div className="bg-white p-6 rounded-2xl border border-black/5">
-                    <div className="flex items-center gap-3 mb-4"><Sparkles size={20} color={activeLevel.color} /><h4 className="text-[17px] font-extrabold text-[#0A1628]">Learning Highlights</h4></div>
-                    <ul className="flex flex-col gap-3">
-                      {activeClass.curriculumHighlights.map((hl, idx) => (
-                        <li key={idx} className="flex items-start gap-3 text-[14px] font-semibold text-[#2C3E50] leading-relaxed"><CheckCircle2Icon size={16} color={activeLevel.color} className="shrink-0 mt-1" /><span>{hl}</span></li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="bg-white p-6 rounded-2xl border border-black/5">
-                    <div className="flex items-center gap-3 mb-3"><Award size={20} color={activeLevel.color} /><h4 className="text-[17px] font-extrabold text-[#0A1628]">Assessment Pattern</h4></div>
-                    <p className="text-[14px] font-bold text-[#1A5276] bg-[rgba(26,82,118,0.06)] p-4 rounded-xl border border-[rgba(26,82,118,0.12)] leading-relaxed">{activeClass.assessmentMethod}</p>
-                  </div>
-                </div>
-              </EditableWrap>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </section>
-
-      {/* Strengths */}
-      <section className="py-20 px-6 bg-[#F8F6F0]">
-        <EditableWrap editMode={adminEditMode} target={{ type: "strengthsHeading" }} onEditTarget={onEditTarget}>
-          <div className="max-w-[1200px] mx-auto text-center mb-12">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(26,82,118,0.08)] text-[#1A5276] mb-4">What Sets Us Apart</span>
-            <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#1C2833] mb-3">Our <span className="text-[#D4AC0D]">Academic Strengths</span></h2>
-            <p className="text-[#5D6D7E] leading-relaxed max-w-[600px] mx-auto">A learning ecosystem built on innovation, expertise, and unwavering commitment to student success.</p>
-            <div className="w-[60px] h-1 mx-auto mt-5 rounded-full bg-gradient-to-r from-[#D4AC0D] to-[#E67E22]" />
-          </div>
-        </EditableWrap>
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-          {data.strengths.map((item, i) => {
-            const Icon = item.icon === "Layout" ? Layout : item.icon === "FlaskConical" ? FlaskConical : item.icon === "Globe" ? Globe : item.icon === "Sparkles" ? Sparkles : item.icon === "Heart" ? Heart : Target;
-            return (
-              <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, delay: i * 0.06 }} className="p-7 rounded-2xl border border-black/5" style={{ background: withAlpha(item.color || theme.primary, 0.06) }}>
-                <EditableWrap editMode={adminEditMode} target={{ type: "strength", index: i }} onEditTarget={onEditTarget} canDelete={data.strengths.length > 1} onDeleteTarget={onDeleteTarget}>
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: `${item.color || theme.primary}18` }}><Icon size={24} color={item.color || theme.primary} /></div>
-                  <h4 className="text-[18px] font-bold text-[#1C2833] mb-2">{item.title}</h4>
-                  <p className="text-[14px] text-[#5D6D7E] leading-relaxed">{item.description}</p>
-                </EditableWrap>
-              </motion.div>
-            );
-          })}
-        </div>
-        <div className="max-w-[1200px] mx-auto mt-8 flex justify-center">
-          <AddButton editMode={adminEditMode} label="Add Academic Strength" onClick={onAddStrength} />
-        </div>
-      </section>
-
-      {/* Achievements */}
-      <section className="py-20 px-6 bg-white">
-        <EditableWrap editMode={adminEditMode} target={{ type: "achievementsHeading" }} onEditTarget={onEditTarget}>
-          <div className="max-w-[1200px] mx-auto text-center mb-12">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(212,172,13,0.1)] text-[#D4AC0D] mb-4">Our Milestones</span>
-            <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#1C2833] mb-3">Celebrating <span className="text-[#D4AC0D]">Excellence</span></h2>
-            <p className="text-[#5D6D7E] leading-relaxed max-w-[600px] mx-auto">A legacy of achievement that reflects our commitment to quality education.</p>
-            <div className="w-[60px] h-1 mx-auto mt-5 rounded-full bg-gradient-to-r from-[#D4AC0D] to-[#E67E22]" />
-          </div>
-        </EditableWrap>
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
-          {data.achievements.map((item, i) => {
-            const Icon = i === 0 ? Trophy : i === 1 ? Zap : i === 2 ? Shield : Globe;
-            return (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.08 }} className="p-8 rounded-3xl text-center border border-black/5" style={{ background: withAlpha(theme.primary, 0.05) }}>
-                <EditableWrap editMode={adminEditMode} target={{ type: "achievement", index: i }} onEditTarget={onEditTarget} canDelete={data.achievements.length > 1} onDeleteTarget={onDeleteTarget}>
-                  <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-5 shadow-lg" style={{ background: theme.accent1, boxShadow: "0 8px 20px rgba(212,172,13,0.3)" }}><Icon size={24} color={theme.white} /></div>
-                  <h4 className="text-[18px] font-bold text-[#1C2833] mb-2">{item.title}</h4>
-                  <p className="text-[14px] text-[#5D6D7E] leading-relaxed">{item.description}</p>
-                </EditableWrap>
-              </motion.div>
-            );
-          })}
-        </div>
-        <div className="max-w-[1200px] mx-auto mt-8 flex justify-center">
-          <AddButton editMode={adminEditMode} label="Add Achievement" onClick={onAddAchievement} />
-        </div>
-      </section>
-
-      {/* Assessment */}
-      <section className="py-20 px-6 border-t border-slate-200" style={{ background: "linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%)" }}>
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
-            <EditableWrap editMode={adminEditMode} target={{ type: "assessment" }} onEditTarget={onEditTarget}>
-              <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[rgba(26,82,118,0.08)] text-[#1A5276] border border-[rgba(26,82,118,0.2)] mb-4">Assessment & Growth</span>
-              <h2 className="text-[clamp(2rem,3.5vw,2.8rem)] font-extrabold text-[#0F172A] mb-4">{data.assessment.title}</h2>
-              <p className="text-[16px] text-[#475569] leading-relaxed">{data.assessment.description}</p>
-            </EditableWrap>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {data.assessment.methods.map((m, i) => (
-              <div key={i} className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm"><CheckCircle2Icon size={18} color={theme.accent1} /><span className="text-[14px] font-bold text-[#1E293B]">{m}</span></div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function Counter({ target, suffix, duration = 2000 }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
-  useEffect(() => {
-    if (!isInView) return;
-    let start = 0; const end = parseInt(target) || 0; const increment = end / (duration / 16);
-    const timer = setInterval(() => { start += increment; if (start >= end) { setCount(end); clearInterval(timer); } else { setCount(Math.floor(start)); } }, 16);
-    return () => clearInterval(timer);
-  }, [isInView, target, duration]);
-  return <span ref={ref}>{count}{suffix}</span>;
-}
-
-// ── DEFAULT DATA ──
-const defaultAcademicsContent = {
-  hero: { badge: "Excellence in Education", title: "Empowering Minds Shaping Futures", subtitle: "Nurturing the next generation of thinkers.", description: "At Red Rose Secondary English Boarding School, education extends beyond textbooks." },
-  levelsHeading: {
-    badge: "Academic Structure",
-    title: "Explore Our Class Levels",
-    description: "Click on any academic level below to view the classes, subjects, curriculum, and grading structure.",
-  },
-  strengthsHeading: {
-    badge: "What Sets Us Apart",
-    title: "Our Academic Strengths",
-    description: "A learning ecosystem built on innovation, expertise, and unwavering commitment to student success.",
-  },
-  achievementsHeading: {
-    badge: "Our Milestones",
-    title: "Celebrating Excellence",
-    description: "A legacy of achievement that reflects our commitment to quality education.",
-  },
-  stats: [
-    { value: "1500", suffix: "+", label: "Active Learners", color: "#D4AC0D" },
-    { value: "85", suffix: "+", label: "Dedicated Educators", color: "#E67E22" },
-    { value: "35", suffix: "+", label: "Years of Impact", color: "#1E8449" },
-    { value: "100", suffix: "%", label: "SEE Pass Rate", color: "#1A5276" },
-  ],
-  strengths: [
-    { id: 1, title: "Innovation Hub", description: "State-of-the-art learning spaces with interactive technology.", color: "#1A5276" },
-    { id: 2, title: "STEM Excellence", description: "Robust science, technology, and engineering programs.", color: "#1E8449" },
-    { id: 3, title: "Global Perspective", description: "Integrated curriculum emphasizing critical thinking.", color: "#D4AC0D" },
-    { id: 4, title: "Arts & Expression", description: "Comprehensive arts education nurturing creativity.", color: "#E67E22" },
-    { id: 5, title: "Character Development", description: "Values-based education cultivating integrity.", color: "#7D3C98" },
-    { id: 6, title: "Future Ready", description: "Career and college counseling with mentorship.", color: "#2E86C1" },
-  ],
-  achievements: [
-    { id: 1, title: "Academic Excellence Awards", description: "Consistent top-tier SEE performance." },
-    { id: 2, title: "Science & STEM Showcase", description: "Student science exhibition projects." },
-    { id: 3, title: "Community & Service", description: "Student-led service initiatives." },
-    { id: 4, title: "Co-Curricular Triumphs", description: "Championship trophies in inter-school football." },
-  ],
-  assessment: { title: "Holistic Assessment Framework", description: "Our evaluation system celebrates growth through multiple dimensions.", methods: ["Continuous Assessment System (CAS)", "Laboratory Practical Examinations", "Project-Based & Group Presentations", "Periodic Diagnostic Unit Tests", "Terminal Examinations & SEE Model Series", "Co-curricular & Moral Progress Logs"] },
-  classLevels: deepClone(classLevelsData),
-};
-
-function mergeAcademicsContent(saved = {}) {
-  return {
-    ...defaultAcademicsContent,
-    ...(saved || {}),
-    hero: { ...defaultAcademicsContent.hero, ...(saved?.hero || {}) },
-    levelsHeading: { ...defaultAcademicsContent.levelsHeading, ...(saved?.levelsHeading || {}) },
-    strengthsHeading: { ...defaultAcademicsContent.strengthsHeading, ...(saved?.strengthsHeading || {}) },
-    achievementsHeading: { ...defaultAcademicsContent.achievementsHeading, ...(saved?.achievementsHeading || {}) },
-    stats: Array.isArray(saved?.stats) && saved.stats.length ? saved.stats : defaultAcademicsContent.stats,
-    strengths: Array.isArray(saved?.strengths) && saved.strengths.length ? saved.strengths : defaultAcademicsContent.strengths,
-    achievements: Array.isArray(saved?.achievements) && saved.achievements.length ? saved.achievements : defaultAcademicsContent.achievements,
-    assessment: { ...defaultAcademicsContent.assessment, ...(saved?.assessment || {}) },
-    classLevels: Array.isArray(saved?.classLevels) && saved.classLevels.length ? saved.classLevels : deepClone(classLevelsData),
-  };
-}
-
-function getAuthHeaders() {
-  const token = localStorage.getItem("adminToken");
-  return token ? { Authorization: `Bearer ${token}` } : null;
-}
-
-// ─── ADMIN DASHBOARD ENTRY ───
-export default function AdminAcademics() {
-  const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-  const [form, setForm] = useState(defaultAcademicsContent);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
-  const [editingTarget, setEditingTarget] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [modalForm, setModalForm] = useState({});
-
-  // ── Load Data ──
-  useEffect(() => {
-    const loadContent = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/site-content/academics`, { timeout: 12000 });
-        const savedContent = res.data?.data?.content || {};
-        setForm(mergeAcademicsContent(savedContent));
-      } catch (err) {
-        console.error("Load academics content error:", err);
-        setError("Could not load saved content. Default content shown.");
-      } finally { setLoading(false); }
-    };
-    loadContent();
-  }, []);
-
-  // ── Save Logic ──
-  const saveToBackend = async (nextContent, message) => {
-    const authHeaders = getAuthHeaders();
-    if (!authHeaders) { setError("Admin login expired."); return false; }
-    try {
-      await axios.put(`${API_URL}/api/site-content/academics`, { content: nextContent }, { headers: authHeaders });
-      setForm(nextContent);
-      setSuccess(message || "Academics page updated successfully.");
-      return true;
-    } catch (err) {
-      console.error("Save error:", err);
-      setError(err.response?.data?.message || "Could not save content.");
-      return false;
-    }
-  };
-
-  // Parses "Subject Name - Type - Hours" lines into structured subject objects.
-  // Returns { subjects, invalidLines } so the caller can warn about malformed rows.
-  const parseSubjectsText = (text) => {
-    const invalidLines = [];
-    const subjects = (text || "")
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const parts = line.split(" - ").map((s) => s.trim());
-        if (parts.length !== 3 || parts.some((p) => !p)) {
-          invalidLines.push(line);
-          return null;
-        }
-        const [name, type, hours] = parts;
-        return { name, type, hours };
-      })
-      .filter(Boolean);
-    return { subjects, invalidLines };
-  };
-
-  const saveSelectedPart = async () => {
-    if (!editingTarget) return;
-
-    let nextForm = mergeAcademicsContent(form);
-
-    if (editingTarget.type === "hero") {
-      nextForm.hero = {
-        badge: modalForm.badge || defaultAcademicsContent.hero.badge,
-        title: modalForm.title || defaultAcademicsContent.hero.title,
-        subtitle: modalForm.subtitle || defaultAcademicsContent.hero.subtitle,
-        description: modalForm.description || defaultAcademicsContent.hero.description,
-      };
-    }
-
-    if (editingTarget.type === "levelsHeading") {
-      nextForm.levelsHeading = {
-        badge: modalForm.badge || defaultAcademicsContent.levelsHeading.badge,
-        title: modalForm.title || defaultAcademicsContent.levelsHeading.title,
-        description: modalForm.description || defaultAcademicsContent.levelsHeading.description,
-      };
-    }
-
-    if (editingTarget.type === "strengthsHeading") {
-      nextForm.strengthsHeading = {
-        badge: modalForm.badge || defaultAcademicsContent.strengthsHeading.badge,
-        title: modalForm.title || defaultAcademicsContent.strengthsHeading.title,
-        description: modalForm.description || defaultAcademicsContent.strengthsHeading.description,
-      };
-    }
-
-    if (editingTarget.type === "achievementsHeading") {
-      nextForm.achievementsHeading = {
-        badge: modalForm.badge || defaultAcademicsContent.achievementsHeading.badge,
-        title: modalForm.title || defaultAcademicsContent.achievementsHeading.title,
-        description: modalForm.description || defaultAcademicsContent.achievementsHeading.description,
-      };
-    }
-
-    if (editingTarget.type === "stat") {
-      const idx = editingTarget.index;
-      nextForm.stats[idx] = {
-        ...nextForm.stats[idx],
-        value: modalForm.value || "",
-        suffix: modalForm.suffix || "",
-        label: modalForm.label || "",
-      };
-    }
-
-    if (editingTarget.type === "strength") {
-      const idx = editingTarget.index;
-      if (editingTarget.isNew) {
-        nextForm.strengths.push({ id: Date.now(), title: modalForm.title, description: modalForm.description, icon: "Sparkles", color: "#1A5276" });
-      } else {
-        nextForm.strengths[idx] = { ...nextForm.strengths[idx], title: modalForm.title, description: modalForm.description };
-      }
-    }
-
-    if (editingTarget.type === "achievement") {
-      const idx = editingTarget.index;
-      if (editingTarget.isNew) {
-        nextForm.achievements.push({ id: Date.now(), title: modalForm.title, description: modalForm.description });
-      } else {
-        nextForm.achievements[idx] = { ...nextForm.achievements[idx], title: modalForm.title, description: modalForm.description };
-      }
-    }
-
-    if (editingTarget.type === "assessment") {
-      nextForm.assessment = {
-        title: modalForm.title || defaultAcademicsContent.assessment.title,
-        description: modalForm.description || defaultAcademicsContent.assessment.description,
-        methods: (modalForm.methodsText || "").split("\n").map((s) => s.trim()).filter(Boolean),
-      };
-    }
-
-    // ── Class Level card: name, badge, span, age group, description ──
-    if (editingTarget.type === "levelCard") {
-      if (!modalForm.name || !modalForm.name.trim()) {
-        setError("Class Level name is required.");
-        return;
-      }
-      if (editingTarget.isNew) {
-        const existingIds = nextForm.classLevels.map((l) => l.id);
-        const newLevel = {
-          id: uniqueId(modalForm.name, existingIds),
-          name: modalForm.name.trim(),
-          shortBadge: modalForm.shortBadge || "",
-          span: modalForm.span || "",
-          ageGroup: modalForm.ageGroup || "",
-          color: modalForm.color || "#1A5276",
-          tagline: modalForm.tagline || "",
-          description: modalForm.description || "",
-          classes: [
-            {
-              id: "class-1",
-              name: "New Class",
-              focus: "",
-              subjects: [],
-              curriculumHighlights: [],
-              assessmentMethod: "",
-            },
-          ],
-        };
-        nextForm.classLevels.push(newLevel);
-      } else {
-        const idx = editingTarget.index;
-        nextForm.classLevels[idx] = {
-          ...nextForm.classLevels[idx],
-          name: modalForm.name.trim(),
-          shortBadge: modalForm.shortBadge || "",
-          span: modalForm.span || "",
-          ageGroup: modalForm.ageGroup || "",
-          color: modalForm.color || nextForm.classLevels[idx].color,
-          description: modalForm.description || "",
-        };
-      }
-    }
-
-    // ── Curriculum panel: tagline + description for a specific level ──
-    if (editingTarget.type === "curriculumPanel") {
-      const level = nextForm.classLevels.find((l) => l.id === editingTarget.levelId);
-      if (level) {
-        level.tagline = modalForm.tagline || "";
-        level.description = modalForm.description || "";
-      }
-    }
-
-    // ── Class name (from the Class Selector tabs), scoped to a level+class ──
-    if (editingTarget.type === "className") {
-      if (!modalForm.name || !modalForm.name.trim()) {
-        setError("Class name is required.");
-        return;
-      }
-      const level = nextForm.classLevels.find((l) => l.id === editingTarget.levelId);
-      if (level) {
-        if (editingTarget.isNew) {
-          const existingIds = level.classes.map((c) => c.id);
-          level.classes.push({
-            id: uniqueId(modalForm.name, existingIds),
-            name: modalForm.name.trim(),
-            focus: "",
-            subjects: [],
-            curriculumHighlights: [],
-            assessmentMethod: "",
-          });
-        } else {
-          const cls = level.classes.find((c) => c.id === editingTarget.classId);
-          if (cls) cls.name = modalForm.name.trim();
-        }
-      }
-    }
-
-    // ── Subject Breakdown: class name + subjects list, scoped to a level+class ──
-    if (editingTarget.type === "subjectBreakdown") {
-      const level = nextForm.classLevels.find((l) => l.id === editingTarget.levelId);
-      const cls = level?.classes.find((c) => c.id === editingTarget.classId);
-      if (cls) {
-        const { subjects, invalidLines } = parseSubjectsText(modalForm.subjectsText);
-        if (invalidLines.length) {
-          setError(`Could not parse: "${invalidLines[0]}". Use the format: Subject Name - Type - Hours`);
-          return;
-        }
-        cls.name = modalForm.className && modalForm.className.trim() ? modalForm.className.trim() : cls.name;
-        cls.subjects = subjects;
-      }
-    }
-
-    // ── Learning Highlights + Assessment Pattern, scoped to a level+class ──
-    if (editingTarget.type === "highlightsAndAssessment") {
-      const level = nextForm.classLevels.find((l) => l.id === editingTarget.levelId);
-      const cls = level?.classes.find((c) => c.id === editingTarget.classId);
-      if (cls) {
-        cls.curriculumHighlights = (modalForm.highlightsText || "")
-          .split("\n")
-          .map((s) => s.trim())
-          .filter(Boolean);
-        cls.assessmentMethod = modalForm.assessmentMethod || "";
-      }
-    }
-
-    setSaving(true);
-    const saved = await saveToBackend(nextForm, "Selected item saved successfully.");
-    if (saved) { setEditingTarget(null); setModalForm({}); }
-    setSaving(false);
-  };
-
-  const deleteTargetItem = async (target) => {
-    if (!target) return;
-    setSaving(true);
-    let nextForm = mergeAcademicsContent(form);
-
-    if (target.type === "strength") {
-      if (nextForm.strengths.length <= 1) {
-        setError("At least one Strength must remain.");
-        setSaving(false);
-        return;
-      }
-      nextForm.strengths = nextForm.strengths.filter((_, i) => i !== target.index);
-    } else if (target.type === "achievement") {
-      if (nextForm.achievements.length <= 1) {
-        setError("At least one Achievement must remain.");
-        setSaving(false);
-        return;
-      }
-      nextForm.achievements = nextForm.achievements.filter((_, i) => i !== target.index);
-    } else if (target.type === "levelCard") {
-      if (nextForm.classLevels.length <= 1) {
-        setError("At least one Class Level must remain.");
-        setSaving(false);
-        return;
-      }
-      nextForm.classLevels = nextForm.classLevels.filter((_, i) => i !== target.index);
-    } else if (target.type === "className") {
-      const level = nextForm.classLevels.find((l) => l.id === target.levelId);
-      if (level) {
-        if (level.classes.length <= 1) {
-          setError("At least one Class must remain in this level.");
-          setSaving(false);
-          return;
-        }
-        level.classes = level.classes.filter((c) => c.id !== target.classId);
-      }
-    }
-
-    const saved = await saveToBackend(nextForm, "Item deleted successfully.");
-    if (saved) setDeleteTarget(null);
-    setSaving(false);
-  };
-
-  const openEditor = (target) => {
-    setSuccess(""); setError(""); setEditingTarget(target);
-
-    if (target.type === "hero") {
-      setModalForm({ badge: form.hero.badge || "", title: form.hero.title || "", subtitle: form.hero.subtitle || "", description: form.hero.description || "" });
-    } else if (target.type === "levelsHeading") {
-      const heading = form.levelsHeading || defaultAcademicsContent.levelsHeading;
-      setModalForm({
-        badge: heading.badge || "Academic Structure",
-        title: heading.title || "Explore Our Class Levels",
-        description: heading.description || "Click on any academic level below to view the classes, subjects, curriculum, and grading structure.",
-      });
-    } else if (target.type === "strengthsHeading") {
-      const heading = form.strengthsHeading || defaultAcademicsContent.strengthsHeading;
-      setModalForm({
-        badge: heading.badge || "What Sets Us Apart",
-        title: heading.title || "Our Academic Strengths",
-        description: heading.description || "A learning ecosystem built on innovation, expertise, and unwavering commitment to student success.",
-      });
-    } else if (target.type === "achievementsHeading") {
-      const heading = form.achievementsHeading || defaultAcademicsContent.achievementsHeading;
-      setModalForm({
-        badge: heading.badge || "Our Milestones",
-        title: heading.title || "Celebrating Excellence",
-        description: heading.description || "A legacy of achievement that reflects our commitment to quality education.",
-      });
-    } else if (target.type === "stat") {
-      const s = form.stats[target.index];
-      setModalForm({ value: s.value, suffix: s.suffix, label: s.label });
-    } else if (target.type === "strength" || target.type === "achievement") {
-      const item = target.type === "strength" ? form.strengths[target.index] : form.achievements[target.index];
-      setModalForm({ title: item?.title || "", description: item?.description || "" });
-    } else if (target.type === "assessment") {
-      setModalForm({ title: form.assessment.title || "", description: form.assessment.description || "", methodsText: (form.assessment.methods || []).join("\n") });
-    } else if (target.type === "levelCard") {
-      if (target.isNew) {
-        setModalForm({ name: "", shortBadge: "", span: "", ageGroup: "", description: "", color: "#1A5276" });
-      } else {
-        const level = form.classLevels[target.index];
-        setModalForm({
-          name: level.name || "",
-          shortBadge: level.shortBadge || "",
-          span: level.span || "",
-          ageGroup: level.ageGroup || "",
-          description: level.description || "",
-          color: level.color || "#1A5276",
-        });
-      }
-    } else if (target.type === "curriculumPanel") {
-      const level = form.classLevels.find((l) => l.id === target.levelId);
-      setModalForm({ tagline: level?.tagline || "", description: level?.description || "" });
-    } else if (target.type === "className") {
-      if (target.isNew) {
-        setModalForm({ name: "" });
-      } else {
-        const level = form.classLevels.find((l) => l.id === target.levelId);
-        const cls = level?.classes.find((c) => c.id === target.classId);
-        setModalForm({ name: cls?.name || "" });
-      }
-    } else if (target.type === "subjectBreakdown") {
-      const level = form.classLevels.find((l) => l.id === target.levelId);
-      const cls = level?.classes.find((c) => c.id === target.classId);
-      setModalForm({
-        className: cls?.name || "",
-        subjectsText: (cls?.subjects || []).map((s) => `${s.name} - ${s.type} - ${s.hours}`).join("\n"),
-      });
-    } else if (target.type === "highlightsAndAssessment") {
-      const level = form.classLevels.find((l) => l.id === target.levelId);
-      const cls = level?.classes.find((c) => c.id === target.classId);
-      setModalForm({
-        highlightsText: (cls?.curriculumHighlights || []).join("\n"),
-        assessmentMethod: cls?.assessmentMethod || "",
-      });
-    }
-  };
-
-  const closeEditor = () => { if (saving) return; setEditingTarget(null); setModalForm({}); };
-
-  const openAddLevel = () => openEditor({ type: "levelCard", index: form.classLevels.length, isNew: true });
-  const openAddClass = (levelId) => openEditor({ type: "className", levelId, isNew: true });
-  const openAddStrength = () => openEditor({ type: "strength", index: form.strengths.length, isNew: true });
-  const openAddAchievement = () => openEditor({ type: "achievement", index: form.achievements.length, isNew: true });
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#0B0E14] text-white">Loading Academics Editor...</div>;
-
-  const titleForTarget = (t) => {
-    const labels = {
-      hero: "Hero Section",
-      levelsHeading: "Class Levels Heading",
-      strengthsHeading: "Academic Strengths Heading",
-      achievementsHeading: "Achievements Heading",
-      stat: "Stat",
-      strength: t?.isNew ? "New Academic Strength" : "Academic Strength",
-      achievement: t?.isNew ? "New Achievement" : "Achievement",
-      assessment: "Assessment Section",
-      levelCard: t?.isNew ? "New Class Level" : "Class Level",
-      curriculumPanel: "Curriculum Panel",
-      className: t?.isNew ? "New Class" : "Class Name",
-      subjectBreakdown: "Subject Breakdown",
-      highlightsAndAssessment: "Learning Highlights & Assessment",
-    };
-    return labels[t?.type] || "Item";
-  };
-
-  return (
-    <div className="space-y-6 min-h-screen p-4 sm:p-6 bg-slate-100 font-sans">
-      <style>{`.admin-edit-hidden { display: none; } .group:hover .admin-edit-hidden { display: flex; }`}</style>
-
-      <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm">
-
-        <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-[24px] p-4 sm:p-5 md:p-6"
+        style={{
+          background: "linear-gradient(135deg, #E8EDF5 0%, #DCE3EF 50%, #E8E0F0 100%)",
+          border: "1px solid rgba(15,23,42,0.06)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold mb-2 bg-blue-50 text-blue-700 border border-blue-200">
-              <Eye className="w-3.5 h-3.5" /> Visual Academics Editor
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black mb-3 bg-purple-50 text-purple-700 border border-purple-100">
+              <Eye className="w-3.5 h-3.5" />
+              Visual Academics Editor
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Hover and Edit Academics Page</h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Hover any block to edit. Changes save directly to the public website.</p>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <button onClick={() => navigate("/admin/dashboard")} className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-100 bg-slate-50 border border-slate-300 transition">Dashboard</button>
-            <a
-              href="/academics"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 text-xs sm:text-sm font-bold transition shadow-xs"
+
+            <h2
+              className="text-2xl md:text-3xl font-black text-slate-950"
+              style={{
+                fontFamily: "var(--font-display)",
+                letterSpacing: "-0.04em",
+              }}
             >
-              <ExternalLink size={14} /> View Public
-            </a>
-            <button onClick={async () => { setSaving(true); await saveToBackend(form, "All content saved successfully."); setSaving(false); }} disabled={saving} className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md transition disabled:opacity-50">
-              {saving ? "Saving..." : "Save All Changes"}
-            </button>
+              Hover and Edit Academics Page
+            </h2>
+
+            <p className="text-sm text-slate-500 mt-1">
+              Hover content to edit. Stats, strengths, achievements, assessment, and class levels are all editable.
+            </p>
           </div>
         </div>
 
-        {success && <div className="mb-4 rounded-xl px-4 py-3 flex items-center gap-2 text-xs sm:text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><CheckCircle2 className="w-4 h-4" />{success}</div>}
-        {error && <div className="mb-4 rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold bg-rose-50 text-rose-700 border border-rose-200"><AlertCircle className="w-4 h-4 inline mr-2" />{error}</div>}
+        {success && (
+          <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-green-50 text-green-700 border border-green-100">
+            <CheckCircle2 className="w-4 h-4" />
+            {success}
+          </div>
+        )}
 
-        <div className="rounded-2xl overflow-hidden border border-slate-300 bg-white shadow-xl relative">
-          <AcademicsPage
-            adminEditMode={true}
-            contentOverride={form}
-            onEditTarget={openEditor}
-            onDeleteTarget={(t) => { setDeleteTarget(t); deleteTargetItem(t); }}
-            onAddLevel={openAddLevel}
-            onAddClass={openAddClass}
-            onAddStrength={openAddStrength}
-            onAddAchievement={openAddAchievement}
-          />
+        {error && (
+          <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-red-50 text-red-700 border border-red-100">
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </div>
+        )}
+
+        <div
+          className="admin-academics-preview-frame rounded-[2rem] overflow-x-auto"
+          style={{
+            background: "radial-gradient(circle at top left, rgba(56,189,248,0.14), transparent 34%), linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)",
+            border: "1px solid rgba(15,23,42,0.08)",
+          }}
+        >
+          <div className="w-full min-w-0 bg-white">
+            <AcademicsPage
+              editMode
+              contentOverride={form}
+              onEditTarget={openEditor}
+              onDeleteTarget={(target) => setDeleteTarget(target)}
+              onAddTarget={addItem}
+            />
+          </div>
         </div>
       </motion.div>
 
+      {/* ====================================================
+          EDIT MODAL (matching About page style)
+          ==================================================== */}
       <AnimatePresence>
         {editingTarget && (
-          <ModalShell title={`Edit ${titleForTarget(editingTarget)}`} onClose={closeEditor} onSave={saveSelectedPart} saving={saving}>
+          <motion.div
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5"
+            style={{ background: "rgba(2,6,23,0.55)", backdropFilter: "blur(12px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 14, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 130, damping: 16 }}
+              className="w-full max-w-xl rounded-[28px] overflow-hidden max-h-[92vh] overflow-y-auto"
+              style={{ background: "#FFFFFF", border: "1px solid rgba(255,255,255,0.75)", boxShadow: "0 42px 110px rgba(0,0,0,0.28)" }}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <div className="h-1" style={{ background: "linear-gradient(90deg, #FACC15, #38BDF8, #168A3A)" }} />
 
-            {editingTarget.type === "hero" && (
-              <div className="space-y-4">
-                <Field label="Badge Text" value={modalForm.badge} onChange={(v) => setModalForm({ ...modalForm, badge: v })} />
-                <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
-                <Field label="Subtitle" value={modalForm.subtitle} onChange={(v) => setModalForm({ ...modalForm, subtitle: v })} textarea rows={2} />
-                <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                      style={{ background: "linear-gradient(135deg, rgba(250,204,21,0.18), rgba(56,189,248,0.18))", color: "#0B1020" }}
+                    >
+                      <Pencil className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-950">{modalTitle}</h3>
+                      <p className="text-sm text-slate-500">Save only this selected item.</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEditingTarget(null)}
+                    className="w-10 h-10 rounded-2xl flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Hero */}
+                  {editingTarget.type === "hero" && (
+                    <>
+                      <Field label="Badge" value={modalForm.badge} onChange={(v) => setModalForm({ ...modalForm, badge: v })} />
+                      <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
+                      <Field label="Subtitle" value={modalForm.subtitle} onChange={(v) => setModalForm({ ...modalForm, subtitle: v })} textarea rows={2} />
+                      <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={3} />
+                    </>
+                  )}
+
+                  {/* Stat */}
+                  {editingTarget.type === "statsCard" && (
+                    <>
+                      <Field label="Value" value={modalForm.value} onChange={(v) => setModalForm({ ...modalForm, value: v })} placeholder="1500" />
+                      <Field label="Suffix" value={modalForm.suffix} onChange={(v) => setModalForm({ ...modalForm, suffix: v })} placeholder="+" />
+                      <Field label="Label" value={modalForm.label} onChange={(v) => setModalForm({ ...modalForm, label: v })} placeholder="Active Learners" />
+                      <ColorPicker label="Color" value={modalForm.color} onChange={(v) => setModalForm({ ...modalForm, color: v })} />
+                      <Toggle label="Show this statistic" checked={modalForm.visible !== false} onChange={(v) => setModalForm({ ...modalForm, visible: v })} />
+                    </>
+                  )}
+
+                  {/* Strength */}
+                  {editingTarget.type === "strengthCard" && (
+                    <>
+                      <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
+                      <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={2} />
+                      <ColorPicker label="Color" value={modalForm.color} onChange={(v) => setModalForm({ ...modalForm, color: v })} />
+                      <Toggle label="Show this strength" checked={modalForm.visible !== false} onChange={(v) => setModalForm({ ...modalForm, visible: v })} />
+                    </>
+                  )}
+
+                  {/* Achievement */}
+                  {editingTarget.type === "achievementCard" && (
+                    <>
+                      <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
+                      <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={2} />
+                      <Toggle label="Show this achievement" checked={modalForm.visible !== false} onChange={(v) => setModalForm({ ...modalForm, visible: v })} />
+                    </>
+                  )}
+
+                  {/* Assessment */}
+                  {editingTarget.type === "assessment" && (
+                    <>
+                      <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
+                      <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={2} />
+                      <Field
+                        label="Methods (one per line)"
+                        value={modalForm.methods}
+                        onChange={(v) => setModalForm({ ...modalForm, methods: v })}
+                        textarea
+                        rows={6}
+                        placeholder="Continuous Assessment System (CAS)&#10;Laboratory Practical Examinations"
+                      />
+                    </>
+                  )}
+
+                  {/* Class Level */}
+                  {editingTarget.type === "classLevel" && (
+                    <>
+                      <Field label="Level Name" value={modalForm.name} onChange={(v) => setModalForm({ ...modalForm, name: v })} />
+                      <Field label="Short Badge" value={modalForm.shortBadge} onChange={(v) => setModalForm({ ...modalForm, shortBadge: v })} />
+                      <Field label="Span / Classes" value={modalForm.span} onChange={(v) => setModalForm({ ...modalForm, span: v })} />
+                      <Field label="Age Group" value={modalForm.ageGroup} onChange={(v) => setModalForm({ ...modalForm, ageGroup: v })} />
+                      <Field label="Tagline" value={modalForm.tagline} onChange={(v) => setModalForm({ ...modalForm, tagline: v })} />
+                      <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={2} />
+                      <ColorPicker label="Color" value={modalForm.color} onChange={(v) => setModalForm({ ...modalForm, color: v })} />
+                      <Toggle label="Show this level" checked={modalForm.visible !== false} onChange={(v) => setModalForm({ ...modalForm, visible: v })} />
+                    </>
+                  )}
+
+                  {/* Class Item */}
+                  {editingTarget.type === "classItem" && (
+                    <>
+                      <Field label="Class Name" value={modalForm.name} onChange={(v) => setModalForm({ ...modalForm, name: v })} />
+                      <Field label="Focus" value={modalForm.focus} onChange={(v) => setModalForm({ ...modalForm, focus: v })} />
+                      <Field
+                        label="Subjects (format: Name|Type|Hours per line)"
+                        value={modalForm.subjects}
+                        onChange={(v) => setModalForm({ ...modalForm, subjects: v })}
+                        textarea
+                        rows={4}
+                        placeholder="English Grammar & Reader|Compulsory|6 hrs/wk"
+                      />
+                      <Field
+                        label="Curriculum Highlights (one per line)"
+                        value={modalForm.curriculumHighlights}
+                        onChange={(v) => setModalForm({ ...modalForm, curriculumHighlights: v })}
+                        textarea
+                        rows={3}
+                      />
+                      <Field label="Assessment Method" value={modalForm.assessmentMethod} onChange={(v) => setModalForm({ ...modalForm, assessmentMethod: v })} textarea rows={2} />
+                      <Toggle label="Show this class" checked={modalForm.visible !== false} onChange={(v) => setModalForm({ ...modalForm, visible: v })} />
+                    </>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 mt-7">
+                  {canDeleteSelected && (
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(editingTarget)}
+                      disabled={saving}
+                      className="sm:w-auto px-5 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                      style={{ background: "rgba(215,25,32,0.08)", color: "#D71920", border: "1px solid rgba(215,25,32,0.18)" }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setEditingTarget(null)}
+                    disabled={saving}
+                    className="flex-1 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60"
+                    style={{ background: "rgba(15,23,42,0.06)", color: "rgba(15,23,42,0.65)", border: "1px solid rgba(15,23,42,0.08)" }}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={saveSelectedPart}
+                    disabled={saving}
+                    className="flex-1 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                    style={{ background: "linear-gradient(135deg, #FACC15, #38BDF8)", color: "#020617", boxShadow: "0 16px 38px rgba(56,189,248,0.24)" }}
+                  >
+                    <Save className="w-4 h-4" />
+                    {saving ? "Saving..." : "Save This Item"}
+                  </button>
+                </div>
               </div>
-            )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            {editingTarget.type === "levelsHeading" && (
-              <div className="space-y-4">
-                <Field label="Badge Text" value={modalForm.badge} onChange={(v) => setModalForm({ ...modalForm, badge: v })} />
-                <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
-                <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
+      {/* ====================================================
+          DELETE CONFIRMATION
+          ==================================================== */}
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div
+            className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5"
+            style={{ background: "rgba(2,6,23,0.62)", backdropFilter: "blur(14px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => !saving && setDeleteTarget(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.96 }}
+              className="w-full max-w-md rounded-[28px] bg-white overflow-hidden"
+              style={{ boxShadow: "0 42px 110px rgba(0,0,0,0.32)", border: "1px solid rgba(255,255,255,0.75)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-5">
+                  <Trash2 className="w-6 h-6" />
+                </div>
+
+                <h3 className="text-2xl font-black text-slate-950 mb-2">Are you sure?</h3>
+                <p className="text-sm text-slate-500 leading-relaxed mb-6">
+                  This will permanently delete this item from the Academics page.
+                </p>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={() => setDeleteTarget(null)}
+                    className="flex-1 py-3 rounded-2xl text-sm font-black disabled:opacity-60"
+                    style={{ background: "rgba(15,23,42,0.06)", color: "rgba(15,23,42,0.68)", border: "1px solid rgba(15,23,42,0.08)" }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={() => {
+                      const target = deleteTarget;
+                      deleteTargetItem(target);
+                    }}
+                    className="flex-1 py-3 rounded-2xl text-sm font-black disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                    style={{ background: "linear-gradient(135deg, #D71920, #991B1B)", color: "#FFFFFF", boxShadow: "0 16px 38px rgba(215,25,32,0.24)" }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {saving ? "Deleting..." : "Yes, Delete"}
+                  </button>
+                </div>
               </div>
-            )}
-
-            {editingTarget.type === "strengthsHeading" && (
-              <div className="space-y-4">
-                <Field label="Badge Text" value={modalForm.badge} onChange={(v) => setModalForm({ ...modalForm, badge: v })} />
-                <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
-                <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
-              </div>
-            )}
-
-            {editingTarget.type === "achievementsHeading" && (
-              <div className="space-y-4">
-                <Field label="Badge Text" value={modalForm.badge} onChange={(v) => setModalForm({ ...modalForm, badge: v })} />
-                <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
-                <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
-              </div>
-            )}
-
-            {editingTarget.type === "stat" && (
-              <div className="space-y-4">
-                <Field label="Value (e.g. 1500)" value={modalForm.value} onChange={(v) => setModalForm({ ...modalForm, value: v })} />
-                <Field label="Suffix (e.g. + or %)" value={modalForm.suffix} onChange={(v) => setModalForm({ ...modalForm, suffix: v })} />
-                <Field label="Label (e.g. Active Learners)" value={modalForm.label} onChange={(v) => setModalForm({ ...modalForm, label: v })} />
-              </div>
-            )}
-
-            {(editingTarget.type === "strength" || editingTarget.type === "achievement") && (
-              <div className="space-y-4">
-                <Field label="Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
-                <Field label="Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
-              </div>
-            )}
-
-            {editingTarget.type === "assessment" && (
-              <div className="space-y-4">
-                <Field label="Assessment Title" value={modalForm.title} onChange={(v) => setModalForm({ ...modalForm, title: v })} />
-                <Field label="Assessment Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={3} />
-                <Field label="Methods (One per line)" value={modalForm.methodsText} onChange={(v) => setModalForm({ ...modalForm, methodsText: v })} textarea rows={6} />
-              </div>
-            )}
-
-            {editingTarget.type === "levelCard" && (
-              <div className="space-y-4">
-                <Field label="Level Name" value={modalForm.name} onChange={(v) => setModalForm({ ...modalForm, name: v })} placeholder="e.g. Pre-Primary / Early Years" />
-                <Field label="Short Badge" value={modalForm.shortBadge} onChange={(v) => setModalForm({ ...modalForm, shortBadge: v })} placeholder="e.g. Early Childhood" />
-                <Field label="Span" value={modalForm.span} onChange={(v) => setModalForm({ ...modalForm, span: v })} placeholder="e.g. Play Group, Nursery, LKG, UKG" />
-                <Field label="Age Group" value={modalForm.ageGroup} onChange={(v) => setModalForm({ ...modalForm, ageGroup: v })} placeholder="e.g. 3 – 5.5 Years" />
-                <Field label="Accent Color (hex)" value={modalForm.color} onChange={(v) => setModalForm({ ...modalForm, color: v })} placeholder="#1A5276" />
-                <Field label="Card Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={3} />
-              </div>
-            )}
-
-            {editingTarget.type === "curriculumPanel" && (
-              <div className="space-y-4">
-                <Field label="Curriculum Tagline" value={modalForm.tagline} onChange={(v) => setModalForm({ ...modalForm, tagline: v })} />
-                <Field label="Curriculum Description" value={modalForm.description} onChange={(v) => setModalForm({ ...modalForm, description: v })} textarea rows={4} />
-              </div>
-            )}
-
-            {editingTarget.type === "className" && (
-              <div className="space-y-4">
-                <Field label="Class Name" value={modalForm.name} onChange={(v) => setModalForm({ ...modalForm, name: v })} placeholder="e.g. Grade 1 – 3 (Lower Primary)" />
-              </div>
-            )}
-
-            {editingTarget.type === "subjectBreakdown" && (
-              <div className="space-y-4">
-                <Field label="Class Name" value={modalForm.className} onChange={(v) => setModalForm({ ...modalForm, className: v })} />
-                <Field
-                  label="Subjects (one per line: Subject Name - Type - Hours)"
-                  value={modalForm.subjectsText}
-                  onChange={(v) => setModalForm({ ...modalForm, subjectsText: v })}
-                  textarea
-                  rows={10}
-                  placeholder={"Mathematics - Core - 6 hrs/wk\nEnglish - Compulsory - 6 hrs/wk"}
-                />
-              </div>
-            )}
-
-            {editingTarget.type === "highlightsAndAssessment" && (
-              <div className="space-y-4">
-                <Field
-                  label="Learning Highlights (one per line)"
-                  value={modalForm.highlightsText}
-                  onChange={(v) => setModalForm({ ...modalForm, highlightsText: v })}
-                  textarea
-                  rows={6}
-                />
-                <Field label="Assessment Pattern" value={modalForm.assessmentMethod} onChange={(v) => setModalForm({ ...modalForm, assessmentMethod: v })} textarea rows={3} />
-              </div>
-            )}
-
-          </ModalShell>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

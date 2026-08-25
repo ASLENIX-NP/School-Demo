@@ -12,6 +12,14 @@ import { Camera, ChevronRight, Pencil, Plus, Quote, Trash2, X } from "lucide-rea
 // gradients and stock icon grid. Depth comes from real layered shadows,
 // tilt, deckle (torn-paper) edges and a book-spread layout — not icons.
 //
+// EVERY section on this page is editable from the admin panel (AdminAbout):
+// each block is wrapped in <EditableWrap> (shows a pencil on hover) and,
+// where the content is a list (stats, values, staff, mission/vision,
+// journey), there's also a <SectionAddButton> to add a new card and a
+// trash icon on each card to remove it. See the `target.type` passed to
+// onEditTarget on each wrapper — AdminAbout.jsx switches on that string
+// to know which form fields to show.
+//
 // Optional (recommended) font preload for index.html <head>, the component
 // also self-loads these fonts via @import so it works without it:
 //   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,19 +67,27 @@ const TORN_EDGE_CLIP =
   "polygon(0% 40%,3% 8%,6% 44%,9% 12%,12% 40%,15% 6%,18% 38%,21% 14%,24% 42%,27% 8%,30% 36%,33% 12%,36% 42%,39% 6%,42% 38%,45% 10%,48% 44%,51% 8%,54% 36%,57% 12%,60% 40%,63% 6%,66% 38%,69% 10%,72% 42%,75% 8%,78% 36%,81% 12%,84% 40%,87% 6%,90% 38%,93% 10%,96% 42%,100% 8%,100% 100%,0% 100%)";
 
 // ──────────────────────────────────────────────
-// Default content (unchanged data contract — safe for existing editors)
+// Default content
+// NOTE ON THE DATA CONTRACT: every field here is what AdminAbout.jsx reads
+// from and writes back to (via PUT /api/site-content/about). If you add a
+// new field to a card here, add matching read/write logic in AdminAbout's
+// openEditor()/saveSelectedPart(). `visible` on list items controls the
+// "show/hide" toggle in the admin editor without deleting the item.
 // ──────────────────────────────────────────────
 export const defaultAboutContent = {
   pageBadge: "About Our School",
   pageTitle: "Growing Curious Minds, Inspiring Bright Futures",
   pageSubtitle:
     "At Red Rose School, learning goes beyond the classroom. We nurture confident, creative, and compassionate students through meaningful experiences, strong values, and a love for discovery.",
+  heroEmblemText: "RR",
+  heroEmblemLabel: "Red Rose",
 
+  // Editable via: click any stat coin (target: "statsCard") · "Add Stat" button (add type: "stat")
   stats: [
-    { id: 1, icon: "users", value: 2500, suffix: "+", label: "Students Enrolled" },
-    { id: 2, icon: "trophy", value: 98.5, suffix: "%", decimals: 1, label: "Board Success Rate" },
-    { id: 3, icon: "graduation", value: 15, suffix: " yrs", label: "Excellence in Education" },
-    { id: 4, icon: "heart", value: 180, suffix: "+", label: "Dedicated Faculty" },
+    { id: 1, value: 2500, suffix: "+", decimals: 0, label: "Students Enrolled", visible: true },
+    { id: 2, value: 98.5, suffix: "%", decimals: 1, label: "Board Success Rate", visible: true },
+    { id: 3, value: 15, suffix: " yrs", decimals: 0, label: "Excellence in Education", visible: true },
+    { id: 4, value: 180, suffix: "+", decimals: 0, label: "Dedicated Faculty", visible: true },
   ],
 
   storyBadge: "Our Story",
@@ -81,6 +97,7 @@ export const defaultAboutContent = {
     "Our approach is simple yet profound: provide world-class facilities, encourage creative thinking, and foster an environment where every student feels seen, heard, and empowered to reach their full potential. We prepare students not just for exams, but for life.",
   ],
   storyImageUrl: "",
+  storyImageAlt: "Students and teachers on the Red Rose School campus",
   storyImageZoom: 1,
   storyImageOffsetX: 0,
   storyImageOffsetY: 0,
@@ -92,24 +109,22 @@ export const defaultAboutContent = {
   pillarTitle: "The Principles That Guide Our Community",
   pillarDescription:
     "More than just words on a wall, these values shape our culture, our teaching, and our relationships every single day.",
+  // Editable via: click any card (target: "pillarCard") · "Add Value" button (add type: "pillar")
   pillars: [
     {
       id: 1,
-      icon: "trophy",
       label: "Academic Excellence",
       desc: "We challenge our students to strive for greatness through a rigorous, engaging, and supportive curriculum.",
       visible: true,
     },
     {
       id: 2,
-      icon: "heart",
       label: "Character & Integrity",
       desc: "We believe that true education is built on a foundation of honesty, respect, and empathy for others.",
       visible: true,
     },
     {
       id: 3,
-      icon: "globe",
       label: "Global Readiness",
       desc: "Equipping students with the critical thinking skills and cultural awareness needed to thrive in an interconnected world.",
       visible: true,
@@ -121,6 +136,8 @@ export const defaultAboutContent = {
   leadershipDescription:
     "Hear directly from the dedicated educators and leaders who make our school a home for learning.",
 
+  // Editable via: click any staff card (target: "leadershipMessage", includes photo
+  // upload + crop) · "Add Staff" button (add type: "message")
   messages: [
     {
       id: 1,
@@ -151,17 +168,16 @@ export const defaultAboutContent = {
   ],
 
   missionVisionBadge: "Our Focus",
+  // Editable via: click any card (target: "missionVision") · "Add Card" button (add type: "missionVision")
   missionVision: [
     {
       id: 1,
-      icon: "target",
       title: "Our Mission",
       desc: "To cultivate a love for learning in every student by providing a challenging, inclusive, and innovative educational environment that promotes academic achievement and personal growth.",
       visible: true,
     },
     {
       id: 2,
-      icon: "compass",
       title: "Our Vision",
       desc: "To be recognized as a beacon of educational excellence, producing well-rounded, compassionate, and future-ready graduates who lead with confidence and integrity.",
       visible: true,
@@ -170,6 +186,7 @@ export const defaultAboutContent = {
 
   journeyBadge: "Our Journey",
   journeyTitle: "A Timeline of Growth",
+  // Editable via: click any milestone (target: "journeyItem") · "Add Milestone" button (add type: "journey")
   journey: [
     { id: 1, year: "2010 AD", title: "School Founded", desc: "Our school opens with a vision to deliver modern, high-quality education to the local community.", visible: true },
     { id: 2, year: "2015 AD", title: "Expanded To Secondary", desc: "Rising demand pushed the school to extend its academic structure, offering education up to Grade 10.", visible: true },
@@ -393,6 +410,14 @@ function CountUp({ value, suffix = "", decimals = 0 }) {
 
 // ──────────────────────────────────────────────
 // Shared editing chrome
+// Every editable block on the page is one of these two wrappers:
+//   <EditableWrap>     — hover reveals a pencil (and a trash can if
+//                         canDelete is set) that calls onEditTarget/
+//                         onDeleteTarget with a `target` object.
+//   <SectionAddButton> — a visible "+ Add …" button (edit mode only)
+//                         that calls onAddTarget(type).
+// AdminAbout.jsx is the only thing that needs to know what each
+// `target.type` string means.
 // ──────────────────────────────────────────────
 function EditIconButton({ editMode, target, onEditTarget, icon: Icon = Pencil, label = "Edit" }) {
   if (!editMode) return null;
@@ -596,6 +621,15 @@ function StaffPopup({ isOpen, onClose, staff, accent }) {
 
 // ══════════════════════════════════════════════════════════════════════════
 // ABOUT PAGE
+//
+// Props:
+//   editMode         — when true, every block shows its pencil/trash/add
+//                       controls (AdminAbout renders this with editMode).
+//   contentOverride  — AdminAbout passes its live in-memory form here so
+//                       the preview updates instantly with no API round trip.
+//   onEditTarget(target)   — called when a pencil icon is clicked.
+//   onDeleteTarget(target) — called when a trash icon is clicked.
+//   onAddTarget(type)      — called when a "+ Add …" button is clicked.
 // ══════════════════════════════════════════════════════════════════════════
 export default function About({
   editMode = false,
@@ -657,6 +691,7 @@ export default function About({
     );
   }
 
+  const visibleStats = (content.stats || []).filter((s) => s.visible !== false);
   const visiblePillars = (content.pillars || []).filter((p) => p.visible !== false);
   const visibleStaff = (content.messages || []).filter((m) => m.visible !== false);
   const visibleMissionVision = (content.missionVision || []).filter((mv) => mv.visible !== false);
@@ -716,8 +751,8 @@ export default function About({
                   <div className="absolute inset-0 rounded-full" style={{ background: `conic-gradient(from 90deg, ${theme.gold}, ${theme.goldSoft}, ${theme.gold}, #7a5a26, ${theme.gold})`, boxShadow: "0 25px 55px rgba(0,0,0,0.4)" }} />
                   <div className="absolute inset-[10px] rounded-full" style={{ background: theme.gradInk, border: `1px solid ${theme.goldSoft}55` }} />
                   <div className="absolute inset-[22px] rounded-full flex flex-col items-center justify-center" style={{ border: `1px dashed ${theme.goldSoft}55` }}>
-                    <span className="rr-serif text-4xl font-semibold" style={{ color: theme.goldSoft }}>RR</span>
-                    <span className="rr-mono mt-1 text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(231,206,156,0.7)" }}>Red Rose</span>
+                    <span className="rr-serif text-4xl font-semibold" style={{ color: theme.goldSoft }}>{content.heroEmblemText || "RR"}</span>
+                    <span className="rr-mono mt-1 text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(231,206,156,0.7)" }}>{content.heroEmblemLabel || "Red Rose"}</span>
                   </div>
                 </div>
               </div>
@@ -728,27 +763,48 @@ export default function About({
           </motion.div>
         </EditableWrap>
 
-        {/* ═══════════════ STAT COINS (overlapping the torn edge) ═══════════════ */}
+        {/* ═══════════════ STAT COINS (overlapping the torn edge) ═══════════════
+             Fully editable: hover any coin to edit or delete it, and the
+             "Add Stat" button appears here in edit mode. */}
         <div className="relative z-20 -mt-7 md:-mt-9 mb-16 md:mb-24 px-4 sm:px-8">
+          {editMode && (
+            <div className="flex justify-end mb-4">
+              <SectionAddButton editMode={editMode} label="Add Stat" type="stat" onAddTarget={onAddTarget} />
+            </div>
+          )}
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {(content.stats || []).map((stat, i) => (
-              <motion.div
-                key={stat.id || i}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.06 }}
-                className="rounded-2xl px-5 py-6 text-center"
-                style={{ background: theme.card, border: `1px solid ${theme.paperDeep}`, boxShadow: "0 16px 34px rgba(30,20,32,0.10)" }}
-              >
-                <div className="rr-serif text-2xl sm:text-3xl font-semibold" style={{ color: theme.rose }}>
-                  <CountUp value={stat.value} suffix={stat.suffix} decimals={stat.decimals || 0} />
-                </div>
-                <div className="mt-2 rr-mono text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: theme.textMuted }}>
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
+            {visibleStats.map((stat, i) => {
+              const realIndex = content.stats.findIndex((item) => item.id === stat.id);
+
+              return (
+                <EditableWrap
+                  key={stat.id || i}
+                  editMode={editMode}
+                  target={{ type: "statsCard", index: realIndex }}
+                  onEditTarget={onEditTarget}
+                  onDeleteTarget={onDeleteTarget}
+                  canDelete={content.stats.length > 1}
+                  label="Edit stat card"
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: i * 0.06 }}
+                    className="rounded-2xl px-5 py-6 text-center"
+                    style={{ background: theme.card, border: `1px solid ${theme.paperDeep}`, boxShadow: "0 16px 34px rgba(30,20,32,0.10)" }}
+                  >
+                    <div className="rr-serif text-2xl sm:text-3xl font-semibold" style={{ color: theme.rose }}>
+                      <CountUp value={stat.value} suffix={stat.suffix} decimals={stat.decimals || 0} />
+                    </div>
+                    <div className="mt-2 rr-mono text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: theme.textMuted }}>
+                      {stat.label}
+                    </div>
+                  </motion.div>
+                </EditableWrap>
+              );
+            })}
           </div>
         </div>
 
@@ -770,7 +826,7 @@ export default function About({
                   {content.storyImageUrl ? (
                     <img
                       src={content.storyImageUrl}
-                      alt="Campus"
+                      alt={content.storyImageAlt || "Campus"}
                       draggable={false}
                       className="absolute inset-0"
                       style={getAdjustedImageStyle(content)}
