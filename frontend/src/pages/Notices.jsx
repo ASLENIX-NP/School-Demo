@@ -769,41 +769,18 @@ export default function Notices({
 
     let alive = true;
 
-    async function load() {
-      setLoading(true);
+    setLoading(true);
 
-      try {
-        const [
-          noticeResult,
-          announcementResult,
-          settingsResult,
-        ] = await Promise.all([
-          fetchJson(
-            `${API_URL}/api/notices`
-          ),
-
-          fetchJson(
-            `${API_URL}/api/announcements`
-          ),
-
-          fetchJson(
-            `${API_URL}/api/notice-settings`
-          ).catch(() => null),
-        ]);
-
+    fetchJson(
+      `${API_URL}/api/notices`
+    )
+      .then((noticeResult) => {
         if (!alive) return;
 
         const rawNotices =
           Array.isArray(noticeResult)
             ? noticeResult
             : noticeResult?.data || [];
-
-        const rawAnnouncements =
-          Array.isArray(
-            announcementResult
-          )
-            ? announcementResult
-            : announcementResult?.data || [];
 
         setNotices(
           sortNoticesNewestFirst(
@@ -812,6 +789,33 @@ export default function Notices({
             )
           )
         );
+      })
+      .catch((error) => {
+        if (alive) {
+          console.error(
+            "Notice page load error:",
+            error
+          );
+        }
+      })
+      .finally(() => {
+        if (alive) {
+          setLoading(false);
+        }
+      });
+
+    fetchJson(
+      `${API_URL}/api/announcements`
+    )
+      .then((announcementResult) => {
+        if (!alive) return;
+
+        const rawAnnouncements =
+          Array.isArray(
+            announcementResult
+          )
+            ? announcementResult
+            : announcementResult?.data || [];
 
         setAnnouncements(
           rawAnnouncements
@@ -848,6 +852,21 @@ export default function Notices({
               );
             })
         );
+      })
+      .catch((error) => {
+        if (alive) {
+          console.error(
+            "Notice announcements load error:",
+            error
+          );
+        }
+      });
+
+    fetchJson(
+      `${API_URL}/api/notice-settings`
+    )
+      .then((settingsResult) => {
+        if (!alive) return;
 
         setSettings({
           ...defaultNoticeSettings,
@@ -855,19 +874,15 @@ export default function Notices({
             settingsResult ||
             {}),
         });
-      } catch (error) {
-        console.error(
-          "Notice page load error:",
-          error
-        );
-      } finally {
+      })
+      .catch((error) => {
         if (alive) {
-          setLoading(false);
+          console.error(
+            "Notice settings load error:",
+            error
+          );
         }
-      }
-    }
-
-    load();
+      });
 
     return () => {
       alive = false;

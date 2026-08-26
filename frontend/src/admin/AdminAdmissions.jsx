@@ -1,5 +1,5 @@
 import {useEffect,useState} from "react";
-import {useNavigate} from "react-router-dom";
+import {useNavigate,useLocation} from "react-router-dom";
 import {motion,AnimatePresence} from "motion/react";
 import api from "../lib/api";
 import AdmissionsPage,{defaultSettings,mergeAdmissionsContent} from "../app/components/Admissions";
@@ -70,6 +70,12 @@ function Modal({target,settings,onClose,onSave,saving}){
 
 export default function AdminAdmissions(){
   const navigate=useNavigate();
+  const location=useLocation();
+
+  // When Admissions is opened as a tab inside /admin/dashboard,
+  // the dashboard already owns the admin shell/header. Do not render
+  // a second Admissions header on top of the dashboard.
+  const isDashboardEmbedded=location.pathname==="/admin/dashboard";
   const [tab,setTab]=useState("preview");
   const [settings,setSettings]=useState(defaultSettings);
   const [loading,setLoading]=useState(true);
@@ -160,16 +166,16 @@ export default function AdminAdmissions(){
 
   if(loading)return <div className="min-h-screen flex items-center justify-center bg-slate-100"><div className="rounded-2xl bg-white px-6 py-4 font-bold shadow">Loading Admission Control Panel...</div></div>;
 
-  return <div className="min-h-screen bg-slate-100 text-slate-900">
-    <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <div className="flex items-center gap-3"><button onClick={()=>navigate("/admin/dashboard")} className="rounded-xl border bg-slate-50 px-3 py-2 text-xs font-bold"><ArrowLeft size={14} className="inline mr-1"/>Dashboard</button><div><b className="text-sm">Admissions Manager</b><p className="text-[10px] text-slate-500">Live visual editor — saved changes use the public page API.</p></div></div>
-        <div className="flex rounded-xl bg-slate-100 p-1">{[["preview","Live Preview",Eye],["editor","Page Editor",Settings],["inquiries","Inquiries Desk",Users],["analytics","Analytics",BarChart3]].map(([k,l,I])=><button key={k} onClick={()=>setTab(k)} className={`rounded-lg px-3 py-2 text-[11px] font-black ${tab===k?"bg-amber-400":"text-slate-600"}`}><I size={13} className="inline mr-1"/>{l}</button>)}</div>
+  return <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-slate-100 text-slate-900">
+    {!isDashboardEmbedded&&<header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur">
+      <div className="mx-auto flex w-full max-w-[1500px] min-w-0 flex-wrap items-center justify-between gap-3 px-3 py-2 sm:px-4 sm:py-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3"><button onClick={()=>navigate("/admin/dashboard")} className="shrink-0 rounded-xl border bg-slate-50 px-2.5 py-2 text-[11px] font-bold sm:px-3 sm:text-xs"><ArrowLeft size={14} className="inline mr-1"/>Dashboard</button><div className="min-w-0"><b className="block truncate text-xs sm:text-sm">Admissions Manager</b><p className="hidden text-[10px] text-slate-500 sm:block">Live visual editor — saved changes use the public page API.</p></div></div>
+        <div className="flex max-w-full overflow-x-auto rounded-xl bg-slate-100 p-1">{[["preview","Live Preview",Eye],["editor","Page Editor",Settings],["inquiries","Inquiries Desk",Users],["analytics","Analytics",BarChart3]].map(([k,l,I])=><button key={k} onClick={()=>setTab(k)} className={`shrink-0 rounded-lg px-2.5 py-2 text-[10px] font-black sm:px-3 sm:text-[11px] ${tab===k?"bg-amber-400":"text-slate-600"}`}><I size={13} className="inline mr-1"/>{l}</button>)}</div>
       </div>
-    </header>
+    </header>}
     {toast&&<div className="fixed right-5 top-20 z-[9999] rounded-2xl border bg-white px-4 py-3 text-sm font-bold shadow-xl">{toast.type==="success"?<CheckCircle className="inline mr-2 text-emerald-600"/>:<AlertCircle className="inline mr-2 text-rose-600"/>}{toast.text}</div>}
-    <main className="mx-auto max-w-[1500px] p-4 sm:p-6">
-      {tab==="preview"&&<div className="space-y-4"><div className="rounded-3xl border bg-white p-5 shadow-sm"><b>Live Preview with Editing</b><p className="mt-1 text-xs text-slate-500">Click the pencil on any section. Saving immediately updates the database and public Admissions page.</p></div><div className="overflow-hidden rounded-[28px] border bg-white shadow-2xl"><AdmissionsPage editMode contentOverride={settings} onEditTarget={setTarget} onDeleteTarget={remove} onAddTarget={add}/></div></div>}
+    <main className="mx-auto w-full max-w-[1500px] min-w-0 p-2.5 sm:p-6">
+      {tab==="preview"&&<div className="min-w-0 space-y-3 sm:space-y-4"><div className="rounded-2xl border bg-white p-4 shadow-sm sm:rounded-3xl sm:p-5"><b>Live Preview with Editing</b><p className="mt-1 text-xs text-slate-500">Click the pencil on any section. Saving immediately updates the database and public Admissions page.</p></div><div className="w-full min-w-0 overflow-hidden rounded-2xl border bg-white shadow-2xl sm:rounded-[28px]"><AdmissionsPage editMode contentOverride={settings} onEditTarget={setTarget} onDeleteTarget={remove} onAddTarget={add}/></div></div>}
       {tab==="editor"&&<div className="rounded-3xl border bg-white p-6 shadow-sm"><h2 className="text-xl font-black">Page Editor</h2><p className="mt-2 text-sm text-slate-500">Direct editing is intentionally kept in Live Preview. This prevents duplicate editors and ensures the pencil edits the exact content displayed on the website.</p><button onClick={()=>setTab("preview")} className="mt-5 rounded-xl bg-slate-950 px-4 py-2 text-xs font-black text-white"><Eye size={14} className="inline mr-1"/>Open Live Preview</button></div>}
       {tab==="inquiries"&&<div className="space-y-4"><div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{[["Total",analytics.total],["Today",analytics.todayCount],["Pending",analytics.pendingCount],["Converted",analytics.convertedCount]].map(([a,b])=><div className="rounded-2xl border bg-white p-4 shadow-sm" key={a}><small className="font-bold text-slate-400">{a}</small><div className="text-2xl font-black">{b||0}</div></div>)}</div><div className="rounded-3xl border bg-white shadow-sm overflow-hidden"><div className="flex gap-2 border-b p-4"><div className="relative flex-1"><Search size={14} className="absolute left-3 top-3 text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search inquiries..." className="w-full rounded-xl border bg-slate-50 py-2.5 pl-8 text-xs"/></div><select value={status} onChange={e=>setStatus(e.target.value)} className="rounded-xl border px-3 text-xs"><option>All</option><option>New</option><option>Follow-up</option><option>Under Review</option><option>Approved</option><option>Converted</option><option>Rejected</option></select></div><div className="overflow-x-auto"><table className="w-full text-xs"><thead className="bg-slate-50"><tr><th className="p-3 text-left">Student</th><th className="p-3 text-left">Class</th><th className="p-3 text-left">Parent</th><th className="p-3 text-left">Status</th></tr></thead><tbody>{filtered.map(x=><tr key={x.id} className="border-t"><td className="p-3 font-bold">{x.studentName}</td><td className="p-3">{x.applyingClass}</td><td className="p-3">{x.parentName}</td><td className="p-3">{x.status||"New"}</td></tr>)}</tbody></table></div></div></div>}
       {tab==="analytics"&&<div className="grid sm:grid-cols-3 gap-4"><div className="rounded-3xl border bg-white p-6 text-center shadow"><TrendingUp className="mx-auto text-emerald-600"/><p className="mt-2 text-xs font-bold text-slate-400">CONVERSION</p><b className="text-4xl">{analytics.conversionRate||0}%</b></div><div className="rounded-3xl border bg-white p-6 shadow"><p className="text-xs font-bold text-slate-400">MOST APPLIED CLASS</p><b className="mt-2 block text-2xl">{analytics.mostAppliedClass||"N/A"}</b></div><div className="rounded-3xl border bg-white p-6 shadow"><p className="text-xs font-bold text-slate-400">TOTAL INQUIRIES</p><b className="mt-2 block text-2xl">{analytics.total||0}</b></div></div>}

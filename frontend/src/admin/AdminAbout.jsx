@@ -1,142 +1,66 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import api from "../lib/api";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  AlertCircle,
-  BookOpen,
-  Camera,
-  CheckCircle2,
-  Eye,
-  Image as ImageIcon,
-  MessageSquareText,
-  Pencil,
-  Save,
-  Trash2,
-  UploadCloud,
-  X,
-} from "lucide-react";
-
 import About, {
   defaultAboutContent,
   mergeAboutContent,
 } from "../app/components/About";
+import {
+  ArrowLeft,
+  Camera,
+  CheckCircle2,
+  Eye,
+  ExternalLink,
+  Pencil,
+  Plus,
+  Save,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 
-const colors = {
-  red: "#D71920",
-  green: "#168A3A",
-  purple: "#4B2E83",
-  dark: "#0B1020",
-  cyan: "#38BDF8",
-  gold: "#FACC15",
-};
+/*
+|--------------------------------------------------------------------------
+| RED ROSE SCHOOL — ADMIN ABOUT
+|--------------------------------------------------------------------------
+| FULL REPLACEMENT
+|
+| Important:
+| - Keeps the existing About public component as the live preview.
+| - Keeps the existing API:
+|       GET /api/site-content/about
+|       PUT /api/site-content/about
+|       POST /api/upload
+| - The main change is responsive behaviour inside the admin preview.
+| - On phones/tablets the preview is allowed to shrink naturally instead
+|   of retaining desktop-sized rows/columns.
+| - Editing, adding, deleting and image uploading remain available.
+| - No separate About.css file is required.
+|--------------------------------------------------------------------------
+*/
 
-const cardColors = [
+const API_PATH = "/api/site-content/about";
+
+const CARD_COLORS = [
   "#4B2E83",
   "#168A3A",
-  "#D71920",
-  "#38BDF8",
-  "#F97316",
-  "#FACC15",
-  "#14B8A6",
-  "#8B5CF6",
+  "#C58A19",
+  "#A62B4F",
+  "#2563EB",
+  "#0EA5E9",
 ];
 
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder = "",
-  textarea = false,
-  type = "text",
-}) {
+function getToken() {
   return (
-    <div>
-      <label className="block text-sm font-black mb-2 text-slate-700">
-        {label}
-      </label>
-
-      {textarea ? (
-        <textarea
-          value={value || ""}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={placeholder}
-          rows={4}
-          className="w-full px-4 py-3 rounded-2xl outline-none text-sm resize-none"
-          style={{
-            background: "rgba(255,255,255,0.92)",
-            border: "1px solid rgba(75,46,131,0.16)",
-            color: colors.dark,
-          }}
-        />
-      ) : (
-        <input
-          type={type}
-          value={value || ""}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={placeholder}
-          className="w-full px-4 py-3 rounded-2xl outline-none text-sm"
-          style={{
-            background: "rgba(255,255,255,0.92)",
-            border: "1px solid rgba(75,46,131,0.16)",
-            color: colors.dark,
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
-function Toggle({ checked, onChange, label }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className="w-full flex items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left"
-      style={{
-        background: checked
-          ? "rgba(22,138,58,0.08)"
-          : "rgba(100,116,139,0.08)",
-        border: checked
-          ? "1px solid rgba(22,138,58,0.18)"
-          : "1px solid rgba(100,116,139,0.18)",
-      }}
-    >
-      <span className="text-sm font-black text-slate-700">{label}</span>
-
-      <span
-        className="relative w-12 h-7 rounded-full transition-all"
-        style={{
-          background: checked ? colors.green : "#CBD5E1",
-        }}
-      >
-        <span
-          className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow"
-          style={{
-            left: checked ? "24px" : "4px",
-          }}
-        />
-      </span>
-    </button>
-  );
-}
-
-function getUploadUrl(payload) {
-  return (
-    payload?.url ||
-    payload?.imageUrl ||
-    payload?.fileUrl ||
-    payload?.data?.url ||
-    payload?.data?.imageUrl ||
-    payload?.data?.fileUrl ||
-    payload?.data?.secure_url ||
-    payload?.file?.url ||
+    localStorage.getItem("adminToken") ||
+    sessionStorage.getItem("adminToken") ||
     ""
   );
 }
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("adminToken");
-
+  const token = getToken();
   if (!token) return null;
 
   return {
@@ -144,538 +68,612 @@ function getAuthHeaders() {
   };
 }
 
-function clampImageOffset(value) {
-  const numberValue = Number(value);
-
-  if (!Number.isFinite(numberValue)) return 0;
-
-  return Math.min(60, Math.max(-60, numberValue));
+function clamp(value, min, max, fallback) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(max, Math.max(min, number));
 }
 
-function clampImageZoom(value) {
-  const numberValue = Number(value);
-
-  if (!Number.isFinite(numberValue)) return 1;
-
-  return Math.min(3, Math.max(1, numberValue));
+function clampZoom(value) {
+  return clamp(value, 1, 3, 1);
 }
 
-function getCropImageStyle(source = {}) {
-  const zoom = clampImageZoom(source.imageZoom);
-  const x = clampImageOffset(source.imageOffsetX);
-  const y = clampImageOffset(source.imageOffsetY);
-  const objectX = Math.min(100, Math.max(0, 50 - x));
-  const objectY = Math.min(100, Math.max(0, 50 - y));
-
-  return {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    objectPosition: `${objectX}% ${objectY}%`,
-    transform: `scale(${zoom})`,
-    transformOrigin: "center center",
-    transition:
-      "transform 160ms ease-out, object-position 160ms ease-out",
-    userSelect: "none",
-    pointerEvents: "none",
-  };
+function clampOffset(value) {
+  return clamp(value, -60, 60, 0);
 }
 
-function getActiveImageConfig(editingTarget, modalForm) {
-  const isStoryImage = editingTarget?.type === "storyImage";
-
-  return {
-    imageKey: isStoryImage ? "storyImageUrl" : "image",
-    imageUrl: isStoryImage ? modalForm.storyImageUrl : modalForm.image,
-    title: isStoryImage ? "Story Image Adjustment" : "Leadership Photo Adjustment",
-    label: isStoryImage ? "About Story Image" : "Leadership Photo",
-    shape: isStoryImage ? "landscape" : "portrait",
-  };
-}
-
-function CropSlider({ label, value, min, max, step = 1, suffix = "", onChange }) {
-  const numericValue = Number(value);
-
+function getUploadUrl(response) {
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <label className="text-sm font-black text-slate-700">{label}</label>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">
-          {Number.isFinite(numericValue) ? numericValue.toFixed(step < 1 ? 2 : 0) : min}
-          {suffix}
-        </span>
-      </div>
-
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={Number.isFinite(numericValue) ? numericValue : min}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full accent-sky-500"
-      />
-    </div>
+    response?.data?.url ||
+    response?.data?.imageUrl ||
+    response?.data?.image_url ||
+    response?.url ||
+    response?.imageUrl ||
+    response?.image_url ||
+    ""
   );
 }
 
-function AboutImageAdjustPage({
-  editingTarget,
-  modalForm,
-  setModalForm,
-  uploadImage,
-  uploadingImage,
-  saving,
+function getTargetTitle(target) {
+  if (!target) return "Edit About Page";
+
+  const titles = {
+    pageHeader: "Edit About Page Header",
+    storyText: "Edit Story Text",
+    storyImage: "Change Story Image",
+    storyImageText: "Edit Story Image Caption",
+    pillarHeader: "Edit Core Values Heading",
+    pillarCard: "Edit Core Value Card",
+    leadershipHeader: "Edit Leadership Heading",
+    leadershipMessage: "Edit Leadership Message",
+    leadershipPhoto: "Change Leadership Photo",
+    missionVisionBadge: "Edit Mission / Vision Heading",
+    missionVisionHeader: "Edit Mission / Vision Heading",
+    missionVision: "Edit Mission / Vision Card",
+    journeyBadge: "Edit Journey Heading",
+    journeyHeader: "Edit Journey Heading",
+    journeyItem: "Edit Journey Item",
+    ctaBand: "Edit Call to Action",
+    statsCard: "Edit Statistic Card",
+  };
+
+  return titles[target.type] || "Edit About Page";
+}
+
+function Field({ label, value, onChange, textarea = false, type = "text" }) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-xs font-black uppercase tracking-[0.08em] text-slate-500">
+        {label}
+      </span>
+
+      {textarea ? (
+        <textarea
+          value={value ?? ""}
+          onChange={(event) => onChange(event.target.value)}
+          rows={5}
+          className="w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-purple-400 focus:ring-4 focus:ring-purple-500/10"
+        />
+      ) : (
+        <input
+          type={type}
+          value={value ?? ""}
+          onChange={(event) => onChange(event.target.value)}
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-purple-400 focus:ring-4 focus:ring-purple-500/10"
+        />
+      )}
+    </label>
+  );
+}
+
+function ToggleField({ label, checked, onChange }) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+      <span className="text-sm font-bold text-slate-700">{label}</span>
+
+      <input
+        type="checkbox"
+        checked={Boolean(checked)}
+        onChange={(event) => onChange(event.target.checked)}
+        className="h-5 w-5 accent-purple-600"
+      />
+    </label>
+  );
+}
+
+function EditModal({
+  target,
+  form,
+  setForm,
   onClose,
   onSave,
+  saving,
+  uploading,
+  onUpload,
+  onDelete,
+  canDelete,
+  imageAdjustOpen,
+  setImageAdjustOpen,
 }) {
-  const dragRef = useRef(null);
-  const pointersRef = useRef(new Map());
-  const pinchRef = useRef(null);
-  const imageConfig = getActiveImageConfig(editingTarget, modalForm);
+  if (!target) return null;
 
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    const previousTouchAction = document.body.style.touchAction;
-    const previousOverscroll = document.body.style.overscrollBehavior;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.touchAction = "none";
-    document.body.style.overscrollBehavior = "contain";
-
-    const preventGesture = (event) => event.preventDefault();
-
-    window.addEventListener("gesturestart", preventGesture, { passive: false });
-    window.addEventListener("gesturechange", preventGesture, { passive: false });
-    window.addEventListener("gestureend", preventGesture, { passive: false });
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.style.touchAction = previousTouchAction;
-      document.body.style.overscrollBehavior = previousOverscroll;
-      window.removeEventListener("gesturestart", preventGesture);
-      window.removeEventListener("gesturechange", preventGesture);
-      window.removeEventListener("gestureend", preventGesture);
-    };
-  }, []);
-
-  const updateCrop = (updates) => {
-    setModalForm((prev) => ({
-      ...prev,
-      ...updates,
+  const update = (key, value) => {
+    setForm((previous) => ({
+      ...previous,
+      [key]: value,
     }));
   };
 
-  const resetCrop = () => {
-    updateCrop({
-      imageZoom: 1,
-      imageOffsetX: 0,
-      imageOffsetY: 0,
-    });
-  };
-
-  const getPointerDistance = (points) => {
-    if (points.length < 2) return 0;
-
-    const [first, second] = points;
-
-    return Math.hypot(
-      second.clientX - first.clientX,
-      second.clientY - first.clientY
-    );
-  };
-
-  const startDrag = (event) => {
-    if (!imageConfig.imageUrl) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const box = event.currentTarget.getBoundingClientRect();
-
-    pointersRef.current.set(event.pointerId, {
-      clientX: event.clientX,
-      clientY: event.clientY,
-    });
-
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-
-    const points = Array.from(pointersRef.current.values());
-
-    if (points.length >= 2) {
-      pinchRef.current = {
-        startDistance: getPointerDistance(points),
-        startZoom: clampImageZoom(modalForm.imageZoom),
-      };
-      dragRef.current = null;
-      return;
-    }
-
-    dragRef.current = {
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startOffsetX: clampImageOffset(modalForm.imageOffsetX),
-      startOffsetY: clampImageOffset(modalForm.imageOffsetY),
-      boxWidth: box.width || 1,
-      boxHeight: box.height || 1,
-    };
-  };
-
-  const moveDrag = (event) => {
-    if (!imageConfig.imageUrl) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (pointersRef.current.has(event.pointerId)) {
-      pointersRef.current.set(event.pointerId, {
-        clientX: event.clientX,
-        clientY: event.clientY,
-      });
-    }
-
-    const points = Array.from(pointersRef.current.values());
-
-    if (points.length >= 2 && pinchRef.current) {
-      const currentDistance = getPointerDistance(points);
-      const startDistance = pinchRef.current.startDistance || currentDistance || 1;
-      const nextZoom =
-        pinchRef.current.startZoom * (currentDistance / startDistance);
-
-      updateCrop({
-        imageZoom: clampImageZoom(nextZoom),
-      });
-      return;
-    }
-
-    if (!dragRef.current) return;
-
-    const data = dragRef.current;
-    const moveX = ((event.clientX - data.startClientX) / data.boxWidth) * 100;
-    const moveY = ((event.clientY - data.startClientY) / data.boxHeight) * 100;
-
-    updateCrop({
-      imageOffsetX: clampImageOffset(data.startOffsetX + moveX),
-      imageOffsetY: clampImageOffset(data.startOffsetY + moveY),
-    });
-  };
-
-  const endDrag = (event) => {
-    pointersRef.current.delete(event.pointerId);
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
-
-    const points = Array.from(pointersRef.current.values());
-
-    if (points.length < 2) {
-      pinchRef.current = null;
-    }
-
-    if (dragRef.current?.pointerId === event.pointerId) {
-      dragRef.current = null;
-    }
-  };
-
-  const handleWheelZoom = (event) => {
-    if (!imageConfig.imageUrl) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const direction = event.deltaY > 0 ? -0.1 : 0.1;
-    const nextZoom = clampImageZoom(clampImageZoom(modalForm.imageZoom) + direction);
-
-    updateCrop({
-      imageZoom: nextZoom,
-    });
-  };
-
-  const cropBoxClass =
-    imageConfig.shape === "landscape"
-      ? "relative mx-auto h-[52vh] min-h-[320px] max-h-[560px] w-full max-w-[780px] touch-none select-none overflow-hidden rounded-[32px] bg-slate-100 shadow-2xl cursor-grab active:cursor-grabbing"
-      : "relative mx-auto h-[68vh] min-h-[420px] max-h-[680px] w-full max-w-[410px] touch-none select-none overflow-hidden rounded-[32px] bg-slate-100 shadow-2xl cursor-grab active:cursor-grabbing";
-
-  const cropBoxStyle = {
-    border: "3px solid rgba(255,255,255,0.88)",
-    touchAction: "none",
-    overscrollBehavior: "contain",
-  };
+  const imageTarget =
+    target.type === "storyImage" ||
+    target.type === "leadershipPhoto" ||
+    target.type === "leadershipMessage";
 
   return (
-    <motion.div
-      className="fixed inset-0 z-[20000] flex flex-col overflow-hidden bg-slate-950 text-white"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onWheelCapture={(event) => {
-        if (event.ctrlKey) event.preventDefault();
-      }}
-    >
-      <header className="shrink-0 border-b border-white/10 bg-slate-950/96 px-4 py-4 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-white/45">
-              {imageConfig.label}
-            </div>
-            <h2 className="mt-1 text-2xl font-black leading-tight">
-              Drag and zoom the image
-            </h2>
-          </div>
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/75 p-3 sm:p-5 backdrop-blur-md"
+        onMouseDown={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96, y: 18 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.96, y: 18 }}
+          onMouseDown={(event) => event.stopPropagation()}
+          className="flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-[24px] bg-white shadow-2xl sm:rounded-[30px]"
+        >
+          <header className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 sm:py-5">
+            <div className="min-w-0">
+              <div className="text-[9px] font-black uppercase tracking-[0.18em] text-purple-700 sm:text-[10px]">
+                About Editor
+              </div>
 
-          <div className="flex flex-wrap gap-2">
+              <h2 className="mt-1 truncate text-lg font-black text-slate-950 sm:text-2xl">
+                {getTargetTitle(target)}
+              </h2>
+            </div>
+
             <button
               type="button"
               onClick={onClose}
-              disabled={saving || uploadingImage}
-              className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-black text-white disabled:opacity-50"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-red-50 hover:text-red-600 sm:h-10 sm:w-10"
             >
-              Back to Details
+              <X size={18} />
+            </button>
+          </header>
+
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6">
+            <div className="space-y-5">
+              {imageTarget && (
+                <section className="rounded-3xl border border-slate-200 bg-slate-950 p-4 sm:p-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <div className="h-32 w-full overflow-hidden rounded-2xl bg-slate-800 sm:h-36 sm:w-36 sm:shrink-0">
+                      {form.image || form.storyImageUrl || form.imageUrl ? (
+                        <img
+                          src={
+                            form.storyImageUrl ||
+                            form.imageUrl ||
+                            form.image
+                          }
+                          alt=""
+                          className="h-full w-full object-cover"
+                          style={{
+                            objectPosition: `${50 - clampOffset(form.imageOffsetX)}% ${50 - clampOffset(form.imageOffsetY)}%`,
+                            transform: `scale(${clampZoom(form.imageZoom)})`,
+                          }}
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs font-bold text-white/50">
+                          No image
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="font-black text-white">Image</p>
+                      <p className="mt-1 text-xs leading-5 text-white/55">
+                        Upload a new image without changing the rest of the
+                        About page.
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-xs font-black text-slate-900">
+                          <Upload size={14} />
+                          {uploading ? "Uploading..." : "Upload Image"}
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            disabled={uploading}
+                            className="hidden"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0];
+                              event.target.value = "";
+                              if (file) onUpload(file);
+                            }}
+                          />
+                        </label>
+
+                        <button
+                          type="button"
+                          disabled={
+                            !(form.storyImageUrl ||
+                              form.imageUrl ||
+                              form.image)
+                          }
+                          onClick={() => setImageAdjustOpen(true)}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <Camera size={14} />
+                          Adjust Image
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {target.type === "pageHeader" && (
+                <>
+                  <Field label="Badge" value={form.pageBadge} onChange={(v) => update("pageBadge", v)} />
+                  <Field label="Page Title" value={form.pageTitle} onChange={(v) => update("pageTitle", v)} />
+                  <Field label="Page Subtitle" value={form.pageSubtitle} onChange={(v) => update("pageSubtitle", v)} textarea />
+                  <Field label="Story Badge / Year" value={form.storyBadgeYear} onChange={(v) => update("storyBadgeYear", v)} />
+                  <Field label="Hero Emblem Text" value={form.heroEmblemText} onChange={(v) => update("heroEmblemText", v)} />
+                  <Field label="Hero Emblem Label" value={form.heroEmblemLabel} onChange={(v) => update("heroEmblemLabel", v)} />
+                </>
+              )}
+
+              {target.type === "storyText" && (
+                <>
+                  <Field label="Story Badge" value={form.storyBadge} onChange={(v) => update("storyBadge", v)} />
+                  <Field label="Story Title" value={form.storyTitle} onChange={(v) => update("storyTitle", v)} />
+                  <Field label="Paragraph 1" value={form.paragraph1} onChange={(v) => update("paragraph1", v)} textarea />
+                  <Field label="Paragraph 2" value={form.paragraph2} onChange={(v) => update("paragraph2", v)} textarea />
+                  <Field label="Story Tags — one per line" value={form.tags} onChange={(v) => update("tags", v)} textarea />
+                </>
+              )}
+
+              {target.type === "storyImage" && (
+                <>
+                  <Field label="Image URL" value={form.storyImageUrl} onChange={(v) => update("storyImageUrl", v)} />
+                  <Field label="Image Alt Text" value={form.storyImageAlt} onChange={(v) => update("storyImageAlt", v)} />
+                </>
+              )}
+
+              {target.type === "storyImageText" && (
+                <>
+                  <Field label="Image Title" value={form.storyImageTitle} onChange={(v) => update("storyImageTitle", v)} />
+                  <Field label="Image Subtitle" value={form.storyImageSubtitle} onChange={(v) => update("storyImageSubtitle", v)} />
+                </>
+              )}
+
+              {(target.type === "pillarHeader") && (
+                <>
+                  <Field label="Badge" value={form.pillarBadge} onChange={(v) => update("pillarBadge", v)} />
+                  <Field label="Title" value={form.pillarTitle} onChange={(v) => update("pillarTitle", v)} />
+                  <Field label="Description" value={form.pillarDescription} onChange={(v) => update("pillarDescription", v)} textarea />
+                </>
+              )}
+
+              {target.type === "pillarCard" && (
+                <>
+                  <Field label="Label" value={form.label} onChange={(v) => update("label", v)} />
+                  <Field label="Description" value={form.desc} onChange={(v) => update("desc", v)} textarea />
+                  <Field label="Icon" value={form.icon} onChange={(v) => update("icon", v)} />
+                  <Field label="Color" value={form.color} onChange={(v) => update("color", v)} />
+                  <ToggleField label="Visible on public page" checked={form.visible} onChange={(v) => update("visible", v)} />
+                </>
+              )}
+
+              {(target.type === "leadershipHeader") && (
+                <>
+                  <Field label="Badge" value={form.leadershipBadge} onChange={(v) => update("leadershipBadge", v)} />
+                  <Field label="Title" value={form.leadershipTitle} onChange={(v) => update("leadershipTitle", v)} />
+                  <Field label="Description" value={form.leadershipDescription} onChange={(v) => update("leadershipDescription", v)} textarea />
+                </>
+              )}
+
+              {(target.type === "leadershipMessage" || target.type === "leadershipPhoto") && (
+                <>
+                  <Field label="Name" value={form.name} onChange={(v) => update("name", v)} />
+                  <Field label="Role" value={form.role} onChange={(v) => update("role", v)} />
+                  <Field label="Message Title" value={form.title} onChange={(v) => update("title", v)} />
+                  <Field label="Message" value={form.message} onChange={(v) => update("message", v)} textarea />
+                  <Field label="Image URL" value={form.imageUrl || form.image} onChange={(v) => update("imageUrl", v)} />
+                  <ToggleField label="Visible on public page" checked={form.visible} onChange={(v) => update("visible", v)} />
+                </>
+              )}
+
+              {(target.type === "missionVisionBadge" || target.type === "missionVisionHeader") && (
+                <>
+                  <Field label="Badge" value={form.missionVisionBadge} onChange={(v) => update("missionVisionBadge", v)} />
+                  <Field label="Title" value={form.missionVisionTitle} onChange={(v) => update("missionVisionTitle", v)} />
+                </>
+              )}
+
+              {target.type === "missionVision" && (
+                <>
+                  <Field label="Title" value={form.title} onChange={(v) => update("title", v)} />
+                  <Field label="Description" value={form.desc} onChange={(v) => update("desc", v)} textarea />
+                  <Field label="Color" value={form.color} onChange={(v) => update("color", v)} />
+                  <Field label="Icon" value={form.icon} onChange={(v) => update("icon", v)} />
+                  <ToggleField label="Visible on public page" checked={form.visible} onChange={(v) => update("visible", v)} />
+                </>
+              )}
+
+              {(target.type === "journeyBadge" || target.type === "journeyHeader") && (
+                <>
+                  <Field label="Badge" value={form.journeyBadge} onChange={(v) => update("journeyBadge", v)} />
+                  <Field label="Title" value={form.journeyTitle} onChange={(v) => update("journeyTitle", v)} />
+                </>
+              )}
+
+              {target.type === "journeyItem" && (
+                <>
+                  <Field label="Year" value={form.year} onChange={(v) => update("year", v)} />
+                  <Field label="Title" value={form.title} onChange={(v) => update("title", v)} />
+                  <Field label="Description" value={form.desc} onChange={(v) => update("desc", v)} textarea />
+                  <ToggleField label="Visible on public page" checked={form.visible} onChange={(v) => update("visible", v)} />
+                </>
+              )}
+
+              {target.type === "ctaBand" && (
+                <>
+                  <Field label="CTA Title" value={form.ctaTitle} onChange={(v) => update("ctaTitle", v)} />
+                  <Field label="CTA Description" value={form.ctaDescription} onChange={(v) => update("ctaDescription", v)} textarea />
+                  <Field label="Button Text" value={form.ctaButtonText} onChange={(v) => update("ctaButtonText", v)} />
+                  <Field label="Button Link" value={form.ctaButtonLink} onChange={(v) => update("ctaButtonLink", v)} />
+                </>
+              )}
+
+              {target.type === "statsCard" && (
+                <>
+                  <Field label="Value" value={form.value} onChange={(v) => update("value", v)} type="number" />
+                  <Field label="Suffix" value={form.suffix} onChange={(v) => update("suffix", v)} />
+                  <Field label="Label" value={form.label} onChange={(v) => update("label", v)} />
+                  <Field label="Decimals" value={form.decimals} onChange={(v) => update("decimals", v)} type="number" />
+                  <ToggleField label="Visible on public page" checked={form.visible} onChange={(v) => update("visible", v)} />
+                </>
+              )}
+
+              {imageAdjustOpen && imageTarget && (
+                <section className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-base font-black text-slate-900">
+                      Image Adjustment
+                    </h3>
+
+                    <button
+                      type="button"
+                      onClick={() => setImageAdjustOpen(false)}
+                      className="rounded-xl bg-white px-3 py-2 text-xs font-black text-slate-600"
+                    >
+                      Done
+                    </button>
+                  </div>
+
+                  <div className="mt-4 overflow-hidden rounded-2xl bg-slate-900">
+                    <div className="mx-auto aspect-[4/3] max-h-[360px] w-full max-w-xl overflow-hidden">
+                      {(form.storyImageUrl || form.imageUrl || form.image) && (
+                        <img
+                          src={form.storyImageUrl || form.imageUrl || form.image}
+                          alt=""
+                          className="h-full w-full object-cover"
+                          style={{
+                            objectPosition: `${50 - clampOffset(form.imageOffsetX)}% ${50 - clampOffset(form.imageOffsetY)}%`,
+                            transform: `scale(${clampZoom(form.imageZoom)})`,
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                    <label className="block">
+                      <span className="text-xs font-black text-slate-500">
+                        Zoom
+                      </span>
+                      <input
+                        className="mt-2 w-full"
+                        type="range"
+                        min="1"
+                        max="3"
+                        step="0.05"
+                        value={clampZoom(form.imageZoom)}
+                        onChange={(event) =>
+                          update("imageZoom", Number(event.target.value))
+                        }
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="text-xs font-black text-slate-500">
+                        Horizontal
+                      </span>
+                      <input
+                        className="mt-2 w-full"
+                        type="range"
+                        min="-60"
+                        max="60"
+                        value={clampOffset(form.imageOffsetX)}
+                        onChange={(event) =>
+                          update("imageOffsetX", Number(event.target.value))
+                        }
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="text-xs font-black text-slate-500">
+                        Vertical
+                      </span>
+                      <input
+                        className="mt-2 w-full"
+                        type="range"
+                        min="-60"
+                        max="60"
+                        value={clampOffset(form.imageOffsetY)}
+                        onChange={(event) =>
+                          update("imageOffsetY", Number(event.target.value))
+                        }
+                      />
+                    </label>
+                  </div>
+                </section>
+              )}
+            </div>
+          </div>
+
+          <footer className="flex shrink-0 flex-col-reverse gap-2 border-t border-slate-100 bg-white/95 p-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div>
+              {canDelete && (
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={onDelete}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-xs font-black text-red-700 disabled:opacity-50 sm:w-auto"
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                disabled={saving || uploading}
+                onClick={onClose}
+                className="rounded-2xl bg-slate-100 px-5 py-3 text-xs font-black text-slate-700 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={saving || uploading}
+                onClick={onSave}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-xs font-black text-white disabled:opacity-50"
+              >
+                <Save size={14} />
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </footer>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function ConfirmDelete({ target, onCancel, onConfirm, saving }) {
+  if (!target) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100000] flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-md"
+        onMouseDown={onCancel}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          onMouseDown={(event) => event.stopPropagation()}
+          className="w-full max-w-md rounded-[26px] bg-white p-6 shadow-2xl sm:p-7"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+            <Trash2 size={21} />
+          </div>
+
+          <h3 className="mt-5 text-xl font-black text-slate-950">
+            Delete this item?
+          </h3>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            This will remove the selected About item from the public page.
+            The action is saved to the backend.
+          </p>
+
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={saving}
+              className="rounded-2xl bg-slate-100 px-5 py-3 text-xs font-black text-slate-700"
+            >
+              Cancel
             </button>
 
             <button
               type="button"
-              onClick={onSave}
-              disabled={saving || uploadingImage}
-              className="rounded-2xl px-5 py-3 text-sm font-black text-slate-950 disabled:opacity-50"
-              style={{
-                background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-              }}
+              onClick={onConfirm}
+              disabled={saving}
+              className="rounded-2xl bg-red-600 px-5 py-3 text-xs font-black text-white disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save This Item"}
+              {saving ? "Deleting..." : "Delete"}
             </button>
           </div>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
-        <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[minmax(280px,1fr)_420px] lg:items-start">
-          <section className="rounded-[34px] bg-white/8 p-4 shadow-2xl ring-1 ring-white/10 sm:p-5">
-            <div
-              className={cropBoxClass}
-              style={cropBoxStyle}
-              onPointerDown={startDrag}
-              onPointerMove={moveDrag}
-              onPointerUp={endDrag}
-              onPointerCancel={endDrag}
-              onPointerLeave={endDrag}
-              onWheel={handleWheelZoom}
-            >
-              {imageConfig.imageUrl ? (
-                <img
-                  src={imageConfig.imageUrl}
-                  alt="About image crop preview"
-                  draggable={false}
-                  className="absolute inset-0"
-                  style={getCropImageStyle(modalForm)}
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ImageIcon className="h-16 w-16 text-slate-300" />
-                </div>
-              )}
-
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-x-0 top-1/3 h-px bg-white/35" />
-                <div className="absolute inset-x-0 top-2/3 h-px bg-white/35" />
-                <div className="absolute inset-y-0 left-1/3 w-px bg-white/35" />
-                <div className="absolute inset-y-0 left-2/3 w-px bg-white/35" />
-              </div>
-
-              <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-white">
-                Drag / Pinch / Wheel
-              </div>
-            </div>
-          </section>
-
-          <section className="rounded-[34px] bg-white p-5 text-slate-950 shadow-2xl sm:p-6">
-            <div className="mb-5">
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">
-                Controls
-              </div>
-              <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-500">
-                Phone: use two fingers on the image to zoom. Laptop: place the mouse over the image and use mouse wheel or trackpad. Drag the image to position it.
-              </p>
-            </div>
-
-            <label
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl px-4 py-3 font-black"
-              style={{
-                background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                color: colors.dark,
-              }}
-            >
-              <UploadCloud className="w-4 h-4" />
-              {uploadingImage ? "Uploading..." : "Upload New Image"}
-              <input
-                type="file"
-                accept="image/*"
-                disabled={uploadingImage}
-                onChange={(event) => {
-                  uploadImage(event.target.files?.[0]);
-                  event.target.value = "";
-                }}
-                className="hidden"
-              />
-            </label>
-
-            <div className="mt-6 space-y-5">
-              <CropSlider
-                label="Zoom"
-                value={clampImageZoom(modalForm.imageZoom)}
-                min={1}
-                max={3}
-                step={0.05}
-                suffix="x"
-                onChange={(value) => updateCrop({ imageZoom: clampImageZoom(value) })}
-              />
-
-              <CropSlider
-                label="Move Left / Right"
-                value={clampImageOffset(modalForm.imageOffsetX)}
-                min={-60}
-                max={60}
-                step={1}
-                onChange={(value) => updateCrop({ imageOffsetX: clampImageOffset(value) })}
-              />
-
-              <CropSlider
-                label="Move Up / Down"
-                value={clampImageOffset(modalForm.imageOffsetY)}
-                min={-60}
-                max={60}
-                step={1}
-                onChange={(value) => updateCrop({ imageOffsetY: clampImageOffset(value) })}
-              />
-            </div>
-
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  updateCrop({
-                    imageOffsetY: clampImageOffset(clampImageOffset(modalForm.imageOffsetY) - 5),
-                  })
-                }
-                className="rounded-xl bg-slate-100 px-3 py-3 text-xs font-black text-slate-600"
-              >
-                Up
-              </button>
-
-              <button
-                type="button"
-                onClick={resetCrop}
-                disabled={saving || uploadingImage}
-                className="rounded-xl px-3 py-3 text-xs font-black text-slate-950 disabled:opacity-50"
-                style={{
-                  background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                }}
-              >
-                Reset
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  updateCrop({
-                    imageOffsetY: clampImageOffset(clampImageOffset(modalForm.imageOffsetY) + 5),
-                  })
-                }
-                className="rounded-xl bg-slate-100 px-3 py-3 text-xs font-black text-slate-600"
-              >
-                Down
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  updateCrop({
-                    imageOffsetX: clampImageOffset(clampImageOffset(modalForm.imageOffsetX) - 5),
-                  })
-                }
-                className="rounded-xl bg-slate-100 px-3 py-3 text-xs font-black text-slate-600"
-              >
-                Left
-              </button>
-
-              <div className="rounded-xl bg-slate-50 px-3 py-3 text-center text-[11px] font-black text-slate-400">
-                Move
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  updateCrop({
-                    imageOffsetX: clampImageOffset(clampImageOffset(modalForm.imageOffsetX) + 5),
-                  })
-                }
-                className="rounded-xl bg-slate-100 px-3 py-3 text-xs font-black text-slate-600"
-              >
-                Right
-              </button>
-            </div>
-
-            <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-xs font-semibold leading-relaxed text-slate-500">
-              Current: Zoom {clampImageZoom(modalForm.imageZoom).toFixed(2)}x, X{" "}
-              {Math.round(clampImageOffset(modalForm.imageOffsetX))}, Y{" "}
-              {Math.round(clampImageOffset(modalForm.imageOffsetY))}
-            </div>
-          </section>
-        </div>
-      </main>
-    </motion.div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
-function getDeleteName(target) {
-  if (!target) return "this item";
-
-  if (target.type === "statsCard") return "this statistic card";
-  if (target.type === "pillarCard") return "this core value card";
-  if (target.type === "leadershipMessage") return "this leadership message";
-  if (target.type === "missionVision") return "this mission / vision card";
-  if (target.type === "journeyItem") return "this journey item";
-
-  return "this item";
-}
-
 export default function AdminAbout() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState(defaultAboutContent);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const [editingTarget, setEditingTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+
   const [modalForm, setModalForm] = useState({});
   const [imageAdjustOpen, setImageAdjustOpen] = useState(false);
+
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const loadAboutContent = async () => {
-      try {
-        const res = await api.get("/api/site-content/about", {
-          timeout: 12000,
-        });
-        const savedContent = res.data?.data?.content || {};
-        setForm(mergeAboutContent(savedContent));
-      } catch (err) {
-        console.error("Load about content error:", err);
-        setError("Could not load saved about content. Default content shown.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadAboutContent = async () => {
+    setLoading(true);
+    setError("");
 
+    try {
+      const response = await api.get(API_PATH, {
+        timeout: 12000,
+      });
+
+      const savedContent = response?.data?.data?.content || {};
+      setForm(mergeAboutContent(savedContent));
+    } catch (err) {
+      console.error("Load about content error:", err);
+      setError(
+        err?.response?.data?.message ||
+          "Could not load saved About content. Default content is being shown by the preview."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadAboutContent();
   }, []);
 
   const openEditor = (target) => {
+    if (!target) return;
+
     setSuccess("");
     setError("");
     setImageAdjustOpen(false);
     setEditingTarget(target);
 
-    // Page Header
+    const item = target.index != null
+      ? form?.[
+          target.type === "statsCard"
+            ? "stats"
+            : target.type === "pillarCard"
+              ? "pillars"
+              : target.type === "leadershipMessage" ||
+                  target.type === "leadershipPhoto"
+                ? "messages"
+                : target.type === "missionVision"
+                  ? "missionVision"
+                  : target.type === "journeyItem"
+                    ? "journey"
+                    : ""
+        ]?.[target.index] || {}
+      : {};
+
     if (target.type === "pageHeader") {
       setModalForm({
         pageBadge: form.pageBadge || "",
@@ -688,30 +686,30 @@ export default function AdminAbout() {
       return;
     }
 
-    // Story Text
     if (target.type === "storyText") {
       setModalForm({
         storyBadge: form.storyBadge || "",
         storyTitle: form.storyTitle || "",
         paragraph1: form.storyParagraphs?.[0] || "",
         paragraph2: form.storyParagraphs?.[1] || "",
+        tags: Array.isArray(form.storyTags)
+          ? form.storyTags.join("\n")
+          : "",
       });
       return;
     }
 
-    // Story Image
     if (target.type === "storyImage") {
       setModalForm({
         storyImageUrl: form.storyImageUrl || "",
         storyImageAlt: form.storyImageAlt || "",
-        imageZoom: clampImageZoom(form.storyImageZoom),
-        imageOffsetX: clampImageOffset(form.storyImageOffsetX),
-        imageOffsetY: clampImageOffset(form.storyImageOffsetY),
+        imageZoom: clampZoom(form.storyImageZoom),
+        imageOffsetX: clampOffset(form.storyImageOffsetX),
+        imageOffsetY: clampOffset(form.storyImageOffsetY),
       });
       return;
     }
 
-    // Story Image Text
     if (target.type === "storyImageText") {
       setModalForm({
         storyImageTitle: form.storyImageTitle || "",
@@ -720,7 +718,6 @@ export default function AdminAbout() {
       return;
     }
 
-    // Pillar Header
     if (target.type === "pillarHeader") {
       setModalForm({
         pillarBadge: form.pillarBadge || "",
@@ -730,20 +727,17 @@ export default function AdminAbout() {
       return;
     }
 
-    // Pillar Card
     if (target.type === "pillarCard") {
-      const item = form.pillars?.[target.index];
-
       setModalForm({
-        label: item?.label || "",
-        desc: item?.desc || "",
-        color: item?.color || colors.green,
-        visible: item?.visible !== false,
+        ...item,
+        label: item.label || "",
+        desc: item.desc || "",
+        color: item.color || CARD_COLORS[target.index % CARD_COLORS.length],
+        visible: item.visible !== false,
       });
       return;
     }
 
-    // Leadership Header
     if (target.type === "leadershipHeader") {
       setModalForm({
         leadershipBadge: form.leadershipBadge || "",
@@ -753,60 +747,38 @@ export default function AdminAbout() {
       return;
     }
 
-    // Leadership Message
-    if (target.type === "leadershipMessage") {
-      const item = form.messages?.[target.index];
-
+    if (target.type === "leadershipMessage" || target.type === "leadershipPhoto") {
       setModalForm({
-        name: item?.name || "",
-        role: item?.role || "",
-        title: item?.title || "",
-        message: item?.message || "",
-        image: item?.image || "",
-        imageZoom: clampImageZoom(item?.imageZoom),
-        imageOffsetX: clampImageOffset(item?.imageOffsetX),
-        imageOffsetY: clampImageOffset(item?.imageOffsetY),
-        visible: item?.visible !== false,
+        ...item,
+        imageUrl: item.image || item.imageUrl || "",
+        imageZoom: clampZoom(item.imageZoom),
+        imageOffsetX: clampOffset(item.imageOffsetX),
+        imageOffsetY: clampOffset(item.imageOffsetY),
+        visible: item.visible !== false,
       });
       return;
     }
 
-    // Leadership Photo
-    if (target.type === "leadershipPhoto") {
-      const item = form.messages?.[target.index];
-
-      setModalForm({
-        image: item?.image || "",
-        imageZoom: clampImageZoom(item?.imageZoom),
-        imageOffsetX: clampImageOffset(item?.imageOffsetX),
-        imageOffsetY: clampImageOffset(item?.imageOffsetY),
-      });
-      return;
-    }
-
-    // Mission/Vision Badge
-    if (target.type === "missionVisionBadge") {
+    if (target.type === "missionVisionBadge" || target.type === "missionVisionHeader") {
       setModalForm({
         missionVisionBadge: form.missionVisionBadge || "",
+        missionVisionTitle: form.missionVisionTitle || "",
       });
       return;
     }
 
-    // Mission/Vision Card
     if (target.type === "missionVision") {
-      const item = form.missionVision?.[target.index];
-
       setModalForm({
-        title: item?.title || "",
-        desc: item?.desc || "",
-        color: item?.color || colors.purple,
-        visible: item?.visible !== false,
+        ...item,
+        title: item.title || "",
+        desc: item.desc || "",
+        color: item.color || CARD_COLORS[target.index % CARD_COLORS.length],
+        visible: item.visible !== false,
       });
       return;
     }
 
-    // Journey Badge
-    if (target.type === "journeyBadge") {
+    if (target.type === "journeyBadge" || target.type === "journeyHeader") {
       setModalForm({
         journeyBadge: form.journeyBadge || "",
         journeyTitle: form.journeyTitle || "",
@@ -814,20 +786,17 @@ export default function AdminAbout() {
       return;
     }
 
-    // Journey Item
     if (target.type === "journeyItem") {
-      const item = form.journey?.[target.index];
-
       setModalForm({
-        year: item?.year || "",
-        title: item?.title || "",
-        desc: item?.desc || "",
-        visible: item?.visible !== false,
+        ...item,
+        year: item.year || "",
+        title: item.title || "",
+        desc: item.desc || "",
+        visible: item.visible !== false,
       });
       return;
     }
 
-    // CTA Band
     if (target.type === "ctaBand") {
       setModalForm({
         ctaTitle: form.ctaTitle || "",
@@ -838,112 +807,24 @@ export default function AdminAbout() {
       return;
     }
 
-    // Stats Card
     if (target.type === "statsCard") {
-      const stat = form.stats?.[target.index];
-
       setModalForm({
-        value: stat?.value !== undefined ? stat.value : "",
-        suffix: stat?.suffix || "",
-        label: stat?.label || "",
-        decimals: stat?.decimals !== undefined ? stat.decimals : 0,
-        visible: stat?.visible !== false,
+        ...item,
+        value: item.value ?? 0,
+        suffix: item.suffix || "",
+        label: item.label || "",
+        decimals: item.decimals ?? 0,
+        visible: item.visible !== false,
       });
-      return;
     }
   };
 
   const closeEditor = () => {
     if (saving || uploadingImage) return;
+
     setImageAdjustOpen(false);
     setEditingTarget(null);
     setModalForm({});
-  };
-
-  const preventUnsafeBackspaceNavigation = (event) => {
-    if (event.key !== "Backspace") return;
-
-    const target = event.target;
-    const tagName = String(target?.tagName || "").toLowerCase();
-    const isEditableField =
-      tagName === "input" ||
-      tagName === "textarea" ||
-      target?.isContentEditable;
-
-    if (!isEditableField) {
-      event.preventDefault();
-    }
-  };
-
-  const updateModalField = (name, value) => {
-    setModalForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const uploadImage = async (file) => {
-    if (!file) return;
-
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    const maxSize = 6 * 1024 * 1024;
-
-    if (!allowedTypes.includes(file.type)) {
-      setError("Please upload only PNG, JPG, or WebP image.");
-      return;
-    }
-
-    if (file.size > maxSize) {
-      setError("Image must be less than 6 MB.");
-      return;
-    }
-
-    const authHeaders = getAuthHeaders();
-
-    if (!authHeaders) {
-      setError("Admin login expired. Please logout and login again.");
-      return;
-    }
-
-    setSuccess("");
-    setError("");
-    setUploadingImage(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await api.post("/api/upload", formData, {
-        headers: {
-          ...authHeaders,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const uploadedUrl = getUploadUrl(res.data);
-
-      if (!uploadedUrl) {
-        setError("Image uploaded but backend did not return image URL.");
-        return;
-      }
-
-      const imageKey = editingTarget?.type === "storyImage" ? "storyImageUrl" : "image";
-
-      setModalForm((prev) => ({
-        ...prev,
-        [imageKey]: uploadedUrl,
-        imageZoom: clampImageZoom(prev.imageZoom),
-        imageOffsetX: clampImageOffset(prev.imageOffsetX),
-        imageOffsetY: clampImageOffset(prev.imageOffsetY),
-      }));
-
-      setSuccess("Image uploaded. Open image adjustment if needed, then click Save.");
-    } catch (err) {
-      console.error("About image upload error:", err);
-      setError(err.response?.data?.message || "Image upload failed.");
-    } finally {
-      setUploadingImage(false);
-    }
   };
 
   const saveContentToBackend = async (nextForm, message) => {
@@ -955,18 +836,82 @@ export default function AdminAbout() {
     }
 
     await api.put(
-      "/api/site-content/about",
-      {
-        content: nextForm,
-      },
+      API_PATH,
+      { content: nextForm },
       {
         headers: authHeaders,
+        timeout: 20000,
       }
     );
 
     setForm(nextForm);
     setSuccess(message || "About page updated successfully.");
     return true;
+  };
+
+  const uploadImage = async (file) => {
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Please upload only PNG, JPG, or WebP images.");
+      return;
+    }
+
+    if (file.size > 6 * 1024 * 1024) {
+      setError("Image must be less than 6 MB.");
+      return;
+    }
+
+    const authHeaders = getAuthHeaders();
+
+    if (!authHeaders) {
+      setError("Admin login expired. Please logout and login again.");
+      return;
+    }
+
+    setUploadingImage(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      const data = new FormData();
+      data.append("file", file);
+
+      const response = await api.post("/api/upload", data, {
+        headers: {
+          ...authHeaders,
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 30000,
+      });
+
+      const url = getUploadUrl(response?.data);
+
+      if (!url) {
+        throw new Error("Image uploaded but no image URL was returned.");
+      }
+
+      setModalForm((previous) => ({
+        ...previous,
+        ...(editingTarget?.type === "storyImage"
+          ? { storyImageUrl: url }
+          : { imageUrl: url }),
+        imageZoom: 1,
+        imageOffsetX: 0,
+        imageOffsetY: 0,
+      }));
+
+      setSuccess("Image uploaded. Click Save Changes to publish it.");
+    } catch (err) {
+      console.error("About image upload error:", err);
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Image upload failed."
+      );
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const saveSelectedPart = async () => {
@@ -978,9 +923,9 @@ export default function AdminAbout() {
 
     try {
       let nextForm = mergeAboutContent(form);
+      const target = editingTarget;
 
-      // Page Header
-      if (editingTarget.type === "pageHeader") {
+      if (target.type === "pageHeader") {
         nextForm = {
           ...nextForm,
           pageBadge: modalForm.pageBadge || "",
@@ -992,8 +937,7 @@ export default function AdminAbout() {
         };
       }
 
-      // Story Text
-      if (editingTarget.type === "storyText") {
+      if (target.type === "storyText") {
         nextForm = {
           ...nextForm,
           storyBadge: modalForm.storyBadge || "",
@@ -1002,23 +946,25 @@ export default function AdminAbout() {
             modalForm.paragraph1 || "",
             modalForm.paragraph2 || "",
           ],
+          storyTags: String(modalForm.tags || "")
+            .split("\n")
+            .map((item) => item.trim())
+            .filter(Boolean),
         };
       }
 
-      // Story Image
-      if (editingTarget.type === "storyImage") {
+      if (target.type === "storyImage") {
         nextForm = {
           ...nextForm,
           storyImageUrl: modalForm.storyImageUrl || "",
           storyImageAlt: modalForm.storyImageAlt || "",
-          storyImageZoom: clampImageZoom(modalForm.imageZoom),
-          storyImageOffsetX: clampImageOffset(modalForm.imageOffsetX),
-          storyImageOffsetY: clampImageOffset(modalForm.imageOffsetY),
+          storyImageZoom: clampZoom(modalForm.imageZoom),
+          storyImageOffsetX: clampOffset(modalForm.imageOffsetX),
+          storyImageOffsetY: clampOffset(modalForm.imageOffsetY),
         };
       }
 
-      // Story Image Text
-      if (editingTarget.type === "storyImageText") {
+      if (target.type === "storyImageText") {
         nextForm = {
           ...nextForm,
           storyImageTitle: modalForm.storyImageTitle || "",
@@ -1026,8 +972,7 @@ export default function AdminAbout() {
         };
       }
 
-      // Pillar Header
-      if (editingTarget.type === "pillarHeader") {
+      if (target.type === "pillarHeader") {
         nextForm = {
           ...nextForm,
           pillarBadge: modalForm.pillarBadge || "",
@@ -1036,26 +981,19 @@ export default function AdminAbout() {
         };
       }
 
-      // Pillar Card
-      if (editingTarget.type === "pillarCard") {
-        nextForm = {
-          ...nextForm,
-          pillars: nextForm.pillars.map((item, index) =>
-            index === editingTarget.index
-              ? {
+      if (target.type === "pillarCard") {
+        nextForm.pillars = nextForm.pillars.map((item, index) =>
+          index === target.index
+            ? {
                 ...item,
-                label: modalForm.label || "",
-                desc: modalForm.desc || "",
-                color: modalForm.color || colors.green,
+                ...modalForm,
                 visible: modalForm.visible !== false,
               }
-              : item
-          ),
-        };
+            : item
+        );
       }
 
-      // Leadership Header
-      if (editingTarget.type === "leadershipHeader") {
+      if (target.type === "leadershipHeader") {
         nextForm = {
           ...nextForm,
           leadershipBadge: modalForm.leadershipBadge || "",
@@ -1064,75 +1002,43 @@ export default function AdminAbout() {
         };
       }
 
-      // Leadership Message
-      if (editingTarget.type === "leadershipMessage") {
-        nextForm = {
-          ...nextForm,
-          messages: nextForm.messages.map((item, index) =>
-            index === editingTarget.index
-              ? {
+      if (target.type === "leadershipMessage" || target.type === "leadershipPhoto") {
+        nextForm.messages = nextForm.messages.map((item, index) =>
+          index === target.index
+            ? {
                 ...item,
-                name: modalForm.name || "",
-                role: modalForm.role || "",
-                title: modalForm.title || "",
-                message: modalForm.message || "",
-                image: modalForm.image || "",
-                imageZoom: clampImageZoom(modalForm.imageZoom),
-                imageOffsetX: clampImageOffset(modalForm.imageOffsetX),
-                imageOffsetY: clampImageOffset(modalForm.imageOffsetY),
+                ...modalForm,
+                image: modalForm.imageUrl || modalForm.image || "",
+                imageZoom: clampZoom(modalForm.imageZoom),
+                imageOffsetX: clampOffset(modalForm.imageOffsetX),
+                imageOffsetY: clampOffset(modalForm.imageOffsetY),
                 visible: modalForm.visible !== false,
               }
-              : item
-          ),
-        };
+            : item
+        );
       }
 
-      // Leadership Photo
-      if (editingTarget.type === "leadershipPhoto") {
-        nextForm = {
-          ...nextForm,
-          messages: nextForm.messages.map((item, index) =>
-            index === editingTarget.index
-              ? {
-                ...item,
-                image: modalForm.image || "",
-                imageZoom: clampImageZoom(modalForm.imageZoom),
-                imageOffsetX: clampImageOffset(modalForm.imageOffsetX),
-                imageOffsetY: clampImageOffset(modalForm.imageOffsetY),
-              }
-              : item
-          ),
-        };
-      }
-
-      // Mission/Vision Badge
-      if (editingTarget.type === "missionVisionBadge") {
+      if (target.type === "missionVisionBadge" || target.type === "missionVisionHeader") {
         nextForm = {
           ...nextForm,
           missionVisionBadge: modalForm.missionVisionBadge || "",
+          missionVisionTitle: modalForm.missionVisionTitle || "",
         };
       }
 
-      // Mission/Vision Card
-      if (editingTarget.type === "missionVision") {
-        nextForm = {
-          ...nextForm,
-          missionVision: nextForm.missionVision.map((item, index) =>
-            index === editingTarget.index
-              ? {
+      if (target.type === "missionVision") {
+        nextForm.missionVision = nextForm.missionVision.map((item, index) =>
+          index === target.index
+            ? {
                 ...item,
-                title: modalForm.title || "",
-                desc: modalForm.desc || "",
-                color: modalForm.color || colors.purple,
+                ...modalForm,
                 visible: modalForm.visible !== false,
               }
-              : item
-          ),
-        };
+            : item
+        );
       }
 
-      // Journey Badge
-      if (editingTarget.type === "journeyBadge") {
+      if (target.type === "journeyBadge" || target.type === "journeyHeader") {
         nextForm = {
           ...nextForm,
           journeyBadge: modalForm.journeyBadge || "",
@@ -1140,26 +1046,19 @@ export default function AdminAbout() {
         };
       }
 
-      // Journey Item
-      if (editingTarget.type === "journeyItem") {
-        nextForm = {
-          ...nextForm,
-          journey: nextForm.journey.map((item, index) =>
-            index === editingTarget.index
-              ? {
+      if (target.type === "journeyItem") {
+        nextForm.journey = nextForm.journey.map((item, index) =>
+          index === target.index
+            ? {
                 ...item,
-                year: modalForm.year || "",
-                title: modalForm.title || "",
-                desc: modalForm.desc || "",
+                ...modalForm,
                 visible: modalForm.visible !== false,
               }
-              : item
-          ),
-        };
+            : item
+        );
       }
 
-      // CTA Band
-      if (editingTarget.type === "ctaBand") {
+      if (target.type === "ctaBand") {
         nextForm = {
           ...nextForm,
           ctaTitle: modalForm.ctaTitle || "",
@@ -1169,81 +1068,79 @@ export default function AdminAbout() {
         };
       }
 
-      // Stats Card
-      if (editingTarget.type === "statsCard") {
-        const stats = [...nextForm.stats];
-
-        const updatedStat = {
-          ...(stats[editingTarget.index] || {}),
-          id: stats[editingTarget.index]?.id || Date.now(),
-          value: modalForm.value === "" ? 0 : Number(modalForm.value),
-          suffix: modalForm.suffix || "",
-          label: modalForm.label || "",
-          decimals: Number(modalForm.decimals) || 0,
-          visible: modalForm.visible !== false,
-        };
-
-        if (editingTarget.isNew) {
-          stats.push(updatedStat);
-        } else {
-          stats[editingTarget.index] = updatedStat;
-        }
-
-        nextForm.stats = stats;
+      if (target.type === "statsCard") {
+        nextForm.stats = nextForm.stats.map((item, index) =>
+          index === target.index
+            ? {
+                ...item,
+                ...modalForm,
+                value:
+                  modalForm.value === ""
+                    ? 0
+                    : Number(modalForm.value),
+                decimals: Number(modalForm.decimals) || 0,
+                visible: modalForm.visible !== false,
+              }
+            : item
+        );
       }
 
-      const cleanContent = mergeAboutContent(nextForm);
       await saveContentToBackend(
-        cleanContent,
-        "Selected about item saved successfully."
+        mergeAboutContent(nextForm),
+        "Selected About item saved successfully."
       );
 
-      setImageAdjustOpen(false);
-      setEditingTarget(null);
-      setModalForm({});
+      closeEditor();
     } catch (err) {
-      console.error("Save selected about item error:", err);
+      console.error("Save selected About item error:", err);
 
-      if (err.response?.status === 401) {
+      if (err?.response?.status === 401) {
         setError("Admin login expired or token is invalid. Please login again.");
       } else {
-        setError(err.response?.data?.message || "Could not save selected item.");
+        setError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Could not save selected item."
+        );
       }
     } finally {
       setSaving(false);
     }
   };
 
-  const deleteTargetItem = async (target) => {
+  const requestDelete = () => {
+    if (!editingTarget) return;
+    setDeleteTarget(editingTarget);
+  };
+
+  const deleteTargetItem = async () => {
+    const target = deleteTarget;
+
     if (!target) return;
-
-    const deletableTypes = [
-      "statsCard",
-      "pillarCard",
-      "leadershipMessage",
-      "missionVision",
-      "journeyItem",
-    ];
-
-    if (!deletableTypes.includes(target.type)) return;
 
     setSaving(true);
     setSuccess("");
     setError("");
 
     try {
-      let nextForm = mergeAboutContent(form);
+      const nextForm = mergeAboutContent(form);
 
       if (target.type === "statsCard") {
-        nextForm.stats = nextForm.stats.filter((_, index) => index !== target.index);
+        nextForm.stats = nextForm.stats.filter(
+          (_, index) => index !== target.index
+        );
       }
 
       if (target.type === "pillarCard") {
-        nextForm.pillars = nextForm.pillars.filter((_, index) => index !== target.index);
+        nextForm.pillars = nextForm.pillars.filter(
+          (_, index) => index !== target.index
+        );
       }
 
       if (target.type === "leadershipMessage") {
-        nextForm.messages = nextForm.messages.filter((_, index) => index !== target.index);
+        nextForm.messages = nextForm.messages.filter(
+          (_, index) => index !== target.index
+        );
       }
 
       if (target.type === "missionVision") {
@@ -1253,18 +1150,25 @@ export default function AdminAbout() {
       }
 
       if (target.type === "journeyItem") {
-        nextForm.journey = nextForm.journey.filter((_, index) => index !== target.index);
+        nextForm.journey = nextForm.journey.filter(
+          (_, index) => index !== target.index
+        );
       }
 
-      const cleanContent = mergeAboutContent(nextForm);
-      await saveContentToBackend(cleanContent, "Selected item deleted successfully.");
+      await saveContentToBackend(
+        mergeAboutContent(nextForm),
+        "Selected About item deleted successfully."
+      );
 
       setDeleteTarget(null);
-      setEditingTarget(null);
-      setModalForm({});
+      closeEditor();
     } catch (err) {
-      console.error("Delete selected about item error:", err);
-      setError(err.response?.data?.message || "Could not delete selected item.");
+      console.error("Delete About item error:", err);
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Could not delete selected item."
+      );
     } finally {
       setSaving(false);
     }
@@ -1277,152 +1181,100 @@ export default function AdminAbout() {
 
     try {
       let nextForm = mergeAboutContent(form);
+      const id = Date.now();
 
       if (type === "stat") {
-        nextForm = {
-          ...nextForm,
-          stats: [
-            ...nextForm.stats,
-            {
-              id: Date.now(),
-              value: 0,
-              suffix: "",
-              decimals: 0,
-              label: "New Statistic",
-              visible: true,
-            },
-          ],
-        };
+        nextForm.stats = [
+          ...nextForm.stats,
+          {
+            id,
+            value: 0,
+            suffix: "",
+            decimals: 0,
+            label: "New Statistic",
+            visible: true,
+          },
+        ];
       }
 
       if (type === "pillar") {
-        const nextColor = cardColors[nextForm.pillars.length % cardColors.length];
-
-        nextForm = {
-          ...nextForm,
-          pillars: [
-            ...nextForm.pillars,
-            {
-              id: Date.now(),
-              label: "New Core Value",
-              desc: "Write a short description for this core value.",
-              color: nextColor,
-              visible: true,
-            },
-          ],
-        };
+        nextForm.pillars = [
+          ...nextForm.pillars,
+          {
+            id,
+            label: "New Core Value",
+            desc: "Write a short description for this core value.",
+            color: CARD_COLORS[nextForm.pillars.length % CARD_COLORS.length],
+            visible: true,
+          },
+        ];
       }
 
       if (type === "message") {
-        nextForm = {
-          ...nextForm,
-          messages: [
-            ...nextForm.messages,
-            {
-              id: Date.now(),
-              name: "Leader Name",
-              role: "Post / Designation",
-              title: "Message Title",
-              message: "Write the leadership message here.",
-              image: "",
-              imageZoom: 1,
-              imageOffsetX: 0,
-              imageOffsetY: 0,
-              visible: true,
-            },
-          ],
-        };
+        nextForm.messages = [
+          ...nextForm.messages,
+          {
+            id,
+            name: "Leader Name",
+            role: "Post / Designation",
+            title: "Message Title",
+            message: "Write the leadership message here.",
+            image: "",
+            imageZoom: 1,
+            imageOffsetX: 0,
+            imageOffsetY: 0,
+            visible: true,
+          },
+        ];
       }
 
       if (type === "missionVision") {
-        const nextColor = cardColors[nextForm.missionVision.length % cardColors.length];
-
-        nextForm = {
-          ...nextForm,
-          missionVision: [
-            ...nextForm.missionVision,
-            {
-              id: Date.now(),
-              title: "New Section",
-              desc: "Write the section description here.",
-              color: nextColor,
-              visible: true,
-            },
-          ],
-        };
+        nextForm.missionVision = [
+          ...nextForm.missionVision,
+          {
+            id,
+            title: "New Section",
+            desc: "Write the section description here.",
+            color:
+              CARD_COLORS[
+                nextForm.missionVision.length %
+                  CARD_COLORS.length
+              ],
+            visible: true,
+          },
+        ];
       }
 
       if (type === "journey") {
-        nextForm = {
-          ...nextForm,
-          journey: [
-            ...nextForm.journey,
-            {
-              id: Date.now(),
-              year: "Year",
-              title: "Journey Title",
-              desc: "Write journey description here.",
-              visible: true,
-            },
-          ],
-        };
+        nextForm.journey = [
+          ...nextForm.journey,
+          {
+            id,
+            year: "Year",
+            title: "Journey Title",
+            desc: "Write journey description here.",
+            visible: true,
+          },
+        ];
       }
 
-      const cleanContent = mergeAboutContent(nextForm);
-      await saveContentToBackend(cleanContent, "New item added successfully.");
+      await saveContentToBackend(
+        mergeAboutContent(nextForm),
+        "New About item added successfully."
+      );
     } catch (err) {
-      console.error("Add about item error:", err);
-      setError(err.response?.data?.message || "Could not add item.");
+      console.error("Add About item error:", err);
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Could not add item."
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  const modalTitle = useMemo(() => {
-    if (!editingTarget) return "";
-
-    const titles = {
-      pageHeader: "Edit About Page Header",
-      storyText: "Edit Story Text",
-      storyImage: "Change Story Image",
-      storyImageText: "Edit Story Image Caption",
-      pillarHeader: "Edit Core Values Heading",
-      pillarCard: "Edit Core Value Card",
-      leadershipHeader: "Edit Leadership Heading",
-      leadershipMessage: "Edit Leadership Message",
-      leadershipPhoto: "Change Leadership Photo",
-      missionVisionBadge: "Edit Mission/Vision Badge",
-      missionVision: "Edit Mission / Vision Card",
-      journeyBadge: "Edit Journey Badge",
-      journeyItem: "Edit Journey Item",
-      ctaBand: "Edit Call to Action",
-      statsCard: "Edit Statistic Card",
-    };
-
-    return titles[editingTarget.type] || "Edit About Page";
-  }, [editingTarget]);
-
-  const ModalIcon = useMemo(() => {
-    if (!editingTarget) return Pencil;
-
-    if (
-      editingTarget.type === "storyImage" ||
-      editingTarget.type === "leadershipPhoto"
-    ) {
-      return Camera;
-    }
-
-    if (
-      editingTarget.type === "leadershipMessage" ||
-      editingTarget.type === "leadershipHeader"
-    ) {
-      return MessageSquareText;
-    }
-
-    return Pencil;
-  }, [editingTarget]);
-
-  const canDeleteSelected = useMemo(() => {
+  const canDelete = useMemo(() => {
     if (!editingTarget) return false;
 
     return [
@@ -1434,782 +1286,299 @@ export default function AdminAbout() {
     ].includes(editingTarget.type);
   }, [editingTarget]);
 
-  const needsImageUpload = useMemo(() => {
-    if (!editingTarget) return false;
-
-    return [
-      "storyImage",
-      "leadershipPhoto",
-      "leadershipMessage",
-    ].includes(editingTarget.type);
-  }, [editingTarget]);
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-slate-50 p-6">
+        <div className="rounded-3xl bg-white px-6 py-5 text-sm font-black text-slate-600 shadow-xl ring-1 ring-slate-200">
+          Loading visual About editor...
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <style>
-        {`
-          @media (max-width: 767px) {
-            .admin-about-preview-frame .group .opacity-0,
-            .admin-about-preview-frame .group [class*="opacity-0"],
-            .admin-about-preview-frame .group [class*="group-hover:opacity"],
-            .admin-about-preview-frame [class*="group-hover:opacity"] {
-              opacity: 1 !important;
-              visibility: visible !important;
-              pointer-events: auto !important;
-            }
+    <div className="admin-about-root min-w-0 max-w-full space-y-5 overflow-x-hidden">
+      <style>{`
+        /* ============================================================
+           ADMIN ABOUT — RESPONSIVE PREVIEW ONLY
+           These rules are scoped to this admin page.
+           They do not alter the public About page globally.
+        ============================================================ */
 
-            .admin-about-preview-frame .group .pointer-events-none,
-            .admin-about-preview-frame .group [class*="pointer-events-none"] {
-              pointer-events: auto !important;
-            }
+        .admin-about-preview-frame,
+        .admin-about-preview-frame * {
+          box-sizing: border-box;
+        }
 
-            .admin-about-preview-frame .group button[class*="opacity-0"],
-            .admin-about-preview-frame button[class*="group-hover:opacity"],
-            .admin-about-preview-frame button[class*="opacity-0"] {
-              opacity: 1 !important;
-              visibility: visible !important;
-              pointer-events: auto !important;
-            }
+        .admin-about-preview-frame {
+          width: 100%;
+          min-width: 0;
+          max-width: 100%;
+          overflow-x: hidden;
+          isolation: isolate;
+        }
 
-            .admin-about-preview-frame .group .hidden,
-            .admin-about-preview-frame .group [class*="hidden"] {
-              display: inline-flex !important;
-            }
+        .admin-about-preview-frame .rr-about {
+          width: 100% !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          overflow-x: hidden !important;
+        }
 
-            .admin-about-preview-frame [class*="absolute"] button,
-            .admin-about-preview-frame button[class*="rounded-full"] {
-              min-width: 2.25rem !important;
-              min-height: 2.25rem !important;
-              max-width: calc(100vw - 2rem) !important;
-              white-space: nowrap !important;
-              z-index: 30 !important;
-              pointer-events: auto !important;
-            }
+        .admin-about-preview-frame img,
+        .admin-about-preview-frame video,
+        .admin-about-preview-frame iframe {
+          max-width: 100%;
+        }
 
-            .admin-about-preview-frame [class*="absolute"][class*="z-50"],
-            .admin-about-preview-frame [class*="absolute"][class*="z-[50]"],
-            .admin-about-preview-frame [class*="absolute"][class*="z-[60]"],
-            .admin-about-preview-frame [class*="absolute"][class*="z-[70]"],
-            .admin-about-preview-frame [class*="absolute"][class*="z-[80]"],
-            .admin-about-preview-frame [class*="absolute"][class*="z-[90]"],
-            .admin-about-preview-frame [class*="absolute"][class*="z-[999]"] {
-              z-index: 30 !important;
-            }
+        .admin-about-preview-frame [class*="min-w-"] {
+          min-width: 0 !important;
+        }
+
+        .admin-about-preview-frame [class*="max-w-"] {
+          max-width: 100%;
+        }
+
+        .admin-about-preview-frame h1,
+        .admin-about-preview-frame h2,
+        .admin-about-preview-frame h3,
+        .admin-about-preview-frame h4,
+        .admin-about-preview-frame p,
+        .admin-about-preview-frame span,
+        .admin-about-preview-frame a,
+        .admin-about-preview-frame button {
+          overflow-wrap: anywhere;
+          word-break: normal;
+        }
+
+        /* Edit buttons must be visible/tappable on touch screens. */
+        @media (max-width: 767px) {
+          .admin-about-preview-frame .group .opacity-0,
+          .admin-about-preview-frame .group [class*="opacity-0"],
+          .admin-about-preview-frame .group [class*="group-hover:opacity"],
+          .admin-about-preview-frame [class*="group-hover:opacity"] {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
           }
-        `}
-      </style>
+
+          .admin-about-preview-frame .group .pointer-events-none,
+          .admin-about-preview-frame .group [class*="pointer-events-none"] {
+            pointer-events: auto !important;
+          }
+
+          .admin-about-preview-frame .group button[class*="opacity-0"],
+          .admin-about-preview-frame button[class*="group-hover:opacity"],
+          .admin-about-preview-frame button[class*="opacity-0"] {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+          }
+
+          /* Any responsive grid becomes a single clean mobile column. */
+          .admin-about-preview-frame .rr-about [class*="grid-cols-"] {
+            grid-template-columns: minmax(0, 1fr) !important;
+          }
+
+          /* Prevent fixed desktop widths from creating horizontal overflow. */
+          .admin-about-preview-frame .rr-about [class*="w-\\["],
+          .admin-about-preview-frame .rr-about [class*="min-w-\\["],
+          .admin-about-preview-frame .rr-about [class*="basis-\\["] {
+            max-width: 100% !important;
+            min-width: 0 !important;
+          }
+
+          /* Large desktop padding is reduced only inside the mobile preview. */
+          .admin-about-preview-frame .rr-about [class*="p-16"],
+          .admin-about-preview-frame .rr-about [class*="px-16"],
+          .admin-about-preview-frame .rr-about [class*="py-16"] {
+            padding: 1.25rem !important;
+          }
+
+          .admin-about-preview-frame .rr-about [class*="p-12"],
+          .admin-about-preview-frame .rr-about [class*="px-12"],
+          .admin-about-preview-frame .rr-about [class*="py-12"] {
+            padding: 1rem !important;
+          }
+
+          .admin-about-preview-frame .rr-about [class*="gap-12"],
+          .admin-about-preview-frame .rr-about [class*="gap-10"] {
+            gap: 1.25rem !important;
+          }
+
+          /* Mobile typography */
+          .admin-about-preview-frame .rr-about h1 {
+            font-size: clamp(2rem, 10vw, 3.1rem) !important;
+            line-height: 1.08 !important;
+          }
+
+          .admin-about-preview-frame .rr-about h2 {
+            font-size: clamp(1.55rem, 7vw, 2.25rem) !important;
+            line-height: 1.12 !important;
+          }
+
+          .admin-about-preview-frame .rr-about h3 {
+            line-height: 1.2 !important;
+          }
+
+          .admin-about-preview-frame .rr-about p {
+            max-width: 100% !important;
+          }
+
+          /* Journey rows should not remain two-sided on a phone. */
+          .admin-about-preview-frame .rr-about [class*="md\\:flex-row"],
+          .admin-about-preview-frame .rr-about [class*="lg\\:flex-row"] {
+            flex-direction: column !important;
+          }
+
+          /* CTA is always one column on a phone. */
+          .admin-about-preview-frame .rr-about [class*="justify-between"] {
+            min-width: 0 !important;
+          }
+
+          /* Absolute editor controls stay inside the phone width. */
+          .admin-about-preview-frame [class*="absolute"] {
+            max-width: 100%;
+          }
+
+          .admin-about-preview-frame [class*="absolute"] button,
+          .admin-about-preview-frame button[class*="rounded-full"] {
+            min-width: 2.25rem !important;
+            min-height: 2.25rem !important;
+            max-width: calc(100% - 8px) !important;
+            z-index: 40 !important;
+            pointer-events: auto !important;
+          }
+
+          /* Images inside cards must never force the page wider. */
+          .admin-about-preview-frame .rr-about img {
+            max-width: 100% !important;
+          }
+        }
+
+        /* Very narrow phones (360px and below). */
+        @media (max-width: 380px) {
+          .admin-about-preview-frame .rr-about {
+            font-size: 14px;
+          }
+
+          .admin-about-preview-frame .rr-about [class*="rounded-\\[2.5rem\\]"] {
+            border-radius: 1.5rem !important;
+          }
+
+          .admin-about-preview-frame .rr-about [class*="px-8"],
+          .admin-about-preview-frame .rr-about [class*="p-8"] {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+          }
+        }
+      `}</style>
 
       <motion.div
-        initial={{ opacity: 0, y: 18 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-[24px] p-4 sm:p-5 md:p-6"
+        className="rounded-[24px] border border-slate-200 p-4 shadow-sm sm:p-5 md:p-6"
         style={{
           background:
             "linear-gradient(135deg, #E8EDF5 0%, #DCE3EF 50%, #E8E0F0 100%)",
-          border: "1px solid rgba(15,23,42,0.06)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
         }}
       >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black mb-3 bg-purple-50 text-purple-700 border border-purple-100">
-              <Eye className="w-3.5 h-3.5" />
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 rounded-full border border-purple-100 bg-purple-50 px-3 py-1.5 text-xs font-black text-purple-700">
+              <Eye className="h-3.5 w-3.5" />
               Visual About Editor
             </div>
 
-            <h2
-              className="text-2xl md:text-3xl font-black text-slate-950"
-              style={{
-                fontFamily: "var(--font-display)",
-                letterSpacing: "-0.04em",
-              }}
-            >
+            <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">
               Hover and Edit About Page
             </h2>
 
-            <p className="text-sm text-slate-500 mt-1">
-              Hover content to edit. Stats, core values, messages, mission cards, journey items, and CTA are all editable.
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">
+              The preview below uses the same About component as the public
+              page. On mobile it now stacks correctly, stays inside the phone
+              width, and keeps edit controls tappable.
             </p>
           </div>
-        </div>
 
-        {success && (
-          <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-green-50 text-green-700 border border-green-100">
-            <CheckCircle2 className="w-4 h-4" />
-            {success}
-          </div>
-        )}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => navigate("/admin/dashboard")}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-black text-slate-700 shadow-sm"
+            >
+              <ArrowLeft size={15} />
+              Dashboard
+            </button>
 
-        {error && (
-          <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-red-50 text-red-700 border border-red-100">
-            <AlertCircle className="w-4 h-4" />
-            {error}
-          </div>
-        )}
-
-        <div
-          className="admin-about-preview-frame rounded-[2rem] overflow-x-auto"
-          style={{
-            background:
-              "radial-gradient(circle at top left, rgba(56,189,248,0.14), transparent 34%), linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)",
-            border: "1px solid rgba(15,23,42,0.08)",
-          }}
-        >
-          <div className="w-full min-w-0 bg-white">
-            <About
-              editMode
-              contentOverride={form}
-              onEditTarget={openEditor}
-              onDeleteTarget={(target) => setDeleteTarget(target)}
-              onAddTarget={addItem}
-            />
+            <a
+              href="/about"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-black text-slate-700 shadow-sm"
+            >
+              <ExternalLink size={15} />
+              View Public
+            </a>
           </div>
         </div>
       </motion.div>
 
-      <AnimatePresence>
-        {editingTarget && (
-          <motion.div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5"
-            style={{
-              background: "rgba(2,6,23,0.55)",
-              backdropFilter: "blur(12px)",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 24, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 14, scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 130, damping: 16 }}
-              className="w-full max-w-xl rounded-[28px] overflow-hidden max-h-[92vh] overflow-y-auto"
-              style={{
-                background: "#FFFFFF",
-                border: "1px solid rgba(255,255,255,0.75)",
-                boxShadow: "0 42px 110px rgba(0,0,0,0.28)",
-              }}
-              onClick={(event) => event.stopPropagation()}
-              onMouseDown={(event) => event.stopPropagation()}
-              onPointerDown={(event) => event.stopPropagation()}
-              onKeyDownCapture={preventUnsafeBackspaceNavigation}
-            >
-              <div
-                className="h-1"
-                style={{
-                  background: `linear-gradient(90deg, ${colors.gold}, ${colors.cyan}, ${colors.green})`,
-                }}
-              />
+      {success && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-start gap-2 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-bold text-green-700"
+        >
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{success}</span>
+        </motion.div>
+      )}
 
-              <div className="p-6">
-                <div className="flex items-start justify-between gap-4 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, rgba(250,204,21,0.18), rgba(56,189,248,0.18))",
-                        color: colors.dark,
-                      }}
-                    >
-                      <ModalIcon className="w-5 h-5" />
-                    </div>
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700"
+        >
+          <span className="shrink-0">!</span>
+          <span>{error}</span>
+        </motion.div>
+      )}
 
-                    <div>
-                      <h3 className="text-xl font-black text-slate-950">
-                        {modalTitle}
-                      </h3>
-                      <p className="text-sm text-slate-500">
-                        Save only this selected About page item.
-                      </p>
-                    </div>
-                  </div>
+      <div className="admin-about-preview-frame min-w-0 max-w-full overflow-x-hidden rounded-[24px] border border-slate-200 bg-white shadow-xl">
+        <About
+          editMode={true}
+          contentOverride={form}
+          onEditTarget={openEditor}
+          onDeleteTarget={(target) => {
+            if (target) setDeleteTarget(target);
+          }}
+          onAddTarget={addItem}
+        />
+      </div>
 
-                  <button
-                    type="button"
-                    onClick={closeEditor}
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center bg-slate-100 text-slate-600"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+      <EditModal
+        target={editingTarget}
+        form={modalForm}
+        setForm={setModalForm}
+        onClose={closeEditor}
+        onSave={saveSelectedPart}
+        saving={saving}
+        uploading={uploadingImage}
+        onUpload={uploadImage}
+        onDelete={requestDelete}
+        canDelete={canDelete}
+        imageAdjustOpen={imageAdjustOpen}
+        setImageAdjustOpen={setImageAdjustOpen}
+      />
 
-                <div className="space-y-5">
-                  {needsImageUpload && (
-                    <>
-                      <div
-                        className="rounded-3xl p-5"
-                        style={{
-                          background:
-                            "linear-gradient(145deg, rgba(15,23,42,0.96), rgba(30,41,59,0.92))",
-                          border: "1px solid rgba(255,255,255,0.12)",
-                        }}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="w-32 h-24 rounded-2xl bg-slate-900 overflow-hidden flex items-center justify-center shrink-0">
-                            {modalForm.storyImageUrl || modalForm.image ? (
-                              <img
-                                src={modalForm.storyImageUrl || modalForm.image}
-                                alt="Preview"
-                                className="w-full h-full"
-                                style={getCropImageStyle(modalForm)}
-                              />
-                            ) : (
-                              <ImageIcon className="w-8 h-8 text-slate-300" />
-                            )}
-                          </div>
-
-                          <div className="min-w-0">
-                            <div className="text-white font-black">Image Preview</div>
-                            <div className="text-white/55 text-sm mt-1 leading-relaxed">
-                              Upload image, then open full-screen adjustment to drag and zoom.
-                            </div>
-                          </div>
-                        </div>
-
-                        <label
-                          className="mt-5 flex items-center justify-center gap-2 rounded-2xl px-4 py-3 font-black cursor-pointer"
-                          style={{
-                            background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                            color: colors.dark,
-                          }}
-                        >
-                          <UploadCloud className="w-4 h-4" />
-                          {uploadingImage ? "Uploading..." : "Upload New Image"}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            disabled={uploadingImage}
-                            onChange={(event) => {
-                              uploadImage(event.target.files?.[0]);
-                              event.target.value = "";
-                            }}
-                            className="hidden"
-                          />
-                        </label>
-
-                        <button
-                          type="button"
-                          onClick={() => setImageAdjustOpen(true)}
-                          disabled={uploadingImage || saving || !(modalForm.storyImageUrl || modalForm.image)}
-                          className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black disabled:opacity-50"
-                          style={{
-                            background: "rgba(255,255,255,0.10)",
-                            color: "#FFFFFF",
-                            border: "1px solid rgba(255,255,255,0.14)",
-                          }}
-                        >
-                          <Camera className="w-4 h-4" />
-                          Open Image Adjustment
-                        </button>
-                      </div>
-
-                      {editingTarget.type === "storyImage" ? (
-                        <>
-                          <Field
-                            label="Story Image URL"
-                            value={modalForm.storyImageUrl}
-                            onChange={(value) =>
-                              updateModalField("storyImageUrl", value)
-                            }
-                          />
-
-                          <Field
-                            label="Image Alt Text"
-                            value={modalForm.storyImageAlt}
-                            onChange={(value) =>
-                              updateModalField("storyImageAlt", value)
-                            }
-                          />
-                        </>
-                      ) : (
-                        <Field
-                          label="Image URL"
-                          value={modalForm.image}
-                          onChange={(value) => updateModalField("image", value)}
-                        />
-                      )}
-                    </>
-                  )}
-
-                  {/* Stats Card */}
-                  {editingTarget.type === "statsCard" && (
-                    <>
-                      <Field
-                        label="Stat Value (number)"
-                        value={modalForm.value}
-                        onChange={(value) => updateModalField("value", value)}
-                        type="number"
-                        placeholder="2500"
-                      />
-                      <Field
-                        label="Suffix (e.g. +, %, yrs)"
-                        value={modalForm.suffix}
-                        onChange={(value) => updateModalField("suffix", value)}
-                        placeholder="+"
-                      />
-                      <Field
-                        label="Label"
-                        value={modalForm.label}
-                        onChange={(value) => updateModalField("label", value)}
-                        placeholder="Students Enrolled"
-                      />
-                      <Field
-                        label="Decimal Places"
-                        value={modalForm.decimals}
-                        onChange={(value) => updateModalField("decimals", value)}
-                        type="number"
-                        placeholder="0"
-                      />
-                      <Toggle
-                        label="Show this statistic on website"
-                        checked={modalForm.visible !== false}
-                        onChange={(value) => updateModalField("visible", value)}
-                      />
-                    </>
-                  )}
-
-                  {/* Page Header */}
-                  {editingTarget.type === "pageHeader" && (
-                    <>
-                      <Field
-                        label="Page Badge"
-                        value={modalForm.pageBadge}
-                        onChange={(value) => updateModalField("pageBadge", value)}
-                      />
-                      <Field
-                        label="Page Title"
-                        value={modalForm.pageTitle}
-                        onChange={(value) => updateModalField("pageTitle", value)}
-                      />
-                      <Field
-                        label="Page Subtitle"
-                        value={modalForm.pageSubtitle}
-                        onChange={(value) => updateModalField("pageSubtitle", value)}
-                        textarea
-                      />
-                      <Field
-                        label="Established Date / Year"
-                        value={modalForm.storyBadgeYear}
-                        placeholder="Est. 2010 AD"
-                        onChange={(value) => updateModalField("storyBadgeYear", value)}
-                      />
-                      <Field
-                        label="Emblem Text (e.g. RR)"
-                        value={modalForm.heroEmblemText}
-                        placeholder="RR"
-                        onChange={(value) => updateModalField("heroEmblemText", value)}
-                      />
-                      <Field
-                        label="Emblem Label (e.g. Red Rose)"
-                        value={modalForm.heroEmblemLabel}
-                        placeholder="Red Rose"
-                        onChange={(value) => updateModalField("heroEmblemLabel", value)}
-                      />
-                    </>
-                  )}
-
-                  {/* Story Text */}
-                  {editingTarget.type === "storyText" && (
-                    <>
-                      <Field
-                        label="Story Badge"
-                        value={modalForm.storyBadge}
-                        onChange={(value) => updateModalField("storyBadge", value)}
-                      />
-                      <Field
-                        label="Story Title"
-                        value={modalForm.storyTitle}
-                        onChange={(value) => updateModalField("storyTitle", value)}
-                      />
-                      <Field
-                        label="Paragraph 1"
-                        value={modalForm.paragraph1}
-                        onChange={(value) => updateModalField("paragraph1", value)}
-                        textarea
-                      />
-                      <Field
-                        label="Paragraph 2"
-                        value={modalForm.paragraph2}
-                        onChange={(value) => updateModalField("paragraph2", value)}
-                        textarea
-                      />
-                    </>
-                  )}
-
-                  {/* Story Image Text */}
-                  {editingTarget.type === "storyImageText" && (
-                    <>
-                      <Field
-                        label="Image Caption Title"
-                        value={modalForm.storyImageTitle}
-                        onChange={(value) => updateModalField("storyImageTitle", value)}
-                      />
-                      <Field
-                        label="Image Caption Subtitle"
-                        value={modalForm.storyImageSubtitle}
-                        onChange={(value) => updateModalField("storyImageSubtitle", value)}
-                      />
-                    </>
-                  )}
-
-                  {/* Pillar Header */}
-                  {editingTarget.type === "pillarHeader" && (
-                    <>
-                      <Field
-                        label="Core Values Badge"
-                        value={modalForm.pillarBadge}
-                        onChange={(value) => updateModalField("pillarBadge", value)}
-                      />
-                      <Field
-                        label="Core Values Title"
-                        value={modalForm.pillarTitle}
-                        onChange={(value) => updateModalField("pillarTitle", value)}
-                      />
-                      <Field
-                        label="Core Values Description"
-                        value={modalForm.pillarDescription}
-                        onChange={(value) => updateModalField("pillarDescription", value)}
-                        textarea
-                      />
-                    </>
-                  )}
-
-                  {/* Pillar Card */}
-                  {editingTarget.type === "pillarCard" && (
-                    <>
-                      <Field
-                        label="Card Title"
-                        value={modalForm.label}
-                        onChange={(value) => updateModalField("label", value)}
-                      />
-                      <Field
-                        label="Description"
-                        value={modalForm.desc}
-                        onChange={(value) => updateModalField("desc", value)}
-                        textarea
-                      />
-                      <Field
-                        label="Accent Color"
-                        value={modalForm.color}
-                        onChange={(value) => updateModalField("color", value)}
-                        type="color"
-                      />
-                      <Toggle
-                        label="Show this card on website"
-                        checked={modalForm.visible !== false}
-                        onChange={(value) => updateModalField("visible", value)}
-                      />
-                    </>
-                  )}
-
-                  {/* Leadership Header */}
-                  {editingTarget.type === "leadershipHeader" && (
-                    <>
-                      <Field
-                        label="Leadership Badge"
-                        value={modalForm.leadershipBadge}
-                        onChange={(value) => updateModalField("leadershipBadge", value)}
-                      />
-                      <Field
-                        label="Leadership Title"
-                        value={modalForm.leadershipTitle}
-                        onChange={(value) => updateModalField("leadershipTitle", value)}
-                      />
-                      <Field
-                        label="Leadership Description"
-                        value={modalForm.leadershipDescription}
-                        onChange={(value) => updateModalField("leadershipDescription", value)}
-                        textarea
-                      />
-                    </>
-                  )}
-
-                  {/* Leadership Message */}
-                  {editingTarget.type === "leadershipMessage" && (
-                    <>
-                      <Field
-                        label="Person Name"
-                        value={modalForm.name}
-                        onChange={(value) => updateModalField("name", value)}
-                        placeholder="Example: Principal name"
-                      />
-                      <Field
-                        label="Post / Designation"
-                        value={modalForm.role}
-                        onChange={(value) => updateModalField("role", value)}
-                        placeholder="Example: Principal"
-                      />
-                      <div className="rounded-2xl bg-sky-50 px-4 py-3 text-xs font-semibold leading-relaxed text-sky-700 border border-sky-100">
-                        Name and post will appear on the lower-right side of the message card and on the full message page.
-                      </div>
-                      <Field
-                        label="Message Title"
-                        value={modalForm.title}
-                        onChange={(value) => updateModalField("title", value)}
-                      />
-                      <Field
-                        label="Message"
-                        value={modalForm.message}
-                        onChange={(value) => updateModalField("message", value)}
-                        textarea
-                      />
-                      <Toggle
-                        label="Show this message on website"
-                        checked={modalForm.visible !== false}
-                        onChange={(value) => updateModalField("visible", value)}
-                      />
-                    </>
-                  )}
-
-                  {/* Mission/Vision Badge */}
-                  {editingTarget.type === "missionVisionBadge" && (
-                    <Field
-                      label="Mission/Vision Badge"
-                      value={modalForm.missionVisionBadge}
-                      onChange={(value) => updateModalField("missionVisionBadge", value)}
-                    />
-                  )}
-
-                  {/* Mission/Vision Card */}
-                  {editingTarget.type === "missionVision" && (
-                    <>
-                      <Field
-                        label="Title"
-                        value={modalForm.title}
-                        onChange={(value) => updateModalField("title", value)}
-                      />
-                      <Field
-                        label="Description"
-                        value={modalForm.desc}
-                        onChange={(value) => updateModalField("desc", value)}
-                        textarea
-                      />
-                      <Field
-                        label="Accent Color"
-                        value={modalForm.color}
-                        onChange={(value) => updateModalField("color", value)}
-                        type="color"
-                      />
-                      <Toggle
-                        label="Show this card on website"
-                        checked={modalForm.visible !== false}
-                        onChange={(value) => updateModalField("visible", value)}
-                      />
-                    </>
-                  )}
-
-                  {/* Journey Badge */}
-                  {editingTarget.type === "journeyBadge" && (
-                    <>
-                      <Field
-                        label="Journey Badge"
-                        value={modalForm.journeyBadge}
-                        onChange={(value) => updateModalField("journeyBadge", value)}
-                      />
-                      <Field
-                        label="Journey Title"
-                        value={modalForm.journeyTitle}
-                        onChange={(value) => updateModalField("journeyTitle", value)}
-                      />
-                    </>
-                  )}
-
-                  {/* Journey Item */}
-                  {editingTarget.type === "journeyItem" && (
-                    <>
-                      <Field
-                        label="Year / Label"
-                        value={modalForm.year}
-                        onChange={(value) => updateModalField("year", value)}
-                      />
-                      <Field
-                        label="Title"
-                        value={modalForm.title}
-                        onChange={(value) => updateModalField("title", value)}
-                      />
-                      <Field
-                        label="Description"
-                        value={modalForm.desc}
-                        onChange={(value) => updateModalField("desc", value)}
-                        textarea
-                      />
-                      <Toggle
-                        label="Show this timeline item on website"
-                        checked={modalForm.visible !== false}
-                        onChange={(value) => updateModalField("visible", value)}
-                      />
-                    </>
-                  )}
-
-                  {/* CTA Band */}
-                  {editingTarget.type === "ctaBand" && (
-                    <>
-                      <Field
-                        label="CTA Title"
-                        value={modalForm.ctaTitle}
-                        onChange={(value) => updateModalField("ctaTitle", value)}
-                      />
-                      <Field
-                        label="CTA Description"
-                        value={modalForm.ctaDescription}
-                        onChange={(value) => updateModalField("ctaDescription", value)}
-                        textarea
-                      />
-                      <Field
-                        label="Button Text"
-                        value={modalForm.ctaButtonText}
-                        onChange={(value) => updateModalField("ctaButtonText", value)}
-                      />
-                      <Field
-                        label="Button Link"
-                        value={modalForm.ctaButtonLink}
-                        onChange={(value) => updateModalField("ctaButtonLink", value)}
-                        placeholder="/contact"
-                      />
-                    </>
-                  )}
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 mt-7">
-                  {canDeleteSelected && (
-                    <button
-                      type="button"
-                      onClick={() => setDeleteTarget(editingTarget)}
-                      disabled={saving || uploadingImage}
-                      className="sm:w-auto px-5 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2"
-                      style={{
-                        background: "rgba(215,25,32,0.08)",
-                        color: colors.red,
-                        border: "1px solid rgba(215,25,32,0.18)",
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Delete
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={closeEditor}
-                    disabled={saving || uploadingImage}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60"
-                    style={{
-                      background: "rgba(15,23,42,0.06)",
-                      color: "rgba(15,23,42,0.65)",
-                      border: "1px solid rgba(15,23,42,0.08)",
-                    }}
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={saveSelectedPart}
-                    disabled={saving || uploadingImage}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2"
-                    style={{
-                      background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                      color: "#020617",
-                      boxShadow: "0 16px 38px rgba(56,189,248,0.24)",
-                    }}
-                  >
-                    <Save className="w-4 h-4" />
-                    {saving ? "Saving..." : "Save This Item"}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {imageAdjustOpen && editingTarget && needsImageUpload && (
-          <AboutImageAdjustPage
-            editingTarget={editingTarget}
-            modalForm={modalForm}
-            setModalForm={setModalForm}
-            uploadImage={uploadImage}
-            uploadingImage={uploadingImage}
-            saving={saving}
-            onClose={() => setImageAdjustOpen(false)}
-            onSave={saveSelectedPart}
-          />
-        )}
-
-        {deleteTarget && (
-          <motion.div
-            className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5"
-            style={{
-              background: "rgba(2,6,23,0.62)",
-              backdropFilter: "blur(14px)",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => {
-              if (!saving) setDeleteTarget(null);
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.96 }}
-              className="w-full max-w-md rounded-[28px] bg-white overflow-hidden"
-              style={{
-                boxShadow: "0 42px 110px rgba(0,0,0,0.32)",
-                border: "1px solid rgba(255,255,255,0.75)",
-              }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="p-6">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-5">
-                  <Trash2 className="w-6 h-6" />
-                </div>
-
-                <h3 className="text-2xl font-black text-slate-950 mb-2">
-                  Are you sure?
-                </h3>
-
-                <p className="text-sm text-slate-500 leading-relaxed mb-6">
-                  This will permanently delete {getDeleteName(deleteTarget)} from the About page.
-                </p>
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => setDeleteTarget(null)}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black disabled:opacity-60"
-                    style={{
-                      background: "rgba(15,23,42,0.06)",
-                      color: "rgba(15,23,42,0.68)",
-                      border: "1px solid rgba(15,23,42,0.08)",
-                    }}
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => deleteTargetItem(deleteTarget)}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black disabled:opacity-60 inline-flex items-center justify-center gap-2"
-                    style={{
-                      background: `linear-gradient(135deg, ${colors.red}, #991B1B)`,
-                      color: "#FFFFFF",
-                      boxShadow: "0 16px 38px rgba(215,25,32,0.24)",
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    {saving ? "Deleting..." : "Yes, Delete"}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ConfirmDelete
+        target={deleteTarget}
+        saving={saving}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={deleteTargetItem}
+      />
     </div>
   );
 }

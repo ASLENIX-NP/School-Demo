@@ -51,6 +51,21 @@ export const defaultFacilitiesContent = {
     "Red Rose Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
   learnMoreText: "Learn More",
   highlightsTitle: "Facility Highlights",
+
+  // Editable intro section
+  introBadge: "Life Beyond The Classroom",
+  introTitle: "Places that make learning feel real.",
+  introHighlightedText: "learning",
+  introDescription:
+    "Our campus is designed as more than a collection of rooms. Each space gives students an opportunity to read, experiment, create, perform, travel safely, stay active, and discover the confidence that comes from doing things for themselves.",
+
+  // Editable Facility Highlights section heading
+  sectionKicker: "Explore Our Campus",
+  sectionTitle: "Facility Highlights",
+  sectionHighlightedText: "Highlights",
+  sectionSubtitle:
+    "Explore the spaces and services that support the academic, creative, physical, and social development of our students.",
+
   facilities: [
     {
       id: 1,
@@ -1470,43 +1485,78 @@ export function Facilities({
         </EditableWrap>
 
         {/* ================= INTRO ================= */}
-        <motion.section
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.15 }}
-          transition={{ duration: 0.6 }}
-          className="facilities-intro"
+        <EditableWrap
+          editMode={editMode}
+          target={{ type: "pageIntro" }}
+          onEditTarget={onEditTarget}
+          label="Edit Life Beyond The Classroom"
         >
-          <div>
-            <div className="facilities-intro-label">Life Beyond The Classroom</div>
-            <h2 className="facilities-intro-title">
-              Places that make <span>learning</span> feel real.
-            </h2>
-            <div className="facilities-intro-rule" />
-          </div>
+          <motion.section
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.6 }}
+            className="facilities-intro"
+          >
+            <div>
+              <div className="facilities-intro-label">
+                {content.introBadge || "Life Beyond The Classroom"}
+              </div>
 
-          <p className="facilities-intro-copy">
-            Our campus is designed as more than a collection of rooms.
-            Each space gives students an opportunity to read, experiment,
-            create, perform, travel safely, stay active, and discover the
-            confidence that comes from doing things for themselves.
-          </p>
-        </motion.section>
+              <h2 className="facilities-intro-title">
+                {content.introTitle?.includes(content.introHighlightedText) ? (
+                  <HighlightedTitle
+                    title={content.introTitle}
+                    highlightedText={content.introHighlightedText}
+                  />
+                ) : (
+                  content.introTitle || "Places that make learning feel real."
+                )}
+              </h2>
+
+              <div className="facilities-intro-rule" />
+            </div>
+
+            <p className="facilities-intro-copy">
+              {content.introDescription ||
+                "Our campus is designed as more than a collection of rooms. Each space gives students an opportunity to read, experiment, create, perform, travel safely, stay active, and discover the confidence that comes from doing things for themselves."}
+            </p>
+          </motion.section>
+        </EditableWrap>
 
         {/* ================= FACILITIES ================= */}
-        <section>
-          <div className="facilities-section-head">
-            <div className="facilities-section-kicker">Explore Our Campus</div>
-            <h2 className="facilities-section-title">
-              Facility <span>Highlights</span>
-            </h2>
-            <p className="facilities-section-subtitle">
-              Explore the spaces and services that support the academic,
-              creative, physical, and social development of our students.
-            </p>
-          </div>
+        <EditableWrap
+          editMode={editMode}
+          target={{ type: "facilitySectionHeader" }}
+          onEditTarget={onEditTarget}
+          label="Edit Facility Highlights heading"
+        >
+          <section>
+            <div className="facilities-section-head">
+              <div className="facilities-section-kicker">
+                {content.sectionKicker || "Explore Our Campus"}
+              </div>
 
-          <div className="facilities-list">
+              <h2 className="facilities-section-title">
+                {content.sectionTitle?.includes(content.sectionHighlightedText) ? (
+                  <HighlightedTitle
+                    title={content.sectionTitle}
+                    highlightedText={content.sectionHighlightedText}
+                  />
+                ) : (
+                  content.sectionTitle || "Facility Highlights"
+                )}
+              </h2>
+
+              <p className="facilities-section-subtitle">
+                {content.sectionSubtitle ||
+                  "Explore the spaces and services that support the academic, creative, physical, and social development of our students."}
+              </p>
+            </div>
+          </section>
+        </EditableWrap>
+
+        <div className="facilities-list">
             {visibleFacilities.map((facility, i) => {
               const realIndex = content.facilities.findIndex(
                 (item) => item.id === facility.id
@@ -1618,8 +1668,7 @@ export function Facilities({
             })}
           </div>
 
-          <AddFacilityButton editMode={editMode} onAddTarget={onAddTarget} />
-        </section>
+        <AddFacilityButton editMode={editMode} onAddTarget={onAddTarget} />
 
         {/* ================= FACILITY DETAIL POPUP ================= */}
         <AnimatePresence>
@@ -1640,7 +1689,7 @@ export function Facilities({
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="facility-modal-header">
-                  <div className="facility-modal-quote">“</div>
+                  <div className="facility-modal-quote">"</div>
 
                   <button
                     type="button"
@@ -1678,40 +1727,52 @@ export function Facilities({
                     {selectedFacility.description}
                   </p>
 
-                  {selectedFacility.title === "School Transport" && (
-                    <div className="facility-routes">
-                      <div className="facility-routes-title">
-                        Available Bus Routes
-                      </div>
+                  {/*
+                    FIX: was previously gated on
+                    `selectedFacility.title === "School Transport"`, which is
+                    a fragile string match. If the facility title is ever
+                    edited in the admin panel (e.g. renamed to "Transport &
+                    Buses"), the routes silently stop showing here even
+                    though the data is still saved. Now this checks the
+                    actual data (busRoutes array) instead of the title text,
+                    so it always reflects what's really stored — and stays
+                    in sync with the admin editor's isBusFacility check.
+                  */}
+                  {selectedFacility.busRoutes &&
+                    selectedFacility.busRoutes.length > 0 && (
+                      <div className="facility-routes">
+                        <div className="facility-routes-title">
+                          Available Bus Routes
+                        </div>
 
-                      <div className="facility-routes-grid">
-                        {(selectedFacility.busRoutes || []).map((route) => (
-                          <div className="facility-route-card" key={route.id}>
-                            <div className="facility-route-name">
-                              {route.name}
-                            </div>
-
-                            <div className="facility-route-line">
-                              {route.from || "Not set"} → {route.to || "Not set"}
-                            </div>
-
-                            {route.stops?.length > 0 && (
-                              <div className="facility-route-stops">
-                                {route.stops.map((stop, index) => (
-                                  <span
-                                    className="facility-route-stop"
-                                    key={`${stop}-${index}`}
-                                  >
-                                    {stop}
-                                  </span>
-                                ))}
+                        <div className="facility-routes-grid">
+                          {selectedFacility.busRoutes.map((route) => (
+                            <div className="facility-route-card" key={route.id}>
+                              <div className="facility-route-name">
+                                {route.name}
                               </div>
-                            )}
-                          </div>
-                        ))}
+
+                              <div className="facility-route-line">
+                                {route.from || "Not set"} → {route.to || "Not set"}
+                              </div>
+
+                              {route.stops?.length > 0 && (
+                                <div className="facility-route-stops">
+                                  {route.stops.map((stop, index) => (
+                                    <span
+                                      className="facility-route-stop"
+                                      key={`${stop}-${index}`}
+                                    >
+                                      {stop}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   <div className="facility-modal-paper">
                     <div className="facility-modal-paper-label">

@@ -966,6 +966,26 @@ export default function AdminFacilities() {
       return;
     }
 
+    if (target.type === "pageIntro") {
+      setModalForm({
+        introBadge: form.introBadge || "",
+        introTitle: form.introTitle || "",
+        introHighlightedText: form.introHighlightedText || "",
+        introDescription: form.introDescription || "",
+      });
+      return;
+    }
+
+    if (target.type === "facilitySectionHeader") {
+      setModalForm({
+        sectionKicker: form.sectionKicker || "",
+        sectionTitle: form.sectionTitle || "",
+        sectionHighlightedText: form.sectionHighlightedText || "",
+        sectionSubtitle: form.sectionSubtitle || "",
+      });
+      return;
+    }
+
     if (target.type === "facilityCard" || target.type === "facilityImage") {
       const item = form.facilities?.[target.index] || {};
 
@@ -1123,6 +1143,26 @@ export default function AdminFacilities() {
         };
       }
 
+      if (editingTarget.type === "pageIntro") {
+        nextForm = {
+          ...nextForm,
+          introBadge: modalForm.introBadge || "",
+          introTitle: modalForm.introTitle || "",
+          introHighlightedText: modalForm.introHighlightedText || "",
+          introDescription: modalForm.introDescription || "",
+        };
+      }
+
+      if (editingTarget.type === "facilitySectionHeader") {
+        nextForm = {
+          ...nextForm,
+          sectionKicker: modalForm.sectionKicker || "",
+          sectionTitle: modalForm.sectionTitle || "",
+          sectionHighlightedText: modalForm.sectionHighlightedText || "",
+          sectionSubtitle: modalForm.sectionSubtitle || "",
+        };
+      }
+
       if (
         editingTarget.type === "facilityCard" ||
         editingTarget.type === "facilityImage"
@@ -1242,6 +1282,8 @@ export default function AdminFacilities() {
     if (!editingTarget) return "";
 
     if (editingTarget.type === "pageHeader") return "Edit Facilities Heading";
+    if (editingTarget.type === "pageIntro") return "Edit Life Beyond The Classroom";
+    if (editingTarget.type === "facilitySectionHeader") return "Edit Facility Highlights Heading";
     if (editingTarget.type === "facilityImage") return "Change Facility Image";
     if (editingTarget.type === "facilityCard") return "Edit Facility Card";
 
@@ -1263,8 +1305,14 @@ export default function AdminFacilities() {
   const isBusFacility = useMemo(() => {
     if (!editingTarget) return false;
     if (editingTarget.type !== "facilityCard") return false;
-    return modalForm.title === "Bus Facility";
-  }, [editingTarget, modalForm.title]);
+
+    // Show the Bus Route editor for School Transport and for any
+    // facility that already contains saved bus route data.
+    return (
+      (Array.isArray(modalForm.busRoutes) && modalForm.busRoutes.length > 0) ||
+      /transport|bus/i.test(String(modalForm.title || ""))
+    );
+  }, [editingTarget, modalForm.busRoutes, modalForm.title]);
 
   if (loading) {
     return (
@@ -1606,6 +1654,80 @@ export default function AdminFacilities() {
                         label="Modal Details Title"
                         value={modalForm.highlightsTitle}
                         onChange={(value) => updateModalField("highlightsTitle", value)}
+                      />
+                    </>
+                  )}
+
+                  {editingTarget.type === "pageIntro" && (
+                    <>
+                      <Field
+                        label="Section Label"
+                        value={modalForm.introBadge}
+                        onChange={(value) =>
+                          updateModalField("introBadge", value)
+                        }
+                      />
+
+                      <Field
+                        label="Section Title"
+                        value={modalForm.introTitle}
+                        onChange={(value) =>
+                          updateModalField("introTitle", value)
+                        }
+                      />
+
+                      <Field
+                        label="Red Highlight Text"
+                        value={modalForm.introHighlightedText}
+                        onChange={(value) =>
+                          updateModalField("introHighlightedText", value)
+                        }
+                      />
+
+                      <TextArea
+                        label="Section Description"
+                        value={modalForm.introDescription}
+                        onChange={(value) =>
+                          updateModalField("introDescription", value)
+                        }
+                        rows={5}
+                      />
+                    </>
+                  )}
+
+                  {editingTarget.type === "facilitySectionHeader" && (
+                    <>
+                      <Field
+                        label="Section Kicker"
+                        value={modalForm.sectionKicker}
+                        onChange={(value) =>
+                          updateModalField("sectionKicker", value)
+                        }
+                      />
+
+                      <Field
+                        label="Section Title"
+                        value={modalForm.sectionTitle}
+                        onChange={(value) =>
+                          updateModalField("sectionTitle", value)
+                        }
+                      />
+
+                      <Field
+                        label="Red Highlight Text"
+                        value={modalForm.sectionHighlightedText}
+                        onChange={(value) =>
+                          updateModalField("sectionHighlightedText", value)
+                        }
+                      />
+
+                      <TextArea
+                        label="Section Description"
+                        value={modalForm.sectionSubtitle}
+                        onChange={(value) =>
+                          updateModalField("sectionSubtitle", value)
+                        }
+                        rows={4}
                       />
                     </>
                   )}
