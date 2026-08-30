@@ -210,10 +210,29 @@ const AcademicsPage = ({ editMode = false, contentOverride = null, onEditTarget 
   }, [contentOverride]);
 
   const classLevels = data.classLevels || [];
-  const activeLevel = classLevels.find((level) => level.id === activeLevelId) || classLevels[0] || defaultAcademicsData.classLevels[0];
-  const activeClass = activeLevel?.classes?.[activeClassIndex] || activeLevel?.classes?.[0] || { subjects: [], curriculumHighlights: [], assessmentMethod: "" };
 
-  const handleSelectLevel = (levelId) => { setActiveLevelId(levelId); setActiveClassIndex(0); };
+  // The selected level is intentionally nullable.
+  // Clicking the currently-open level again closes the curriculum panel.
+  const activeLevel = activeLevelId
+    ? classLevels.find((level) => level.id === activeLevelId) || null
+    : null;
+
+  const activeClass = activeLevel?.classes?.[activeClassIndex]
+    || activeLevel?.classes?.[0]
+    || { subjects: [], curriculumHighlights: [], assessmentMethod: "" };
+
+  const handleSelectLevel = (levelId) => {
+    // Same card clicked again -> close the curriculum panel.
+    if (activeLevelId === levelId) {
+      setActiveLevelId(null);
+      setActiveClassIndex(0);
+      return;
+    }
+
+    // Different card -> open that level and reset to its first class.
+    setActiveLevelId(levelId);
+    setActiveClassIndex(0);
+  };
 
   const visibleStats = (data.stats || []).filter((s) => s.visible !== false);
   const visibleStrengths = (data.strengths || []).filter((s) => s.visible !== false);
@@ -275,7 +294,24 @@ const AcademicsPage = ({ editMode = false, contentOverride = null, onEditTarget 
             const levelColor = level.color || "#9C2748";
             return (
               <EditableWrap key={level.id || index} editMode={editMode} target={{ type: "classLevel", index: realIndex >= 0 ? realIndex : index }} onEditTarget={onEditTarget} onDeleteTarget={onDeleteTarget} canDelete={visibleClassLevels.length > 1} label="Edit academic level" className="h-full">
-                <motion.button type="button" className="rr-level-card" onClick={() => handleSelectLevel(level.id)} whileHover={{ y: -5 }} whileTap={{ scale: 0.99 }} style={{ ...styles.levelCard, width: "100%", height: "100%", borderColor: isActive ? levelColor : theme.paperDeep, boxShadow: isActive ? `0 12px 30px ${levelColor}18` : "0 5px 18px rgba(30,20,32,0.035)" }}>
+                <motion.button
+                  type="button"
+                  className="rr-level-card"
+                  onClick={() => handleSelectLevel(level.id)}
+                  aria-expanded={isActive}
+                  aria-controls={isActive ? "rr-active-curriculum-panel" : undefined}
+                  whileHover={{ y: -5 }}
+                  whileTap={{ scale: 0.99 }}
+                  style={{
+                    ...styles.levelCard,
+                    width: "100%",
+                    height: "100%",
+                    borderColor: isActive ? levelColor : theme.paperDeep,
+                    boxShadow: isActive
+                      ? `0 12px 30px ${levelColor}18`
+                      : "0 5px 18px rgba(30,20,32,0.035)",
+                  }}
+                >
                   <div style={styles.levelCardNumber}>
                     <span className="rr-mono" style={{ color: isActive ? levelColor : theme.textMuted }}>{String(index + 1).padStart(2, "0")}</span>
                     <span style={{ ...styles.levelBadge, color: levelColor, background: level.bgAccent || `${levelColor}18` }}>{level.shortBadge || "Level"}</span>
@@ -294,7 +330,20 @@ const AcademicsPage = ({ editMode = false, contentOverride = null, onEditTarget 
         </motion.div>
 
         <AnimatePresence mode="wait">
-          <motion.div key={activeLevel.id} initial={{ opacity: 0, y: 20, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -15, scale: 0.96 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="rr-academics-curriculum" style={{ ...styles.curriculumPanel, borderTopColor: activeLevel.color || "#9C2748" }}>
+          {activeLevel && (
+            <motion.div
+              key={activeLevel.id}
+              initial={{ opacity: 0, y: 20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.96 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              id="rr-active-curriculum-panel"
+              className="rr-academics-curriculum"
+              style={{
+                ...styles.curriculumPanel,
+                borderTopColor: activeLevel.color || "#9C2748",
+              }}
+            >
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="rr-academics-panel-header" style={styles.panelHeader}>
               <EditableWrap editMode={editMode} target={{ type: "classLevel", index: classLevels.findIndex((level) => level.id === activeLevel.id) }} onEditTarget={onEditTarget} onDeleteTarget={onDeleteTarget} canDelete={classLevels.length > 1} label="Edit academic level">
                 <div style={styles.panelHeaderLeft}>
@@ -376,7 +425,8 @@ const AcademicsPage = ({ editMode = false, contentOverride = null, onEditTarget 
                 </motion.div>
               </motion.div>
             </motion.div>
-          </motion.div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </section>
 

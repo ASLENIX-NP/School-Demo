@@ -44,7 +44,7 @@ const facilityTints = [
 // Default content
 // ---------------------------------------------------------------------
 export const defaultFacilitiesContent = {
-  badgeText: "Our Campus",
+  badgeText: "Our School",
   title: "Spaces Built For How Students Actually Learn",
   highlightedText: "Learn",
   subtitle:
@@ -57,10 +57,10 @@ export const defaultFacilitiesContent = {
   introTitle: "Places that make learning feel real.",
   introHighlightedText: "learning",
   introDescription:
-    "Our campus is designed as more than a collection of rooms. Each space gives students an opportunity to read, experiment, create, perform, travel safely, stay active, and discover the confidence that comes from doing things for themselves.",
+    "Our School is designed as more than a collection of rooms. Each space gives students an opportunity to read, experiment, create, perform, travel safely, stay active, and discover the confidence that comes from doing things for themselves.",
 
   // Editable Facility Highlights section heading
-  sectionKicker: "Explore Our Campus",
+  sectionKicker: "Explore Our School",
   sectionTitle: "Facility Highlights",
   sectionHighlightedText: "Highlights",
   sectionSubtitle:
@@ -131,15 +131,15 @@ export const defaultFacilitiesContent = {
           id: 1,
           name: "Route 1",
           from: "Hetauda – New Bus Park",
-          to: "School Campus",
-          stops: ["New Bus Park", "Chandranagar", "Bhanu Chowk", "School Campus"],
+          to: "School School",
+          stops: ["New Bus Park", "Chandranagar", "Bhanu Chowk", "School School"],
         },
         {
           id: 2,
           name: "Route 2",
           from: "Hetauda – Old Bus Park",
-          to: "School Campus",
-          stops: ["Old Bus Park", "Milan Chowk", "Bishnupur", "School Campus"],
+          to: "School School",
+          stops: ["Old Bus Park", "Milan Chowk", "Bishnupur", "School School"],
         },
       ],
     },
@@ -1455,7 +1455,7 @@ export function Facilities({
           >
             <div className="facilities-hero-inner">
               <div className="facilities-eyebrow">
-                {content.badgeText || "Our Campus"}
+                {content.badgeText || "Our School"}
               </div>
 
               <h1>
@@ -1475,11 +1475,6 @@ export function Facilities({
                 {content.subtitle ||
                   "Thoughtfully designed spaces that support learning, creativity, discovery, wellbeing, and everyday school life."}
               </p>
-            </div>
-
-            <div className="facilities-hero-mark" aria-hidden="true">
-              <strong>RR</strong>
-              <span>Red Rose</span>
             </div>
           </motion.div>
         </EditableWrap>
@@ -1519,7 +1514,7 @@ export function Facilities({
 
             <p className="facilities-intro-copy">
               {content.introDescription ||
-                "Our campus is designed as more than a collection of rooms. Each space gives students an opportunity to read, experiment, create, perform, travel safely, stay active, and discover the confidence that comes from doing things for themselves."}
+                "Our School is designed as more than a collection of rooms. Each space gives students an opportunity to read, experiment, create, perform, travel safely, stay active, and discover the confidence that comes from doing things for themselves."}
             </p>
           </motion.section>
         </EditableWrap>
@@ -1534,7 +1529,7 @@ export function Facilities({
           <section>
             <div className="facilities-section-head">
               <div className="facilities-section-kicker">
-                {content.sectionKicker || "Explore Our Campus"}
+                {content.sectionKicker || "Explore Our School"}
               </div>
 
               <h2 className="facilities-section-title">
@@ -1701,7 +1696,7 @@ export function Facilities({
                   </button>
 
                   <div className="facility-modal-kicker">
-                    {selectedFacility.category || "Campus Facility"}
+                    {selectedFacility.category || "School Facility"}
                   </div>
 
                   <div className="facility-modal-profile">
@@ -1710,7 +1705,7 @@ export function Facilities({
                     </div>
 
                     <div>
-                      <h3>Red Rose Campus</h3>
+                      <h3>Red Rose School</h3>
                       <p>Facility Information</p>
                     </div>
                   </div>

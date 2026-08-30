@@ -25,7 +25,7 @@ import {
 
 // NOTE: Since you didn't provide blogUtils.js, I have added fallbacks for these functions
 // so the file doesn't crash. You should replace these with your actual imports if you have them.
-const defaultBlogContent = { pageBadge: "School Journal", pageTitle: "Latest Stories", pageDescription: "Updates from our campus.", categories: ["All", "Events", "Academics", "Achievements"], posts: [] };
+const defaultBlogContent = { pageBadge: "School Journal", pageTitle: "Latest Stories", pageDescription: "Updates from our school.", categories: ["All", "Events", "Academics", "Achievements"], posts: [] };
 const formatBlogDate = (date) => { if (!date) return "TBD"; try { return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); } catch { return date; } };
 const makeBlogSlug = (title, id) => { return String(title || "post").toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + (id || Date.now()); };
 const mergeBlogContent = (saved) => { return { ...defaultBlogContent, ...saved }; };

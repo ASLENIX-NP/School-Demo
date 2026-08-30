@@ -179,7 +179,6 @@ function GalleryHero({ content, totalPhotos, onExplore }) {
           <div><strong>∞</strong><span>Memories</span></div>
         </div>
       </div>
-      <div className="gallery-hero-mark" aria-hidden="true"><div className="gallery-hero-mark-inner"><strong>RR</strong><span>RED ROSE</span></div></div>
       <div className="gallery-hero-bottom"><ZigZag color={COLORS.cream} /></div>
     </section>
   );
@@ -253,7 +252,7 @@ function GalleryCard({ album, index, onOpen }) {
   const photo = album.photos[slide];
 
   return (
-    <motion.article initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.5, delay: Math.min(index * 0.04, 0.18) }} whileHover={{ y: -5 }} className={`${index === 0 ? "gallery-card gallery-card-large" : "gallery-card"}`}>
+    <motion.article initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.5, delay: Math.min(index * 0.04, 0.18) }} whileHover={{ y: -5 }} className="gallery-card">
       <div className="gallery-card-image">
         <ImageWithFallback src={photo?.url || ""} alt={album.title} className="gallery-card-photo" />
         <div className="gallery-card-shade" />
@@ -428,10 +427,6 @@ const PUBLIC_GALLERY_CSS = `
   .gallery-hero-stats strong { color: white; font-size: 24px; font-weight: 800; }
   .gallery-hero-stats span { color: rgba(255,255,255,.45); font-size: 9px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
   .gallery-hero-stats i { width: 1px; height: 30px; background: rgba(255,255,255,.14); }
-  .gallery-hero-mark { position: absolute; z-index: 2; right: 8%; top: 50%; transform: translateY(-50%); width: 220px; height: 220px; padding: 7px; border-radius: 50%; background: linear-gradient(135deg, #8a641f, #efd98e, #a87b28); opacity: .42; }
-  .gallery-hero-mark-inner { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px dashed rgba(229,200,120,.65); border-radius: 50%; background: #2b1622; }
-  .gallery-hero-mark strong { color: #e6c978; font-family: Georgia, "Times New Roman", serif; font-size: 55px; line-height: 1; }
-  .gallery-hero-mark span { margin-top: 6px; color: #d9c99e; font-size: 7px; font-weight: 900; letter-spacing: .28em; }
   .gallery-hero-bottom { position: absolute; z-index: 5; left: 0; right: 0; bottom: -1px; height: 34px; }
   .gallery-zigzag { width: 100%; height: 100%; }
   .gallery-achievements { padding: 85px 0 95px; background: radial-gradient(circle at 10% 20%, rgba(166,43,79,.055), transparent 25%), radial-gradient(circle at 90% 70%, rgba(199,154,59,.09), transparent 25%), var(--cream); }
@@ -459,12 +454,10 @@ const PUBLIC_GALLERY_CSS = `
   .gallery-tab { display: inline-flex; align-items: center; gap: 7px; padding: 11px 16px; border: 1px solid #dfd3c7; border-radius: 11px; color: #675b60; background: rgba(255,249,240,.88); cursor: pointer; font-size: 11px; font-weight: 800; transition: transform .25s ease, background .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease; }
   .gallery-tab:hover { transform: translateY(-2px); border-color: #d3b982; color: var(--rose); }
   .gallery-tab.active { color: white; border-color: var(--burgundy); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-2)); box-shadow: 0 10px 25px rgba(36,19,31,.14); }
-  .gallery-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .gallery-card { overflow: hidden; border: 1px solid #e4d8cc; border-radius: 22px; background: var(--paper); box-shadow: 0 10px 32px rgba(55,39,30,.06); transition: box-shadow .3s ease, border-color .3s ease; position: relative; }
+  .gallery-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
+  .gallery-card { overflow: hidden; display: flex; flex-direction: column; min-width: 0; border: 1px solid #e4d8cc; border-radius: 22px; background: var(--paper); box-shadow: 0 10px 32px rgba(55,39,30,.06); transition: box-shadow .3s ease, border-color .3s ease; position: relative; }
   .gallery-card:hover { border-color: #d8c2a0; box-shadow: 0 20px 45px rgba(55,39,30,.11); }
-  .gallery-card-large { grid-column: span 2; }
-  .gallery-card-image { position: relative; height: 280px; overflow: hidden; background: #e8ded3; }
-  .gallery-card-large .gallery-card-image { height: 360px; }
+  .gallery-card-image { position: relative; height: 300px; flex: 0 0 300px; overflow: hidden; background: #e8ded3; }
   .gallery-card-photo { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .7s ease, filter .5s ease; }
   .gallery-card:hover .gallery-card-photo { transform: scale(1.045); filter: saturate(1.04); }
   .gallery-card-shade { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(20,12,18,.28), transparent 35%, transparent 45%, rgba(20,12,18,.48)); pointer-events: none; }
@@ -478,12 +471,12 @@ const PUBLIC_GALLERY_CSS = `
   .gallery-slide-dots span.active { width: 15px; border-radius: 99px; background: white; }
   .gallery-open-button { position: absolute; left: 50%; top: 50%; display: flex; align-items: center; gap: 7px; padding: 11px 14px; border: 0; border-radius: 11px; color: var(--text); background: rgba(255,250,242,.94); cursor: pointer; font-size: 10px; font-weight: 900; opacity: 0; transform: translate(-50%, -45%) scale(.94); transition: opacity .25s ease, transform .25s ease; }
   .gallery-card:hover .gallery-open-button { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  .gallery-card-body { padding: 20px 21px 19px; }
+  .gallery-card-body { display: flex; flex: 1; flex-direction: column; padding: 20px 21px 19px; }
   .gallery-card-date { display: flex; align-items: center; gap: 7px; color: #9b8d87; font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
   .gallery-card-date span { width: 20px; height: 2px; border-radius: 99px; background: linear-gradient(90deg, var(--rose), var(--gold)); }
   .gallery-card-body h3 { margin: 9px 0 7px; color: var(--text); font-family: Georgia, "Times New Roman", serif; font-size: 25px; line-height: 1.08; font-weight: 700; }
   .gallery-card-body p { min-height: 42px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-  .gallery-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 17px; padding-top: 13px; border-top: 1px solid #e9dfd5; color: #9b8d87; font-size: 10px; font-weight: 800; }
+  .gallery-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 17px; padding-top: 13px; border-top: 1px solid #e9dfd5; color: #9b8d87; font-size: 10px; font-weight: 800; }
   .gallery-card-footer button { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 9px; color: white; background: var(--rose); cursor: pointer; transition: transform .2s ease, background .2s ease; }
   .gallery-card-footer button:hover { transform: translateX(2px); background: var(--burgundy); }
   .gallery-empty { grid-column: 1 / -1; padding: 75px 25px; border: 1px dashed #d8cabe; border-radius: 22px; text-align: center; background: rgba(255,249,240,.65); }
@@ -531,10 +524,8 @@ const PUBLIC_GALLERY_CSS = `
   .gallery-closing-note { display: block; margin-top: 14px; color: rgba(255,255,255,.4); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 
   @media (max-width: 1050px) {
-    .gallery-hero-mark { right: 3%; width: 170px; height: 170px; opacity: .24; }
     .gallery-achievement-grid { grid-template-columns: repeat(2, 1fr); }
-    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-    .gallery-card-large { grid-column: span 2; }
+    .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .gallery-viewer { grid-template-columns: 1fr; }
     .gallery-viewer-photo { min-height: 470px; }
   }
@@ -548,13 +539,11 @@ const PUBLIC_GALLERY_CSS = `
     .gallery-hero-actions { flex-direction: column; }
     .gallery-gold-button, .gallery-hero-note { width: min(320px, 100%); justify-content: center; }
     .gallery-hero-stats { gap: 16px; margin-top: 34px; }
-    .gallery-hero-mark { display: none; }
     .gallery-achievements, .gallery-main { padding: 70px 0; }
     .gallery-achievement-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
     .gallery-achievement-card { padding: 21px 12px; }
     .gallery-grid { grid-template-columns: 1fr; }
-    .gallery-card-large { grid-column: auto; }
-    .gallery-card-image, .gallery-card-large .gallery-card-image { height: 290px; }
+    .gallery-card-image { height: 290px; flex-basis: 290px; }
     .gallery-open-button { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     .gallery-viewer-backdrop { padding: 7px; }
     .gallery-viewer { border-radius: 19px; }

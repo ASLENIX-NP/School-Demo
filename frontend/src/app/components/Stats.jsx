@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import api from "../../lib/api";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 import {
   ArrowRight,
@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 import PdfNoticePreview from "./PdfNoticePreview";
-import HomeAnnouncementPopup from "./HomeAnnouncementPopup";
 
 /* =========================================================
    THEME — Matches About page design language
@@ -80,11 +79,8 @@ function TiltCard({
         return;
       }
 
-      const px =
-        (e.clientX - rect.left) / rect.width;
-
-      const py =
-        (e.clientY - rect.top) / rect.height;
+      const px = (e.clientX - rect.left) / rect.width;
+      const py = (e.clientY - rect.top) / rect.height;
 
       const rotY = (px - 0.5) * max * 2;
       const rotX = (0.5 - py) * max * 2;
@@ -120,9 +116,7 @@ function TiltCard({
         transition: editMode
           ? "none"
           : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease",
-        willChange: editMode
-          ? "auto"
-          : "transform",
+        willChange: editMode ? "auto" : "transform",
         transformStyle: "preserve-3d",
         ...style,
       }}
@@ -159,8 +153,26 @@ function StatsStyles() {
 
       @keyframes rr-float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
       @keyframes rr-drift { 0% { transform: translate(0,0); } 50% { transform: translate(-1.5%,1.5%); } 100% { transform: translate(0,0); } }
+      @keyframes rr-pulse-line { 0%, 100% { opacity: 0.55; transform: scaleX(1); } 50% { opacity: 1; transform: scaleX(1.15); } }
+      @keyframes rr-shimmer { 0% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+      @keyframes rr-skel { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+
       .rr-emblem { animation: rr-float 7s ease-in-out infinite; }
       .rr-grain { animation: rr-drift 18s ease-in-out infinite; }
+      .rr-accent-pulse { animation: rr-pulse-line 2.6s ease-in-out infinite; transform-origin: center; }
+      .rr-skel-block { animation: rr-skel 1.4s ease-in-out infinite; }
+
+      .rr-sheen-wrap { position: relative; overflow: hidden; }
+      .rr-sheen {
+        position: absolute;
+        top: 0; left: 0;
+        width: 40%; height: 100%;
+        background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.55) 45%, transparent 90%);
+        transform: translateX(-120%);
+        pointer-events: none;
+        z-index: 15;
+      }
+      .rr-sheen-wrap:hover .rr-sheen { animation: rr-shimmer 0.9s ease-in-out; }
 
       @media (prefers-reduced-motion: reduce) {
         .rr-stats *, .rr-stats *::before, .rr-stats *::after {
@@ -241,8 +253,7 @@ function StatsEditableWrap({
 const defaultStatsData = {
   eyebrow: "Our Impact",
 
-  title:
-    "Creating Futures, One Student at a Time",
+  title: "Creating Futures, One Student at a Time",
 
   // Keep this empty by default. If the admin deletes the description,
   // the user website must not restore the old hard-coded sentence.
@@ -256,7 +267,6 @@ const defaultStatsData = {
       note: "Across school programs",
       color: theme.rose,
     },
-
     {
       value: "240",
       suffix: "+",
@@ -264,7 +274,6 @@ const defaultStatsData = {
       note: "Academic support team",
       color: theme.gold,
     },
-
     {
       value: "35",
       suffix: " yrs",
@@ -272,7 +281,6 @@ const defaultStatsData = {
       note: "Serving Makwanpur",
       color: theme.moss,
     },
-
     {
       value: "98",
       suffix: "%",
@@ -284,67 +292,40 @@ const defaultStatsData = {
 
   story: {
     badge: "Our Story",
-
-    title:
-      "Building Tomorrow's Leaders Today",
-
-    imageTopTitle: "Our Campus",
-
+    title: "Building Tomorrow's Leaders Today",
+    imageTopTitle: "Our School",
     imageTopSubtitle: "Hetauda-2",
-
     paragraphs: [
       "Established with a vision to provide quality education in Makawanpur, Red Rose Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
-
       "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development.",
     ],
-
     image: "",
-
-    buttonText:
-      "Read Our Story",
-
-    buttonLink:
-      "/about",
-
+    buttonText: "Read Our Story",
+    buttonLink: "/about",
     imageZoom: 1,
-
     imageOffsetX: 0,
-
     imageOffsetY: 0,
-
     imageBottomTitle: "",
-
     imageBottomDescription: "",
   },
 
   excellence: {
-    title:
-      "ACADEMIC EXCELLENCE",
-
+    title: "ACADEMIC EXCELLENCE",
     description:
       "We nurture knowledge, confidence, and curiosity through purposeful learning experiences that help every student discover their strengths and prepare for the future.",
-
     cards: [
       {
-        title:
-          "Strong Academic Foundations",
-
+        title: "Strong Academic Foundations",
         description:
           "Focused teaching and consistent guidance help students build the knowledge, discipline, and confidence needed to achieve their academic goals.",
       },
-
       {
-        title:
-          "Learning for Tomorrow",
-
+        title: "Learning for Tomorrow",
         description:
           "Modern teaching, technology, creativity, and practical learning experiences prepare students to adapt, think independently, and embrace new opportunities.",
       },
-
       {
-        title:
-          "Growing Beyond Books",
-
+        title: "Growing Beyond Books",
         description:
           "Sports, arts, leadership, teamwork, and extracurricular activities encourage students to develop character, confidence, and a balanced personality.",
       },
@@ -352,11 +333,8 @@ const defaultStatsData = {
   },
 
   notices: {
-    title:
-      "Latest Notices",
-
-    description:
-      "Stay informed with the latest announcements.",
+    title: "Latest Notices",
+    description: "Stay informed with the latest announcements.",
   },
 };
 
@@ -366,56 +344,33 @@ const defaultStatsData = {
 
 function normalizeExcellence(savedExcellence = {}) {
   const saved =
-    savedExcellence &&
-    typeof savedExcellence === "object"
-      ? savedExcellence
-      : {};
+    savedExcellence && typeof savedExcellence === "object" ? savedExcellence : {};
 
-  const oldTitle =
-    "Academic Focus";
+  const oldTitle = "Academic Focus";
 
   const oldDescription =
     "Our students consistently achieve outstanding results in the SEE examinations.";
 
   const oldCards = [
     {
-      title:
-        "Best SEE Results",
-
-      description:
-        "Achieving top results in the Secondary Education Examination.",
+      title: "Best SEE Results",
+      description: "Achieving top results in the Secondary Education Examination.",
     },
-
     {
-      title:
-        "GPA 4.00 Achievers",
-
-      description:
-        "Our brightest students attain a perfect GPA of 4.00.",
+      title: "GPA 4.00 Achievers",
+      description: "Our brightest students attain a perfect GPA of 4.00.",
     },
-
     {
-      title:
-        "Holistic Development",
-
-      description:
-        "Fostering creativity, leadership, and sportsmanship.",
+      title: "Holistic Development",
+      description: "Fostering creativity, leadership, and sportsmanship.",
     },
   ];
 
-  let title =
-    saved.title;
+  let title = saved.title;
+  let description = saved.description;
 
-  let description =
-    saved.description;
-
-  if (
-    !title ||
-    title === oldTitle
-  ) {
-    title =
-      defaultStatsData
-        .excellence.title;
+  if (!title || title === oldTitle) {
+    title = defaultStatsData.excellence.title;
   }
 
   // Only use the default when the field is actually missing.
@@ -426,68 +381,33 @@ function normalizeExcellence(savedExcellence = {}) {
     description === null ||
     description === oldDescription
   ) {
-    description =
-      defaultStatsData
-        .excellence
-        .description;
+    description = defaultStatsData.excellence.description;
   }
 
-  const savedCards =
-    Array.isArray(
-      saved.cards
-    )
-      ? saved.cards
-      : [];
+  const savedCards = Array.isArray(saved.cards) ? saved.cards : [];
 
-  const cards =
-    defaultStatsData.excellence.cards.map(
-      (
-        defaultCard,
-        index
-      ) => {
-        const existing =
-          savedCards[index];
+  const cards = defaultStatsData.excellence.cards.map((defaultCard, index) => {
+    const existing = savedCards[index];
 
-        if (!existing) {
-          return {
-            ...defaultCard,
-          };
-        }
+    if (!existing) {
+      return { ...defaultCard };
+    }
 
-        const isOldCard =
-          existing.title ===
-            oldCards[index]
-              ?.title &&
-          existing.description ===
-            oldCards[index]
-              ?.description;
+    const isOldCard =
+      existing.title === oldCards[index]?.title &&
+      existing.description === oldCards[index]?.description;
 
-        if (isOldCard) {
-          return {
-            ...defaultCard,
-          };
-        }
+    if (isOldCard) {
+      return { ...defaultCard };
+    }
 
-        return {
-          ...defaultCard,
-          ...existing,
-        };
-      }
-    );
+    return { ...defaultCard, ...existing };
+  });
 
-  if (
-    savedCards.length >
-    defaultStatsData
-      .excellence.cards.length
-  ) {
-    savedCards
-      .slice(
-        defaultStatsData
-          .excellence.cards.length
-      )
-      .forEach((card) => {
-        cards.push(card);
-      });
+  if (savedCards.length > defaultStatsData.excellence.cards.length) {
+    savedCards.slice(defaultStatsData.excellence.cards.length).forEach((card) => {
+      cards.push(card);
+    });
   }
 
   return {
@@ -504,93 +424,126 @@ function normalizeExcellence(savedExcellence = {}) {
 ========================================================= */
 
 function clampOffset(value) {
-  const number =
-    Number(value);
-
-  if (!Number.isFinite(number)) {
-    return 0;
-  }
-
-  return Math.min(
-    60,
-    Math.max(-60, number)
-  );
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  return Math.min(60, Math.max(-60, number));
 }
 
 function clampZoom(value) {
-  const number =
-    Number(value);
-
-  if (!Number.isFinite(number)) {
-    return 1;
-  }
-
-  return Math.min(
-    3,
-    Math.max(1, number)
-  );
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 1;
+  return Math.min(3, Math.max(1, number));
 }
 
 function cleanImageUrl(value) {
-  let url =
-    String(value || "").trim();
-
+  let url = String(value || "").trim();
   if (!url) return "";
 
-  const markdownMatch =
-    url.match(
-      /\]\((https?:\/\/[^)]+)\)$/
-    );
+  const markdownMatch = url.match(/\]\((https?:\/\/[^)]+)\)$/);
+  if (markdownMatch?.[1]) return markdownMatch[1].trim();
 
-  if (markdownMatch?.[1]) {
-    return markdownMatch[1].trim();
-  }
-
-  const embeddedUrl =
-    url.match(
-      /https?:\/\/[^\s)]+/
-    );
-
-  if (
-    url.startsWith("[") &&
-    embeddedUrl?.[0]
-  ) {
-    return embeddedUrl[0].trim();
-  }
+  const embeddedUrl = url.match(/https?:\/\/[^\s)]+/);
+  if (url.startsWith("[") && embeddedUrl?.[0]) return embeddedUrl[0].trim();
 
   return url;
 }
 
-function getStoryImageStyle(
-  story
-) {
-  const zoom =
-    clampZoom(
-      story?.imageZoom
-    );
-
-  const x =
-    clampOffset(
-      story?.imageOffsetX
-    );
-
-  const y =
-    clampOffset(
-      story?.imageOffsetY
-    );
+function getStoryImageStyle(story) {
+  const zoom = clampZoom(story?.imageZoom);
+  const x = clampOffset(story?.imageOffsetX);
+  const y = clampOffset(story?.imageOffsetY);
 
   return {
     width: "100%",
     height: "100%",
     objectFit: "cover",
     objectPosition: "center",
-    transform:
-      `translate(${x}%, ${y}%) scale(${zoom})`,
-    transformOrigin:
-      "center center",
-    transition:
-      "transform 180ms ease-out",
+    transform: `translate(${x}%, ${y}%) scale(${zoom})`,
+    transformOrigin: "center center",
+    transition: "transform 180ms ease-out",
   };
+}
+
+/* =========================================================
+   NOTICE ACCENT — consistent color per notice, not per index,
+   so the list card and the modal always match.
+========================================================= */
+
+function getNoticeAccent(notice) {
+  const palette = [
+    { border: theme.rose, badge: `${theme.rose}12`, badgeText: theme.rose, accent: theme.rose },
+    { border: theme.gold, badge: `${theme.gold}18`, badgeText: theme.gold, accent: theme.gold },
+    { border: theme.moss, badge: `${theme.moss}14`, badgeText: theme.moss, accent: theme.moss },
+  ];
+
+  const key = String(notice?.category || notice?.title || "");
+  let hash = 0;
+
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  }
+
+  return palette[hash % palette.length];
+}
+
+/* =========================================================
+   SKELETON — shown while real content loads, so the page
+   never flashes default/placeholder copy before swapping in
+   the saved content.
+========================================================= */
+
+function StatsSkeleton({ editMode }) {
+  return (
+    <section
+      className={`rr-stats relative w-full overflow-hidden ${editMode ? "py-12" : ""}`}
+      style={{ background: theme.paper }}
+    >
+      <StatsStyles />
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-16 md:py-24">
+        <div className="flex flex-col items-center text-center mb-16 md:mb-20">
+          <div
+            className="rr-skel-block h-3 w-32 rounded-full mb-5"
+            style={{ background: theme.paperDeep }}
+          />
+          <div
+            className="rr-skel-block h-9 w-full max-w-md rounded-lg mb-3"
+            style={{ background: theme.paperDeep }}
+          />
+          <div
+            className="rr-skel-block h-4 w-full max-w-sm rounded"
+            style={{ background: theme.paperDeep }}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="rr-skel-block rounded-2xl p-6 sm:p-8"
+              style={{
+                background: theme.card,
+                border: `1px solid ${theme.paperDeep}`,
+                animationDelay: `${i * 120}ms`,
+              }}
+            >
+              <div
+                className="w-12 h-1 mx-auto rounded-full mb-5"
+                style={{ background: theme.paperDeep }}
+              />
+              <div
+                className="h-8 w-16 mx-auto rounded mb-3"
+                style={{ background: theme.paperDeep }}
+              />
+              <div
+                className="h-3 w-20 mx-auto rounded"
+                style={{ background: theme.paperDeep }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 /* =========================================================
@@ -625,6 +578,70 @@ function SectionIntro({ eyebrow, title, description, tone = "dark", align = "lef
 }
 
 /* =========================================================
+   FAST CONTENT CACHE
+   - Shows the last successfully loaded Stats content immediately.
+   - Refreshes from the API in the background.
+   - Never falls back to old hard-coded content before the first
+     successful API response.
+========================================================= */
+
+const STATS_CACHE_KEY = "redrose_stats_section_cache_v3";
+
+function readStatsCache() {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(STATS_CACHE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+
+    return {
+      ...defaultStatsData,
+      ...parsed,
+      stats: Array.isArray(parsed.stats)
+        ? parsed.stats
+        : defaultStatsData.stats,
+      story: {
+        ...defaultStatsData.story,
+        ...(parsed.story || {}),
+        image: cleanImageUrl(parsed.story?.image),
+      },
+      excellence: normalizeExcellence(parsed.excellence),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeStatsCache(statsData) {
+  if (typeof window === "undefined" || !statsData) return;
+
+  try {
+    window.sessionStorage.setItem(
+      STATS_CACHE_KEY,
+      JSON.stringify(statsData)
+    );
+  } catch {
+    // Cache is only an optimization. Ignore storage failures.
+  }
+}
+
+function preloadStoryImage(imageUrl) {
+  const url = cleanImageUrl(imageUrl);
+  if (!url || typeof window === "undefined") return;
+
+  try {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
+  } catch {
+    // Image preloading is optional.
+  }
+}
+
+/* =========================================================
    MAIN STATS
 ========================================================= */
 
@@ -634,24 +651,25 @@ export default function Stats({
   onEditTarget = () => {},
   onDeleteTarget = () => {},
 }) {
-  const [loading, setLoading] =
-    useState(true);
+  // If we already have a successful Stats response in this browser
+  // session, paint it immediately and refresh it in the background.
+  // This removes the visible delay on normal page navigation/reloads.
+  const [cachedData] = useState(() =>
+    contentOverride ? null : readStatsCache()
+  );
 
-  const [notices, setNotices] =
-    useState([]);
+  const [loading, setLoading] = useState(
+    !contentOverride && !cachedData
+  );
 
-  const [
-    selectedNotice,
-    setSelectedNotice,
-  ] = useState(null);
-
-  const [error, setError] =
-    useState(null);
-
-  const [data, setData] =
-    useState(
-      defaultStatsData
-    );
+  const [notices, setNotices] = useState([]);
+  const [selectedNotice, setSelectedNotice] = useState(null);
+  const [error, setError] = useState(null);
+  const [data, setData] = useState(
+    contentOverride
+      ? defaultStatsData
+      : cachedData || defaultStatsData
+  );
 
   /* =======================================================
      LOAD CONTENT
@@ -661,98 +679,85 @@ export default function Stats({
     let alive = true;
 
     if (contentOverride) {
-      setData({
+      const nextData = {
         ...defaultStatsData,
-
         ...contentOverride,
-
-        stats:
-          contentOverride.stats ||
-          defaultStatsData.stats,
-
+        stats: Array.isArray(contentOverride.stats)
+          ? contentOverride.stats
+          : defaultStatsData.stats,
         story: {
           ...defaultStatsData.story,
-
-          ...(contentOverride.story ||
-            {}),
-
-          image: cleanImageUrl(
-            contentOverride.story?.image
-          ),
+          ...(contentOverride.story || {}),
+          image: cleanImageUrl(contentOverride.story?.image),
         },
+        excellence: normalizeExcellence(contentOverride.excellence),
+      };
 
-        excellence:
-          normalizeExcellence(
-            contentOverride.excellence
-          ),
-      });
-
+      setData(nextData);
       setLoading(false);
+      preloadStoryImage(nextData.story?.image);
     } else {
-      const loadStatsContent =
-        async () => {
-          try {
-            const res =
-              await api.get(
-                "/api/site-content/home"
-              );
+      // Cached content is already visible, so the API request happens
+      // silently in the background instead of making the whole section
+      // wait every time.
+      const hasCachedContent = Boolean(readStatsCache());
 
-            if (!alive) {
-              return;
-            }
+      if (!hasCachedContent) {
+        setLoading(true);
+      } else {
+        setLoading(false);
+      }
 
-            const saved =
-              res.data?.data?.content
-                ?.statsSection;
+      const loadStatsContent = async () => {
+        try {
+          const res = await api.get("/api/site-content/home");
 
-            if (saved) {
-              setData({
-                ...defaultStatsData,
+          if (!alive) return;
 
-                ...saved,
+          const saved = res.data?.data?.content?.statsSection;
 
-                stats:
-                  saved.stats ||
-                  defaultStatsData.stats,
+          if (saved) {
+            const nextData = {
+              ...defaultStatsData,
+              ...saved,
+              stats: Array.isArray(saved.stats)
+                ? saved.stats
+                : defaultStatsData.stats,
+              story: {
+                ...defaultStatsData.story,
+                ...(saved.story || {}),
+                image: cleanImageUrl(saved.story?.image),
+              },
+              excellence: normalizeExcellence(saved.excellence),
+            };
 
-                story: {
-                  ...defaultStatsData.story,
+            setData(nextData);
+            writeStatsCache(nextData);
+            preloadStoryImage(nextData.story?.image);
+          } else {
+            // The server has confirmed there is no saved section.
+            setData(defaultStatsData);
+            writeStatsCache(defaultStatsData);
+          }
+        } catch (err) {
+          console.error("Load stats content error:", err);
 
-                  ...(saved.story ||
-                    {}),
+          if (alive) {
+            // Keep cached content on the screen if the network is slow
+            // or temporarily unavailable. Only use the hard-coded
+            // defaults when this is the first-ever successful/failed load.
+            setError(null);
 
-                  image: cleanImageUrl(
-                    saved.story?.image
-                  ),
-                },
-
-                excellence:
-                  normalizeExcellence(
-                    saved.excellence
-                  ),
-              });
-            } else {
-              setData(
-                defaultStatsData
-              );
-            }
-          } catch (err) {
-            console.error(
-              "Load stats content error:",
-              err
-            );
-
-            if (alive) {
-              setError(
-                "Unable to load homepage content."
-              );
-            }
-          } finally {
-            if (alive) {
-              setLoading(false);
+            if (!readStatsCache()) {
+              setData(defaultStatsData);
             }
           }
-        };
+        } finally {
+          if (alive) {
+            setLoading(false);
+          }
+        }
+      };
 
       loadStatsContent();
     }
@@ -765,31 +770,15 @@ export default function Stats({
       api
         .get("/api/notices")
         .then((res) => {
-          if (!alive) {
-            return;
-          }
+          if (!alive) return;
 
-          const list =
-            Array.isArray(
-              res.data
-            )
-              ? res.data
-              : res.data?.data ||
-                [];
+          const list = Array.isArray(res.data) ? res.data : res.data?.data || [];
 
-          setNotices(
-            list.slice(0, 3)
-          );
+          setNotices(list.slice(0, 3));
         })
         .catch((err) => {
-          console.error(
-            "Failed to load notices:",
-            err
-          );
-
-          if (alive) {
-            setNotices([]);
-          }
+          console.error("Failed to load notices:", err);
+          if (alive) setNotices([]);
         });
     } else {
       setNotices([]);
@@ -798,33 +787,14 @@ export default function Stats({
     return () => {
       alive = false;
     };
-  }, [
-    contentOverride,
-    editMode,
-  ]);
+  }, [contentOverride, editMode]);
 
   /* =======================================================
      LOADING
   ======================================================= */
 
   if (loading) {
-    return (
-      <div
-        className={`flex items-center justify-center min-h-[60vh] ${
-          editMode
-            ? "py-12"
-            : ""
-        }`}
-        style={{ background: theme.paper }}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-11 h-11 rounded-full border-[3px] animate-spin" style={{ borderColor: theme.paperDeep, borderTopColor: theme.rose }} />
-          <p className="rr-mono text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: theme.textMuted }}>
-            LOADING CONTENT
-          </p>
-        </div>
-      </div>
-    );
+    return <StatsSkeleton editMode={editMode} />;
   }
 
   /* =======================================================
@@ -834,11 +804,7 @@ export default function Stats({
   if (error) {
     return (
       <div
-        className={`flex items-center justify-center min-h-[60vh] ${
-          editMode
-            ? "py-12"
-            : ""
-        }`}
+        className={`flex items-center justify-center min-h-[60vh] ${editMode ? "py-12" : ""}`}
         style={{ background: theme.paper }}
       >
         <div className="flex flex-col items-center gap-4">
@@ -855,18 +821,10 @@ export default function Stats({
      DATA CHECK
   ======================================================= */
 
-  if (
-    !data ||
-    !data.stats ||
-    data.stats.length === 0
-  ) {
+  if (!data || !data.stats || data.stats.length === 0) {
     return (
       <div
-        className={`flex items-center justify-center min-h-[60vh] ${
-          editMode
-            ? "py-12"
-            : ""
-        }`}
+        className={`flex items-center justify-center min-h-[60vh] ${editMode ? "py-12" : ""}`}
         style={{ background: theme.paper }}
       >
         <p className="text-sm font-medium" style={{ color: theme.textMuted }}>
@@ -883,14 +841,29 @@ export default function Stats({
   return (
     <>
       <StatsStyles />
-      {!editMode && (
-        <HomeAnnouncementPopup />
-      )}
-
       <section
         className="rr-stats relative w-full overflow-hidden"
         style={{ background: theme.paper }}
       >
+        {/* Ambient decorative glows — same palette, adds depth */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div
+            className="absolute -left-32 top-10 h-[380px] w-[380px] rounded-full blur-3xl"
+            style={{ background: `${theme.rose}08` }}
+          />
+          <div
+            className="absolute -right-24 bottom-0 h-[420px] w-[420px] rounded-full blur-3xl"
+            style={{ background: `${theme.gold}0c` }}
+          />
+          <div
+            className="rr-grain absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: "radial-gradient(circle, #1E1420 1px, transparent 1.4px)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+        </div>
+
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-16 md:py-24">
 
           {/* =================================================
@@ -899,22 +872,16 @@ export default function Stats({
 
           <StatsEditableWrap
             editMode={editMode}
-            target={{
-              type: "statsHeader",
-            }}
-            onEditTarget={
-              onEditTarget
-            }
+            target={{ type: "statsHeader" }}
+            onEditTarget={onEditTarget}
           >
-            <div
-              className={`text-center max-w-3xl mx-auto mb-16 md:mb-20`}
-            >
+            <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
               <div className="flex items-center justify-center gap-3 mb-4">
-                <span className="h-px w-10" style={{ background: theme.gold }} />
+                <span className="h-px w-10 rr-accent-pulse" style={{ background: theme.gold }} />
                 <span className="rr-mono text-[11px] font-semibold uppercase tracking-[0.28em]" style={{ color: theme.rose }}>
                   {data.eyebrow || "Our Impact"}
                 </span>
-                <span className="h-px w-10" style={{ background: theme.gold }} />
+                <span className="h-px w-10 rr-accent-pulse" style={{ background: theme.gold }} />
               </div>
 
               <h1
@@ -938,112 +905,72 @@ export default function Stats({
           ================================================= */}
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-16 sm:mb-24">
+            {data.stats.map((stat, i) => {
+              const card = (
+                <TiltCard
+                  editMode={editMode}
+                  max={5}
+                  className="rr-sheen-wrap relative p-6 sm:p-8 text-center rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_55px_rgba(30,20,32,0.14)]"
+                  style={{
+                    background: theme.card,
+                    border: `1px solid ${theme.paperDeep}`,
+                    boxShadow: "0 16px 36px rgba(30,20,32,0.08)",
+                  }}
+                >
+                  {!editMode && <div className="rr-sheen" />}
 
-            {data.stats.map(
-              (stat, i) => {
-
-                const card = (
-                  <TiltCard
-                    editMode={
-                      editMode
-                    }
-                    max={5}
-                    className="relative p-6 sm:p-8 text-center rounded-2xl transition-all duration-300 hover:-translate-y-1.5"
-                    style={{
-                      background: theme.card,
-                      border: `1px solid ${theme.paperDeep}`,
-                      boxShadow: "0 16px 36px rgba(30,20,32,0.08)",
-                    }}
+                  <StatsEditableWrap
+                    editMode={editMode}
+                    target={{ type: "statsCard", index: i }}
+                    onEditTarget={onEditTarget}
+                    onDeleteTarget={onDeleteTarget}
+                    canDelete={data.stats.length > 1}
                   >
+                    {/* Simple colored accent line */}
+                    <div
+                      className="w-12 h-1 mx-auto rounded-full mb-5 transition-all duration-300 group-hover:w-16"
+                      style={{ background: stat.color || theme.rose }}
+                    />
 
-                    <StatsEditableWrap
-                      editMode={
-                        editMode
-                      }
-                      target={{
-                        type: "statsCard",
-                        index: i,
-                      }}
-                      onEditTarget={
-                        onEditTarget
-                      }
-                      onDeleteTarget={
-                        onDeleteTarget
-                      }
-                      canDelete={
-                        data.stats
-                          .length >
-                        1
-                      }
-                    >
-
-                      {/* Simple colored accent line */}
-                      <div
-                        className="w-12 h-1 mx-auto rounded-full mb-5"
-                        style={{
-                          background: stat.color || theme.rose,
-                        }}
-                      />
-
-                      <div className="relative z-10">
-                        <div className="rr-serif text-3xl sm:text-4xl md:text-5xl font-semibold mb-2 tracking-tight" style={{ color: theme.ink }}>
-                          {stat.value}
-                          {stat.suffix}
-                        </div>
-
-                        <div className="text-sm font-bold" style={{ color: theme.text }}>
-                          {stat.label}
-                        </div>
-
-                        <div className="text-xs mt-1" style={{ color: theme.textMuted }}>
-                          {stat.note}
-                        </div>
+                    <div className="relative z-10">
+                      <div className="rr-serif text-3xl sm:text-4xl md:text-5xl font-semibold mb-2 tracking-tight" style={{ color: theme.ink }}>
+                        {stat.value}
+                        {stat.suffix}
                       </div>
 
-                    </StatsEditableWrap>
+                      <div className="text-sm font-bold" style={{ color: theme.text }}>
+                        {stat.label}
+                      </div>
 
-                  </TiltCard>
-                );
-
-                if (editMode) {
-                  return (
-                    <div
-                      key={i}
-                      className="group relative"
-                    >
-                      {card}
+                      <div className="text-xs mt-1" style={{ color: theme.textMuted }}>
+                        {stat.note}
+                      </div>
                     </div>
-                  );
-                }
+                  </StatsEditableWrap>
+                </TiltCard>
+              );
 
+              if (editMode) {
                 return (
-                  <motion.div
-                    key={i}
-                    initial={{
-                      opacity: 0,
-                      y: 20,
-                    }}
-                    whileInView={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    viewport={{
-                      once: true,
-                      margin:
-                        "-50px",
-                    }}
-                    transition={{
-                      duration: 0.4,
-                      delay:
-                        i * 0.08,
-                    }}
-                    className="group"
-                  >
+                  <div key={i} className="group relative">
                     {card}
-                  </motion.div>
+                  </div>
                 );
               }
-            )}
+
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.4, delay: i * 0.08 }}
+                  className="group"
+                >
+                  {card}
+                </motion.div>
+              );
+            })}
 
             {editMode && (
               <div
@@ -1052,18 +979,14 @@ export default function Stats({
                 onClick={() => {
                   onEditTarget({
                     type: "statsCard",
-                    index:
-                      data.stats
-                        .length,
+                    index: data.stats.length,
                     isNew: true,
                   });
                 }}
               >
                 <div className="flex flex-col items-center gap-2" style={{ color: theme.rose }}>
                   <Plus className="w-7 h-7 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs sm:text-sm font-bold">
-                    Add Stat Card
-                  </span>
+                  <span className="text-xs sm:text-sm font-bold">Add Stat Card</span>
                 </div>
               </div>
             )}
@@ -1074,226 +997,128 @@ export default function Stats({
           ================================================= */}
 
           <div className="relative grid lg:grid-cols-2 gap-12 md:gap-16 items-center mb-16 sm:mb-24">
-
             <div className="relative">
-
               <StatsEditableWrap
                 editMode={editMode}
-                target={{
-                  type: "storyImage",
-                }}
-                onEditTarget={
-                  onEditTarget
-                }
+                target={{ type: "storyImage" }}
+                onEditTarget={onEditTarget}
               >
-
-                <div className="relative rounded-3xl overflow-hidden shadow-xl bg-slate-900 aspect-[4/3] w-full group">
+                <div className="rr-sheen-wrap relative rounded-3xl overflow-hidden shadow-xl bg-slate-900 aspect-[4/3] w-full group">
+                  {!editMode && <div className="rr-sheen" />}
 
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent z-10 pointer-events-none" />
 
-                  {cleanImageUrl(
-                    data.story?.image
-                  ) ? (
+                  {cleanImageUrl(data.story?.image) ? (
                     <img
-                      src={cleanImageUrl(
-                        data.story?.image
-                      )}
+                      src={cleanImageUrl(data.story?.image)}
                       alt="School story"
-                      className="absolute inset-0 w-full h-full object-cover"
-                      style={getStoryImageStyle(
-                        data.story
-                      )}
+                      loading="eager"
+                      decoding="async"
+                      fetchPriority="high"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      style={getStoryImageStyle(data.story)}
                     />
                   ) : (
                     <div
                       className="absolute inset-0 flex items-center justify-center"
                       style={{
-                        background:
-                          "linear-gradient(135deg, #EEF2F7 0%, #E5EAF0 50%, #DCE3EB 100%)",
+                        background: "linear-gradient(135deg, #EEF2F7 0%, #E5EAF0 50%, #DCE3EB 100%)",
                       }}
                     >
-
                       <div className="flex flex-col items-center gap-3 text-center px-6">
-
-                        <div className="h-12 w-12 rounded-full border-4 animate-spin" style={{ borderColor: theme.paperDeep, borderTopColor: theme.gold }} />
-
+                        <div
+                          className="flex h-12 w-12 items-center justify-center rounded-full"
+                          style={{
+                            background: `${theme.gold}14`,
+                            color: theme.gold,
+                            border: `1px solid ${theme.gold}30`,
+                          }}
+                        >
+                          <Camera className="w-5 h-5" />
+                        </div>
                         <span className="rr-mono text-xs font-black uppercase tracking-[0.18em]" style={{ color: theme.textMuted }}>
-                          Loading school image
+                          School image
                         </span>
-
                       </div>
-
                     </div>
                   )}
 
                   <StatsEditableWrap
-                    editMode={
-                      editMode
-                    }
-                    target={{
-                      type: "storyImageText",
-                    }}
-                    onEditTarget={
-                      onEditTarget
-                    }
+                    editMode={editMode}
+                    target={{ type: "storyImageText" }}
+                    onEditTarget={onEditTarget}
                   >
-
                     <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 z-20 pointer-events-none">
-
                       <div className="backdrop-blur-md bg-white/15 p-3.5 sm:p-4 rounded-2xl border border-white/25 inline-block shadow-lg">
-
                         <div className="rr-serif text-white text-lg sm:text-xl font-semibold">
-                          {data.story
-                            ?.imageTopTitle ||
-                            "Our Campus"}
+                          {data.story?.imageTopTitle || "Our School"}
                         </div>
-
                         <div className="text-white/80 text-xs sm:text-sm">
-                          {data.story
-                            ?.imageTopSubtitle ||
-                            "Hetauda-2"}
+                          {data.story?.imageTopSubtitle || "Hetauda-2"}
                         </div>
-
                       </div>
-
                     </div>
-
                   </StatsEditableWrap>
 
-                  {(
-                    data.story
-                      ?.imageBottomTitle ||
-                    data.story
-                      ?.imageBottomDescription
-                  ) && (
+                  {(data.story?.imageBottomTitle || data.story?.imageBottomDescription) && (
                     <div className="absolute top-5 right-5 z-20 max-w-[260px] rounded-2xl bg-slate-950/55 backdrop-blur-md border border-white/20 p-4 text-white">
-
-                      {data.story
-                        ?.imageBottomTitle && (
+                      {data.story?.imageBottomTitle && (
                         <div className="rr-serif font-semibold text-sm">
-                          {
-                            data.story
-                              .imageBottomTitle
-                          }
+                          {data.story.imageBottomTitle}
                         </div>
                       )}
-
-                      {data.story
-                        ?.imageBottomDescription && (
+                      {data.story?.imageBottomDescription && (
                         <div className="mt-1 text-xs leading-relaxed text-white/75">
-                          {
-                            data.story
-                              .imageBottomDescription
-                          }
+                          {data.story.imageBottomDescription}
                         </div>
                       )}
-
                     </div>
                   )}
-
                 </div>
-
               </StatsEditableWrap>
-
             </div>
 
             <div>
-
               <StatsEditableWrap
                 editMode={editMode}
-                target={{
-                  type: "storyText",
-                }}
-                onEditTarget={
-                  onEditTarget
-                }
+                target={{ type: "storyText" }}
+                onEditTarget={onEditTarget}
               >
-
                 <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
-
                   <span className="rr-mono text-xs sm:text-sm font-bold uppercase tracking-widest" style={{ color: theme.gold }}>
-                    {data.story
-                      ?.badge ||
-                      "Our Story"}
+                    {data.story?.badge || "Our Story"}
                   </span>
-
                 </div>
 
                 <h2 className="rr-serif text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-900 mb-4 sm:mb-6 tracking-tight leading-tight" style={{ color: theme.ink }}>
-                  {
-                    data.story
-                      ?.title
-                  }
+                  {data.story?.title}
                 </h2>
 
                 <div className="space-y-3.5 text-slate-600 leading-relaxed text-sm sm:text-base md:text-lg mb-6 sm:mb-8" style={{ color: theme.textMuted }}>
-
-                  {(
-                    data.story
-                      ?.paragraphs ||
-                    []
-                  ).map(
-                    (
-                      paragraph,
-                      index
-                    ) => (
-                      <p
-                        key={
-                          index
-                        }
-                      >
-                        {
-                          paragraph
-                        }
-                      </p>
-                    )
-                  )}
-
+                  {(data.story?.paragraphs || []).map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
                 </div>
-
               </StatsEditableWrap>
 
               <StatsEditableWrap
                 editMode={editMode}
-                target={{
-                  type: "storyButton",
-                }}
-                onEditTarget={
-                  onEditTarget
-                }
+                target={{ type: "storyButton" }}
+                onEditTarget={onEditTarget}
               >
-
                 <Link
-                  to={
-                    editMode
-                      ? "#"
-                      : data.story
-                          ?.buttonLink ||
-                        "/about"
-                  }
+                  to={editMode ? "#" : data.story?.buttonLink || "/about"}
                   onClick={(e) => {
-                    if (
-                      editMode
-                    ) {
-                      e.preventDefault();
-                    }
+                    if (editMode) e.preventDefault();
                   }}
                   className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all group"
                   style={{ background: theme.gradRose }}
                 >
-
-                  {data.story
-                    ?.buttonText ||
-                    "Read Our Story"}
-
+                  {data.story?.buttonText || "Read Our Story"}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-
                 </Link>
-
               </StatsEditableWrap>
-
             </div>
-
           </div>
 
           {/* =================================================
@@ -1301,25 +1126,18 @@ export default function Stats({
           ================================================= */}
 
           <div className="relative mb-16 sm:mb-24">
-
             <StatsEditableWrap
               editMode={editMode}
-              target={{
-                type: "excellenceHeader",
-              }}
-              onEditTarget={
-                onEditTarget
-              }
+              target={{ type: "excellenceHeader" }}
+              onEditTarget={onEditTarget}
             >
-
               <div className="relative z-10 text-center mb-12 sm:mb-16">
-
                 <div className="flex items-center justify-center gap-3 mb-4">
-                  <span className="h-px w-10" style={{ background: theme.gold }} />
+                  <span className="h-px w-10 rr-accent-pulse" style={{ background: theme.gold }} />
                   <span className="rr-mono text-[11px] font-semibold uppercase tracking-[0.28em]" style={{ color: theme.rose }}>
                     {data.excellence?.title || "ACADEMIC EXCELLENCE"}
                   </span>
-                  <span className="h-px w-10" style={{ background: theme.gold }} />
+                  <span className="h-px w-10 rr-accent-pulse" style={{ background: theme.gold }} />
                 </div>
 
                 <h2
@@ -1327,231 +1145,109 @@ export default function Stats({
                   style={{ color: theme.ink }}
                 >
                   Where Curiosity
-                  <span style={{ color: theme.rose }}>
-                    {" "}
-                    Becomes Achievement
-                  </span>
+                  <span style={{ color: theme.rose }}> Becomes Achievement</span>
                 </h2>
 
                 <p
                   className="text-slate-600 max-w-2xl mx-auto mt-4 text-sm sm:text-base leading-7 sm:leading-8"
                   style={{ color: theme.textMuted }}
                 >
-                  {data.excellence
-                    ?.description ||
+                  {data.excellence?.description ||
                     "We nurture knowledge, confidence, and curiosity through purposeful learning experiences that help every student discover their strengths and prepare for the future."}
                 </p>
-
               </div>
-
             </StatsEditableWrap>
 
             <div className="relative z-10 grid md:grid-cols-3 gap-6">
+              {(data.excellence?.cards || []).map((card, i) => {
+                const themes = [
+                  { accent: theme.rose, soft: `${theme.rose}12`, label: "ACADEMIC GROWTH" },
+                  { accent: theme.gold, soft: `${theme.gold}18`, label: "FUTURE READY" },
+                  { accent: theme.moss, soft: `${theme.moss}14`, label: "HOLISTIC GROWTH" },
+                ];
 
-              {(
-                data.excellence
-                  ?.cards || []
-              ).map(
-                (
-                  card,
-                  i
-                ) => {
+                const themeAccent = themes[i % themes.length];
 
-                  const themes = [
-                    {
-                      accent: theme.rose,
-                      soft: `${theme.rose}12`,
-                      label: "ACADEMIC GROWTH",
-                    },
-                    {
-                      accent: theme.gold,
-                      soft: `${theme.gold}18`,
-                      label: "FUTURE READY",
-                    },
-                    {
-                      accent: theme.moss,
-                      soft: `${theme.moss}14`,
-                      label: "HOLISTIC GROWTH",
-                    },
-                  ];
-
-                  const themeAccent =
-                    themes[
-                      i %
-                        themes.length
-                    ];
-
-                  return (
-                    <motion.div
-                      key={i}
-                      initial={{
-                        opacity: 0,
-                        y: 35,
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 35 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.6, delay: i * 0.1 }}
+                    className="group"
+                  >
+                    <TiltCard
+                      editMode={editMode}
+                      max={5}
+                      className="rr-sheen-wrap relative min-h-[240px] h-full rounded-2xl p-7 sm:p-8 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_55px_rgba(30,20,32,0.14)]"
+                      style={{
+                        background: theme.card,
+                        border: `1px solid ${theme.paperDeep}`,
+                        boxShadow: "0 16px 36px rgba(30,20,32,0.08)",
                       }}
-                      whileInView={{
-                        opacity: 1,
-                        y: 0,
-                      }}
-                      viewport={{
-                        once: true,
-                        amount: 0.2,
-                      }}
-                      transition={{
-                        duration: 0.6,
-                        delay:
-                          i * 0.1,
-                      }}
-                      className="group"
                     >
+                      {!editMode && <div className="rr-sheen" />}
 
-                      <TiltCard
-                        editMode={
-                          editMode
-                        }
-                        max={5}
-                        className="
-                          relative
-                          min-h-[240px]
-                          h-full
-                          overflow-hidden
-                          rounded-2xl
-                          p-7
-                          sm:p-8
-                          transition-all
-                          duration-500
-                          hover:-translate-y-1.5
-                        "
-                        style={{
-                          background: theme.card,
-                          border: `1px solid ${theme.paperDeep}`,
-                          boxShadow: "0 16px 36px rgba(30,20,32,0.08)",
-                        }}
-                      >
+                      {/* Accent line */}
+                      <div
+                        className="absolute left-0 right-0 top-0 h-1"
+                        style={{ background: themeAccent.accent }}
+                      />
 
-                        {/* Accent line */}
-                        <div
-                          className="absolute left-0 right-0 top-0 h-1"
-                          style={{ background: themeAccent.accent }}
-                        />
+                      {/* Soft glow */}
+                      <div
+                        className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full blur-3xl opacity-30 transition-all duration-500 group-hover:scale-150 group-hover:opacity-50"
+                        style={{ background: themeAccent.accent }}
+                      />
 
-                        {/* Soft glow */}
-                        <div
-                          className="
-                            pointer-events-none
-                            absolute
-                            -right-16
-                            -top-16
-                            h-44
-                            w-44
-                            rounded-full
-                            blur-3xl
-                            opacity-30
-                            transition-all
-                            duration-500
-                            group-hover:scale-150
-                            group-hover:opacity-50
-                          "
-                          style={{
-                            background: themeAccent.accent,
-                          }}
-                        />
+                      <div className="relative z-20 flex h-full flex-col">
+                        <StatsEditableWrap
+                          editMode={editMode}
+                          target={{ type: "excellenceCard", index: i }}
+                          onEditTarget={onEditTarget}
+                          onDeleteTarget={onDeleteTarget}
+                          canDelete={data.excellence?.cards?.length > 1}
+                        >
+                          <p className="rr-mono mb-3 text-[10px] font-black uppercase tracking-[0.22em]" style={{ color: themeAccent.accent }}>
+                            {themeAccent.label}
+                          </p>
 
-                        <div className="relative z-20 flex h-full flex-col">
+                          <h3 className="rr-serif text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: theme.ink }}>
+                            {card.title}
+                          </h3>
 
-                          <StatsEditableWrap
-                            editMode={
-                              editMode
-                            }
-                            target={{
-                              type: "excellenceCard",
-                              index:
-                                i,
-                            }}
-                            onEditTarget={
-                              onEditTarget
-                            }
-                            onDeleteTarget={
-                              onDeleteTarget
-                            }
-                            canDelete={
-                              data
-                                .excellence
-                                ?.cards
-                                ?.length >
-                              1
-                            }
-                          >
-
-                            <p className="rr-mono mb-3 text-[10px] font-black uppercase tracking-[0.22em]" style={{ color: themeAccent.accent }}>
-                              {themeAccent.label}
-                            </p>
-
-                            <h3 className="rr-serif text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: theme.ink }}>
-                              {card.title}
-                            </h3>
-
-                            <p className="mt-4 text-sm leading-7" style={{ color: theme.textMuted }}>
-                              {card.description}
-                            </p>
-
-                          </StatsEditableWrap>
-
-                        </div>
-
-                      </TiltCard>
-
-                    </motion.div>
-                  );
-                }
-              )}
+                          <p className="mt-4 text-sm leading-7" style={{ color: theme.textMuted }}>
+                            {card.description}
+                          </p>
+                        </StatsEditableWrap>
+                      </div>
+                    </TiltCard>
+                  </motion.div>
+                );
+              })}
 
               {editMode && (
                 <div
-                  className="
-                    flex
-                    items-center
-                    justify-center
-                    min-h-[240px]
-                    border-2
-                    border-dashed
-                    rounded-2xl
-                    transition-all
-                    duration-300
-                    cursor-pointer
-                    group
-                  "
+                  className="flex items-center justify-center min-h-[240px] border-2 border-dashed rounded-2xl transition-all duration-300 cursor-pointer group"
                   style={{ borderColor: `${theme.rose}40`, background: `${theme.rose}08` }}
                   onClick={() => {
                     onEditTarget({
                       type: "excellenceCard",
-                      index:
-                        data
-                          .excellence
-                          ?.cards
-                          ?.length ||
-                        0,
+                      index: data.excellence?.cards?.length || 0,
                       isNew: true,
                     });
                   }}
                 >
-
                   <div className="flex flex-col items-center gap-3" style={{ color: theme.rose }}>
-
                     <div className="w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform" style={{ background: `${theme.rose}15` }}>
                       <Plus className="w-7 h-7" />
                     </div>
-
-                    <span className="rr-mono text-xs sm:text-sm font-bold">
-                      Add Excellence Card
-                    </span>
-
+                    <span className="rr-mono text-xs sm:text-sm font-bold">Add Excellence Card</span>
                   </div>
-
                 </div>
               )}
-
             </div>
-
           </div>
 
           {/* =================================================
@@ -1560,525 +1256,260 @@ export default function Stats({
 
           {!editMode && (
             <motion.div
-              initial={{
-                opacity: 0,
-                y: 25,
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-              }}
-              viewport={{
-                once: true,
-                amount: 0.15,
-              }}
-              transition={{
-                duration: 0.6,
-              }}
-              className="
-                relative
-                overflow-hidden
-                rounded-2xl
-                p-6
-                sm:p-8
-                md:p-10
-              "
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.6 }}
+              className="relative overflow-hidden rounded-2xl p-6 sm:p-8 md:p-10"
               style={{
                 background: theme.card,
                 border: `1px solid ${theme.paperDeep}`,
                 boxShadow: "0 16px 36px rgba(30,20,32,0.08)",
               }}
             >
-
               {/* Soft background glow */}
               <div
-                className="
-                  pointer-events-none
-                  absolute
-                  -top-28
-                  -right-20
-                  h-64
-                  w-64
-                  rounded-full
-                  blur-3xl
-                  opacity-20
-                "
+                className="pointer-events-none absolute -top-28 -right-20 h-64 w-64 rounded-full blur-3xl opacity-20"
                 style={{ background: theme.rose }}
               />
-
               <div
-                className="
-                  pointer-events-none
-                  absolute
-                  -bottom-28
-                  -left-20
-                  h-64
-                  w-64
-                  rounded-full
-                  blur-3xl
-                  opacity-20
-                "
+                className="pointer-events-none absolute -bottom-28 -left-20 h-64 w-64 rounded-full blur-3xl opacity-20"
                 style={{ background: theme.gold }}
               />
 
               {/* HEADER */}
               <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5 mb-7 sm:mb-8">
-
                 <div>
-
                   <div className="flex items-center gap-3 mb-3">
                     <span className="h-px w-8" style={{ background: theme.gold }} />
                     <span className="rr-mono text-[10px] font-semibold uppercase tracking-[0.28em]" style={{ color: theme.rose }}>
                       Notice Board
                     </span>
                   </div>
-
-                  <h2
-                    className="rr-serif text-3xl sm:text-4xl font-semibold tracking-tight"
-                    style={{ color: theme.ink }}
-                  >
+                  <h2 className="rr-serif text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: theme.ink }}>
                     Latest Updates
                   </h2>
-
                 </div>
 
                 <Link
                   to="/notices"
-                  className="
-                    inline-flex
-                    items-center
-                    justify-center
-                    gap-2
-                    self-start
-                    sm:self-auto
-                    px-6
-                    py-3
-                    rounded-xl
-                    text-white
-                    text-sm
-                    font-bold
-                    shadow-md
-                    transition-all
-                    duration-300
-                    hover:-translate-y-0.5
-                    hover:shadow-lg
-                  "
+                  className="inline-flex items-center justify-center gap-2 self-start sm:self-auto px-6 py-3 rounded-xl text-white text-sm font-bold shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
                   style={{ background: theme.gradRose }}
                 >
                   View All
                   <ArrowRight className="w-4 h-4" />
                 </Link>
-
               </div>
 
               {/* NOTICES */}
               {notices.length === 0 ? (
-
                 <div
-                  className="
-                    relative
-                    z-10
-                    rounded-2xl
-                    p-10
-                    text-center
-                  "
+                  className="relative z-10 rounded-2xl p-10 text-center"
                   style={{ background: `${theme.paper}80`, border: `1px solid ${theme.paperDeep}` }}
                 >
-
                   <h3 className="rr-serif text-lg font-semibold" style={{ color: theme.textMuted }}>
                     No notices available
                   </h3>
-
                   <p className="mt-1 text-sm" style={{ color: theme.textMuted }}>
                     New school announcements will appear here.
                   </p>
-
                 </div>
-
               ) : (
-
                 <div className="relative z-10 space-y-4">
+                  {notices.map((notice, i) => {
+                    const style = getNoticeAccent(notice);
 
-                  {notices.map(
-                    (
-                      notice,
-                      i
-                    ) => {
-
-                      const noticeStyles = [
-                        {
-                          border: theme.rose,
-                          badge: `${theme.rose}12`,
-                          badgeText: theme.rose,
-                          hover: theme.rose,
-                        },
-                        {
-                          border: theme.gold,
-                          badge: `${theme.gold}16`,
-                          badgeText: theme.gold,
-                          hover: theme.gold,
-                        },
-                        {
-                          border: theme.moss,
-                          badge: `${theme.moss}12`,
-                          badgeText: theme.moss,
-                          hover: theme.moss,
-                        },
-                      ];
-
-                      const style =
-                        noticeStyles[
-                          i %
-                            noticeStyles.length
-                        ];
-
-                      return (
-                        <motion.div
-                          key={
-                            notice.id ||
-                            notice._id ||
-                            i
-                          }
-                          initial={{
-                            opacity: 0,
-                            y: 12,
-                          }}
-                          whileInView={{
-                            opacity: 1,
-                            y: 0,
-                          }}
-                          viewport={{
-                            once: true,
-                          }}
-                          transition={{
-                            duration:
-                              0.4,
-                            delay:
-                              i *
-                              0.07,
-                          }}
+                    return (
+                      <motion.div
+                        key={notice.id || notice._id || i}
+                        initial={{ opacity: 0, y: 12 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: i * 0.07 }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setSelectedNotice(notice)}
+                          className="w-full text-left group cursor-pointer focus:outline-none"
                         >
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setSelectedNotice(
-                                notice
-                              )
-                            }
-                            className="
-                              w-full
-                              text-left
-                              group
-                              cursor-pointer
-                              focus:outline-none
-                            "
+                          <div
+                            className="relative overflow-hidden rounded-2xl border-l-[4px] px-5 py-5 sm:px-6 sm:py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                            style={{
+                              borderColor: style.border,
+                              background: theme.white,
+                              boxShadow: "0 4px 16px rgba(30,20,32,0.04)",
+                            }}
                           >
-
+                            {/* Hover sheen sweep */}
                             <div
-                              className={`
-                                relative
-                                overflow-hidden
-                                rounded-2xl
-                                border-l-[4px]
-                                px-5
-                                py-5
-                                sm:px-6
-                                sm:py-5
-                                transition-all
-                                duration-300
-                                hover:-translate-y-0.5
-                                hover:shadow-lg
-                              `}
+                              className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none"
                               style={{
-                                borderColor: style.border,
-                                background: theme.white,
-                                boxShadow: "0 4px 16px rgba(30,20,32,0.04)",
+                                background: `linear-gradient(120deg, transparent 0%, ${style.badge} 45%, transparent 85%)`,
                               }}
-                            >
+                            />
 
-                              <div
-                                className="
-                                  relative
-                                  flex
-                                  flex-col
-                                  md:flex-row
-                                  md:items-center
-                                  gap-4
-                                "
-                              >
-
-                                <div className="flex-1 min-w-0">
-
-                                  <div
-                                    className="
-                                      flex
-                                      flex-wrap
-                                      items-center
-                                      gap-2
-                                      mb-2
-                                    "
-                                  >
-
-                                    <span
-                                      className={`
-                                        rr-mono
-                                        inline-flex
-                                        items-center
-                                        px-2.5
-                                        py-1
-                                        rounded-full
-                                        text-[10px]
-                                        font-bold
-                                        uppercase
-                                        tracking-[0.13em]
-                                      `}
-                                      style={{
-                                        background: style.badge,
-                                        color: style.badgeText,
-                                      }}
-                                    >
-                                      {notice.category ||
-                                        "General"}
-                                    </span>
-
-                                    {notice.pdf_url && (
-                                      <span
-                                        className="
-                                          rr-mono
-                                          inline-flex
-                                          items-center
-                                          px-2.5
-                                          py-1
-                                          rounded-full
-                                          text-[10px]
-                                          font-bold
-                                          uppercase
-                                          tracking-wider
-                                        "
-                                        style={{
-                                          background: `${theme.gold}15`,
-                                          color: theme.gold,
-                                        }}
-                                      >
-                                        PDF
-                                      </span>
-                                    )}
-
-                                  </div>
-
-                                  <h3
-                                    className="
-                                      text-base
-                                      sm:text-lg
-                                      font-bold
-                                      leading-snug
-                                      transition-colors
-                                      duration-200
-                                    "
-                                    style={{ color: theme.ink }}
-                                  >
-                                    {
-                                      notice.title
-                                    }
-                                  </h3>
-
-                                  <p
-                                    className="
-                                      mt-1
-                                      text-xs
-                                      sm:text-sm
-                                      leading-relaxed
-                                      line-clamp-1
-                                    "
-                                    style={{ color: theme.textMuted }}
-                                  >
-                                    {notice.description ||
-                                      "Click to read more."}
-                                  </p>
-
-                                </div>
-
-                                <div
-                                  className="
-                                    flex
-                                    items-center
-                                    justify-between
-                                    md:justify-end
-                                    gap-3
-                                    md:min-w-[140px]
-                                  "
-                                >
-
+                            <div className="relative flex flex-col md:flex-row md:items-center gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 mb-2">
                                   <span
-                                    className="
-                                      rr-mono
-                                      text-xs
-                                      font-medium
-                                      whitespace-nowrap
-                                    "
-                                    style={{ color: theme.textMuted }}
+                                    className="rr-mono inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.13em]"
+                                    style={{ background: style.badge, color: style.badgeText }}
                                   >
-                                    {new Date(
-                                      notice.date
-                                    ).toLocaleDateString()}
+                                    {notice.category || "General"}
                                   </span>
 
-                                  <div
-                                    className="
-                                      flex
-                                      h-9
-                                      w-9
-                                      flex-shrink-0
-                                      items-center
-                                      justify-center
-                                      rounded-full
-                                      transition-all
-                                      duration-300
-                                      group-hover:translate-x-1
-                                    "
-                                    style={{
-                                      background: style.badge,
-                                      color: style.badgeText,
-                                    }}
-                                  >
-                                    <ArrowRight className="w-4 h-4" />
-                                  </div>
-
+                                  {notice.pdf_url && (
+                                    <span
+                                      className="rr-mono inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                      style={{ background: `${theme.gold}15`, color: theme.gold }}
+                                    >
+                                      PDF
+                                    </span>
+                                  )}
                                 </div>
 
+                                <h3
+                                  className="text-base sm:text-lg font-bold leading-snug transition-colors duration-200"
+                                  style={{ color: theme.ink }}
+                                >
+                                  {notice.title}
+                                </h3>
+
+                                <p className="mt-1 text-xs sm:text-sm leading-relaxed line-clamp-1" style={{ color: theme.textMuted }}>
+                                  {notice.description || "Click to read more."}
+                                </p>
                               </div>
 
+                              <div className="flex items-center justify-between md:justify-end gap-3 md:min-w-[140px]">
+                                <span className="rr-mono text-xs font-medium whitespace-nowrap" style={{ color: theme.textMuted }}>
+                                  {new Date(notice.date).toLocaleDateString()}
+                                </span>
+
+                                <div
+                                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 group-hover:translate-x-1"
+                                  style={{ background: style.badge, color: style.badgeText }}
+                                >
+                                  <ArrowRight className="w-4 h-4" />
+                                </div>
+                              </div>
                             </div>
-
-                          </button>
-
-                        </motion.div>
-                      );
-                    }
-                  )}
-
+                          </div>
+                        </button>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               )}
-
             </motion.div>
           )}
-
         </div>
 
         {/* =================================================
             NOTICE MODAL
         ================================================= */}
 
-        {selectedNotice && (
-          <div
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-            style={{ background: "rgba(15,9,17,0.78)", backdropFilter: "blur(10px)" }}
-            onClick={() =>
-              setSelectedNotice(
-                null
-              )
-            }
-          >
-
+        <AnimatePresence>
+          {selectedNotice && (
             <motion.div
-              initial={{
-                opacity: 0,
-                scale: 0.95,
-                y: 20,
-              }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                y: 0,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 25,
-              }}
-              className="relative w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
-              style={{ background: theme.card }}
-              onClick={(e) =>
-                e.stopPropagation()
-              }
+              key="notice-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+              style={{ background: "rgba(15,9,17,0.82)", backdropFilter: "blur(14px)" }}
+              onClick={() => setSelectedNotice(null)}
             >
+              {(() => {
+                const accent = getNoticeAccent(selectedNotice);
 
-              <div
-                className="sticky top-0 z-10 p-5 sm:p-6 border-b flex justify-between items-start"
-                style={{ background: `${theme.card}dd`, borderColor: theme.paperDeep }}
-              >
-
-                <div>
-
-                  <h2 className="rr-serif text-xl sm:text-2xl font-semibold" style={{ color: theme.ink }}>
-                    {
-                      selectedNotice.title
-                    }
-                  </h2>
-
-                  <div className="flex items-center gap-2 mt-1 rr-mono text-xs" style={{ color: theme.textMuted }}>
-
-                    <Calendar className="w-3.5 h-3.5" />
-
-                    {new Date(
-                      selectedNotice.date
-                    ).toLocaleDateString()}
-
-                  </div>
-
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSelectedNotice(
-                      null
-                    )
-                  }
-                  className="p-2 rounded-full transition-colors cursor-pointer"
-                  style={{ background: `${theme.rose}08`, color: theme.textMuted }}
-                >
-
-                  <X className="w-5 h-5" />
-
-                </button>
-
-              </div>
-
-              <div className="p-5 sm:p-6 overflow-y-auto flex-1">
-
-                <div className="prose max-w-none text-sm sm:text-base leading-relaxed" style={{ color: theme.text }}>
-
-                  <p className="whitespace-pre-line">
-                    {selectedNotice.description ||
-                      selectedNotice.content}
-                  </p>
-
-                </div>
-
-                {selectedNotice.pdf_url && (
-                  <div className="mt-6">
-
-                    <PdfNoticePreview
-                      fileUrl={
-                        selectedNotice.pdf_url
-                      }
-                      title={
-                        selectedNotice.title
-                      }
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.92, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 12 }}
+                    transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                    className="relative w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                    style={{ background: theme.card, border: `1px solid ${theme.paperDeep}` }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Colored top accent bar */}
+                    <div
+                      className="h-1.5 w-full flex-shrink-0"
+                      style={{ background: `linear-gradient(90deg, ${accent.accent}, ${theme.gold})` }}
                     />
 
-                  </div>
-                )}
+                    {/* Decorative glow */}
+                    <div
+                      className="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full blur-3xl opacity-25"
+                      style={{ background: accent.accent }}
+                    />
 
-              </div>
+                    <div
+                      className="relative sticky top-0 z-10 p-5 sm:p-6 border-b flex justify-between items-start gap-4"
+                      style={{ background: `${theme.card}f0`, borderColor: theme.paperDeep }}
+                    >
+                      <div className="flex items-start gap-4 min-w-0">
+                        <motion.div
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.12, type: "spring", stiffness: 260 }}
+                          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl"
+                          style={{ background: accent.badge, color: accent.badgeText }}
+                        >
+                          <Calendar className="w-5 h-5" />
+                        </motion.div>
 
+                        <div className="min-w-0">
+                          <span
+                            className="rr-mono inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.13em] mb-2"
+                            style={{ background: accent.badge, color: accent.badgeText }}
+                          >
+                            {selectedNotice.category || "General"}
+                          </span>
+
+                          <h2 className="rr-serif text-xl sm:text-2xl font-semibold leading-snug" style={{ color: theme.ink }}>
+                            {selectedNotice.title}
+                          </h2>
+
+                          <div className="flex items-center gap-2 mt-2 rr-mono text-xs" style={{ color: theme.textMuted }}>
+                            <Calendar className="w-3.5 h-3.5" />
+                            {new Date(selectedNotice.date).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedNotice(null)}
+                        className="flex-shrink-0 p-2.5 rounded-full transition-all duration-300 hover:rotate-90 cursor-pointer"
+                        style={{ background: accent.badge, color: accent.badgeText }}
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <div className="relative z-10 p-5 sm:p-6 overflow-y-auto flex-1">
+                      <div className="prose max-w-none text-sm sm:text-base leading-relaxed" style={{ color: theme.text }}>
+                        <p className="whitespace-pre-line">
+                          {selectedNotice.description || selectedNotice.content}
+                        </p>
+                      </div>
+
+                      {selectedNotice.pdf_url && (
+                        <div className="mt-6">
+                          <PdfNoticePreview
+                            fileUrl={selectedNotice.pdf_url}
+                            title={selectedNotice.title}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })()}
             </motion.div>
-
-          </div>
-        )}
-
+          )}
+        </AnimatePresence>
       </section>
     </>
   );

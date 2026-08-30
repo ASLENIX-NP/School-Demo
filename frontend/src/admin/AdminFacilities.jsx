@@ -814,7 +814,7 @@ function BusRouteEditor({
             label="Destination"
             value={routeForm.to}
             onChange={(val) => setRouteForm(prev => ({ ...prev, to: val }))}
-            placeholder="e.g., School Campus"
+            placeholder="e.g., School - Hetauda"
           />
           <div>
             <label className="block text-sm font-black mb-2 text-slate-700">Stops</label>

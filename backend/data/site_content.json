@@ -188,7 +188,7 @@
     "stats": [
       {
         "id": 1,
-        "value": 2500,
+        "value": 3800,
         "suffix": "+",
         "decimals": 0,
         "label": "Students Enrolled",
@@ -197,7 +197,7 @@
       },
       {
         "id": 2,
-        "value": 98.5,
+        "value": 98,
         "suffix": "%",
         "decimals": 1,
         "label": "Board Success Rate",
@@ -206,7 +206,7 @@
       },
       {
         "id": 3,
-        "value": 15,
+        "value": 36,
         "suffix": " yrs",
         "decimals": 0,
         "label": "Excellence in Education",
@@ -236,7 +236,7 @@
     "storyImageOffsetY": 0,
     "storyImageTopTitle": "Our Main Campus",
     "storyImageTopSubtitle": "A Hub of Innovation & Learning",
-    "storyBadgeYear": "Est. 2010",
+    "storyBadgeYear": "Est. 1991",
     "pillarBadge": "Our Core Values",
     "pillarTitle": "The Principles That Guide Our Community",
     "pillarDescription": "",
@@ -952,21 +952,6 @@
         "accentColor": ""
       },
       {
-        "id": 2,
-        "name": "Amul Shrestha",
-        "position": "Vice Principal",
-        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786427544732_licensed-image__1__oVUjBQjb_.jpg",
-        "imageZoom": 1,
-        "imageOffsetX": -32.13675474509215,
-        "imageOffsetY": 1.4512527016014738,
-        "qualification": "M.Ed",
-        "phone": "057-590145",
-        "email": "viceprincipal@redroseschool.edu.np",
-        "description": "Oversees daily academic administration, teacher development, and student welfare, maintaining high standards of discipline and achievement.",
-        "visible": true,
-        "accentColor": ""
-      },
-      {
         "id": 3,
         "name": "Prem Hamal",
         "position": "Science Dept Head",
@@ -1025,21 +1010,6 @@
         "description": "Guides primary educators to build a friendly, nurturing, activity-based foundation for young learners.",
         "visible": true,
         "accentColor": ""
-      },
-      {
-        "id": 1786427591628,
-        "name": "New Staff Member",
-        "position": "Teacher",
-        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786427762520_licensed-image__1__ktrm57FAo1.jpg",
-        "imageZoom": 1,
-        "imageOffsetX": 0,
-        "imageOffsetY": 0,
-        "qualification": "",
-        "phone": "",
-        "email": "",
-        "description": "Write a short bio about this staff member.",
-        "visible": true,
-        "accentColor": ""
       }
     ]
   },
@@ -1081,8 +1051,8 @@
         "details": "40+ networked computers, programming environments, office software, and multimedia tools, with a teacher-led session every week from Grade 6 upward.",
         "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786426007258_Screenshot_2026-07-10_234100_IO843eGhs.png",
         "imageZoom": 1,
-        "imageOffsetX": 0,
-        "imageOffsetY": 0,
+        "imageOffsetX": 10.827035422693744,
+        "imageOffsetY": 39.37900495815717,
         "visible": true,
         "color": "#2D6A4F",
         "busRoutes": []
@@ -1095,8 +1065,8 @@
         "details": "Fully equipped, separately ventilated labs for each science stream, with safety gear, demonstration benches, and enough apparatus for every student to run their own experiment — not just watch one.",
         "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786426051586_Brown_White_and_Gold_Delicious_Chicken_Tikka_Masala_Resealable_Pouch_iUXXPrRGP.png",
         "imageZoom": 1,
-        "imageOffsetX": -60,
-        "imageOffsetY": 0,
+        "imageOffsetX": -59.6314959338993,
+        "imageOffsetY": 28.77087180385863,
         "visible": true,
         "color": "#F4A261",
         "busRoutes": []
@@ -1710,14 +1680,14 @@
       {
         "id": "hours",
         "icon": "clock",
-        "label": "Office Hours",
+        "label": "School Timing",
         "value": "Sun - Fri: 9:00 AM - 4:00 PM",
         "color": "#EA580C"
       }
     ],
     "mapCard": {
       "title": "Red Rose Secondary English Boarding School",
-      "address": "Basudev Marga, Hetauda-2, Makawanpur, Nepal",
+      "address": "Hatiya, Hetauda-16",
       "buttonText": "Open in Google Maps",
       "mapUrl": "https://www.google.com/maps/place/Bal+Jagriti+Boarding+School/@27.4312792,85.0379093,19z/data=!4m6!3m5!1s0x39eb4991159e4289:0x8707a51c9add8d8e!8m2!3d27.4312792!4d85.0379093!16s%2Fg%2F11bw3f8rbl"
     },

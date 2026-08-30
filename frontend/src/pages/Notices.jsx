@@ -9,7 +9,6 @@ import {
   ChevronRight,
   Download,
   FileText,
-  Megaphone,
   Pin,
   Search,
   Sparkles,
@@ -113,15 +112,6 @@ function NoticesStyles() {
         transform: translateX(6px);
       }
 
-      .rr-announcement-card {
-        transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-      }
-
-      .rr-announcement-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 20px 50px rgba(30,20,32,0.10);
-      }
-
       .rr-filter-btn {
         transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       }
@@ -155,6 +145,22 @@ function NoticesStyles() {
       }
 
       .rr-popup-close {
+        flex-shrink: 0;
+        appearance: none;
+        -webkit-appearance: none;
+      }
+
+      .rr-popup-close:hover {
+        background: ${theme.roseDeep} !important;
+        box-shadow: 0 12px 30px rgba(156,39,72,0.38) !important;
+      }
+
+      .rr-popup-close:focus-visible {
+        outline: 3px solid ${theme.goldSoft};
+        outline-offset: 3px;
+      }
+
+      .rr-popup-close {
         transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
@@ -180,6 +186,47 @@ function NoticesStyles() {
 
       .rr-float {
         animation: float 6s ease-in-out infinite;
+      }
+
+      /* Hero bottom edge — same cream zigzag language as Academics */
+      .rr-notices-hero-card::after {
+        content: "";
+        position: absolute;
+        left: -1px;
+        right: -1px;
+        bottom: -1px;
+        height: 24px;
+        z-index: 5;
+        pointer-events: none;
+        background: ${theme.paper};
+        clip-path: polygon(
+          0 100%,
+          2% 0, 4% 100%,
+          6% 0, 8% 100%,
+          10% 0, 12% 100%,
+          14% 0, 16% 100%,
+          18% 0, 20% 100%,
+          22% 0, 24% 100%,
+          26% 0, 28% 100%,
+          30% 0, 32% 100%,
+          34% 0, 36% 100%,
+          38% 0, 40% 100%,
+          42% 0, 44% 100%,
+          46% 0, 48% 100%,
+          50% 0, 52% 100%,
+          54% 0, 56% 100%,
+          58% 0, 60% 100%,
+          62% 0, 64% 100%,
+          66% 0, 68% 100%,
+          70% 0, 72% 100%,
+          74% 0, 76% 100%,
+          78% 0, 80% 100%,
+          82% 0, 84% 100%,
+          86% 0, 88% 100%,
+          90% 0, 92% 100%,
+          94% 0, 96% 100%,
+          98% 0, 100% 100%
+        );
       }
 
       /* Zigzag at bottom of card */
@@ -217,6 +264,28 @@ function NoticesStyles() {
           90% 0, 92% 100%,
           94% 0, 96% 100%,
           98% 0, 100% 100%
+        );
+      }
+
+      /* Full-width zigzag edge for the notices hero — matches Academics */
+      .rr-hero-zigzag {
+        position: absolute;
+        z-index: 6;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 30px;
+        background: ${theme.paper};
+        clip-path: polygon(
+          0 0, 2% 100%, 4% 0, 6% 100%, 8% 0, 10% 100%,
+          12% 0, 14% 100%, 16% 0, 18% 100%, 20% 0, 22% 100%,
+          24% 0, 26% 100%, 28% 0, 30% 100%, 32% 0, 34% 100%,
+          36% 0, 38% 100%, 40% 0, 42% 100%, 44% 0, 46% 100%,
+          48% 0, 50% 100%, 52% 0, 54% 100%, 56% 0, 58% 100%,
+          60% 0, 62% 100%, 64% 0, 66% 100%, 68% 0, 70% 100%,
+          72% 0, 74% 100%, 76% 0, 78% 100%, 80% 0, 82% 100%,
+          84% 0, 86% 100%, 88% 0, 90% 100%, 92% 0, 94% 100%,
+          96% 0, 98% 100%, 100% 0, 100% 100%, 0 100%
         );
       }
 
@@ -269,15 +338,11 @@ function NoticesStyles() {
         }
 
         .rr-notices-hero-card {
-          padding: 28px 18px !important;
+          padding: 28px 18px 54px !important;
           border-radius: 0 0 16px 16px !important;
         }
 
         .rr-notices-grid {
-          grid-template-columns: 1fr !important;
-        }
-
-        .rr-announcements-grid {
           grid-template-columns: 1fr !important;
         }
 
@@ -314,7 +379,7 @@ export const defaultNoticeSettings = {
   page_badge: "Official School Updates",
   page_title: "Stay Connected with School News",
   page_description:
-    "Important notices, announcements, examinations, holidays, admissions and school updates — all in one place.",
+    "Important notices, examinations, holidays, admissions and school updates — all in one place.",
   sidebar_title: "Stay informed",
   sidebar_description:
     "Check this page regularly for the latest official school information.",
@@ -533,8 +598,6 @@ function NoticeCard({
 }) {
   const color = getCategoryColor(notice.category);
   const hasPdf = Boolean(notice.pdf_url || notice.file_url);
-  const isEven = index % 2 === 0;
-
   return (
     <motion.article
       className="rr-notice-card"
@@ -548,11 +611,10 @@ function NoticeCard({
       }}
       style={{
         ...styles.noticeCard,
-        marginTop: isEven ? "0" : "30px",
       }}
     >
       <div
-        className="relative h-full overflow-hidden rounded-[28px] p-6 sm:p-7 pb-9 cursor-pointer"
+        className="relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-[28px] p-6 sm:p-7 pb-9 cursor-pointer"
         style={{
           background: theme.card,
           border: `1px solid ${theme.paperDeep}`,
@@ -722,7 +784,6 @@ function NoticeCard({
 export default function Notices({
   editMode = false,
   noticesOverride = null,
-  announcementsOverride = null,
   settingsOverride = null,
   loadingOverride = false,
   onEditTarget = () => {},
@@ -731,13 +792,37 @@ export default function Notices({
   onViewAllNotices = () => {},
 }) {
   const [notices, setNotices] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
   const [settings, setSettings] = useState(defaultNoticeSettings);
   const [loading, setLoading] = useState(!editMode && !loadingOverride);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [pdfOnly, setPdfOnly] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState(null);
+  const [isClosingNotice, setIsClosingNotice] = useState(false);
+
+  const handleCloseNotice = () => {
+    if (!selectedNotice || isClosingNotice) return;
+
+    setIsClosingNotice(true);
+
+    window.setTimeout(() => {
+      setSelectedNotice(null);
+      setIsClosingNotice(false);
+    }, 220);
+  };
+
+  useEffect(() => {
+    if (!selectedNotice || editMode) return undefined;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        handleCloseNotice();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [selectedNotice, editMode, isClosingNotice]);
 
   // ==========================================================
   // LOAD DATA
@@ -753,9 +838,6 @@ export default function Notices({
         )
       );
 
-      setAnnouncements(
-        announcementsOverride || []
-      );
 
       setSettings({
         ...defaultNoticeSettings,
@@ -805,64 +887,6 @@ export default function Notices({
       });
 
     fetchJson(
-      `${API_URL}/api/announcements`
-    )
-      .then((announcementResult) => {
-        if (!alive) return;
-
-        const rawAnnouncements =
-          Array.isArray(
-            announcementResult
-          )
-            ? announcementResult
-            : announcementResult?.data || [];
-
-        setAnnouncements(
-          rawAnnouncements
-            .filter(
-              (item) =>
-                item?.active !== false &&
-                item?.visible !== false
-            )
-            .sort((a, b) => {
-              if (
-                Boolean(
-                  a.show_on_homepage
-                ) !==
-                Boolean(
-                  b.show_on_homepage
-                )
-              ) {
-                return a.show_on_homepage
-                  ? -1
-                  : 1;
-              }
-
-              return (
-                new Date(
-                  b.created_at ||
-                    b.createdAt ||
-                    0
-                ).getTime() -
-                new Date(
-                  a.created_at ||
-                    a.createdAt ||
-                    0
-                ).getTime()
-              );
-            })
-        );
-      })
-      .catch((error) => {
-        if (alive) {
-          console.error(
-            "Notice announcements load error:",
-            error
-          );
-        }
-      });
-
-    fetchJson(
       `${API_URL}/api/notice-settings`
     )
       .then((settingsResult) => {
@@ -890,7 +914,6 @@ export default function Notices({
   }, [
     editMode,
     noticesOverride,
-    announcementsOverride,
     settingsOverride,
     loadingOverride,
   ]);
@@ -1073,112 +1096,11 @@ export default function Notices({
               </div>
             </motion.div>
           </div>
+
+          {/* Full-width zigzag edge, matching the Academics hero */}
+          <div className="rr-hero-zigzag" aria-hidden="true" />
         </motion.div>
       </section>
-
-      {/* =====================================================
-          ANNOUNCEMENTS — Clean cards
-      ====================================================== */}
-
-      {announcements.length > 0 && (
-        <section style={styles.announcementsSection}>
-          <div style={styles.sectionContainer}>
-            <SectionIntro
-              eyebrow="School Announcements"
-              title='Latest <span style="color: #9C2748;">Announcements</span>'
-              description="Stay informed with the latest school news and updates."
-              align="left"
-            />
-
-            <div className="rr-announcements-grid" style={styles.announcementsGrid}>
-              {announcements
-                .slice(0, 4)
-                .map(
-                  (
-                    announcement,
-                    index
-                  ) => (
-                    <motion.article
-                      key={
-                        announcement.id ||
-                        index
-                      }
-                      className="rr-announcement-card"
-                      initial={{
-                        opacity: 0,
-                        y: 25,
-                      }}
-                      whileInView={{
-                        opacity: 1,
-                        y: 0,
-                      }}
-                      viewport={{
-                        once: true,
-                        amount: 0.15,
-                      }}
-                      transition={{
-                        duration: 0.5,
-                        delay: index * 0.06,
-                        ease: [0.22, 1, 0.36, 1],
-                      }}
-                      style={styles.announcementCard}
-                    >
-                      {announcement.image_url && (
-                        <div style={styles.announcementImage}>
-                          <img
-                            src={
-                              announcement.image_url
-                            }
-                            alt={
-                              announcement.title ||
-                              "Announcement"
-                            }
-                            style={styles.announcementImg}
-                          />
-                        </div>
-                      )}
-
-                      <div style={styles.announcementContent}>
-                        <div style={styles.announcementHeader}>
-                          <div style={styles.announcementIcon}>
-                            <Megaphone
-                              size={20}
-                              color={theme.rose}
-                            />
-                          </div>
-
-                          <div style={styles.announcementMeta}>
-                            <span className="rr-mono" style={styles.announcementBadge}>
-                              School Announcement
-                            </span>
-
-                            {announcement.show_on_homepage && (
-                              <span className="rr-mono" style={styles.announcementPinned}>
-                                <Pin size={11} />
-                                Home
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <h3 className="rr-serif" style={styles.announcementTitle}>
-                          {announcement.title ||
-                            "School Announcement"}
-                        </h3>
-
-                        {announcement.description && (
-                          <p style={styles.announcementDesc}>
-                            {announcement.description}
-                          </p>
-                        )}
-                      </div>
-                    </motion.article>
-                  )
-                )}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* =====================================================
           SEARCH + FILTER
@@ -1189,7 +1111,7 @@ export default function Notices({
           <SectionIntro
             eyebrow="Official Notices"
             title='Recent <span style="color: #9C2748;">Updates</span>'
-            description="Search and filter through all official school notices and announcements."
+            description="Search and filter through all official school notices and updates."
             align="left"
           />
 
@@ -1470,7 +1392,7 @@ export default function Notices({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setSelectedNotice(null)}
+            onClick={handleCloseNotice}
           >
             <motion.div
               className="rr-popup-content"
@@ -1488,15 +1410,25 @@ export default function Notices({
               </div>
 
               <div style={styles.popupInner}>
-                {/* Close button - enhanced */}
-                <button
+                {/* Sticky close button — stays visible while the notice/PDF is scrolled */}
+                <motion.button
                   type="button"
                   className="rr-popup-close"
-                  onClick={() => setSelectedNotice(null)}
+                  aria-label="Close notice"
+                  title="Close notice"
+                  onClick={handleCloseNotice}
+                  animate={{
+                    rotate: isClosingNotice ? 180 : 0,
+                    backgroundColor: isClosingNotice ? theme.roseDeep : theme.rose,
+                    scale: isClosingNotice ? 0.94 : 1,
+                  }}
+                  whileHover={{ rotate: 90, scale: 1.06 }}
+                  whileTap={{ rotate: 180, scale: 0.92 }}
+                  transition={{ type: "spring", stiffness: 320, damping: 18 }}
                   style={styles.popupClose}
                 >
-                  <X size={20} />
-                </button>
+                  <X size={21} strokeWidth={2.5} />
+                </motion.button>
 
                 {/* Header with category and date */}
                 <div style={styles.popupHeader}>
@@ -1595,17 +1527,6 @@ export default function Notices({
                   </div>
                 )}
 
-                {/* Footer with close action */}
-                <div style={styles.popupFooter}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedNotice(null)}
-                    style={styles.popupFooterBtn}
-                  >
-                    Close
-                  </button>
-                </div>
-
                 {/* Same zig-zag edge used across the Academics design */}
                 <div className="rr-popup-zigzag" aria-hidden="true" />
               </div>
@@ -1639,8 +1560,8 @@ const styles = {
     maxWidth: "1180px",
     margin: "0 auto",
     overflow: "hidden",
-    borderRadius: "0 0 34px 34px",
-    padding: "60px clamp(32px, 6vw, 76px)",
+    borderRadius: "30px",
+    padding: "60px clamp(32px, 6vw, 76px) 88px",
     background: theme.gradInk,
     boxShadow: "0 24px 55px rgba(30,20,32,0.16)",
     border: "1px solid rgba(255,255,255,0.08)",
@@ -1738,110 +1659,6 @@ const styles = {
   heroStatDivider: {
     width: "1px",
     background: "rgba(255,255,255,0.10)",
-  },
-
-  // ANNOUNCEMENTS
-  announcementsSection: {
-    padding: "20px 24px 60px",
-    background: theme.paper,
-  },
-
-  sectionContainer: {
-    maxWidth: "1180px",
-    margin: "0 auto",
-  },
-
-  announcementsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "24px",
-  },
-
-  announcementCard: {
-    padding: "28px",
-    background: theme.card,
-    border: `1px solid ${theme.paperDeep}`,
-    borderRadius: "20px",
-    boxShadow: "0 12px 30px rgba(30,20,32,0.055)",
-  },
-
-  announcementImage: {
-    marginBottom: "20px",
-    borderRadius: "16px",
-    overflow: "hidden",
-    background: theme.paperDeep,
-    height: "200px",
-  },
-
-  announcementImg: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    transition: "transform 0.7s ease",
-  },
-
-  announcementContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-
-  announcementHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-
-  announcementIcon: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: `${theme.rose}08`,
-  },
-
-  announcementMeta: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: "8px",
-  },
-
-  announcementBadge: {
-    fontSize: "10px",
-    fontWeight: 700,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    color: theme.textMuted,
-  },
-
-  announcementPinned: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "4px",
-    padding: "3px 8px",
-    borderRadius: "20px",
-    fontSize: "9px",
-    fontWeight: 700,
-    textTransform: "uppercase",
-    background: "#FEF3C7",
-    color: "#92400E",
-  },
-
-  announcementTitle: {
-    fontSize: "20px",
-    fontWeight: 600,
-    color: theme.ink,
-    margin: 0,
-  },
-
-  announcementDesc: {
-    fontSize: "14px",
-    lineHeight: 1.7,
-    color: theme.textMuted,
-    margin: 0,
   },
 
   // NOTICES SECTION
@@ -1963,11 +1780,13 @@ const styles = {
   noticesGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gridAutoRows: "1fr",
+    alignItems: "stretch",
     gap: "24px",
   },
 
   noticeCard: {
-    marginTop: "0",
+    height: "100%",
   },
 
   pinnedSection: {
@@ -2239,14 +2058,24 @@ const styles = {
   },
 
   popupClose: {
-    float: "right",
-    padding: "10px",
+    position: "sticky",
+    top: "14px",
+    zIndex: 50,
+    marginLeft: "auto",
+    marginBottom: "-48px",
+    width: "42px",
+    height: "42px",
+    padding: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: "50%",
-    border: "none",
-    background: theme.paper,
-    color: theme.textMuted,
+    border: `2px solid ${theme.roseBright}`,
+    background: theme.rose,
+    color: theme.white,
     cursor: "pointer",
-    transition: "all 0.3s ease",
+    boxShadow: "0 10px 24px rgba(156,39,72,0.28)",
+    transition: "background 0.25s ease, box-shadow 0.25s ease",
   },
 
   popupHeader: {
@@ -2434,24 +2263,6 @@ const styles = {
     whiteSpace: "nowrap",
   },
 
-  popupFooter: {
-    display: "flex",
-    justifyContent: "flex-end",
-    paddingTop: "16px",
-    borderTop: `1px solid ${theme.paperDeep}`,
-  },
-
-  popupFooterBtn: {
-    padding: "10px 28px",
-    borderRadius: "12px",
-    border: "none",
-    fontSize: "13px",
-    fontWeight: 700,
-    color: theme.textMuted,
-    background: theme.paper,
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-  },
 };
 
 // Add keyframes for animations

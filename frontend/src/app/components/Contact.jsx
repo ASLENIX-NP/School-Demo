@@ -21,28 +21,7 @@ import {
   Navigation,
 } from "lucide-react";
 
-/*
-|--------------------------------------------------------------------------
-| RED ROSE SCHOOL — CONTACT PAGE
-|--------------------------------------------------------------------------
-| Replacement for the existing Contact.jsx.
-|
-| Preserves the existing backend/API:
-|   GET  /api/site-content/contact
-|   POST /api/contact-messages
-|
-| Preserves admin edit-mode callbacks:
-|   onEditHero
-|   onEditContactInfo
-|   onDeleteContactInfo
-|   onAddContactInfo
-|   onEditMap
-|   onEditForm
-|   onEditTarget
-|
-| No separate CSS file is required.
-|--------------------------------------------------------------------------
-*/
+
 
 export const colors = {
   burgundy: "#24131F",
@@ -297,6 +276,78 @@ export default function Contact({
     error: "",
   });
 
+  // Contact-card interactions
+  const [phoneModalOpen, setPhoneModalOpen] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState("");
+
+  const RED_ROSE_MAP_URL =
+    "https://www.google.com/maps?cid=8720645357221949406&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF&hl=en&source=embed";
+
+  const PHONE_NUMBERS = [
+    "057-590144",
+    "057-590145",
+    "057-590146",
+  ];
+
+  const handlePhoneClick = (event) => {
+    if (editMode) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    setCopiedPhone("");
+    setPhoneModalOpen(true);
+  };
+
+  const handleCopyPhone = async (phone) => {
+    try {
+      await navigator.clipboard.writeText(phone);
+    } catch {
+      const textArea = document.createElement("textarea");
+      textArea.value = phone;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand("copy");
+      textArea.remove();
+    }
+
+    setCopiedPhone(phone);
+    window.setTimeout(() => {
+      setCopiedPhone((current) => (current === phone ? "" : current));
+    }, 1800);
+  };
+
+  const handleContactCardClick = (event, info) => {
+    if (editMode) {
+      handleContactInfoEdit(info.id);
+      return;
+    }
+
+    const type = String(info.id || info.icon || "").toLowerCase();
+
+    if (type.includes("address") || type === "map" || info.icon === "map") {
+      event.preventDefault();
+      window.open(RED_ROSE_MAP_URL, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    if (type.includes("phone") || info.icon === "phone") {
+      handlePhoneClick(event);
+      return;
+    }
+
+    if (type.includes("email") || info.icon === "mail") {
+      event.preventDefault();
+      window.location.href = `mailto:${String(
+        info.value || "inforedroseschool@gmail.com"
+      )
+        .split(",")[0]
+        .trim()}`;
+    }
+  };
+
   const {
     ref: heroRef,
     inView: heroInView,
@@ -480,9 +531,6 @@ export default function Contact({
       });
     }
   };
-
-  const RED_ROSE_MAP_URL =
-    "https://www.google.com/maps/place/Red+Rose+English+Boarding+School/@27.3787422,85.0771236,983m/data=!3m1!1e3!4m14!1m7!3m6!1s0x39eb48cf3ad13d91:0x7905f4bf995fafde!2sRed+Rose+English+Boarding+School!8m2!3d27.3787422!4d85.0796985!16s%2Fg%2F11hc_dz_zg!3m5!1s0x39eb48cf3ad13d91:0x7905f4bf995fafde!8m2!3d27.3787422!4d85.0796985!16s%2Fg%2F11hc_dz_zg?entry=ttu";
 
   const RED_ROSE_EMBED_URL =
     "https://maps.google.com/maps?q=Red%20Rose%20English%20Boarding%20School%2C%20Hetauda%2C%20Nepal&ll=27.3787422%2C85.0796985&z=17&hl=en&output=embed";
@@ -721,13 +769,39 @@ export default function Contact({
                       editMode
                         ? "rr-editable-card"
                         : ""
+                    } ${
+                      !editMode &&
+                      (info.icon === "map" ||
+                        info.icon === "phone" ||
+                        info.icon === "mail")
+                        ? "rr-contact-clickable"
+                        : ""
                     }`}
-                    onClick={
-                      editMode
-                        ? () =>
-                            handleContactInfoEdit(
-                              info.id
-                            )
+                    onClick={(event) =>
+                      handleContactCardClick(event, info)
+                    }
+                    onKeyDown={(event) => {
+                      if (
+                        event.key === "Enter" ||
+                        event.key === " "
+                      ) {
+                        handleContactCardClick(event, info);
+                      }
+                    }}
+                    role={
+                      !editMode &&
+                      (info.icon === "map" ||
+                        info.icon === "phone" ||
+                        info.icon === "mail")
+                        ? "button"
+                        : undefined
+                    }
+                    tabIndex={
+                      !editMode &&
+                      (info.icon === "map" ||
+                        info.icon === "phone" ||
+                        info.icon === "mail")
+                        ? 0
                         : undefined
                     }
                   >
@@ -1073,7 +1147,7 @@ export default function Contact({
                 <div>
                   <div className="rr-contact-small-label">
                     <span />
-                    Visit Our Campus
+                    Visit Our School
                   </div>
 
                   <h2>Find Us</h2>
@@ -1178,6 +1252,81 @@ export default function Contact({
           </div>
         </div>
       </section>
+
+      {/* ============================================================
+          PHONE NUMBER MODAL
+          ============================================================ */}
+
+      {phoneModalOpen && !editMode && (
+        <div
+          className="rr-contact-phone-modal-backdrop"
+          role="presentation"
+          onClick={() => setPhoneModalOpen(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94, y: 18 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ duration: 0.22 }}
+            className="rr-contact-phone-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rr-contact-phone-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="rr-contact-phone-modal-top-line" />
+
+            <div className="rr-contact-phone-modal-header">
+              <div className="rr-contact-phone-modal-title">
+                <Phone size={19} />
+                <h2 id="rr-contact-phone-title">
+                  Contact Red Rose School
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                className="rr-contact-phone-close"
+                onClick={() => setPhoneModalOpen(false)}
+                aria-label="Close phone numbers"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="rr-contact-phone-list">
+              {PHONE_NUMBERS.map((phone) => (
+                <button
+                  type="button"
+                  key={phone}
+                  className="rr-contact-phone-number"
+                  onClick={() => handleCopyPhone(phone)}
+                  title="Click to copy"
+                >
+                  <span>{phone}</span>
+                  {copiedPhone === phone && (
+                    <span className="rr-contact-copied">
+                      Copied
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <p className="rr-contact-phone-hint">
+              Click any number to copy it.
+            </p>
+
+            <button
+              type="button"
+              className="rr-contact-phone-close-main"
+              onClick={() => setPhoneModalOpen(false)}
+            >
+              Close
+            </button>
+          </motion.div>
+        </div>
+      )}
 
       <style>{`
         /* ============================================================
@@ -2227,6 +2376,200 @@ export default function Contact({
         }
 
         /* ============================================================
+           CLICKABLE CONTACT CARDS
+           ============================================================ */
+
+        .rr-contact-clickable {
+          cursor: pointer;
+        }
+
+        .rr-contact-clickable:focus-visible {
+          outline: 2px solid var(--gold);
+          outline-offset: 4px;
+        }
+
+        .rr-contact-clickable:hover .rr-contact-card-line {
+          width: 58px;
+        }
+
+        /* ============================================================
+           PHONE NUMBER MODAL
+           ============================================================ */
+
+        .rr-contact-phone-modal-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          background: rgba(18, 9, 15, .76);
+          backdrop-filter: blur(10px);
+        }
+
+        .rr-contact-phone-modal {
+          position: relative;
+          width: min(450px, 100%);
+          overflow: hidden;
+          padding: 29px 24px 24px;
+          border: 1px solid rgba(229, 200, 120, .18);
+          border-radius: 18px;
+          background:
+            linear-gradient(
+              145deg,
+              #171019 0%,
+              #241622 55%,
+              #321b2b 100%
+            );
+          box-shadow:
+            0 30px 90px rgba(0,0,0,.42);
+        }
+
+        .rr-contact-phone-modal-top-line {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 3px;
+          background:
+            linear-gradient(
+              90deg,
+              var(--gold-light),
+              var(--gold),
+              var(--gold-light)
+            );
+        }
+
+        .rr-contact-phone-modal-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 21px;
+        }
+
+        .rr-contact-phone-modal-title {
+          display: flex;
+          align-items: center;
+          gap: 11px;
+          color: var(--gold-light);
+        }
+
+        .rr-contact-phone-modal-title h2 {
+          margin: 0;
+          color: #fff;
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+          font-size: 21px;
+          line-height: 1.2;
+        }
+
+        .rr-contact-phone-close {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 auto;
+          border: 1px solid rgba(255,255,255,.12);
+          border-radius: 50%;
+          color: rgba(255,255,255,.72);
+          background: rgba(255,255,255,.06);
+          cursor: pointer;
+          font-size: 22px;
+          line-height: 1;
+          transition: .2s ease;
+        }
+
+        .rr-contact-phone-close:hover {
+          color: white;
+          background: rgba(255,255,255,.12);
+          transform: rotate(90deg);
+        }
+
+        .rr-contact-phone-list {
+          display: flex;
+          flex-direction: column;
+          gap: 11px;
+        }
+
+        .rr-contact-phone-number {
+          width: 100%;
+          min-height: 62px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 0 16px;
+          border: 1px solid rgba(255,255,255,.11);
+          border-radius: 14px;
+          color: #fff;
+          background: rgba(255,255,255,.045);
+          cursor: pointer;
+          text-align: left;
+          font-family:
+            Inter,
+            ui-sans-serif,
+            system-ui,
+            sans-serif;
+          font-size: 17px;
+          font-weight: 800;
+          transition:
+            background .2s ease,
+            border-color .2s ease,
+            transform .2s ease;
+        }
+
+        .rr-contact-phone-number:hover {
+          border-color: rgba(229,200,120,.32);
+          background: rgba(255,255,255,.08);
+          transform: translateY(-1px);
+        }
+
+        .rr-contact-copied {
+          color: var(--gold-light);
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+
+        .rr-contact-phone-hint {
+          margin: 14px 0 20px;
+          color: rgba(255,255,255,.5);
+          font-size: 11px;
+        }
+
+        .rr-contact-phone-close-main {
+          width: 100%;
+          height: 53px;
+          border: 0;
+          border-radius: 13px;
+          color: #1e1720;
+          background:
+            linear-gradient(
+              135deg,
+              #f0d797,
+              #c7953d
+            );
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 700;
+          transition:
+            transform .2s ease,
+            box-shadow .2s ease;
+        }
+
+        .rr-contact-phone-close-main:hover {
+          transform: translateY(-1px);
+          box-shadow:
+            0 9px 24px rgba(199,154,59,.2);
+        }
+
+        /* ============================================================
            EDIT BUTTONS
            ============================================================ */
 
@@ -2389,6 +2732,20 @@ export default function Contact({
         }
 
         @media (max-width: 430px) {
+          .rr-contact-phone-modal {
+            padding: 25px 17px 18px;
+            border-radius: 16px;
+          }
+
+          .rr-contact-phone-modal-title h2 {
+            font-size: 18px;
+          }
+
+          .rr-contact-phone-number {
+            min-height: 58px;
+            font-size: 15px;
+          }
+
           .rr-contact-form-heading {
             gap: 10px;
           }

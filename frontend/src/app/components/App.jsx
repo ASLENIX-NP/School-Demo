@@ -106,6 +106,17 @@ function PageLoader() {
 // =========================================================
 // HOME PAGE
 // =========================================================
+//
+// IMPORTANT:
+// Hero.jsx and Stats.jsx are reused elsewhere, so we do NOT
+// remove their own API fallback behavior.
+//
+// On the public homepage, however, we load /home ONCE here
+// and pass the two relevant pieces down as contentOverride.
+// This prevents Hero and Stats from making duplicate
+// /api/site-content/home requests.
+//
+// =========================================================
 
 function HomePage() {
   return (
@@ -115,7 +126,9 @@ function HomePage() {
         <HomeAnnouncementPopup />
       </Suspense>
 
-      {/* Main home content */}
+      {/* Hero and Stats load their content independently.
+          They render immediately with safe defaults and update
+          when the homepage content request finishes. */}
       <Hero />
       <Stats />
     </>

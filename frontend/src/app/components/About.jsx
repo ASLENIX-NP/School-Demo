@@ -4,27 +4,6 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, ChevronRight, Pencil, Plus, Quote, Trash2, X } from "lucide-react";
 
-// ══════════════════════════════════════════════════════════════════════════
-// RED ROSE SCHOOL — ABOUT PAGE
-//
-// Design direction: "The Ledger" — a bound archive / yearbook aesthetic.
-// Deep rose ink, brass foil and warm paper replace the old flat blue/violet
-// gradients and stock icon grid. Depth comes from real layered shadows,
-// tilt, deckle (torn-paper) edges and a book-spread layout — not icons.
-//
-// EVERY section on this page is editable from the admin panel (AdminAbout):
-// each block is wrapped in <EditableWrap> (shows a pencil on hover) and,
-// where the content is a list (stats, values, staff, mission/vision,
-// journey), there's also a <SectionAddButton> to add a new card and a
-// trash icon on each card to remove it. See the `target.type` passed to
-// onEditTarget on each wrapper — AdminAbout.jsx switches on that string
-// to know which form fields to show.
-//
-// Optional (recommended) font preload for index.html <head>, the component
-// also self-loads these fonts via @import so it works without it:
-//   <link rel="preconnect" href="https://fonts.googleapis.com">
-//   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-// ══════════════════════════════════════════════════════════════════════════
 
 const theme = {
   ink: "#1E1420",
@@ -32,9 +11,9 @@ const theme = {
   paper: "#F5EEE2",
   paperDeep: "#E9DCC4",
   card: "#FBF7EE",
-  rose: "#9C2748",
-  roseDeep: "#6E1733",
-  roseBright: "#C6486B",
+  rose: "#B34C6A",
+  roseDeep: "#7F2C47",
+  roseBright: "#CF6D86",
   gold: "#B98A42",
   goldSoft: "#E7CE9C",
   moss: "#3F5B49",
@@ -42,7 +21,7 @@ const theme = {
   text: "#2B1E23",
   textMuted: "#7C6B6F",
   white: "#FFFFFF",
-  gradRose: "linear-gradient(135deg, #6E1733 0%, #9C2748 55%, #C6486B 100%)",
+  gradRose: "linear-gradient(135deg, #7F2C47 0%, #B34C6A 55%, #CF6D86 100%)",
   gradInk: "linear-gradient(160deg, #17101C 0%, #2A1826 55%, #3A2130 100%)",
   gradGold: "linear-gradient(135deg, #E7CE9C 0%, #B98A42 100%)",
   gradMoss: "linear-gradient(135deg, #2C4234 0%, #3F5B49 55%, #6E8F76 100%)",
@@ -50,7 +29,7 @@ const theme = {
 
 // Rotating accent themes for staff cards / message popup.
 const STAFF_ACCENTS = [
-  { solid: theme.rose, soft: "rgba(156,39,72,0.10)", ring: "rgba(156,39,72,0.35)", grad: theme.gradRose },
+  { solid: theme.rose, soft: "rgba(179,76,106,0.10)", ring: "rgba(179,76,106,0.35)", grad: theme.gradRose },
   { solid: theme.gold, soft: "rgba(185,138,66,0.14)", ring: "rgba(185,138,66,0.35)", grad: theme.gradGold },
   { solid: theme.moss, soft: "rgba(63,91,73,0.12)", ring: "rgba(63,91,73,0.35)", grad: theme.gradMoss },
   { solid: theme.inkSoft, soft: "rgba(45,28,42,0.08)", ring: "rgba(45,28,42,0.30)", grad: theme.gradInk },
@@ -97,11 +76,11 @@ export const defaultAboutContent = {
     "Our approach is simple yet profound: provide world-class facilities, encourage creative thinking, and foster an environment where every student feels seen, heard, and empowered to reach their full potential. We prepare students not just for exams, but for life.",
   ],
   storyImageUrl: "",
-  storyImageAlt: "Students and teachers on the Red Rose School campus",
+  storyImageAlt: "Students and teachers on the Red Rose School",
   storyImageZoom: 1,
   storyImageOffsetX: 0,
   storyImageOffsetY: 0,
-  storyImageTopTitle: "Our Main Campus",
+  storyImageTopTitle: "Our Main School",
   storyImageTopSubtitle: "A Hub of Innovation & Learning",
   storyBadgeYear: "Est. 2010 AD",
 
@@ -195,7 +174,7 @@ export const defaultAboutContent = {
   ],
 
   ctaTitle: "Ready to Join Our Community?",
-  ctaDescription: "Experience our campus, meet our dedicated faculty, and see firsthand how we nurture the leaders of tomorrow.",
+  ctaDescription: "Experience our school, meet our dedicated faculty, and see firsthand how we nurture the leaders of tomorrow.",
   ctaButtonText: "Schedule a Visit",
   ctaButtonLink: "/contact",
 };
@@ -449,7 +428,7 @@ function DeleteIconButton({ editMode, target, onDeleteTarget, label = "Delete" }
         onDeleteTarget(target);
       }}
       className="absolute -top-2 -right-12 z-[90] opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
-      style={{ background: "#FBE3E7", color: "#9C2748", border: `2px solid ${theme.white}` }}
+      style={{ background: "#FBE3E7", color: "#B34C6A", border: `2px solid ${theme.white}` }}
       title={label}
     >
       <Trash2 className="w-3.5 h-3.5" />
@@ -512,7 +491,7 @@ function SectionIntro({ eyebrow, title, description, tone = "dark", align = "lef
         <span className="rr-mono text-[11px] font-semibold uppercase tracking-[0.28em]" style={{ color: light ? theme.goldSoft : theme.rose }}>
           {eyebrow}
         </span>
-        {!isCenter && <span className="h-px flex-1 max-w-[80px]" style={{ background: light ? "rgba(231,206,156,0.35)" : "rgba(156,39,72,0.25)" }} />}
+        {!isCenter && <span className="h-px flex-1 max-w-[80px]" style={{ background: light ? "rgba(231,206,156,0.35)" : "rgba(179,76,106,0.25)" }} />}
       </div>
       <h2
         className="rr-serif text-3xl sm:text-4xl md:text-[2.75rem] font-semibold leading-[1.08] tracking-tight"
@@ -718,7 +697,7 @@ export default function About({
             <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-[100px] opacity-40 pointer-events-none" style={{ background: theme.rose }} />
             <div className="absolute -bottom-28 -left-16 w-72 h-72 rounded-full blur-[100px] opacity-25 pointer-events-none" style={{ background: theme.moss }} />
 
-            <div className="relative z-10 grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-center px-7 py-14 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
+            <div className="relative z-10 grid gap-12 items-center px-7 py-14 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
               <div>
                 <div className="flex items-center gap-3">
                   <span className="h-px w-10" style={{ background: theme.gold }} />
@@ -745,17 +724,7 @@ export default function About({
                 </div>
               </div>
 
-              {/* brass emblem */}
-              <div className="hidden lg:flex justify-center">
-                <div className="rr-emblem relative w-56 h-56">
-                  <div className="absolute inset-0 rounded-full" style={{ background: `conic-gradient(from 90deg, ${theme.gold}, ${theme.goldSoft}, ${theme.gold}, #7a5a26, ${theme.gold})`, boxShadow: "0 25px 55px rgba(0,0,0,0.4)" }} />
-                  <div className="absolute inset-[10px] rounded-full" style={{ background: theme.gradInk, border: `1px solid ${theme.goldSoft}55` }} />
-                  <div className="absolute inset-[22px] rounded-full flex flex-col items-center justify-center" style={{ border: `1px dashed ${theme.goldSoft}55` }}>
-                    <span className="rr-serif text-4xl font-semibold" style={{ color: theme.goldSoft }}>{content.heroEmblemText || "RR"}</span>
-                    <span className="rr-mono mt-1 text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(231,206,156,0.7)" }}>{content.heroEmblemLabel || "Red Rose"}</span>
-                  </div>
-                </div>
-              </div>
+
             </div>
 
             {/* torn edge into the page */}
@@ -826,7 +795,7 @@ export default function About({
                   {content.storyImageUrl ? (
                     <img
                       src={content.storyImageUrl}
-                      alt={content.storyImageAlt || "Campus"}
+                      alt={content.storyImageAlt || "School"}
                       draggable={false}
                       className="absolute inset-0"
                       style={getAdjustedImageStyle(content)}
@@ -876,7 +845,7 @@ export default function About({
                   <span
                     key={tag}
                     className="rr-mono rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em]"
-                    style={{ color: theme.rose, border: `1px solid ${theme.rose}30`, background: "rgba(156,39,72,0.05)" }}
+                    style={{ color: theme.rose, border: `1px solid ${theme.rose}30`, background: "rgba(179,76,106,0.05)" }}
                   >
                     {tag}
                   </span>
