@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import ScrollToTop from "./ScrollToTop";
 import ProtectedAdminRoute from "../../admin/ProtectedAdminRoute";
@@ -106,29 +106,15 @@ function PageLoader() {
 // =========================================================
 // HOME PAGE
 // =========================================================
-//
-// IMPORTANT:
-// Hero.jsx and Stats.jsx are reused elsewhere, so we do NOT
-// remove their own API fallback behavior.
-//
-// On the public homepage, however, we load /home ONCE here
-// and pass the two relevant pieces down as contentOverride.
-// This prevents Hero and Stats from making duplicate
-// /api/site-content/home requests.
-//
-// =========================================================
-
-function HomePage() {
+function HomePage({ showAnnouncement }) {
   return (
     <>
-      {/* Announcement popup */}
-      <Suspense fallback={null}>
-        <HomeAnnouncementPopup />
-      </Suspense>
+      {showAnnouncement && (
+        <Suspense fallback={null}>
+          <HomeAnnouncementPopup />
+        </Suspense>
+      )}
 
-      {/* Hero and Stats load their content independently.
-          They render immediately with safe defaults and update
-          when the homepage content request finishes. */}
       <Hero />
       <Stats />
     </>
@@ -194,6 +180,33 @@ function ProtectedPage({ children }) {
 function SchoolApp() {
   const location = useLocation();
 
+  // ---------------------------------------------------------
+  // HOME ANNOUNCEMENT BEHAVIOR
+  //
+  // Desired behavior:
+  // 1. Fresh load/reload directly on "/"  -> SHOW
+  // 2. Home -> About -> Home             -> HIDE
+  // 3. Home -> Academics -> Home         -> HIDE
+  // 4. Refresh while on "/"              -> SHOW again
+  //
+  // Refs survive React Router navigation, but are recreated
+  // on a real browser refresh. Therefore we do NOT use
+  // localStorage/sessionStorage for this behavior.
+  // ---------------------------------------------------------
+  const startedOnHomeRef = useRef(location.pathname === "/");
+  const leftHomeRef = useRef(false);
+
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      leftHomeRef.current = true;
+    }
+  }, [location.pathname]);
+
+  const shouldShowAnnouncement =
+    location.pathname === "/" &&
+    startedOnHomeRef.current &&
+    !leftHomeRef.current;
+
   const isAdminRoute =
     location.pathname.startsWith("/admin");
 
@@ -231,7 +244,11 @@ function SchoolApp() {
 
             <Route
               path="/"
-              element={<HomePage />}
+              element={
+                <HomePage
+                  showAnnouncement={shouldShowAnnouncement}
+                />
+              }
             />
 
             <Route
@@ -580,7 +597,9 @@ function SchoolApp() {
                     replace
                   />
                 ) : (
-                  <HomePage />
+                  <HomePage
+                    showAnnouncement={shouldShowAnnouncement}
+                  />
                 )
               }
             />

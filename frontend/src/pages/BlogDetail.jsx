@@ -418,14 +418,19 @@ export default function BlogDetail() {
           background:
             radial-gradient(
               circle at 8% 22%,
-              rgba(229,198,111,.10),
+              rgba(201,150,61,.08),
               transparent 24%
+            ),
+            radial-gradient(
+              circle at 92% 72%,
+              rgba(165,43,74,.10),
+              transparent 28%
             ),
             linear-gradient(
               135deg,
-              #24121f 0%,
-              #42162c 58%,
-              #5a1d3a 100%
+              #FDEDEE 0%,
+              #FBD9DC 56%,
+              #F6C3C8 100%
             );
         }
 
@@ -433,11 +438,11 @@ export default function BlogDetail() {
           position: absolute;
           inset: 0;
           pointer-events: none;
-          opacity: .10;
+          opacity: .16;
           background-image:
             radial-gradient(
               circle,
-              #ffffff 1px,
+              rgba(165,43,74,.20) 1px,
               transparent 1.2px
             );
           background-size: 19px 19px;
@@ -446,7 +451,7 @@ export default function BlogDetail() {
         .rr-blog-orbit {
           position: absolute;
           pointer-events: none;
-          border: 1px solid rgba(229,198,111,.10);
+          border: 1px solid rgba(165,43,74,.14);
           border-radius: 50%;
         }
 
@@ -474,31 +479,39 @@ export default function BlogDetail() {
          */
 
         .rr-blog-back-button {
-          position: relative;
-          z-index: 20;
+          position: fixed;
+          z-index: 1000;
+
+          /*
+           * The button is intentionally fixed so users can return to
+           * the Blog page from ANY scroll position. It no longer
+           * disappears above the article when the user scrolls down.
+           *
+           * 105px keeps it below the main school navbar.
+           */
+          top: 105px;
+          left: max(
+            24px,
+            calc((100vw - 1140px) / 2)
+          );
 
           display: inline-flex;
           align-items: center;
           justify-content: center;
           gap: 9px;
 
-          margin: 0 0 20px 0;
+          margin: 0;
           padding: 11px 17px;
 
-          border: 1px solid rgba(229,198,111,.58);
+          border: 1px solid rgba(165,43,74,.34);
           border-radius: 999px;
 
-          color: #fff8e9;
-          background:
-            linear-gradient(
-              135deg,
-              rgba(255,255,255,.12),
-              rgba(255,255,255,.05)
-            );
+          color: #6E1733;
+          background: rgba(255,253,248,.90);
 
           box-shadow:
-            0 8px 22px rgba(0,0,0,.16),
-            inset 0 1px 0 rgba(255,255,255,.12);
+            0 8px 22px rgba(165,43,74,.12),
+            inset 0 1px 0 rgba(255,255,255,.82);
 
           text-decoration: none;
 
@@ -507,7 +520,8 @@ export default function BlogDetail() {
           letter-spacing: .14em;
           text-transform: uppercase;
 
-          backdrop-filter: blur(8px);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
 
           transition:
             transform .22s ease,
@@ -524,12 +538,12 @@ export default function BlogDetail() {
 
         .rr-blog-back-button:hover {
           transform: translateY(-2px);
-          border-color: #efd477;
-          color: #fff3c7;
-          background: rgba(229,198,111,.15);
+          border-color: #A52B4A;
+          color: #4A1830;
+          background: rgba(255,253,248,.94);
           box-shadow:
-            0 12px 28px rgba(0,0,0,.22),
-            0 0 0 3px rgba(229,198,111,.08);
+            0 12px 28px rgba(165,43,74,.14),
+            0 0 0 3px rgba(165,43,74,.07);
         }
 
         .rr-blog-back-button:hover svg {
@@ -553,7 +567,7 @@ export default function BlogDetail() {
           background: var(--rr-paper);
 
           box-shadow:
-            0 28px 75px rgba(0,0,0,.24);
+            0 28px 75px rgba(165,43,74,.16);
         }
 
         .rr-blog-hero-copy {
@@ -564,18 +578,19 @@ export default function BlogDetail() {
           min-width: 0;
           padding: 44px 42px 37px;
 
-          color: white;
+          color: var(--rr-ink);
 
           background:
             radial-gradient(
               circle at 85% 8%,
-              rgba(229,198,111,.09),
+              rgba(201,150,61,.08),
               transparent 25%
             ),
             linear-gradient(
               145deg,
-              #2b1524,
-              #4a1830
+              #FDEDEE 0%,
+              #FBD9DC 58%,
+              #F6C3C8 100%
             );
         }
 
@@ -603,15 +618,15 @@ export default function BlogDetail() {
         }
 
         .rr-blog-category-pill {
-          color: #f6d876;
-          border: 1px solid rgba(229,198,111,.34);
-          background: rgba(229,198,111,.09);
+          color: #6E1733;
+          border: 1px solid rgba(165,43,74,.28);
+          background: rgba(255,253,248,.45);
         }
 
         .rr-blog-read-pill {
-          color: rgba(255,255,255,.68);
-          border: 1px solid rgba(255,255,255,.12);
-          background: rgba(255,255,255,.045);
+          color: #6F6268;
+          border: 1px solid rgba(43,20,35,.12);
+          background: rgba(255,253,248,.42);
         }
 
         .rr-blog-label {
@@ -635,14 +650,14 @@ export default function BlogDetail() {
         }
 
         .rr-blog-label-light {
-          color: #ddc48b;
+          color: #6E1733;
         }
 
         .rr-blog-hero-copy h1 {
           max-width: 590px;
           margin: 14px 0 0;
 
-          color: white;
+          color: var(--rr-ink);
 
           font-family:
             Georgia,
@@ -663,7 +678,7 @@ export default function BlogDetail() {
 
           border-left: 2px solid var(--rr-gold);
 
-          color: rgba(255,255,255,.65);
+          color: #5F555A;
 
           font-size: 12px;
           line-height: 1.8;
@@ -677,7 +692,7 @@ export default function BlogDetail() {
           margin-top: 35px;
           padding-top: 20px;
 
-          border-top: 1px solid rgba(255,255,255,.11);
+          border-top: 1px solid rgba(43,20,35,.12);
         }
 
         .rr-blog-author-avatar {
@@ -690,11 +705,11 @@ export default function BlogDetail() {
 
           flex: 0 0 auto;
 
-          border: 2px solid #e1bd57;
+          border: 2px solid #A52B4A;
           border-radius: 50%;
 
-          color: #332316;
-          background: #f0cf70;
+          color: #fff;
+          background: #A52B4A;
 
           font-family:
             Georgia,
@@ -713,7 +728,7 @@ export default function BlogDetail() {
 
         .rr-blog-author span {
           margin-bottom: 3px;
-          color: rgba(255,255,255,.45);
+          color: #806F76;
           font-size: 7px;
           font-weight: 900;
           letter-spacing: .13em;
@@ -721,13 +736,13 @@ export default function BlogDetail() {
         }
 
         .rr-blog-author strong {
-          color: white;
+          color: var(--rr-ink);
           font-size: 11px;
         }
 
         .rr-blog-author small {
           margin-top: 2px;
-          color: rgba(255,255,255,.45);
+          color: #806F76;
           font-size: 8px;
         }
 
@@ -754,8 +769,8 @@ export default function BlogDetail() {
           background:
             linear-gradient(
               180deg,
-              rgba(36,18,31,.02),
-              rgba(36,18,31,.27)
+              rgba(36,18,31,.01),
+              rgba(36,18,31,.20)
             );
         }
 
@@ -766,11 +781,11 @@ export default function BlogDetail() {
 
           padding: 8px 11px;
 
-          border: 1px solid rgba(255,255,255,.32);
+          border: 1px solid rgba(255,255,255,.55);
           border-radius: 999px;
 
-          color: white;
-          background: rgba(36,18,31,.54);
+          color: #fff;
+          background: rgba(74,24,48,.72);
 
           font-size: 8px;
           font-weight: 900;
@@ -1582,10 +1597,15 @@ export default function BlogDetail() {
            * Mobile back button stays visible and easy to tap.
            */
           .rr-blog-back-button {
+            top: 76px;
+            left: 12px;
+
             width: auto;
             min-height: 43px;
-            margin-bottom: 14px;
+
+            margin: 0;
             padding: 11px 15px;
+
             font-size: 8px;
           }
 

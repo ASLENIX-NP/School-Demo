@@ -805,7 +805,7 @@ export function Calendar({
           z-index: 2;
         }
 
-        /* HERO - deliberately follows the dark About-page section */
+        /* HERO - light red treatment matching the About page */
         .rr-calendar-hero {
           position: relative;
           overflow: hidden;
@@ -813,20 +813,20 @@ export function Calendar({
           padding: 64px 64px 78px;
           border-radius: 0 0 38px 38px;
           background:
-            radial-gradient(circle at 88% 20%, rgba(166,43,75,.28), transparent 30%),
-            radial-gradient(circle at 15% 85%, rgba(201,149,61,.09), transparent 32%),
-            linear-gradient(135deg, #1b101c 0%, #2a1422 58%, #351725 100%);
-          box-shadow: 0 28px 70px rgba(42,20,34,.18);
-          color: white;
+            radial-gradient(circle at 88% 20%, rgba(166,43,75,.10), transparent 30%),
+            radial-gradient(circle at 15% 85%, rgba(201,149,61,.06), transparent 32%),
+            linear-gradient(135deg, #FDEDEE 0%, #FBD9DC 55%, #F6C3C8 100%);
+          box-shadow: 0 28px 70px rgba(166,43,75,.14);
+          color: var(--rr-text);
         }
 
         .rr-calendar-hero::before {
           content: "";
           position: absolute;
           inset: 0;
-          opacity: .20;
+          opacity: .28;
           background-image:
-            radial-gradient(rgba(255,255,255,.22) .8px, transparent .8px);
+            radial-gradient(rgba(166,43,75,.12) .8px, transparent .8px);
           background-size: 22px 22px;
           mask-image: linear-gradient(to bottom, black 10%, transparent 100%);
           pointer-events: none;
@@ -864,7 +864,7 @@ export function Calendar({
           align-items: center;
           gap: 12px;
           margin-bottom: 24px;
-          color: #e6c77e;
+          color: var(--rr-maroon);
           font-size: 12px;
           font-weight: 800;
           letter-spacing: .22em;
@@ -875,7 +875,7 @@ export function Calendar({
           content: "";
           width: 40px;
           height: 1px;
-          background: #c9953d;
+          background: var(--rr-maroon);
         }
 
         .rr-calendar-hero h1 {
@@ -886,17 +886,17 @@ export function Calendar({
           line-height: .98;
           font-weight: 900;
           letter-spacing: -.055em;
-          color: #fffaf5;
+          color: var(--rr-text);
         }
 
         .rr-calendar-hero h1 span {
-          color: #e8c978;
+          color: var(--rr-maroon);
         }
 
         .rr-calendar-hero-description {
           max-width: 800px;
           margin-top: 24px;
-          color: rgba(255,248,241,.78);
+          color: var(--rr-text);
           font-size: 17px;
           line-height: 1.75;
         }
@@ -913,9 +913,10 @@ export function Calendar({
           display: inline-flex;
           align-items: center;
           padding: 9px 15px;
-          border: 1px solid rgba(232,201,120,.35);
+          border: 1px solid rgba(166,43,75,.28);
           border-radius: 999px;
-          color: #e8c978;
+          color: var(--rr-maroon);
+          background: rgba(255,255,255,.18);
           font-size: 11px;
           font-weight: 800;
           letter-spacing: .18em;
@@ -925,18 +926,18 @@ export function Calendar({
         .rr-calendar-stats {
           display: inline-flex;
           align-items: stretch;
-          border-left: 1px solid rgba(255,255,255,.14);
+          border-left: 1px solid rgba(166,43,75,.20);
           margin-left: 4px;
         }
 
         .rr-calendar-stat {
           padding: 0 22px;
-          border-right: 1px solid rgba(255,255,255,.12);
+          border-right: 1px solid rgba(166,43,75,.18);
         }
 
         .rr-calendar-stat strong {
           display: block;
-          color: #e8c978;
+          color: var(--rr-maroon);
           font-family: var(--font-display);
           font-size: 25px;
           line-height: 1;
@@ -945,7 +946,7 @@ export function Calendar({
         .rr-calendar-stat small {
           display: block;
           margin-top: 7px;
-          color: rgba(255,255,255,.55);
+          color: rgba(37,23,37,.62);
           font-size: 9px;
           font-weight: 800;
           letter-spacing: .13em;
@@ -1629,7 +1630,7 @@ export function Calendar({
         <div className="rr-calendar-wrap">
 
           {/* =====================================================
-              HERO - matches the dark burgundy About-page sections
+              HERO - light red treatment matching the About page
           ====================================================== */}
           <motion.header
             initial={{ opacity: 0, y: 18 }}
@@ -1684,9 +1685,9 @@ export function Calendar({
                 }}
                 className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full"
                 style={{
-                  background: "#e8c978",
-                  color: "#251725",
-                  border: "1px solid rgba(255,255,255,.55)",
+                  background: "#fffaf2",
+                  color: "#8F3E57",
+                  border: "1px solid rgba(166,43,75,.22)",
                 }}
                 title="Edit calendar heading"
               >

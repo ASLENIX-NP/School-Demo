@@ -1378,30 +1378,30 @@ export default function Contact({
           background:
             radial-gradient(
               circle at 14% 25%,
-              rgba(199,154,59,.14),
-              transparent 24%
+              rgba(166,43,79,.10),
+              transparent 25%
             ),
             radial-gradient(
-              circle at 87% 72%,
-              rgba(166,43,79,.25),
+              circle at 86% 72%,
+              rgba(199,154,59,.10),
               transparent 31%
             ),
             linear-gradient(
               135deg,
-              #24131F 0%,
-              #351725 50%,
-              #512036 100%
+              #FFF5F6 0%,
+              #FDE8EA 48%,
+              #F8D7DC 100%
             );
         }
 
         .rr-contact-hero-pattern {
           position: absolute;
           inset: 0;
-          opacity: .09;
+          opacity: .18;
           background-image:
             radial-gradient(
               circle,
-              white 1px,
+              rgba(143,35,56,.22) 1px,
               transparent 1.25px
             );
           background-size: 19px 19px;
@@ -1409,7 +1409,7 @@ export default function Contact({
             linear-gradient(
               to bottom,
               black,
-              transparent 90%
+              transparent 92%
             );
         }
 
@@ -1420,11 +1420,11 @@ export default function Contact({
           height: 430px;
           top: -190px;
           left: -170px;
-          border: 1px solid rgba(229,200,120,.12);
+          border: 1px solid rgba(143,35,56,.10);
           border-radius: 50%;
           box-shadow:
-            0 0 0 55px rgba(229,200,120,.025),
-            0 0 0 110px rgba(229,200,120,.018);
+            0 0 0 55px rgba(143,35,56,.035),
+            0 0 0 110px rgba(143,35,56,.022);
         }
 
         .rr-contact-hero::after {
@@ -1434,11 +1434,11 @@ export default function Contact({
           height: 520px;
           right: -260px;
           bottom: -300px;
-          border: 1px solid rgba(229,200,120,.11);
+          border: 1px solid rgba(143,35,56,.10);
           border-radius: 50%;
           box-shadow:
-            0 0 0 60px rgba(229,200,120,.022),
-            0 0 0 120px rgba(229,200,120,.015);
+            0 0 0 60px rgba(143,35,56,.028),
+            0 0 0 120px rgba(143,35,56,.018);
         }
 
         .rr-contact-hero-glow {
@@ -1453,9 +1453,9 @@ export default function Contact({
           height: 230px;
           left: 11%;
           bottom: 10%;
-          background: rgba(199,154,59,.06);
+          background: rgba(199,154,59,.08);
           box-shadow:
-            0 0 120px rgba(199,154,59,.12);
+            0 0 120px rgba(199,154,59,.13);
         }
 
         .rr-glow-two {
@@ -1463,9 +1463,9 @@ export default function Contact({
           height: 300px;
           right: 9%;
           top: 15%;
-          background: rgba(166,43,79,.09);
+          background: rgba(166,43,79,.10);
           box-shadow:
-            0 0 130px rgba(166,43,79,.18);
+            0 0 130px rgba(166,43,79,.16);
         }
 
         .rr-contact-hero-inner {
@@ -1503,7 +1503,7 @@ export default function Contact({
         }
 
         .rr-contact-kicker {
-          color: #e5cc91;
+          color: #8F2345;
         }
 
         .rr-contact-kicker span,
@@ -1515,7 +1515,7 @@ export default function Contact({
 
         .rr-contact-hero h1 {
           margin: 22px auto 0;
-          color: #fff;
+          color: var(--text);
           font-family:
             Georgia,
             "Times New Roman",
@@ -1527,7 +1527,7 @@ export default function Contact({
         }
 
         .rr-contact-hero h1 em {
-          color: var(--gold-light);
+          color: var(--rose);
           font-style: normal;
         }
 
@@ -1561,7 +1561,7 @@ export default function Contact({
         .rr-contact-hero-inner > p {
           max-width: 670px;
           margin: 24px auto 0;
-          color: rgba(255,255,255,.67);
+          color: #6f6268;
           font-size: 15px;
           line-height: 1.85;
         }
@@ -1578,7 +1578,7 @@ export default function Contact({
           display: flex;
           align-items: center;
           gap: 9px;
-          color: #dbc88f;
+          color: var(--rose);
         }
 
         .rr-contact-hero-mark strong {
@@ -1594,6 +1594,7 @@ export default function Contact({
           font-size: 8px;
           font-weight: 900;
           letter-spacing: .2em;
+          color: #7f5965;
         }
 
         .rr-contact-hero-note {
@@ -1601,17 +1602,18 @@ export default function Contact({
           align-items: center;
           gap: 8px;
           padding: 10px 14px;
-          border: 1px solid rgba(255,255,255,.12);
+          border: 1px solid rgba(143,35,56,.14);
           border-radius: 999px;
-          color: rgba(255,255,255,.63);
-          background: rgba(255,255,255,.045);
+          color: #725f66;
+          background: rgba(255,255,255,.46);
           backdrop-filter: blur(10px);
           font-size: 10px;
           font-weight: 700;
+          box-shadow: 0 7px 20px rgba(143,35,56,.05);
         }
 
         .rr-contact-hero-note svg {
-          color: var(--gold-light);
+          color: var(--rose);
         }
 
         .rr-contact-hero-wave {

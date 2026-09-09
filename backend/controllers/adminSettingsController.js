@@ -138,8 +138,47 @@ function getDeviceData(req) {
   };
 }
 
+// ------------------------------------------------------------
+// Simple in-memory cache for admin_settings.
+//
+// Why: EXPLAIN ANALYZE confirmed the actual Postgres query takes
+// ~0.15ms — the slowness we were seeing (1-1.5s+) is entirely in the
+// PostgREST/HTTPS round-trip to Supabase, not the query itself.
+// admin_settings is a single row that only changes when the admin
+// edits their profile/email/photo, so there is no need to make that
+// round-trip on every page load. We cache the row for a short window
+// and invalidate the cache immediately whenever it's updated.
+// ------------------------------------------------------------
+const ADMIN_SETTINGS_CACHE_TTL_MS = 30_000; // 30 seconds
+
+let adminSettingsCache = {
+  data: null,
+  expiresAt: 0,
+};
+
+function setAdminSettingsCache(data) {
+  adminSettingsCache = {
+    data,
+    expiresAt: Date.now() + ADMIN_SETTINGS_CACHE_TTL_MS,
+  };
+}
+
+function clearAdminSettingsCache() {
+  adminSettingsCache = { data: null, expiresAt: 0 };
+}
+
 export const getAdminSettings = async (req, res) => {
   try {
+    if (
+      adminSettingsCache.data &&
+      adminSettingsCache.expiresAt > Date.now()
+    ) {
+      return res.json({
+        success: true,
+        data: sanitizeSettings(adminSettingsCache.data),
+      });
+    }
+
     const { data, error } = await supabase
       .from("admin_settings")
       .select(PUBLIC_SETTINGS_COLUMNS)
@@ -154,6 +193,8 @@ export const getAdminSettings = async (req, res) => {
         message: "Administrator settings were not found.",
       });
     }
+
+    setAdminSettingsCache(data);
 
     return res.json({
       success: true,
@@ -216,6 +257,8 @@ export const updateAdminSettings = async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    clearAdminSettingsCache();
 
     return res.json({
       success: true,
@@ -285,6 +328,8 @@ export const updateAdminEmail = async (req, res) => {
       .update({ revoked_at: new Date().toISOString() })
       .eq("admin_email", req.admin.email)
       .is("revoked_at", null);
+
+    clearAdminSettingsCache();
 
     return res.json({
       success: true,
@@ -590,6 +635,8 @@ export const uploadAdminPhoto = async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    clearAdminSettingsCache();
 
     return res.json({
       success: true,

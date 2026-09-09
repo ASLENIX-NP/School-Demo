@@ -100,8 +100,11 @@ export const protectAdmin = async (req, res, next) => {
       });
     }
 
-    // Update last activity time.
-    await supabase
+    // Update last activity time. This is fire-and-forget (no `await`)
+    // so a slow or stuck Supabase write can never hang the response
+    // that the client is waiting on. If it fails, we just log it —
+    // it's a housekeeping field, not something the request depends on.
+    supabase
       .from("admin_sessions")
       .update({
         last_seen_at: now,
@@ -109,7 +112,15 @@ export const protectAdmin = async (req, res, next) => {
       .eq(
         "id",
         session.id
-      );
+      )
+      .then(({ error: updateError }) => {
+        if (updateError) {
+          console.error(
+            "Failed to update last_seen_at:",
+            updateError.message
+          );
+        }
+      });
 
     req.admin = {
       email: String(

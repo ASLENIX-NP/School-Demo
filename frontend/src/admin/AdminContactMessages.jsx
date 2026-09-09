@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
@@ -81,6 +82,7 @@ function buildWhatsAppLink(message) {
 function MessageCard({
   message,
   expanded,
+  focused = false,
   onToggleExpand,
   onToggleRead,
   onDelete,
@@ -94,16 +96,20 @@ function MessageCard({
   return (
     <motion.div
       layout
-      className="rounded-[28px] p-5"
+      id={`message-${String(message.id)}`}
+      className="rounded-[28px] p-5 transition-all duration-300"
       style={{
         background: message.is_read
           ? "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.76))"
           : "linear-gradient(145deg, rgba(22,138,58,0.12), rgba(255,255,255,0.86))",
-        border: message.is_read
-          ? "1px solid rgba(11,16,32,0.08)"
-          : "1px solid rgba(22,138,58,0.28)",
-        boxShadow:
-          "0 18px 48px rgba(11,16,32,0.075), inset 0 1px 0 rgba(255,255,255,0.85)",
+        border: focused
+          ? `2px solid ${colors.purple}`
+          : message.is_read
+            ? "1px solid rgba(11,16,32,0.08)"
+            : "1px solid rgba(22,138,58,0.28)",
+        boxShadow: focused
+          ? "0 24px 60px rgba(75,46,131,0.20), 0 0 0 5px rgba(75,46,131,0.08)"
+          : "0 18px 48px rgba(11,16,32,0.075), inset 0 1px 0 rgba(255,255,255,0.85)",
       }}
     >
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
@@ -387,6 +393,8 @@ function DeleteConfirmDialog({ message, deleting, onCancel, onConfirm }) {
 
 export default function AdminContactMessages() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const selectedMessageId = searchParams.get("id");
 
   const [messages, setMessages] = useState([]);
   const [expandedIds, setExpandedIds] = useState([]);
@@ -421,6 +429,33 @@ export default function AdminContactMessages() {
   useEffect(() => {
     loadMessages();
   }, []);
+
+  // If the admin arrived from the Dashboard with ?id=..., automatically
+  // open that exact message and scroll it into view.
+  useEffect(() => {
+    if (!selectedMessageId || messages.length === 0) return;
+
+    const selectedMessage = messages.find(
+      (item) => String(item.id) === String(selectedMessageId)
+    );
+
+    if (!selectedMessage) return;
+
+    setExpandedIds((prev) =>
+      prev.includes(selectedMessage.id) ? prev : [...prev, selectedMessage.id]
+    );
+
+    const timer = setTimeout(() => {
+      document
+        .getElementById(`message-${String(selectedMessage.id)}`)
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [messages, selectedMessageId]);
 
   const filteredMessages = useMemo(() => {
     if (filter === "unread") {
@@ -582,6 +617,19 @@ export default function AdminContactMessages() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
+          {selectedMessageId && (
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-4"
+              style={{
+                background: "rgba(75,46,131,0.08)",
+                color: colors.purple,
+                border: "1px solid rgba(75,46,131,0.16)",
+              }}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              Message opened from Dashboard
+            </div>
+          )}
           <span
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-5"
             style={{
@@ -717,6 +765,7 @@ export default function AdminContactMessages() {
                 key={message.id}
                 message={message}
                 expanded={expandedIds.includes(message.id)}
+                focused={String(message.id) === String(selectedMessageId)}
                 onToggleExpand={() => toggleExpand(message.id)}
                 onToggleRead={() => toggleRead(message)}
                 onDelete={() => deleteMessage(message)}

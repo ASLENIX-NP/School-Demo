@@ -25,6 +25,7 @@ const theme = {
   gradInk: "linear-gradient(160deg, #17101C 0%, #2A1826 55%, #3A2130 100%)",
   gradGold: "linear-gradient(135deg, #E7CE9C 0%, #B98A42 100%)",
   gradMoss: "linear-gradient(135deg, #2C4234 0%, #3F5B49 55%, #6E8F76 100%)",
+  gradHeroLightRed: "linear-gradient(160deg, #FDEDEE 0%, #FBD9DC 55%, #F6C3C8 100%)",
 };
 
 // Rotating accent themes for staff cards / message popup.
@@ -690,35 +691,35 @@ export default function About({
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className="relative overflow-hidden rounded-[2rem] md:rounded-[2.75rem]"
-            style={{ background: theme.gradInk, boxShadow: "0 40px 90px rgba(30,20,32,0.35)" }}
+            style={{ background: theme.gradHeroLightRed, boxShadow: "0 40px 90px rgba(179,76,106,0.22)" }}
           >
             {/* texture */}
-            <div className="rr-grain absolute -inset-10 opacity-[0.05] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1.4px)", backgroundSize: "22px 22px" }} />
-            <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-[100px] opacity-40 pointer-events-none" style={{ background: theme.rose }} />
-            <div className="absolute -bottom-28 -left-16 w-72 h-72 rounded-full blur-[100px] opacity-25 pointer-events-none" style={{ background: theme.moss }} />
+            <div className="rr-grain absolute -inset-10 opacity-[0.06] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #7F2C47 1px, transparent 1.4px)", backgroundSize: "22px 22px" }} />
+            <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-[100px] opacity-30 pointer-events-none" style={{ background: theme.roseBright }} />
+            <div className="absolute -bottom-28 -left-16 w-72 h-72 rounded-full blur-[100px] opacity-20 pointer-events-none" style={{ background: theme.gold }} />
 
             <div className="relative z-10 grid gap-12 items-center px-7 py-14 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
               <div>
                 <div className="flex items-center gap-3">
-                  <span className="h-px w-10" style={{ background: theme.gold }} />
-                  <span className="rr-mono text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: theme.goldSoft }}>
+                  <span className="h-px w-10" style={{ background: theme.roseDeep }} />
+                  <span className="rr-mono text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: theme.roseDeep }}>
                     {content.pageBadge}
                   </span>
                 </div>
 
                 <h1
                   className="rr-serif mt-7 text-[2.5rem] sm:text-5xl lg:text-[3.75rem] font-semibold leading-[1.04] tracking-tight max-w-xl"
-                  style={{ color: theme.white, textShadow: "0 4px 30px rgba(0,0,0,0.35)" }}
+                  style={{ color: theme.ink }}
                 >
                   {content.pageTitle}
                 </h1>
 
-                <p className="mt-6 max-w-lg text-base sm:text-lg leading-8" style={{ color: "rgba(245,238,226,0.72)" }}>
+                <p className="mt-6 max-w-lg text-base sm:text-lg leading-8" style={{ color: theme.textMuted }}>
                   {content.pageSubtitle}
                 </p>
 
                 <div className="mt-9 flex items-center gap-3">
-                  <span className="rr-mono text-[10px] font-semibold uppercase tracking-[0.3em] px-4 py-2 rounded-full" style={{ color: theme.goldSoft, border: `1px solid ${theme.goldSoft}45` }}>
+                  <span className="rr-mono text-[10px] font-semibold uppercase tracking-[0.3em] px-4 py-2 rounded-full" style={{ color: theme.roseDeep, border: `1px solid ${theme.roseDeep}45` }}>
                     {content.storyBadgeYear}
                   </span>
                 </div>

@@ -1562,9 +1562,9 @@ const styles = {
     overflow: "hidden",
     borderRadius: "30px",
     padding: "60px clamp(32px, 6vw, 76px) 88px",
-    background: theme.gradInk,
-    boxShadow: "0 24px 55px rgba(30,20,32,0.16)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: "linear-gradient(135deg, #F9E8EA 0%, #F6D2D6 55%, #F1BCC4 100%)",
+    boxShadow: "0 24px 55px rgba(156,39,72,0.12)",
+    border: "1px solid rgba(156,39,72,0.10)",
   },
 
   heroGlowOne: {
@@ -1601,19 +1601,23 @@ const styles = {
     gap: "10px",
     padding: "8px 20px",
     borderRadius: "50px",
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.10)",
+    background: "rgba(255,255,255,0.38)",
+    border: "1px solid rgba(156,39,72,0.14)",
     backdropFilter: "blur(14px)",
-    color: theme.goldSoft,
+    color: theme.roseDeep,
     fontSize: "12px",
     fontWeight: 700,
     letterSpacing: "0.14em",
     textTransform: "uppercase",
   },
 
+  eyebrowText: {
+    color: theme.roseDeep,
+  },
+
   heroTitle: {
     margin: "24px 0 18px",
-    color: theme.white,
+    color: theme.ink,
     fontSize: "clamp(2.7rem, 5vw, 4.7rem)",
     lineHeight: 1.01,
     fontWeight: 600,
@@ -1623,7 +1627,7 @@ const styles = {
   heroDescription: {
     maxWidth: "720px",
     margin: "0 0 28px",
-    color: "rgba(245,238,226,0.72)",
+    color: theme.text,
     fontSize: "15px",
     lineHeight: 1.8,
   },
@@ -1633,7 +1637,7 @@ const styles = {
     flexWrap: "wrap",
     gap: "20px",
     paddingTop: "20px",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
+    borderTop: "1px solid rgba(156,39,72,0.14)",
   },
 
   heroStat: {
@@ -1652,13 +1656,13 @@ const styles = {
     fontWeight: 700,
     letterSpacing: "0.12em",
     textTransform: "uppercase",
-    color: "rgba(255,255,255,0.5)",
+    color: theme.textMuted,
     marginTop: "2px",
   },
 
   heroStatDivider: {
     width: "1px",
-    background: "rgba(255,255,255,0.10)",
+    background: "rgba(156,39,72,0.14)",
   },
 
   // NOTICES SECTION

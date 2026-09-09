@@ -1561,15 +1561,18 @@ export default function AdmissionsPage({
           align-items: center;
           justify-content: center;
           overflow: hidden;
-          background: radial-gradient(circle at 13% 30%, rgba(199,154,59,.14), transparent 25%), radial-gradient(circle at 86% 70%, rgba(166,43,79,.23), transparent 30%), linear-gradient(135deg, #24131f 0%, #361725 48%, #531f37 100%);
+          background:
+            radial-gradient(circle at 13% 30%, rgba(166,43,79,.10), transparent 25%),
+            radial-gradient(circle at 86% 70%, rgba(199,154,59,.10), transparent 31%),
+            linear-gradient(135deg, #FFF5F6 0%, #FDE8EA 48%, #F8D7DC 100%);
         }
 
         .rr-admission-pattern, .rr-admission-process-pattern, .rr-admission-final-pattern {
           position: absolute;
           inset: 0;
-          opacity: .09;
+          opacity: .18;
           pointer-events: none;
-          background-image: radial-gradient(circle, white 1px, transparent 1.2px);
+          background-image: radial-gradient(circle, rgba(143,35,56,.22) 1px, transparent 1.2px);
           background-size: 19px 19px;
         }
 
@@ -1580,9 +1583,9 @@ export default function AdmissionsPage({
           height: 520px;
           left: -270px;
           top: -230px;
-          border: 1px solid rgba(229,200,120,.12);
+          border: 1px solid rgba(143,35,56,.10);
           border-radius: 50%;
-          box-shadow: 0 0 0 60px rgba(229,200,120,.025), 0 0 0 120px rgba(229,200,120,.018);
+          box-shadow: 0 0 0 60px rgba(143,35,56,.028), 0 0 0 120px rgba(143,35,56,.018);
         }
 
         .rr-admission-hero::after {
@@ -1592,38 +1595,38 @@ export default function AdmissionsPage({
           height: 570px;
           right: -290px;
           bottom: -350px;
-          border: 1px solid rgba(229,200,120,.1);
+          border: 1px solid rgba(143,35,56,.10);
           border-radius: 50%;
-          box-shadow: 0 0 0 65px rgba(229,200,120,.025), 0 0 0 130px rgba(229,200,120,.015);
+          box-shadow: 0 0 0 65px rgba(143,35,56,.025), 0 0 0 130px rgba(143,35,56,.015);
         }
 
         .rr-admission-glow { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(8px); }
-        .rr-admission-glow.glow-left { width: 260px; height: 260px; left: 12%; bottom: 5%; background: rgba(199,154,59,.05); box-shadow: 0 0 120px rgba(199,154,59,.15); }
-        .rr-admission-glow.glow-right { width: 300px; height: 300px; right: 12%; top: 12%; background: rgba(166,43,79,.08); box-shadow: 0 0 140px rgba(166,43,79,.2); }
+        .rr-admission-glow.glow-left { width: 260px; height: 260px; left: 12%; bottom: 5%; background: rgba(199,154,59,.07); box-shadow: 0 0 120px rgba(199,154,59,.13); }
+        .rr-admission-glow.glow-right { width: 300px; height: 300px; right: 12%; top: 12%; background: rgba(166,43,79,.09); box-shadow: 0 0 140px rgba(166,43,79,.17); }
 
         .rr-admission-hero-inner { position: relative; z-index: 4; width: min(900px, calc(100% - 32px)); padding: 115px 0 105px; text-align: center; }
 
-        .rr-admission-hero-kicker { display: flex; align-items: center; justify-content: center; gap: 11px; color: #e5cc91; font-size: 10px; font-weight: 900; letter-spacing: .24em; text-transform: uppercase; }
+        .rr-admission-hero-kicker { display: flex; align-items: center; justify-content: center; gap: 11px; color: #8F2345; font-size: 10px; font-weight: 900; letter-spacing: .24em; text-transform: uppercase; }
         .rr-admission-hero-kicker span { width: 28px; height: 1px; background: var(--rr-gold); }
 
         .rr-admission-status-row { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 22px; }
         .rr-admission-status, .rr-admission-session { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border-radius: 999px; font-size: 9px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; backdrop-filter: blur(10px); }
-        .rr-admission-status { border: 1px solid rgba(113,196,143,.3); color: #bde8ca; background: rgba(42,112,67,.17); }
-        .rr-admission-status.closed { border-color: rgba(230,117,133,.3); color: #ffc7d0; background: rgba(141,35,56,.2); }
+        .rr-admission-status { border: 1px solid rgba(42,112,67,.22); color: #317149; background: rgba(255,255,255,.48); }
+        .rr-admission-status.closed { border-color: rgba(166,43,79,.18); color: #8f2345; background: rgba(255,255,255,.48); }
         .rr-admission-status i { width: 7px; height: 7px; border-radius: 50%; background: #73d38d; }
         .rr-admission-status.closed i { background: #e97689; }
         .rr-admission-status i.pulse { animation: rrAdmissionPulse 1.6s ease-in-out infinite; }
 
         @keyframes rrAdmissionPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(115,211,141,.35); } 50% { box-shadow: 0 0 0 6px rgba(115,211,141,0); } }
 
-        .rr-admission-session { color: #e9d7a6; border: 1px solid rgba(229,200,120,.19); background: rgba(255,255,255,.045); }
-        .rr-admission-session svg { color: var(--rr-gold-light); }
+        .rr-admission-session { color: #705d66; border: 1px solid rgba(143,35,56,.12); background: rgba(255,255,255,.45); }
+        .rr-admission-session svg { color: var(--rr-rose); }
 
-        .rr-admission-hero h1 { max-width: 880px; margin: 24px auto 0; color: white; font-family: Georgia, "Times New Roman", serif; font-size: clamp(49px, 7.4vw, 79px); line-height: .98; letter-spacing: -.055em; font-weight: 700; }
+        .rr-admission-hero h1 { max-width: 880px; margin: 24px auto 0; color: var(--rr-text) !important; font-family: Georgia, "Times New Roman", serif; font-size: clamp(49px, 7.4vw, 79px); line-height: .98; letter-spacing: -.055em; font-weight: 700; }
         .rr-admission-title-rule { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 26px auto 0; }
         .rr-admission-title-rule i { width: 5px; height: 5px; border-radius: 50%; background: var(--rr-gold); }
         .rr-admission-title-rule span { width: 72px; height: 2px; background: linear-gradient(90deg, transparent, var(--rr-gold), transparent); }
-        .rr-admission-hero-inner > p { max-width: 690px; margin: 25px auto 0; color: rgba(255,255,255,.68); font-size: 14px; line-height: 1.9; }
+        .rr-admission-hero-inner > p { max-width: 690px; margin: 25px auto 0; color: #6f6268 !important; font-size: 14px; line-height: 1.9; }
 
         .rr-admission-hero-actions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
         .rr-admission-primary-btn, .rr-admission-light-btn, .rr-admission-outline-btn, .rr-admission-locked-btn { min-height: 47px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; border-radius: 11px; font-size: 10px; font-weight: 900; text-decoration: none; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
@@ -1631,16 +1634,16 @@ export default function AdmissionsPage({
         .rr-admission-primary-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgba(0,0,0,.24); }
         .rr-admission-light-btn { color: #2c1d25; background: #fffaf2; border: 1px solid #e8d9c8; box-shadow: 0 8px 20px rgba(0,0,0,.08); }
         .rr-admission-light-btn:hover, .rr-admission-outline-btn:hover { transform: translateY(-2px); }
-        .rr-admission-outline-btn { color: #f7eee3; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(8px); }
-        .rr-admission-outline-btn:hover { background: rgba(255,255,255,.08); }
-        .rr-admission-locked-btn { color: #ffd3da; background: rgba(145,40,59,.25); border: 1px solid rgba(239,137,153,.22); cursor: not-allowed; }
+        .rr-admission-outline-btn { color: #6e4f5b; background: rgba(255,255,255,.42); border: 1px solid rgba(143,35,56,.14); backdrop-filter: blur(8px); }
+        .rr-admission-outline-btn:hover { background: rgba(255,255,255,.65); }
+        .rr-admission-locked-btn { color: #8f2345; background: rgba(255,255,255,.42); border: 1px solid rgba(166,43,79,.16); cursor: not-allowed; }
 
         .rr-admission-hero-foot { display: flex; justify-content: center; align-items: center; gap: 19px; margin-top: 34px; }
-        .rr-admission-hero-foot > div { display: flex; align-items: center; gap: 8px; color: #d7c38a; }
+        .rr-admission-hero-foot > div { display: flex; align-items: center; gap: 8px; color: var(--rr-rose); }
         .rr-admission-hero-foot strong { font-family: Georgia, "Times New Roman", serif; font-size: 26px; line-height: 1; }
-        .rr-admission-hero-foot span { font-size: 8px; font-weight: 900; letter-spacing: .2em; }
-        .rr-admission-hero-foot p { display: inline-flex; align-items: center; gap: 7px; margin: 0; color: rgba(255,255,255,.52); font-size: 9px; font-weight: 700; }
-        .rr-admission-hero-foot p svg { color: var(--rr-gold-light); }
+        .rr-admission-hero-foot span { font-size: 8px; font-weight: 900; letter-spacing: .2em; color: #7f5965; }
+        .rr-admission-hero-foot p { display: inline-flex; align-items: center; gap: 7px; margin: 0; color: #786c72; font-size: 9px; font-weight: 700; }
+        .rr-admission-hero-foot p svg { color: var(--rr-rose); }
 
         .rr-admission-zigzag, .rr-admission-process-zigzag { position: absolute; z-index: 5; left: 0; right: 0; bottom: -1px; height: 34px; overflow: hidden; }
         .rr-admission-zigzag div, .rr-admission-process-zigzag div { width: 100%; height: 100%; background: var(--rr-cream); clip-path: polygon(0 40%, 4% 100%, 8% 40%, 12% 100%, 16% 40%, 20% 100%, 24% 40%, 28% 100%, 32% 40%, 36% 100%, 40% 40%, 44% 100%, 48% 40%, 52% 100%, 56% 40%, 60% 100%, 64% 40%, 68% 100%, 72% 40%, 76% 100%, 80% 40%, 84% 100%, 88% 40%, 92% 100%, 96% 40%, 100% 100%, 100% 100%, 0 100%); }

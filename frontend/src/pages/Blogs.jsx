@@ -253,7 +253,7 @@ export default function Blogs() {
           margin: 0 auto;
         }
 
-        /* HERO */
+        /* HERO — same light-red visual system as About */
         .rr-blog-hero {
           position: relative;
           overflow: hidden;
@@ -261,20 +261,20 @@ export default function Blogs() {
           padding: 64px 64px 78px;
           border-radius: 0 0 38px 38px;
           background:
-            radial-gradient(circle at 88% 20%, rgba(165,43,74,.30), transparent 31%),
-            radial-gradient(circle at 12% 85%, rgba(201,150,61,.10), transparent 33%),
-            linear-gradient(135deg, #1b101c 0%, #2b1423 56%, #391728 100%);
-          box-shadow: 0 28px 70px rgba(43,20,35,.18);
-          color: #fff;
+            radial-gradient(circle at 88% 20%, rgba(165,43,74,.12), transparent 31%),
+            radial-gradient(circle at 12% 85%, rgba(201,150,61,.08), transparent 33%),
+            linear-gradient(135deg, #FDEDEE 0%, #FBD9DC 56%, #F6C3C8 100%);
+          box-shadow: 0 28px 70px rgba(165,43,74,.14);
+          color: var(--rr-ink);
         }
 
         .rr-blog-hero::before {
           content: "";
           position: absolute;
           inset: 0;
-          opacity: .18;
+          opacity: .20;
           pointer-events: none;
-          background-image: radial-gradient(rgba(255,255,255,.25) .75px, transparent .75px);
+          background-image: radial-gradient(rgba(165,43,74,.13) .75px, transparent .75px);
           background-size: 22px 22px;
           mask-image: linear-gradient(to bottom, black 10%, transparent 95%);
         }
@@ -310,7 +310,7 @@ export default function Blogs() {
           display: inline-flex;
           align-items: center;
           gap: 11px;
-          color: #e6c87d;
+          color: var(--rr-maroon);
           font-size: 11px;
           font-weight: 900;
           letter-spacing: .22em;
@@ -321,7 +321,7 @@ export default function Blogs() {
           content: "";
           width: 38px;
           height: 1px;
-          background: var(--rr-gold);
+          background: var(--rr-maroon);
         }
 
         .rr-blog-hero h1 {
@@ -332,17 +332,17 @@ export default function Blogs() {
           line-height: .93;
           font-weight: 900;
           letter-spacing: -.06em;
-          color: #fffaf5;
+          color: var(--rr-ink);
         }
 
         .rr-blog-hero h1 span {
-          color: #e8c978;
+          color: var(--rr-maroon);
         }
 
         .rr-blog-hero-description {
           max-width: 760px;
           margin-top: 24px;
-          color: rgba(255,248,241,.78);
+          color: var(--rr-muted);
           font-size: 16px;
           line-height: 1.75;
         }
@@ -359,7 +359,7 @@ export default function Blogs() {
         .rr-blog-hero-mark::after {
           content: "";
           position: absolute;
-          border: 1px solid rgba(232,201,120,.22);
+          border: 1px solid rgba(165,43,74,.18);
           border-radius: 50%;
         }
 
@@ -380,18 +380,18 @@ export default function Blogs() {
           height: 118px;
           display: grid;
           place-items: center;
-          border: 1px solid rgba(232,201,120,.55);
+          border: 1px solid rgba(165,43,74,.38);
           border-radius: 50%;
-          background: rgba(255,255,255,.035);
-          box-shadow: inset 0 0 35px rgba(232,201,120,.06);
-          color: #e8c978;
+          background: rgba(255,255,255,.24);
+          box-shadow: inset 0 0 35px rgba(165,43,74,.06);
+          color: var(--rr-maroon);
         }
 
         .rr-blog-mark-inner::before {
           content: "";
           position: absolute;
           inset: 10px;
-          border: 1px dashed rgba(232,201,120,.25);
+          border: 1px dashed rgba(165,43,74,.22);
           border-radius: 50%;
         }
 
@@ -406,7 +406,7 @@ export default function Blogs() {
           left: 50%;
           transform: translateX(-50%);
           white-space: nowrap;
-          color: rgba(255,255,255,.52);
+          color: rgba(43,20,35,.58);
           font-size: 9px;
           font-weight: 900;
           letter-spacing: .18em;
@@ -1054,7 +1054,7 @@ export default function Blogs() {
         <div className="rr-blog-wrap">
 
           {/* =====================================================
-              HERO — inspired by About page, but with a journal /
+              HERO — follows the light About-page visual system, with a journal /
               editorial identity of its own.
           ====================================================== */}
           <motion.header

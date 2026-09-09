@@ -4,18 +4,19 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   AlertCircle,
   ArrowLeft,
-  BarChart3,
   Camera,
   CheckCircle2,
   ExternalLink,
   Image as ImageIcon,
   Pencil,
+  Plus,
   Save,
   Trash2,
   UploadCloud,
   UserRound,
   Users,
   X,
+  GripVertical,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -33,1497 +34,941 @@ const colors = {
   dark: "#0B1020",
   cyan: "#38BDF8",
   gold: "#FACC15",
+  cream: "#FFF8EE",
 };
 
-// Reuse the exact accent hexes the live Staff page rotates through, so the
-// admin preview's default color swatches always match what the public page
-// will actually render.
-const statColors = ACCENTS.map((accent) => accent.solid);
+const DEFAULT_DEPARTMENTS = [
+  "Science Department",
+  "Mathematics Department",
+  "English Department",
+  "Language Department",
+  "Social Studies Department",
+  "Computer & Technology Department",
+  "Primary Department",
+  "School Leadership",
+  "Student Support & Administration",
+];
 
-function staffAccentFor(index) {
-  return ACCENTS[index % ACCENTS.length]?.solid || colors.purple;
+const LEGACY_DEPARTMENTS = new Set([
+  "Senior Teachers & Department Heads",
+  "Primary & Junior Faculty",
+  "Faculty Members",
+  "Support Staff",
+]);
+
+const DEPARTMENT_DESCRIPTIONS = {
+  "Science Department": "Exploring science through experiments, observation, discovery, and practical learning.",
+  "Mathematics Department": "Building logical thinking, problem-solving skills, numerical confidence, and mathematical reasoning.",
+  "English Department": "Developing communication, reading, writing, literature, confidence, and creative expression.",
+  "Language Department": "Strengthening language skills, communication, literature, and cultural understanding.",
+  "Social Studies Department": "Understanding society, history, civics, geography, culture, and responsible citizenship.",
+  "Computer & Technology Department": "Preparing students with digital literacy, computing skills, technology, and responsible digital learning.",
+  "Primary Department": "Nurturing young learners with strong foundations, curiosity, confidence, and care.",
+  "School Leadership": "Leading the school community with vision, responsibility, and commitment to student success.",
+  "Student Support & Administration": "Supporting student wellbeing, communication, activities, and the systems that keep school life organised.",
+};
+
+const normalizeText = (value) => String(value || "").trim();
+
+function cleanImageUrl(value) {
+  if (!value) return "";
+  let url = String(value).trim();
+  url = url.replace(/^['"`]+|['"`]+$/g, "");
+  url = url.replace(/^\!\[[^\]]*\]\((.*)\)$/s, "$1");
+  if (url.startsWith("//")) url = `https:${url}`;
+  return url;
+}
+
+function clampImageOffset(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.min(60, Math.max(-60, n)) : 0;
+}
+
+function clampImageZoom(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.min(3, Math.max(1, n)) : 1;
+}
+
+function getMemberImage(member = {}) {
+  return cleanImageUrl(
+    member.imageUrl || member.image || member.photo || member.avatar || ""
+  );
+}
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("adminToken");
+  return token ? { Authorization: `Bearer ${token}` } : null;
+}
+
+function getUploadUrl(payload) {
+  return cleanImageUrl(
+    payload?.url ||
+      payload?.imageUrl ||
+      payload?.fileUrl ||
+      payload?.secure_url ||
+      payload?.data?.url ||
+      payload?.data?.imageUrl ||
+      payload?.data?.fileUrl ||
+      payload?.data?.secure_url ||
+      payload?.file?.url ||
+      payload?.file?.secure_url ||
+      ""
+  );
+}
+
+function inferDepartment(member = {}) {
+  const saved = normalizeText(member.category || member.department);
+  if (saved && !LEGACY_DEPARTMENTS.has(saved)) return saved;
+
+  const text = `${member.position || ""} ${member.subjects || ""}`.toLowerCase();
+  if (text.includes("principal") || text.includes("administrator") || text.includes("leadership")) return "School Leadership";
+  if (text.includes("science") || text.includes("physics") || text.includes("chemistry") || text.includes("biology")) return "Science Department";
+  if (text.includes("math")) return "Mathematics Department";
+  if (text.includes("english")) return "English Department";
+  if (text.includes("nepali") || text.includes("language") || text.includes("literature")) return "Language Department";
+  if (text.includes("social") || text.includes("history") || text.includes("civics") || text.includes("geography")) return "Social Studies Department";
+  if (text.includes("computer") || text.includes("technology") || text.includes("ict")) return "Computer & Technology Department";
+  if (text.includes("primary") || text.includes("junior")) return "Primary Department";
+  if (text.includes("support") || text.includes("counsel") || text.includes("coordinator")) return "Student Support & Administration";
+  return "Student Support & Administration";
+}
+
+function getDepartments(content) {
+  const saved = Array.isArray(content?.departments)
+    ? content.departments.map(normalizeText).filter(Boolean)
+    : [];
+
+  const fromStaff = (content?.staff || [])
+    .map(inferDepartment)
+    .map(normalizeText)
+    .filter(Boolean);
+
+  const result = [];
+  [...saved, ...fromStaff].forEach((department) => {
+    if (!result.includes(department)) result.push(department);
+  });
+
+  if (!result.length) return [...DEFAULT_DEPARTMENTS];
+  return result;
+}
+
+function normalizeStaffContent(saved = {}, { migrateLegacy = false } = {}) {
+  /*
+   * IMPORTANT:
+   * The public Staff page owns the canonical 30-teacher list in
+   * defaultStaffContent. The admin page uses that same list so the
+   * admin and public page never start with unrelated/random staff.
+   *
+   * staffAdminInitialized is a small migration flag stored with the
+   * content. It lets us distinguish:
+   *   1. an old/random database record that needs the real 30 teachers
+   *   2. a real admin choice to delete some/all staff later.
+   *
+   * Once initialized, an empty staff array stays EMPTY.
+   */
+  const rawStaff = Array.isArray(saved?.staff) ? saved.staff : null;
+  const initialized = saved?.staffAdminInitialized === true;
+
+  let source = saved || {};
+
+  if (migrateLegacy && !initialized) {
+    const canonicalNames = new Set(
+      (defaultStaffContent.staff || []).map((member) =>
+        normalizeText(member.name).toLowerCase()
+      )
+    );
+
+    const hasCanonicalTeacher = (rawStaff || []).some((member) =>
+      canonicalNames.has(normalizeText(member?.name).toLowerCase())
+    );
+
+    /*
+     * The current database contains an unrelated/random staff record
+     * such as "Suman Rai". If the old content has no canonical teacher,
+     * replace that old list with the real teacher list from Staff.jsx.
+     *
+     * If the database is already empty on first migration, also seed
+     * the real 30 teachers.
+     */
+    if (!hasCanonicalTeacher) {
+      source = {
+        ...source,
+        staff: (defaultStaffContent.staff || []).map((member) => ({
+          ...member,
+        })),
+        staffAdminInitialized: true,
+      };
+    } else {
+      source = {
+        ...source,
+        staffAdminInitialized: true,
+      };
+    }
+  }
+
+  const merged = mergeStaffContent(source || {});
+  const departments = getDepartments(merged);
+
+  /*
+   * mergeStaffContent historically falls back to the canonical 30
+   * teachers when staff is an empty array. That is useful for the
+   * public page, but NOT for the admin editor: an admin must be able
+   * to intentionally delete every staff member.
+   */
+  const intentionallyEmpty =
+    source?.staffAdminInitialized === true &&
+    Array.isArray(source?.staff) &&
+    source.staff.length === 0;
+
+  const staffSource = intentionallyEmpty ? [] : merged.staff;
+
+  return {
+    ...merged,
+    staffAdminInitialized:
+      source?.staffAdminInitialized === true || initialized,
+    departments,
+    staff: Array.isArray(staffSource)
+      ? staffSource.map((member, index) => {
+          const category = inferDepartment(member);
+
+          return {
+            ...member,
+            category,
+            department: category,
+            imageUrl: getMemberImage(member),
+            imageZoom: clampImageZoom(member.imageZoom),
+            imageOffsetX: clampImageOffset(member.imageOffsetX),
+            imageOffsetY: clampImageOffset(member.imageOffsetY),
+            email: member.email || "",
+            description: member.description || "",
+            philosophy: member.philosophy || "",
+            visible: member.visible !== false,
+            accentColor: member.accentColor || "",
+            _accentIndex: index,
+          };
+        })
+      : [],
+  };
 }
 
 function Field({ label, value, onChange, placeholder = "", type = "text" }) {
   return (
-    <div>
-      <label className="block text-sm font-black mb-2 text-slate-700">
-        {label}
-      </label>
-
+    <label className="block">
+      <span className="block mb-2 text-sm font-black text-slate-700">{label}</span>
       <input
         type={type}
-        value={value || ""}
-        onChange={(event) => onChange(event.target.value)}
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-3 rounded-2xl outline-none text-sm"
+        className="w-full rounded-2xl px-4 py-3 text-sm outline-none"
         style={{
-          background: "rgba(255,255,255,0.92)",
-          border: "1px solid rgba(75,46,131,0.16)",
+          background: "#fff",
+          border: "1px solid rgba(75,46,131,.16)",
           color: colors.dark,
         }}
       />
-    </div>
+    </label>
   );
 }
 
 function TextArea({ label, value, onChange, placeholder = "", rows = 4 }) {
   return (
-    <div>
-      <label className="block text-sm font-black mb-2 text-slate-700">
-        {label}
-      </label>
-
+    <label className="block">
+      <span className="block mb-2 text-sm font-black text-slate-700">{label}</span>
       <textarea
-        value={value || ""}
-        onChange={(event) => onChange(event.target.value)}
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full px-4 py-3 rounded-2xl outline-none text-sm resize-none"
+        className="w-full rounded-2xl px-4 py-3 text-sm outline-none resize-none"
         style={{
-          background: "rgba(255,255,255,0.92)",
-          border: "1px solid rgba(75,46,131,0.16)",
+          background: "#fff",
+          border: "1px solid rgba(75,46,131,.16)",
           color: colors.dark,
         }}
       />
-    </div>
+    </label>
   );
 }
 
-// Simple, typo-proof picker for fields that must match a fixed set of values
-// (like icon names). Prevents an admin from saving "Graduation" instead of
-// "graduation" and silently losing the icon on the live page.
-function Select({ label, value, onChange, options }) {
-  return (
-    <div>
-      <label className="block text-sm font-black mb-2 text-slate-700">
-        {label}
-      </label>
-
-      <select
-        value={value || options[0]?.value || ""}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full px-4 py-3 rounded-2xl outline-none text-sm bg-white"
-        style={{
-          border: "1px solid rgba(75,46,131,0.16)",
-          color: colors.dark,
-        }}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-function Toggle({ checked, onChange, label }) {
+function Toggle({ label, checked, onChange }) {
   return (
     <button
       type="button"
       onClick={() => onChange(!checked)}
       className="w-full flex items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left"
       style={{
-        background: checked
-          ? "rgba(22,138,58,0.08)"
-          : "rgba(100,116,139,0.08)",
-        border: checked
-          ? "1px solid rgba(22,138,58,0.18)"
-          : "1px solid rgba(100,116,139,0.18)",
+        background: checked ? "rgba(22,138,58,.08)" : "rgba(100,116,139,.08)",
+        border: checked ? "1px solid rgba(22,138,58,.18)" : "1px solid rgba(100,116,139,.18)",
       }}
     >
       <span className="text-sm font-black text-slate-700">{label}</span>
-
-      <span
-        className="relative w-12 h-7 rounded-full transition-all"
-        style={{ background: checked ? colors.green : "#CBD5E1" }}
-      >
-        <span
-          className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow"
-          style={{ left: checked ? "24px" : "4px" }}
-        />
+      <span className="relative w-12 h-7 rounded-full" style={{ background: checked ? colors.green : "#CBD5E1" }}>
+        <span className="absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all" style={{ left: checked ? 24 : 4 }} />
       </span>
     </button>
   );
 }
 
-function clampImageOffset(value) {
-  const numberValue = Number(value);
+function DepartmentManager({ departments, staff, onAdd, onDelete, disabled }) {
+  const [newDepartment, setNewDepartment] = useState("");
 
-  if (!Number.isFinite(numberValue)) return 0;
-
-  return Math.min(60, Math.max(-60, numberValue));
-}
-
-function clampImageZoom(value) {
-  const numberValue = Number(value);
-
-  if (!Number.isFinite(numberValue)) return 1;
-
-  return Math.min(3, Math.max(1, numberValue));
-}
-
-function getCropImageStyle(source = {}) {
-  const zoom = clampImageZoom(source.imageZoom);
-  const x = clampImageOffset(source.imageOffsetX);
-  const y = clampImageOffset(source.imageOffsetY);
-
-  return {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    objectPosition: "center",
-    transform: `translate(${x}%, ${y}%) scale(${zoom})`,
-    transformOrigin: "center center",
-    transition: "transform 120ms ease-out",
-    userSelect: "none",
-    pointerEvents: "none",
+  const submit = () => {
+    const value = normalizeText(newDepartment);
+    if (!value) return;
+    onAdd(value);
+    setNewDepartment("");
   };
-}
-
-function CropSlider({ label, value, min, max, step = 1, suffix = "", onChange }) {
-  const numericValue = Number(value);
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <label className="text-sm font-black text-slate-700">{label}</label>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">
-          {Number.isFinite(numericValue) ? numericValue.toFixed(step < 1 ? 1 : 0) : min}
-          {suffix}
-        </span>
+    <section
+      className="rounded-[28px] p-5 sm:p-6"
+      style={{ background: "rgba(255,255,255,.86)", border: "1px solid rgba(15,23,42,.08)" }}
+    >
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+          <div className="text-[10px] font-black uppercase tracking-[.2em] text-[#A62B4F]">Department Management</div>
+          <h3 className="mt-1 text-2xl font-black text-slate-950">Manage School Departments</h3>
+          <p className="mt-1 text-sm text-slate-500">Add the departments your school actually uses or remove departments you no longer need.</p>
+        </div>
+        <div className="flex w-full lg:w-auto gap-2">
+          <input
+            value={newDepartment}
+            onChange={(e) => setNewDepartment(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+            placeholder="New department name"
+            disabled={disabled}
+            className="min-w-0 flex-1 lg:w-64 rounded-2xl px-4 py-3 text-sm outline-none"
+            style={{ border: "1px solid rgba(75,46,131,.16)", background: "#fff" }}
+          />
+          <button
+            type="button"
+            onClick={submit}
+            disabled={disabled || !normalizeText(newDepartment)}
+            className="inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-black disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg,#24131F,#4A1C2E)", color: "#fff" }}
+          >
+            <Plus className="w-4 h-4" /> Add
+          </button>
+        </div>
       </div>
 
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={Number.isFinite(numericValue) ? numericValue : min}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full accent-sky-500"
-      />
-    </div>
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        {departments.map((department) => {
+          const count = staff.filter((member) => inferDepartment(member) === department).length;
+          return (
+            <div key={department} className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3" style={{ background: "#FBF7EF", border: "1px solid #E5D9CD" }}>
+              <div className="min-w-0 flex items-center gap-2">
+                <GripVertical className="w-4 h-4 shrink-0 text-slate-300" />
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-black text-slate-800">{department}</div>
+                  <div className="text-xs text-slate-500">{count} {count === 1 ? "staff member" : "staff members"}</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => onDelete(department)}
+                disabled={disabled || count > 0}
+                title={count > 0 ? "Move or delete staff in this department first" : "Delete department"}
+                className="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center disabled:opacity-30"
+                style={{ background: "#FCE7E7", color: colors.red }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <p className="mt-3 text-xs text-slate-400">A department containing staff cannot be deleted until those staff members are moved to another department.</p>
+    </section>
   );
 }
 
-function StaffPhotoPreviewBox({ modalForm }) {
+function StaffPhotoPreview({ member, small = false }) {
+  const src = getMemberImage(member);
   return (
-    <div
-      className="h-32 w-24 shrink-0 overflow-hidden rounded-2xl bg-white"
-      style={{ border: "2px solid rgba(255,255,255,0.86)" }}
-    >
-      {modalForm.imageUrl ? (
+    <div className={`${small ? "w-20 h-24" : "w-24 h-32"} shrink-0 overflow-hidden rounded-2xl bg-slate-100`}>
+      {src ? (
         <img
-          src={modalForm.imageUrl}
-          alt="Staff preview"
+          src={src}
+          alt={member.name || "Staff"}
+          className="w-full h-full object-cover"
           draggable={false}
-          className="h-full w-full object-cover"
-          style={getCropImageStyle(modalForm)}
+          onError={(e) => { e.currentTarget.style.display = "none"; }}
+          style={{
+            transform: `translate(${clampImageOffset(member.imageOffsetX)}%, ${clampImageOffset(member.imageOffsetY)}%) scale(${clampImageZoom(member.imageZoom)})`,
+            transformOrigin: "center",
+          }}
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center">
-          <ImageIcon className="w-8 h-8 text-slate-300" />
-        </div>
+        <div className="w-full h-full flex items-center justify-center text-slate-300"><UserRound className="w-9 h-9" /></div>
       )}
     </div>
   );
 }
 
-function StaffPhotoAdjustPage({
-  modalForm,
-  setModalForm,
-  uploadImage,
-  uploadingImage,
+function StaffEditorModal({
+  mode,
+  form,
+  departments,
   saving,
-  onClose,
+  uploading,
+  onChange,
+  onUpload,
   onSave,
+  onClose,
+  onDelete,
+  onOpenPhoto,
 }) {
-  const dragRef = useRef(null);
-  const pointersRef = useRef(new Map());
-  const pinchRef = useRef(null);
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    const previousTouchAction = document.body.style.touchAction;
-    const previousOverscroll = document.body.style.overscrollBehavior;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.touchAction = "none";
-    document.body.style.overscrollBehavior = "contain";
-
-    const preventGesture = (event) => event.preventDefault();
-
-    window.addEventListener("gesturestart", preventGesture, { passive: false });
-    window.addEventListener("gesturechange", preventGesture, { passive: false });
-    window.addEventListener("gestureend", preventGesture, { passive: false });
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.style.touchAction = previousTouchAction;
-      document.body.style.overscrollBehavior = previousOverscroll;
-      window.removeEventListener("gesturestart", preventGesture);
-      window.removeEventListener("gesturechange", preventGesture);
-      window.removeEventListener("gestureend", preventGesture);
-    };
-  }, []);
-
-  const updateCrop = (updates) => {
-    setModalForm((prev) => ({
-      ...prev,
-      ...updates,
-    }));
-  };
-
-  const resetCrop = () => {
-    updateCrop({
-      imageZoom: 1,
-      imageOffsetX: 0,
-      imageOffsetY: 0,
-    });
-  };
-
-  const getPointerDistance = (points) => {
-    if (points.length < 2) return 0;
-
-    const [first, second] = points;
-
-    return Math.hypot(
-      second.clientX - first.clientX,
-      second.clientY - first.clientY
-    );
-  };
-
-  const startDrag = (event) => {
-    if (!modalForm.imageUrl) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const box = event.currentTarget.getBoundingClientRect();
-
-    pointersRef.current.set(event.pointerId, {
-      clientX: event.clientX,
-      clientY: event.clientY,
-    });
-
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-
-    const points = Array.from(pointersRef.current.values());
-
-    if (points.length >= 2) {
-      pinchRef.current = {
-        startDistance: getPointerDistance(points),
-        startZoom: clampImageZoom(modalForm.imageZoom),
-      };
-      dragRef.current = null;
-      return;
-    }
-
-    dragRef.current = {
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startOffsetX: clampImageOffset(modalForm.imageOffsetX),
-      startOffsetY: clampImageOffset(modalForm.imageOffsetY),
-      boxWidth: box.width || 1,
-      boxHeight: box.height || 1,
-    };
-  };
-
-  const moveDrag = (event) => {
-    if (!modalForm.imageUrl) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (pointersRef.current.has(event.pointerId)) {
-      pointersRef.current.set(event.pointerId, {
-        clientX: event.clientX,
-        clientY: event.clientY,
-      });
-    }
-
-    const points = Array.from(pointersRef.current.values());
-
-    if (points.length >= 2 && pinchRef.current) {
-      const currentDistance = getPointerDistance(points);
-      const startDistance = pinchRef.current.startDistance || currentDistance || 1;
-      const nextZoom =
-        pinchRef.current.startZoom * (currentDistance / startDistance);
-
-      updateCrop({
-        imageZoom: clampImageZoom(nextZoom),
-      });
-      return;
-    }
-
-    if (!dragRef.current) return;
-
-    const data = dragRef.current;
-    const moveX = ((event.clientX - data.startClientX) / data.boxWidth) * 100;
-    const moveY = ((event.clientY - data.startClientY) / data.boxHeight) * 100;
-
-    updateCrop({
-      imageOffsetX: clampImageOffset(data.startOffsetX + moveX),
-      imageOffsetY: clampImageOffset(data.startOffsetY + moveY),
-    });
-  };
-
-  const endDrag = (event) => {
-    pointersRef.current.delete(event.pointerId);
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
-
-    const points = Array.from(pointersRef.current.values());
-
-    if (points.length < 2) {
-      pinchRef.current = null;
-    }
-
-    if (dragRef.current?.pointerId === event.pointerId) {
-      dragRef.current = null;
-    }
-  };
-
-  const handleWheelZoom = (event) => {
-    if (!modalForm.imageUrl) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const direction = event.deltaY > 0 ? -0.1 : 0.1;
-    const nextZoom = clampImageZoom(clampImageZoom(modalForm.imageZoom) + direction);
-
-    updateCrop({
-      imageZoom: nextZoom,
-    });
-  };
-
-  const cropBoxStyle = {
-    border: "3px solid rgba(255,255,255,0.88)",
-    touchAction: "none",
-    overscrollBehavior: "contain",
-  };
+  const fileRef = useRef(null);
+  const isNew = mode === "add";
 
   return (
     <motion.div
-      className="fixed inset-0 z-[20000] flex flex-col overflow-hidden bg-slate-950 text-white"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onWheelCapture={(event) => {
-        if (event.ctrlKey) event.preventDefault();
-      }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5"
+      style={{ background: "rgba(2,6,23,.58)", backdropFilter: "blur(12px)" }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onMouseDown={onClose}
     >
-      <header className="shrink-0 border-b border-white/10 bg-slate-950/96 px-4 py-4 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-white/45">
-              Staff Photo Adjustment
+      <motion.div
+        className="w-full max-w-2xl max-h-[94vh] overflow-y-auto rounded-[30px] bg-white"
+        style={{ boxShadow: "0 42px 110px rgba(0,0,0,.30)" }}
+        initial={{ opacity: 0, y: 25, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="h-1.5" style={{ background: `linear-gradient(90deg,${colors.gold},${colors.cyan},${colors.green})` }} />
+        <div className="p-5 sm:p-7">
+          <div className="flex items-start justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg,rgba(250,204,21,.18),rgba(56,189,248,.18))" }}>
+                {isNew ? <Plus className="w-5 h-5" /> : <UserRound className="w-5 h-5" />}
+              </div>
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-950">{isNew ? "Add Staff Member" : "Edit Staff Member"}</h3>
+                <p className="text-sm text-slate-500">{isNew ? "Create a new teacher or staff profile." : "Update only this selected staff member."}</p>
+              </div>
             </div>
-            <h2 className="mt-1 text-2xl font-black leading-tight">
-              Drag and zoom the photo
-            </h2>
+            <button type="button" onClick={onClose} disabled={saving || uploading} className="w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center disabled:opacity-50"><X className="w-5 h-5" /></button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving || uploadingImage}
-              className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-black text-white disabled:opacity-50"
-            >
-              Back to Details
-            </button>
-
-            <button
-              type="button"
-              onClick={onSave}
-              disabled={saving || uploadingImage}
-              className="rounded-2xl px-5 py-3 text-sm font-black text-slate-950 disabled:opacity-50"
-              style={{
-                background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-              }}
-            >
-              {saving ? "Saving..." : "Save This Item"}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
-        <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[minmax(280px,430px)_1fr] lg:items-start">
-          <section className="rounded-[34px] bg-white/8 p-4 shadow-2xl ring-1 ring-white/10 sm:p-5">
-            <div
-              className="relative mx-auto h-[68vh] min-h-[420px] max-h-[680px] w-full max-w-[410px] touch-none select-none overflow-hidden rounded-[32px] bg-slate-100 shadow-2xl cursor-grab active:cursor-grabbing"
-              style={cropBoxStyle}
-              onPointerDown={startDrag}
-              onPointerMove={moveDrag}
-              onPointerUp={endDrag}
-              onPointerCancel={endDrag}
-              onPointerLeave={endDrag}
-              onWheel={handleWheelZoom}
-            >
-              {modalForm.imageUrl ? (
-                <img
-                  src={modalForm.imageUrl}
-                  alt="Staff crop preview"
-                  draggable={false}
-                  className="absolute inset-0"
-                  style={getCropImageStyle(modalForm)}
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ImageIcon className="h-16 w-16 text-slate-300" />
+          <div className="space-y-5">
+            <div className="rounded-3xl p-5" style={{ background: "linear-gradient(145deg,#0f172a,#1e293b)" }}>
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+                <StaffPhotoPreview member={form} />
+                <div className="flex-1">
+                  <div className="text-white font-black">Staff Photo</div>
+                  <p className="mt-1 text-sm text-white/55">Upload a photo, then adjust its crop before saving.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+                    <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="rounded-2xl px-4 py-3 font-black text-sm flex items-center justify-center gap-2" style={{ background: "rgba(255,255,255,.10)", color: "#fff" }}><UploadCloud className="w-4 h-4" />{uploading ? "Uploading..." : "Upload New Photo"}</button>
+                    <button type="button" onClick={onOpenPhoto} disabled={!getMemberImage(form) || uploading} className="rounded-2xl px-4 py-3 font-black text-sm flex items-center justify-center gap-2 disabled:opacity-40" style={{ background: `linear-gradient(135deg,${colors.gold},${colors.cyan})`, color: colors.dark }}><Camera className="w-4 h-4" /> Adjust Photo</button>
+                  </div>
+                  <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { onUpload(e.target.files?.[0]); e.target.value = ""; }} />
                 </div>
-              )}
-
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-x-0 top-1/3 h-px bg-white/35" />
-                <div className="absolute inset-x-0 top-2/3 h-px bg-white/35" />
-                <div className="absolute inset-y-0 left-1/3 w-px bg-white/35" />
-                <div className="absolute inset-y-0 left-2/3 w-px bg-white/35" />
-              </div>
-
-              <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-white">
-                Drag Photo
               </div>
             </div>
-          </section>
 
-          <section className="rounded-[34px] bg-white p-5 text-slate-950 shadow-2xl sm:p-6">
-            <div className="mb-5">
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">
-                Controls
-              </div>
-              <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-500">
-                Phone: use two fingers on the photo to zoom. Laptop: place the mouse over the photo and use mouse wheel or trackpad. Drag the photo to position the face.
-              </p>
+            <Field label="Image URL" value={form.imageUrl} onChange={(v) => onChange("imageUrl", v)} placeholder="Upload a photo or paste an image URL" />
+            <Field label="Name" value={form.name} onChange={(v) => onChange("name", v)} placeholder="Teacher or staff name" />
+            <Field label="Position" value={form.position} onChange={(v) => onChange("position", v)} placeholder="e.g. Science Teacher" />
+
+            <div>
+              <label className="block mb-2 text-sm font-black text-slate-700">Department</label>
+              <select value={form.category || departments[0] || ""} onChange={(e) => onChange("category", e.target.value)} className="w-full rounded-2xl px-4 py-3 text-sm outline-none bg-white" style={{ border: "1px solid rgba(75,46,131,.16)" }}>
+                {departments.map((department) => <option key={department} value={department}>{department}</option>)}
+              </select>
+              <p className="mt-2 text-xs text-slate-400">This selection controls which department/category the staff member appears under on the public Staff page.</p>
             </div>
 
-            <label
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl px-4 py-3 font-black"
-              style={{
-                background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                color: colors.dark,
-              }}
-            >
-              <UploadCloud className="w-4 h-4" />
-              {uploadingImage ? "Uploading..." : "Upload New Photo"}
-              <input
-                type="file"
-                accept="image/*"
-                disabled={uploadingImage}
-                onChange={(event) => {
-                  uploadImage(event.target.files?.[0]);
-                  event.target.value = "";
-                }}
-                className="hidden"
-              />
-            </label>
+            <Field label="Email" value={form.email} onChange={(v) => onChange("email", v)} placeholder="teacher@redroseschool.edu.np" />
+            <TextArea label="About the Teacher" value={form.description} onChange={(v) => onChange("description", v)} placeholder="Write a short introduction about this teacher..." rows={5} />
+            <TextArea label="Teaching Philosophy" value={form.philosophy} onChange={(v) => onChange("philosophy", v)} placeholder="Describe this teacher's approach to teaching and learning..." rows={4} />
 
-            <div className="mt-6 space-y-5">
-              <CropSlider
-                label="Zoom"
-                value={clampImageZoom(modalForm.imageZoom)}
-                min={1}
-                max={3}
-                step={0.05}
-                suffix="x"
-                onChange={(value) => updateCrop({ imageZoom: clampImageZoom(value) })}
-              />
+            <Toggle label="Show this staff member on website" checked={form.visible !== false} onChange={(v) => onChange("visible", v)} />
+            <Toggle label="Use a custom accent color for this card" checked={Boolean(form.useCustomAccent)} onChange={(v) => onChange("useCustomAccent", v)} />
+            {form.useCustomAccent && <Field label="Accent Color" type="color" value={form.accentColor || "#A62B4F"} onChange={(v) => onChange("accentColor", v)} />}
 
-              <CropSlider
-                label="Move Left / Right"
-                value={clampImageOffset(modalForm.imageOffsetX)}
-                min={-60}
-                max={60}
-                step={1}
-                onChange={(value) => updateCrop({ imageOffsetX: clampImageOffset(value) })}
-              />
-
-              <CropSlider
-                label="Move Up / Down"
-                value={clampImageOffset(modalForm.imageOffsetY)}
-                min={-60}
-                max={60}
-                step={1}
-                onChange={(value) => updateCrop({ imageOffsetY: clampImageOffset(value) })}
-              />
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              {!isNew && <button type="button" onClick={onDelete} disabled={saving || uploading} className="sm:w-auto px-5 py-3 rounded-2xl text-sm font-black inline-flex items-center justify-center gap-2" style={{ background: "#FCE7E7", color: colors.red }}><Trash2 className="w-4 h-4" /> Delete</button>}
+              <button type="button" onClick={onClose} disabled={saving || uploading} className="flex-1 py-3 rounded-2xl text-sm font-black bg-slate-100 text-slate-600">Cancel</button>
+              <button type="button" onClick={onSave} disabled={saving || uploading || !normalizeText(form.name)} className="flex-1 py-3 rounded-2xl text-sm font-black inline-flex items-center justify-center gap-2 disabled:opacity-50" style={{ background: `linear-gradient(135deg,${colors.gold},${colors.cyan})`, color: colors.dark }}><Save className="w-4 h-4" />{saving ? "Saving..." : isNew ? "Add Staff Member" : "Save Changes"}</button>
             </div>
-
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  updateCrop({
-                    imageOffsetY: clampImageOffset(clampImageOffset(modalForm.imageOffsetY) - 5),
-                  })
-                }
-                className="rounded-xl bg-slate-100 px-3 py-3 text-xs font-black text-slate-600"
-              >
-                Up
-              </button>
-
-              <button
-                type="button"
-                onClick={resetCrop}
-                disabled={saving || uploadingImage}
-                className="rounded-xl px-3 py-3 text-xs font-black text-slate-950 disabled:opacity-50"
-                style={{
-                  background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                }}
-              >
-                Reset
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  updateCrop({
-                    imageOffsetY: clampImageOffset(clampImageOffset(modalForm.imageOffsetY) + 5),
-                  })
-                }
-                className="rounded-xl bg-slate-100 px-3 py-3 text-xs font-black text-slate-600"
-              >
-                Down
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  updateCrop({
-                    imageOffsetX: clampImageOffset(clampImageOffset(modalForm.imageOffsetX) - 5),
-                  })
-                }
-                className="rounded-xl bg-slate-100 px-3 py-3 text-xs font-black text-slate-600"
-              >
-                Left
-              </button>
-
-              <div className="rounded-xl bg-slate-50 px-3 py-3 text-center text-[11px] font-black text-slate-400">
-                Move
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  updateCrop({
-                    imageOffsetX: clampImageOffset(clampImageOffset(modalForm.imageOffsetX) + 5),
-                  })
-                }
-                className="rounded-xl bg-slate-100 px-3 py-3 text-xs font-black text-slate-600"
-              >
-                Right
-              </button>
-            </div>
-
-            <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-xs font-semibold leading-relaxed text-slate-500">
-              Current: Zoom {clampImageZoom(modalForm.imageZoom).toFixed(2)}x, X{" "}
-              {Math.round(clampImageOffset(modalForm.imageOffsetX))}, Y{" "}
-              {Math.round(clampImageOffset(modalForm.imageOffsetY))}
-            </div>
-          </section>
+          </div>
         </div>
-      </main>
+      </motion.div>
     </motion.div>
   );
 }
 
-function getAuthHeaders() {
-  const token = localStorage.getItem("adminToken");
-
-  if (!token) return null;
-
-  return {
-    Authorization: `Bearer ${token}`,
-  };
-}
-
-function getUploadUrl(payload) {
+function PhotoAdjustModal({ form, onChange, onSave, onClose, saving }) {
+  const update = (key, value) => onChange(key, value);
+  const src = getMemberImage(form);
   return (
-    payload?.url ||
-    payload?.imageUrl ||
-    payload?.fileUrl ||
-    payload?.data?.url ||
-    payload?.data?.imageUrl ||
-    payload?.data?.fileUrl ||
-    payload?.data?.secure_url ||
-    payload?.file?.url ||
-    ""
+    <motion.div className="fixed inset-0 z-[11000] flex items-center justify-center p-3 sm:p-5" style={{ background: "rgba(2,6,23,.72)", backdropFilter: "blur(14px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <motion.div className="w-full max-w-3xl rounded-[30px] bg-white p-5 sm:p-7 max-h-[94vh] overflow-y-auto" initial={{ opacity: 0, scale: .95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}>
+        <div className="flex items-center justify-between mb-5"><div><h3 className="text-2xl font-black">Adjust Staff Photo</h3><p className="text-sm text-slate-500">Set the crop used by the Staff card.</p></div><button onClick={onClose} className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center"><X className="w-5 h-5" /></button></div>
+        <div className="grid lg:grid-cols-[1fr_280px] gap-6 items-start">
+          <div className="mx-auto w-full max-w-sm aspect-[3/4] overflow-hidden rounded-[28px] bg-slate-100 border border-slate-200">
+            {src ? <img src={src} alt="Staff crop" className="w-full h-full object-cover" draggable={false} onError={(e) => { e.currentTarget.style.display = "none"; }} style={{ transform: `translate(${clampImageOffset(form.imageOffsetX)}%,${clampImageOffset(form.imageOffsetY)}%) scale(${clampImageZoom(form.imageZoom)})`, transformOrigin: "center" }} /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon className="w-16 h-16" /></div>}
+          </div>
+          <div className="space-y-5">
+            <label className="block"><span className="block text-sm font-black text-slate-700 mb-2">Zoom: {clampImageZoom(form.imageZoom).toFixed(2)}x</span><input type="range" min="1" max="3" step=".01" value={clampImageZoom(form.imageZoom)} onChange={(e) => update("imageZoom", Number(e.target.value))} className="w-full" /></label>
+            <label className="block"><span className="block text-sm font-black text-slate-700 mb-2">Horizontal: {Math.round(clampImageOffset(form.imageOffsetX))}</span><input type="range" min="-60" max="60" value={clampImageOffset(form.imageOffsetX)} onChange={(e) => update("imageOffsetX", Number(e.target.value))} className="w-full" /></label>
+            <label className="block"><span className="block text-sm font-black text-slate-700 mb-2">Vertical: {Math.round(clampImageOffset(form.imageOffsetY))}</span><input type="range" min="-60" max="60" value={clampImageOffset(form.imageOffsetY)} onChange={(e) => update("imageOffsetY", Number(e.target.value))} className="w-full" /></label>
+            <button type="button" onClick={() => { update("imageZoom",1); update("imageOffsetX",0); update("imageOffsetY",0); }} className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black">Reset Crop</button>
+            <button type="button" onClick={onSave} disabled={saving || !src} className="w-full rounded-2xl px-4 py-3 text-sm font-black disabled:opacity-50" style={{ background: `linear-gradient(135deg,${colors.gold},${colors.cyan})` }}>{saving ? "Saving..." : "Save Photo"}</button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
-}
-
-function getDeleteName(target) {
-  if (!target) return "this item";
-  if (target.type === "staffCard") return "this staff member";
-  return "this item";
 }
 
 export default function AdminStaff() {
   const navigate = useNavigate();
-
-  const [form, setForm] = useState(defaultStaffContent);
-  const [loading, setLoading] = useState(false);
-  const [editingTarget, setEditingTarget] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [modalForm, setModalForm] = useState({});
-  const [photoAdjustOpen, setPhotoAdjustOpen] = useState(false);
+  const [form, setForm] = useState(() => normalizeStaffContent({
+    ...defaultStaffContent,
+    staffAdminInitialized: true,
+  }));
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [editor, setEditor] = useState(null);
+  const [photoEditor, setPhotoEditor] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     let alive = true;
-
-    const loadStaffContent = async () => {
+    (async () => {
       try {
-        const res = await api.get(
-          "/api/site-content/staff",
-          { timeout: 20000 }
-        );
-
+        const res = await api.get("/api/site-content/staff", { timeout: 20000 });
         if (!alive) return;
-
-        const savedContent = res.data?.data?.content || {};
-        setForm(mergeStaffContent(savedContent));
+        setForm(
+          normalizeStaffContent(
+            res.data?.data?.content || {},
+            { migrateLegacy: true }
+          )
+        );
       } catch (err) {
-        console.error("Load staff content error:", err);
-        if (alive) {
-          setError("Could not load saved staff content. Default content shown.");
-        }
+        console.error("Admin Staff load error:", err);
+        if (alive) setError("Could not load saved Staff content. Default content is shown.");
       } finally {
         if (alive) setLoading(false);
       }
-    };
-
-    loadStaffContent();
-
-    return () => {
-      alive = false;
-    };
+    })();
+    return () => { alive = false; };
   }, []);
 
-  const updateModalField = (name, value) => {
-    setModalForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const departments = useMemo(() => getDepartments(form), [form]);
 
-  const openEditor = (target) => {
-    setSuccess("");
-    setError("");
-    setEditingTarget(target);
-
-    if (target.type === "pageHeader") {
-      setModalForm({
-        badgeText: form.badgeText || "",
-        title: form.title || "",
-        highlightedWord: form.highlightedWord || "",
-        subtitle: form.subtitle || "",
-      });
-      return;
-    }
-
-    if (target.type === "statCard") {
-      const stat = form.stats?.[target.index] || {};
-      setModalForm({
-        value: stat.value || "",
-        label: stat.label || "",
-        icon: stat.icon || "users",
-        color: stat.color || statColors[target.index % statColors.length],
-      });
-      return;
-    }
-
-    if (target.type === "staffCard" || target.type === "staffImage") {
-      const member = form.staff?.[target.index] || {};
-      setModalForm({
-        name: member.name || "",
-        position: member.position || "",
-        imageUrl: member.imageUrl || "",
-        imageZoom: clampImageZoom(member.imageZoom),
-        imageOffsetX: clampImageOffset(member.imageOffsetX),
-        imageOffsetY: clampImageOffset(member.imageOffsetY),
-        qualification: member.qualification || "",
-        phone: member.phone || "",
-        email: member.email || "",
-        description: member.description || "",
-        visible: member.visible !== false,
-        // Accent color: if the member already has a custom color saved, the
-        // toggle starts on and the picker shows that color. Otherwise the
-        // toggle starts off and the picker just previews what the automatic
-        // rotation would use, so switching it on doesn't jump to black.
-        useCustomAccent: Boolean(member.accentColor),
-        accentColor: member.accentColor || staffAccentFor(target.index),
-      });
-    }
-  };
-
-  const closeEditor = () => {
-    if (saving || uploadingImage) return;
-    setPhotoAdjustOpen(false);
-    setEditingTarget(null);
-    setModalForm({});
-  };
-
-  const saveContentToBackend = async (nextForm, message) => {
-    const authHeaders = getAuthHeaders();
-
-    if (!authHeaders) {
+  const persist = async (next, message) => {
+    const headers = getAuthHeaders();
+    if (!headers) {
       setError("Admin login expired. Please logout and login again.");
       return false;
     }
+    const payload = {
+      ...next,
+      staffAdminInitialized: true,
+      staff: Array.isArray(next?.staff) ? next.staff : [],
+    };
 
-    await api.put(
-      "/api/site-content/staff",
-      { content: nextForm },
-      { headers: authHeaders }
-    );
-
-    setForm(nextForm);
-    setSuccess(message || "Staff page updated successfully.");
+    await api.put("/api/site-content/staff", { content: payload }, { headers });
+    setForm(normalizeStaffContent(payload));
+    setSuccess(message);
+    setError("");
     return true;
   };
 
-  const uploadImage = async (file) => {
-    if (!file) return;
-
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    const maxSize = 6 * 1024 * 1024;
-
-    if (!allowedTypes.includes(file.type)) {
-      setError("Please upload only PNG, JPG, or WebP image.");
-      return;
-    }
-
-    if (file.size > maxSize) {
-      setError("Staff photo must be less than 6 MB.");
-      return;
-    }
-
-    const authHeaders = getAuthHeaders();
-
-    if (!authHeaders) {
-      setError("Admin login expired. Please logout and login again.");
-      return;
-    }
-
-    setSuccess("");
-    setError("");
-    setUploadingImage(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await api.post("/api/upload", formData, {
-        headers: {
-          ...authHeaders,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const uploadedUrl = getUploadUrl(res.data);
-
-      if (!uploadedUrl) {
-        setError("Image uploaded but backend did not return image URL.");
-        return;
-      }
-
-      setModalForm((prev) => ({
-        ...prev,
-        imageUrl: uploadedUrl,
-        imageZoom: 1,
-        imageOffsetX: 0,
-        imageOffsetY: 0,
-      }));
-      setPhotoAdjustOpen(true);
-      setSuccess("Staff photo uploaded. Adjust it on the photo adjustment page, then save.");
-    } catch (err) {
-      console.error("Staff photo upload error:", err);
-      setError(err.response?.data?.message || "Staff photo upload failed.");
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const saveSelectedPart = async () => {
-    if (!editingTarget) return;
-
-    setSaving(true);
-    setSuccess("");
-    setError("");
-
-    try {
-      let nextForm = mergeStaffContent(form);
-
-      if (editingTarget.type === "pageHeader") {
-        nextForm = {
-          ...nextForm,
-          badgeText: modalForm.badgeText || "",
-          title: modalForm.title || "",
-          highlightedWord: modalForm.highlightedWord || "",
-          subtitle: modalForm.subtitle || "",
-        };
-      }
-
-      if (editingTarget.type === "statCard") {
-        nextForm = {
-          ...nextForm,
-          stats: nextForm.stats.map((stat, index) =>
-            index === editingTarget.index
-              ? {
-                ...stat,
-                value: modalForm.value || "",
-                label: modalForm.label || "",
-                icon: modalForm.icon || "users",
-                color: modalForm.color || statColors[index % statColors.length],
-              }
-              : stat
-          ),
-        };
-      }
-
-      if (editingTarget.type === "staffCard" || editingTarget.type === "staffImage") {
-        nextForm = {
-          ...nextForm,
-          staff: nextForm.staff.map((member, index) =>
-            index === editingTarget.index
-              ? {
-                ...member,
-                name: modalForm.name || "",
-                position: modalForm.position || "",
-                imageUrl: modalForm.imageUrl || "",
-                imageZoom: clampImageZoom(modalForm.imageZoom),
-                imageOffsetX: clampImageOffset(modalForm.imageOffsetX),
-                imageOffsetY: clampImageOffset(modalForm.imageOffsetY),
-                qualification: modalForm.qualification || "",
-                phone: modalForm.phone || "",
-                email: modalForm.email || "",
-                description: modalForm.description || "",
-                visible: modalForm.visible !== false,
-                // Only persist a custom color when the toggle is on;
-                // otherwise store "" so the card falls back to the
-                // auto-rotating palette (and stays in sync if cards
-                // are reordered later).
-                accentColor: modalForm.useCustomAccent ? (modalForm.accentColor || "") : "",
-              }
-              : member
-          ),
-        };
-      }
-
-      const cleanContent = mergeStaffContent(nextForm);
-      await saveContentToBackend(cleanContent, "Selected staff item saved successfully.");
-
-      setPhotoAdjustOpen(false);
-      setEditingTarget(null);
-      setModalForm({});
-    } catch (err) {
-      console.error("Save selected staff item error:", err);
-
-      if (err.response?.status === 401) {
-        setError("Admin login expired or token is invalid. Please login again.");
-      } else {
-        setError(err.response?.data?.message || "Could not save selected item.");
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const addStaffMember = async () => {
-    setSaving(true);
-    setSuccess("");
-    setError("");
-
-    try {
-      const newMember = {
-        id: Date.now(),
-        name: "New Staff Member",
+  const openAddStaff = () => {
+    setSuccess(""); setError("");
+    setEditor({
+      mode: "add",
+      form: {
+        id: `staff-${Date.now()}`,
+        name: "",
         position: "Teacher",
+        category: departments[0] || DEFAULT_DEPARTMENTS[0],
+        department: departments[0] || DEFAULT_DEPARTMENTS[0],
         imageUrl: "",
         imageZoom: 1,
         imageOffsetX: 0,
         imageOffsetY: 0,
-        qualification: "",
-        phone: "",
         email: "",
-        description: "Write a short bio about this staff member.",
+        description: "",
+        philosophy: "",
         visible: true,
         accentColor: "",
-      };
-
-      const nextForm = mergeStaffContent({
-        ...form,
-        staff: [...form.staff, newMember],
-      });
-
-      await saveContentToBackend(nextForm, "New staff member added successfully.");
-    } catch (err) {
-      console.error("Add staff member error:", err);
-      setError(err.response?.data?.message || "Could not add staff member.");
-    } finally {
-      setSaving(false);
-    }
+        useCustomAccent: false,
+      },
+    });
   };
 
-  const deleteTargetItem = async (target) => {
-    if (!target || target.type !== "staffCard") return;
+  const openEditStaff = (index) => {
+    const member = form.staff[index];
+    if (!member) return;
+    setSuccess(""); setError("");
+    setEditor({
+      mode: "edit",
+      index,
+      form: {
+        ...member,
+        category: inferDepartment(member),
+        department: inferDepartment(member),
+        imageUrl: getMemberImage(member),
+        imageZoom: clampImageZoom(member.imageZoom),
+        imageOffsetX: clampImageOffset(member.imageOffsetX),
+        imageOffsetY: clampImageOffset(member.imageOffsetY),
+        description: member.description || "",
+        philosophy: member.philosophy || "",
+        useCustomAccent: Boolean(member.accentColor),
+      },
+    });
+  };
 
+  const changeEditor = (key, value) => {
+    setEditor((prev) => ({ ...prev, form: { ...prev.form, [key]: value } }));
+  };
+
+  const uploadImage = async (file) => {
+    if (!file || !editor) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Please upload only JPG, PNG, or WebP images."); return;
+    }
+    if (file.size > 6 * 1024 * 1024) {
+      setError("Staff photo must be less than 6 MB."); return;
+    }
+    const headers = getAuthHeaders();
+    if (!headers) { setError("Admin login expired. Please login again."); return; }
+    setUploading(true); setError(""); setSuccess("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await api.post("/api/upload", fd, { headers, timeout: 30000 });
+      const url = getUploadUrl(res.data);
+      if (!url) throw new Error("Backend did not return an image URL.");
+      changeEditor("imageUrl", url);
+      changeEditor("imageZoom", 1);
+      changeEditor("imageOffsetX", 0);
+      changeEditor("imageOffsetY", 0);
+      setSuccess("Photo uploaded. Adjust it before saving.");
+      setPhotoEditor(true);
+    } catch (err) {
+      console.error("Staff image upload error:", err);
+      setError(err.response?.data?.message || err.message || "Staff photo upload failed.");
+    } finally { setUploading(false); }
+  };
+
+  const saveEditor = async () => {
+    if (!editor) return;
+    const member = {
+      ...editor.form,
+      name: normalizeText(editor.form.name),
+      position: normalizeText(editor.form.position) || "Teacher",
+      category: normalizeText(editor.form.category) || departments[0] || DEFAULT_DEPARTMENTS[0],
+      department: normalizeText(editor.form.category) || departments[0] || DEFAULT_DEPARTMENTS[0],
+      imageUrl: getMemberImage(editor.form),
+      image: getMemberImage(editor.form),
+      imageZoom: clampImageZoom(editor.form.imageZoom),
+      imageOffsetX: clampImageOffset(editor.form.imageOffsetX),
+      imageOffsetY: clampImageOffset(editor.form.imageOffsetY),
+      email: normalizeText(editor.form.email),
+      description: editor.form.description || "",
+      philosophy: editor.form.philosophy || "",
+      visible: editor.form.visible !== false,
+      accentColor: editor.form.useCustomAccent ? (editor.form.accentColor || "#A62B4F") : "",
+    };
+
+    if (!member.name) { setError("Please enter the staff member's name."); return; }
+
+    setSaving(true); setError(""); setSuccess("");
+    try {
+      const nextStaff = [...(form.staff || [])];
+      if (editor.mode === "add") nextStaff.push(member);
+      else nextStaff[editor.index] = { ...nextStaff[editor.index], ...member };
+
+      const next = normalizeStaffContent({
+        ...form,
+        departments,
+        staff: nextStaff,
+        staffAdminInitialized: true,
+      });
+      await persist(next, editor.mode === "add" ? "New staff member added successfully." : "Staff member updated successfully.");
+      setEditor(null); setPhotoEditor(false);
+    } catch (err) {
+      console.error("Save staff error:", err);
+      setError(err.response?.data?.message || "Could not save staff member.");
+    } finally { setSaving(false); }
+  };
+
+  const deleteStaff = () => {
+    if (!editor || editor.mode !== "edit") return;
+
+    const staffIndex = editor.index;
+    const staffName = editor.form.name || "this staff member";
+
+    // Close the edit popup immediately.
+    // The delete confirmation is shown separately as the in-app toast.
+    setEditor(null);
+    setPhotoEditor(false);
+
+    setPendingDelete({
+      type: "staff",
+      name: staffName,
+      index: staffIndex,
+    });
+  };
+
+  const confirmPendingDelete = async () => {
+    if (!pendingDelete) return;
+
+    const pending = pendingDelete;
+    setPendingDelete(null);
     setSaving(true);
-    setSuccess("");
     setError("");
+    setSuccess("");
 
     try {
-      const nextForm = mergeStaffContent({
-        ...form,
-        staff: form.staff.filter((_, index) => index !== target.index),
-      });
-
-      await saveContentToBackend(nextForm, "Staff member deleted successfully.");
-      setDeleteTarget(null);
-      setEditingTarget(null);
-      setModalForm({});
+      if (pending.type === "staff") {
+        const nextStaff = form.staff.filter((_, index) => index !== pending.index);
+        await persist(
+          normalizeStaffContent({ ...form, departments, staff: nextStaff, staffAdminInitialized: true }),
+          "Staff member deleted successfully."
+        );
+        setEditor(null);
+        setPhotoEditor(false);
+      } else if (pending.type === "department") {
+        await persist(
+          { ...form, departments: departments.filter((d) => d !== pending.name), staffAdminInitialized: true },
+          `Department "${pending.name}" deleted successfully.`
+        );
+      }
     } catch (err) {
-      console.error("Delete staff member error:", err);
-      setError(err.response?.data?.message || "Could not delete staff member.");
+      setError(
+        err.response?.data?.message ||
+        (pending.type === "staff"
+          ? "Could not delete staff member."
+          : "Could not delete department.")
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  const modalTitle = useMemo(() => {
-    if (!editingTarget) return "";
+  const addDepartment = async (name) => {
+    if (departments.includes(name)) { setError("That department already exists."); return; }
+    setSaving(true); setError(""); setSuccess("");
+    try {
+      await persist({ ...form, departments: [...departments, name], staffAdminInitialized: true }, `Department "${name}" added successfully.`);
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not add department.");
+    } finally { setSaving(false); }
+  };
 
-    if (editingTarget.type === "pageHeader") return "Edit Staff Heading";
-    if (editingTarget.type === "statCard") return "Edit Staff Number Card";
-    if (editingTarget.type === "staffImage") return "Change Staff Photo";
-    if (editingTarget.type === "staffCard") return "Edit Staff Member";
+  const deleteDepartment = async (name) => {
+    const count = form.staff.filter((member) => inferDepartment(member) === name).length;
+    if (count > 0) {
+      setError(
+        `Cannot delete ${name} because ${count} staff member${count === 1 ? " is" : "s are"} assigned to it. Move them first.`
+      );
+      return;
+    }
 
-    return "Edit Staff Page";
-  }, [editingTarget]);
+    // Department deletion uses the same in-app confirmation toast.
+    setEditor(null);
+    setPhotoEditor(false);
 
-  const needsImageUpload = useMemo(() => {
-    if (!editingTarget) return false;
-    return editingTarget.type === "staffCard" || editingTarget.type === "staffImage";
-  }, [editingTarget]);
+    setPendingDelete({
+      type: "department",
+      name,
+    });
+  };
 
-  const ModalIcon = useMemo(() => {
-    if (!editingTarget) return Pencil;
-    if (editingTarget.type === "staffImage") return Camera;
-    if (editingTarget.type === "staffCard") return UserRound;
-    if (editingTarget.type === "statCard") return BarChart3;
-    return Pencil;
-  }, [editingTarget]);
-
-  if (loading) {
-    return (
-      <div className="py-16 flex items-center justify-center">
-        <div className="text-slate-600 font-semibold">
-          Loading visual staff editor...
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="py-16 flex justify-center text-slate-500 font-semibold">Loading Staff editor...</div>;
 
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-[24px] p-4 sm:p-5 md:p-6"
-        style={{
-          background:
-            "linear-gradient(135deg, #E8EDF5 0%, #DCE3EF 50%, #E8E0F0 100%)",
-          border: "1px solid rgba(15,23,42,0.06)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
-        }}
-      >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="rounded-[24px] p-4 sm:p-6" style={{ background: "linear-gradient(135deg,#E8EDF5,#DCE3EF 50%,#E8E0F0)", border: "1px solid rgba(15,23,42,.06)" }}>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black mb-3 bg-green-50 text-green-700 border border-green-100">
-              <Users className="w-3.5 h-3.5" />
-              Visual Staff Editor
-            </div>
-
-            <h2
-              className="text-2xl md:text-3xl font-black text-slate-950"
-              style={{
-                fontFamily: "var(--font-display)",
-                letterSpacing: "-0.04em",
-              }}
-            >
-              Hover and Edit Staff Page
-            </h2>
-
-            <p className="text-sm text-slate-500 mt-1">
-              Hover the heading, number cards, or staff cards. Click pencil/camera to edit and trash to delete a staff member.
-            </p>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black mb-3 bg-green-50 text-green-700 border border-green-100"><Users className="w-3.5 h-3.5" /> Staff Management</div>
+            <h2 className="text-2xl md:text-3xl font-black text-slate-950" style={{ fontFamily: "var(--font-display)", letterSpacing: "-.04em" }}>Manage School Staff</h2>
+            <p className="text-sm text-slate-500 mt-1">Create staff members, manage departments, edit profiles, and control what appears on the public Staff page.</p>
           </div>
-
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/admin/dashboard")}
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-black bg-white text-slate-700 border border-slate-100"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Dashboard
-            </button>
-
-            <a
-              href="/staff"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-black bg-white text-slate-700 border border-slate-100"
-            >
-              <ExternalLink className="w-4 h-4" />
-              View Page
-            </a>
+            <button type="button" onClick={() => navigate("/admin/dashboard")} className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-black bg-white text-slate-700 border border-slate-100"><ArrowLeft className="w-4 h-4" /> Dashboard</button>
+            <a href="/staff" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-black bg-white text-slate-700 border border-slate-100"><ExternalLink className="w-4 h-4" /> View Page</a>
           </div>
         </div>
 
-        {success && (
-          <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-green-50 text-green-700 border border-green-100">
-            <CheckCircle2 className="w-4 h-4" />
-            {success}
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-red-50 text-red-700 border border-red-100">
-            <AlertCircle className="w-4 h-4" />
-            {error}
-          </div>
-        )}
-
-        <div
-          className="admin-staff-preview-frame rounded-[2rem] overflow-hidden"
-          style={{
-            background:
-              "radial-gradient(circle at top left, rgba(56,189,248,0.14), transparent 34%), linear-gradient(180deg, #FFF8EE 0%, #F1ECFF 100%)",
-            border: "1px solid rgba(15,23,42,0.08)",
-          }}
-        >
-          <div className="w-full min-w-0 bg-white">
-            <Staff
-              editMode
-              contentOverride={form}
-              onEditTarget={openEditor}
-              onDeleteTarget={(target) => setDeleteTarget(target)}
-              onAddTarget={addStaffMember}
-            />
-          </div>
-        </div>
+        {success && <div className="mt-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-green-50 text-green-700 border border-green-100"><CheckCircle2 className="w-4 h-4" />{success}</div>}
+        {error && <div className="mt-4 rounded-2xl px-4 py-3 flex items-center gap-2 font-semibold bg-red-50 text-red-700 border border-red-100"><AlertCircle className="w-4 h-4" />{error}</div>}
       </motion.div>
 
-      <AnimatePresence>
-        {editingTarget && (
-          <motion.div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5"
-            style={{
-              background: "rgba(2,6,23,0.55)",
-              backdropFilter: "blur(12px)",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closeEditor}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 24, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 14, scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 130, damping: 16 }}
-              className="w-full max-w-xl rounded-[28px] overflow-hidden max-h-[92vh] overflow-y-auto"
-              style={{
-                background: "#FFFFFF",
-                border: "1px solid rgba(255,255,255,0.75)",
-                boxShadow: "0 42px 110px rgba(0,0,0,0.28)",
+      {/* ADD STAFF IS INTENTIONALLY ABOVE THE DEPARTMENT/STAFF CONTAINERS */}
+      <div className="flex justify-center">
+        <button type="button" onClick={openAddStaff} disabled={saving} className="inline-flex items-center gap-2 rounded-2xl px-7 py-4 text-sm font-black shadow-lg hover:-translate-y-0.5 transition disabled:opacity-50" style={{ background: "linear-gradient(135deg,#24131F,#4A1C2E)", color: "#fff" }}>
+          <Plus className="w-5 h-5" /> Add Staff Member
+        </button>
+      </div>
+
+      <DepartmentManager departments={departments} staff={form.staff || []} onAdd={addDepartment} onDelete={deleteDepartment} disabled={saving} />
+
+      <div className="rounded-[32px] overflow-hidden" style={{ background: "linear-gradient(180deg,#FFF8EE,#F1ECFF)", border: "1px solid rgba(15,23,42,.08)" }}>
+        <div className="p-4 sm:p-6">
+          {form.staff?.length > 0 ? (
+            <Staff
+              editMode
+              contentOverride={{ ...form, departments, staffAdminInitialized: true }}
+              onEditTarget={(target) => {
+                if (target?.type === "staffCard" || target?.type === "staffImage") {
+                  openEditStaff(target.index);
+                }
               }}
-              onClick={(event) => event.stopPropagation()}
-            >
+              onDeleteTarget={(target) => {
+                if (target?.type === "staffCard") {
+                  const staffIndex = target.index;
+                  const staffMember = form.staff?.[staffIndex];
+
+                  if (!staffMember) return;
+
+                  setPendingDelete({
+                    type: "staff",
+                    name: staffMember.name || "this staff member",
+                    index: staffIndex,
+                  });
+                }
+              }}
+              onAddTarget={openAddStaff}
+            />
+          ) : (
+            <div className="min-h-[360px] flex flex-col items-center justify-center text-center px-6 py-16">
               <div
-                className="h-1"
-                style={{
-                  background: `linear-gradient(90deg, ${colors.gold}, ${colors.cyan}, ${colors.green})`,
-                }}
-              />
-
-              <div className="p-6">
-                <div className="flex items-start justify-between gap-4 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, rgba(250,204,21,0.18), rgba(56,189,248,0.18))",
-                        color: colors.dark,
-                      }}
-                    >
-                      <ModalIcon className="w-5 h-5" />
-                    </div>
-
-                    <div>
-                      <h3 className="text-xl font-black text-slate-950">
-                        {modalTitle}
-                      </h3>
-                      <p className="text-sm text-slate-500">
-                        Save only this selected Staff page item.
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={closeEditor}
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center bg-slate-100 text-slate-600"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <div className="space-y-5">
-                  {needsImageUpload && (
-                    <>
-                      <div
-                        className="rounded-3xl p-5"
-                        style={{
-                          background:
-                            "linear-gradient(145deg, rgba(15,23,42,0.96), rgba(30,41,59,0.92))",
-                          border: "1px solid rgba(255,255,255,0.12)",
-                        }}
-                      >
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                          <StaffPhotoPreviewBox modalForm={modalForm} />
-
-                          <div className="min-w-0 flex-1">
-                            <div className="text-white font-black">Staff Photo</div>
-                            <div className="mt-1 text-sm leading-relaxed text-white/55">
-                              Open the adjustment page to drag and zoom the image properly.
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => setPhotoAdjustOpen(true)}
-                              disabled={!modalForm.imageUrl || saving || uploadingImage}
-                              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 font-black disabled:cursor-not-allowed disabled:opacity-50"
-                              style={{
-                                background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                                color: colors.dark,
-                              }}
-                            >
-                              <Camera className="w-4 h-4" />
-                              Open Photo Adjustment
-                            </button>
-                          </div>
-                        </div>
-
-                        <label
-                          className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-2xl px-4 py-3 font-black"
-                          style={{
-                            background: "rgba(255,255,255,0.10)",
-                            color: "#FFFFFF",
-                            border: "1px solid rgba(255,255,255,0.14)",
-                          }}
-                        >
-                          <UploadCloud className="w-4 h-4" />
-                          {uploadingImage ? "Uploading..." : "Upload New Photo"}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            disabled={uploadingImage}
-                            onChange={(event) => {
-                              uploadImage(event.target.files?.[0]);
-                              event.target.value = "";
-                            }}
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
-
-                      <Field
-                        label="Image URL"
-                        value={modalForm.imageUrl}
-                        onChange={(value) => updateModalField("imageUrl", value)}
-                      />
-                    </>
-                  )}
-
-                  {editingTarget.type === "pageHeader" && (
-                    <>
-                      <Field
-                        label="Badge Text"
-                        value={modalForm.badgeText}
-                        onChange={(value) => updateModalField("badgeText", value)}
-                      />
-
-                      <Field
-                        label="Main Title"
-                        value={modalForm.title}
-                        onChange={(value) => updateModalField("title", value)}
-                      />
-
-                      <Field
-                        label="Highlighted Word"
-                        value={modalForm.highlightedWord}
-                        onChange={(value) => updateModalField("highlightedWord", value)}
-                        placeholder="Must match a word/phrase inside Main Title exactly"
-                      />
-
-                      <TextArea
-                        label="Subtitle"
-                        value={modalForm.subtitle}
-                        onChange={(value) => updateModalField("subtitle", value)}
-                        rows={4}
-                      />
-                    </>
-                  )}
-
-                  {editingTarget.type === "statCard" && (
-                    <>
-                      <Field
-                        label="Number"
-                        value={modalForm.value}
-                        onChange={(value) => updateModalField("value", value)}
-                      />
-
-                      <Field
-                        label="Label"
-                        value={modalForm.label}
-                        onChange={(value) => updateModalField("label", value)}
-                      />
-
-                      <Select
-                        label="Icon"
-                        value={modalForm.icon}
-                        onChange={(value) => updateModalField("icon", value)}
-                        options={[
-                          { value: "users", label: "Users" },
-                          { value: "graduation", label: "Graduation Cap" },
-                          { value: "award", label: "Award" },
-                        ]}
-                      />
-
-                      <Field
-                        label="Accent Color"
-                        type="color"
-                        value={modalForm.color}
-                        onChange={(value) => updateModalField("color", value)}
-                      />
-                    </>
-                  )}
-
-                  {(editingTarget.type === "staffCard" ||
-                    editingTarget.type === "staffImage") && (
-                      <>
-                        <Field
-                          label="Name"
-                          value={modalForm.name}
-                          onChange={(value) => updateModalField("name", value)}
-                        />
-
-                        <Field
-                          label="Position"
-                          value={modalForm.position}
-                          onChange={(value) => updateModalField("position", value)}
-                        />
-
-                        <Field
-                          label="Qualification"
-                          value={modalForm.qualification}
-                          onChange={(value) => updateModalField("qualification", value)}
-                        />
-
-                        <Field
-                          label="Phone"
-                          value={modalForm.phone}
-                          onChange={(value) => updateModalField("phone", value)}
-                          placeholder="+977-98XXXXXXXX"
-                        />
-
-                        <Field
-                          label="Email"
-                          value={modalForm.email}
-                          onChange={(value) => updateModalField("email", value)}
-                          placeholder="Optional"
-                        />
-
-                        <TextArea
-                          label="Description / About"
-                          value={modalForm.description}
-                          onChange={(value) => updateModalField("description", value)}
-                          rows={5}
-                        />
-
-                        <Toggle
-                          label="Show this staff member on website"
-                          checked={modalForm.visible !== false}
-                          onChange={(value) => updateModalField("visible", value)}
-                        />
-
-                        <Toggle
-                          label="Use a custom accent color for this card"
-                          checked={modalForm.useCustomAccent === true}
-                          onChange={(value) => updateModalField("useCustomAccent", value)}
-                        />
-
-                        {modalForm.useCustomAccent && (
-                          <Field
-                            label="Accent Color (glow ring, name dot, position label)"
-                            type="color"
-                            value={modalForm.accentColor}
-                            onChange={(value) => updateModalField("accentColor", value)}
-                          />
-                        )}
-                      </>
-                    )}
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 mt-7">
-                  {editingTarget.type === "staffCard" && (
-                    <button
-                      type="button"
-                      onClick={() => setDeleteTarget(editingTarget)}
-                      disabled={saving || uploadingImage}
-                      className="sm:w-auto px-5 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2"
-                      style={{
-                        background: "rgba(215,25,32,0.08)",
-                        color: colors.red,
-                        border: "1px solid rgba(215,25,32,0.18)",
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Delete
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={closeEditor}
-                    disabled={saving || uploadingImage}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60"
-                    style={{
-                      background: "rgba(15,23,42,0.06)",
-                      color: "rgba(15,23,42,0.65)",
-                      border: "1px solid rgba(15,23,42,0.08)",
-                    }}
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={saveSelectedPart}
-                    disabled={saving || uploadingImage}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 disabled:opacity-60 inline-flex items-center justify-center gap-2"
-                    style={{
-                      background: `linear-gradient(135deg, ${colors.gold}, ${colors.cyan})`,
-                      color: "#020617",
-                      boxShadow: "0 16px 38px rgba(56,189,248,0.24)",
-                    }}
-                  >
-                    <Save className="w-4 h-4" />
-                    {saving ? "Saving..." : "Save This Item"}
-                  </button>
-                </div>
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
+                style={{ background: "#F1E5D5", color: "#806A5B" }}
+              >
+                <Users className="w-7 h-7" />
               </div>
-            </motion.div>
-          </motion.div>
-        )}
+              <h3 className="text-2xl font-black text-slate-950">
+                No staff members
+              </h3>
+              <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
+                All staff members have been removed. Add a teacher or staff
+                member whenever you are ready.
+              </p>
+              <button
+                type="button"
+                onClick={openAddStaff}
+                disabled={saving}
+                className="mt-6 inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-black disabled:opacity-50"
+                style={{
+                  background: "linear-gradient(135deg,#24131F,#4A1C2E)",
+                  color: "#fff",
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                Add Staff Member
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
 
-        {photoAdjustOpen && needsImageUpload && (
-          <StaffPhotoAdjustPage
-            modalForm={modalForm}
-            setModalForm={setModalForm}
-            uploadImage={uploadImage}
-            uploadingImage={uploadingImage}
-            saving={saving}
-            onClose={() => setPhotoAdjustOpen(false)}
-            onSave={async () => {
-              await saveSelectedPart();
-              setPhotoAdjustOpen(false);
-            }}
-          />
-        )}
-
-        {deleteTarget && (
+      <AnimatePresence>
+        {pendingDelete && (
           <motion.div
-            className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5"
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.96 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-5 right-5 z-[100] w-[min(420px,calc(100vw-32px))] rounded-2xl p-4 shadow-2xl"
             style={{
-              background: "rgba(2,6,23,0.62)",
-              backdropFilter: "blur(14px)",
+              background: "#24131F",
+              border: "1px solid rgba(255,255,255,.12)",
+              color: "#fff",
+              boxShadow: "0 20px 60px rgba(0,0,0,.28)",
             }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => {
-              if (!saving) setDeleteTarget(null);
-            }}
+            role="alertdialog"
+            aria-live="assertive"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.96 }}
-              className="w-full max-w-md rounded-[28px] bg-white overflow-hidden"
-              style={{
-                boxShadow: "0 42px 110px rgba(0,0,0,0.32)",
-                border: "1px solid rgba(255,255,255,0.75)",
-              }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="p-6">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-5">
-                  <Trash2 className="w-6 h-6" />
+            <div className="flex items-start gap-3">
+              <div
+                className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                style={{ background: "rgba(215,25,32,.18)", color: "#FF8D91" }}
+              >
+                <Trash2 className="w-5 h-5" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="font-black text-base">
+                  Delete {pendingDelete.type === "department" ? "department" : "staff member"}?
+                </div>
+                <div className="mt-1 text-sm text-white/70 leading-5">
+                  {pendingDelete.type === "department"
+                    ? `Delete "${pendingDelete.name}"? This cannot be undone.`
+                    : `Delete "${pendingDelete.name}"? This cannot be undone.`}
                 </div>
 
-                <h3 className="text-2xl font-black text-slate-950 mb-2">
-                  Are you sure?
-                </h3>
-
-                <p className="text-sm text-slate-500 leading-relaxed mb-6">
-                  This will permanently delete {getDeleteName(deleteTarget)} from the Staff page.
-                </p>
-
-                <div className="flex gap-3">
+                <div className="mt-3 flex justify-end gap-2">
                   <button
                     type="button"
+                    onClick={() => setPendingDelete(null)}
                     disabled={saving}
-                    onClick={() => setDeleteTarget(null)}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black disabled:opacity-60"
-                    style={{
-                      background: "rgba(15,23,42,0.06)",
-                      color: "rgba(15,23,42,0.68)",
-                      border: "1px solid rgba(15,23,42,0.08)",
-                    }}
+                    className="rounded-xl px-4 py-2 text-sm font-black transition hover:bg-white/10 disabled:opacity-50"
+                    style={{ color: "#fff" }}
                   >
                     Cancel
                   </button>
-
                   <button
                     type="button"
+                    onClick={confirmPendingDelete}
                     disabled={saving}
-                    onClick={() => deleteTargetItem(deleteTarget)}
-                    className="flex-1 py-3 rounded-2xl text-sm font-black disabled:opacity-60 inline-flex items-center justify-center gap-2"
-                    style={{
-                      background: `linear-gradient(135deg, ${colors.red}, #991B1B)`,
-                      color: "#FFFFFF",
-                      boxShadow: "0 16px 38px rgba(215,25,32,0.24)",
-                    }}
+                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-black transition hover:brightness-110 disabled:opacity-50"
+                    style={{ background: "#D71920", color: "#fff" }}
                   >
                     <Trash2 className="w-4 h-4" />
-                    {saving ? "Deleting..." : "Yes, Delete"}
+                    {saving ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>
-            </motion.div>
+
+              <button
+                type="button"
+                onClick={() => setPendingDelete(null)}
+                disabled={saving}
+                className="rounded-lg p-1 text-white/60 hover:bg-white/10 hover:text-white disabled:opacity-50"
+                aria-label="Close delete confirmation"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </motion.div>
+        )}
+
+        {editor && !photoEditor && (
+          <StaffEditorModal
+            mode={editor.mode}
+            form={editor.form}
+            departments={departments}
+            saving={saving}
+            uploading={uploading}
+            onChange={changeEditor}
+            onUpload={uploadImage}
+            onOpenPhoto={() => setPhotoEditor(true)}
+            onSave={saveEditor}
+            onClose={() => { if (!saving && !uploading) setEditor(null); }}
+            onDelete={deleteStaff}
+          />
+        )}
+        {editor && photoEditor && (
+          <PhotoAdjustModal
+            form={editor.form}
+            onChange={changeEditor}
+            saving={saving}
+            onClose={() => setPhotoEditor(false)}
+            onSave={async () => { setPhotoEditor(false); }}
+          />
         )}
       </AnimatePresence>
     </div>

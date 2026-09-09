@@ -662,13 +662,37 @@ export default function AdminDashboard() {
                       latestMessages.map((message) => (
                         <div
                           key={message.id}
-                          className="rounded-xl p-4 transition-all duration-200 cursor-pointer"
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Open message from ${message.name || "Unknown Sender"}`}
+                          className="rounded-xl p-4 transition-all duration-200 cursor-pointer group"
                           style={{
                             background: message.is_read ? theme.borderSoft : `${theme.primary}0F`,
                             border: message.is_read ? `1px solid ${theme.border}` : `1px solid ${theme.primary}35`,
                           }}
-                          onMouseEnter={e => e.currentTarget.style.background = theme.cardHover}
-                          onMouseLeave={e => e.currentTarget.style.background = message.is_read ? theme.borderSoft : `${theme.primary}0F`}
+                          onClick={() =>
+                            navigate(
+                              `/admin/contact-messages?id=${encodeURIComponent(String(message.id))}`
+                            )
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              navigate(
+                                `/admin/contact-messages?id=${encodeURIComponent(String(message.id))}`
+                              );
+                            }
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.background = theme.cardHover;
+                            e.currentTarget.style.transform = "translateY(-2px)";
+                            e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.18)";
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.background = message.is_read ? theme.borderSoft : `${theme.primary}0F`;
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.boxShadow = "none";
+                          }}
                         >
                           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-1">
                             <div className="flex items-center gap-2 min-w-0">
@@ -686,7 +710,17 @@ export default function AdminDashboard() {
                             </span>
                           </div>
                           <p className="text-sm leading-relaxed line-clamp-2" style={{ color: theme.muted }}>{message.message || "No message text."}</p>
-                          <p className="text-xs mt-1.5" style={{ color: `${theme.muted}90` }}>{formatDate(message.created_at)}</p>
+                          <div className="flex items-center justify-between gap-3 mt-1.5">
+                            <p className="text-xs" style={{ color: `${theme.muted}90` }}>
+                              {formatDate(message.created_at)}
+                            </p>
+                            <span
+                              className="text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                              style={{ color: theme.primarySoft }}
+                            >
+                              Open message →
+                            </span>
+                          </div>
                         </div>
                       ))
                     )}

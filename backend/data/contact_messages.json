@@ -1,23 +1,12 @@
 [
   {
-    "id": 1,
-    "name": "Ram Shrestha",
-    "email": "ram.shrestha@example.com",
-    "phone": "+977 9841234567",
-    "subject": "Admission Inquiry",
-    "message": "I would like to inquire about Grade 1 admission process and fees for the academic year 2026.",
-    "is_read": false,
-    "source": "contact",
-    "created_at": "2026-08-04T08:28:04.707Z"
-  },
-  {
     "id": 2,
     "name": "Sita Sharma",
     "email": "sita.sharma@example.com",
     "phone": "+977 9851098765",
     "subject": "Admission Application",
     "message": "Submitted admission inquiry for Class 5. Please contact us back with details.",
-    "is_read": true,
+    "is_read": false,
     "source": "admission",
     "created_at": "2026-08-03T08:28:04.707Z"
   }

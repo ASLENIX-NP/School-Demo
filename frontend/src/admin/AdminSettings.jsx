@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../lib/api";
 import {
   ArrowLeft,
   RefreshCw,
@@ -37,13 +38,22 @@ import {
 | - "Log out other devices" now opens the same in-page confirmation modal.
 | - Backend logout routes are unchanged.
 | - No browser localhost alert is used anywhere in this file.
+| - API connection now uses VITE_API_URL, then localhost:8080, then 5000.
+| - Failed connection automatically falls back to the next configured port.
+| - Main settings load independently from login activity.
+| - Login activity can never keep the entire page stuck in loading.
+| - The full-page loading skeleton was removed; the Settings UI renders immediately.
 |--------------------------------------------------------------------------
 */
 
-const API_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
-
+/*
+|--------------------------------------------------------------------------
+| API
+|--------------------------------------------------------------------------
+| Use the same shared API client as the rest of the application.
+| This keeps AdminSettings on the project's configured backend.
+|--------------------------------------------------------------------------
+*/
 const MAX_DEVICES = 4;
 
 const DEFAULT_SETTINGS = {
@@ -86,52 +96,78 @@ function getAuthHeaders(withJson = true) {
 }
 
 async function apiRequest(path, options = {}) {
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
+  const method =
+    String(options.method || "GET").toUpperCase();
+
+  const requestConfig = {
+    url: path,
+    method,
+    withCredentials: true,
+    timeout: 12000,
     headers: {
-      ...getAuthHeaders(options.body !== undefined),
+      ...getAuthHeaders(
+        options.body !== undefined
+      ),
       ...(options.headers || {}),
     },
-  });
+  };
 
-  const text = await response.text();
-
-  let data = {};
+  /*
+   * Existing AdminSettings actions use `body`.
+   * Convert JSON strings to axios `data`.
+   */
+  if (options.body !== undefined) {
+    try {
+      requestConfig.data =
+        typeof options.body === "string"
+          ? JSON.parse(options.body)
+          : options.body;
+    } catch {
+      requestConfig.data = options.body;
+    }
+  }
 
   try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    data = {
-      success: false,
-      message: text || `Request failed (${response.status})`,
-    };
-  }
+    const response =
+      await api.request(requestConfig);
 
-  if (!response.ok) {
+    const data =
+      response?.data ?? {};
+
+    if (data?.success === false) {
+      const error = new Error(
+        data?.message ||
+          "The server rejected the request."
+      );
+
+      error.status =
+        response?.status;
+
+      error.data = data;
+
+      throw error;
+    }
+
+    return data;
+  } catch (err) {
+    const responseData =
+      err?.response?.data;
+
     const error = new Error(
-      data?.message ||
-        data?.error ||
-        `Request failed (${response.status})`
+      responseData?.message ||
+        responseData?.error ||
+        err?.message ||
+        "Could not load administrator settings."
     );
 
-    error.status = response.status;
-    error.data = data;
+    error.status =
+      err?.response?.status;
+
+    error.data = responseData;
+    error.code = err?.code;
 
     throw error;
   }
-
-  if (data?.success === false) {
-    const error = new Error(
-      data?.message || "The server rejected the request."
-    );
-
-    error.status = response.status;
-    error.data = data;
-
-    throw error;
-  }
-
-  return data;
 }
 
 function getInitials(name = "School Administrator") {
@@ -651,15 +687,12 @@ export default function AdminSettings() {
     setError("");
 
     try {
-      const [
-        settingsResult,
-        sessionsResult,
-      ] = await Promise.all([
-        apiRequest("/api/admin-settings"),
-        apiRequest(
-          "/api/admin-settings/login-activity"
-        ),
-      ]);
+      /*
+       * Load the main Settings record first. The page is no longer
+       * blocked by the secondary login-activity endpoint.
+       */
+      const settingsResult =
+        await apiRequest("/api/admin-settings");
 
       const serverSettings =
         settingsResult?.data || {};
@@ -680,20 +713,41 @@ export default function AdminSettings() {
       setSettings(nextSettings);
       setProfileForm(nextSettings);
 
-      setSessions(
-        Array.isArray(
-          sessionsResult?.data
-        )
-          ? sessionsResult.data
-          : []
-      );
+      // Render the full Settings UI immediately.
+      setLoading(false);
 
-      setCurrentSessionId(
-        String(
-          sessionsResult?.current_session_id ||
-            ""
-        )
-      );
+      /*
+       * Login activity is secondary. If it fails, Settings still works.
+       */
+      try {
+        const sessionsResult =
+          await apiRequest(
+            "/api/admin-settings/login-activity"
+          );
+
+        setSessions(
+          Array.isArray(
+            sessionsResult?.data
+          )
+            ? sessionsResult.data
+            : []
+        );
+
+        setCurrentSessionId(
+          String(
+            sessionsResult?.current_session_id ||
+              ""
+          )
+        );
+      } catch (sessionError) {
+        console.warn(
+          "Login activity could not be loaded:",
+          sessionError
+        );
+
+        setSessions([]);
+        setCurrentSessionId("");
+      }
     } catch (err) {
       console.error(
         "Admin settings load error:",
@@ -706,14 +760,26 @@ export default function AdminSettings() {
             "Could not load administrator settings."
         );
       }
-    } finally {
+
+      // Never leave the page permanently stuck on the skeleton.
       setLoading(false);
+    } finally {
       setRefreshing(false);
     }
   };
-
   useEffect(() => {
-    load();
+    let mounted = true;
+
+    const initialLoad = async () => {
+      if (!mounted) return;
+      await load();
+    };
+
+    initialLoad();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const openProfile = () => {
@@ -1211,22 +1277,15 @@ export default function AdminSettings() {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-[70vh] bg-[#F3F1EF] p-6">
-        <div className="mx-auto max-w-[1200px] animate-pulse space-y-5">
-          <div className="h-14 rounded-2xl bg-white" />
-          <div className="h-36 rounded-[28px] bg-white" />
-          <div className="h-72 rounded-[28px] bg-white" />
-          <div className="h-80 rounded-[28px] bg-white" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#F3F1EF] px-4 py-5 text-slate-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1200px]">
+        {loading && (
+          <div className="mb-4 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-500 shadow-sm">
+            <Loader2 size={16} className="animate-spin" />
+            Loading administrator settings…
+          </div>
+        )}
         {/* HEADER */}
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button

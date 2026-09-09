@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import api from "../lib/api";
 import {
   ArrowLeft,
-  Award,
   Camera,
   Check,
   ChevronDown,
@@ -12,11 +11,12 @@ import {
   EyeOff,
   ExternalLink,
   Image as ImageIcon,
+  LayoutGrid,
   Plus,
   Save,
-  Star,
+  Search,
+  Settings2,
   Trash2,
-  Trophy,
   Upload,
   X,
 } from "lucide-react";
@@ -25,8 +25,14 @@ import {
   ADMIN GALLERY - FULL REPLACEMENT
   File: src/admin/AdminGallery.jsx
 
-  The public Gallery.jsx reads the same /api/site-content/gallery object.
-  Therefore every change saved here is reflected on the public gallery.
+  Updated:
+  - Removed the entire Achievements manager.
+  - Removed achievement data and achievement actions.
+  - Made the page easier to manage by putting the most-used controls first.
+  - Added clear dashboard-style stats.
+  - Added category/subcategory management.
+  - Added image search, bulk selection, visibility, edit, replace and delete.
+  - Kept the same /api/site-content/gallery endpoint.
 */
 
 const DEFAULT_CATEGORIES = ["Classroom", "Events", "Certificate"];
@@ -94,37 +100,6 @@ const DEFAULT_CONTENT = {
   categories: DEFAULT_CATEGORIES,
   categoryDescriptions: DEFAULT_CATEGORY_DESCRIPTIONS,
   subcategories: DEFAULT_SUBCATEGORIES,
-
-  achievements: [
-    {
-      id: "achievement-1",
-      title: "Top School Award",
-      year: "2024",
-      icon: "Trophy",
-      visible: true,
-    },
-    {
-      id: "achievement-2",
-      title: "STEM Excellence",
-      year: "2023",
-      icon: "Award",
-      visible: true,
-    },
-    {
-      id: "achievement-3",
-      title: "Sports Champion",
-      year: "2024",
-      icon: "Trophy",
-      visible: true,
-    },
-    {
-      id: "achievement-4",
-      title: "Community Service",
-      year: "2023",
-      icon: "Star",
-      visible: true,
-    },
-  ],
 
   images: [],
 
@@ -227,15 +202,6 @@ function normalizeContent(value = {}) {
       return result;
     }, {}),
     subcategories: normalizeSubcategories(value.subcategories, categories),
-    achievements: Array.isArray(value.achievements)
-      ? value.achievements.map((item, index) => ({
-          id: item?.id || `achievement-${index}`,
-          title: String(item?.title || "Achievement"),
-          year: String(item?.year || ""),
-          icon: item?.icon || "Trophy",
-          visible: item?.visible !== false,
-        }))
-      : [...DEFAULT_CONTENT.achievements],
     images: normalizeImages(value.images, categories),
   };
 }
@@ -249,13 +215,13 @@ function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-function AchievementIcon({ type = "Trophy", size = 22 }) {
-  if (type === "Award") return <Award size={size} />;
-  if (type === "Star") return <Star size={size} />;
-  return <Trophy size={size} />;
-}
-
-function Field({ label, value, onChange, textarea = false, placeholder = "" }) {
+function Field({
+  label,
+  value,
+  onChange,
+  textarea = false,
+  placeholder = "",
+}) {
   return (
     <label className="ag-field">
       <span>{label}</span>
@@ -279,14 +245,22 @@ function Field({ label, value, onChange, textarea = false, placeholder = "" }) {
 function Modal({ title, subtitle, children, onClose, onSave }) {
   return (
     <div className="ag-modal-backdrop" onMouseDown={onClose}>
-      <div className="ag-modal" onMouseDown={(event) => event.stopPropagation()}>
+      <div
+        className="ag-modal"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <div className="ag-modal-head">
           <div>
             <div className="ag-modal-kicker">Gallery Editor</div>
             <h2>{title}</h2>
             {subtitle && <p>{subtitle}</p>}
           </div>
-          <button className="ag-icon-button" onClick={onClose} aria-label="Close">
+
+          <button
+            className="ag-icon-button"
+            onClick={onClose}
+            aria-label="Close"
+          >
             <X size={18} />
           </button>
         </div>
@@ -316,6 +290,7 @@ export default function AdminGallery() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+
   const [activeCategory, setActiveCategory] = useState("Classroom");
   const [activeSubcategory, setActiveSubcategory] = useState("");
   const [search, setSearch] = useState("");
@@ -323,6 +298,7 @@ export default function AdminGallery() {
   const [modal, setModal] = useState(null);
   const [draft, setDraft] = useState({});
   const [notice, setNotice] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   const showNotice = (message, type = "success") => {
     setNotice({ message, type });
@@ -365,11 +341,15 @@ export default function AdminGallery() {
 
   const currentSubcategories = content.subcategories?.[activeCategory] || [];
 
+  const categoryImages = useMemo(
+    () => content.images.filter((item) => item.category === activeCategory),
+    [content.images, activeCategory]
+  );
+
   const visibleImages = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return content.images.filter((item) => {
-      const categoryMatch = item.category === activeCategory;
+    return categoryImages.filter((item) => {
       const subcategoryMatch =
         !activeSubcategory || item.subcategory === activeSubcategory;
 
@@ -380,9 +360,23 @@ export default function AdminGallery() {
         item.category.toLowerCase().includes(query) ||
         item.subcategory.toLowerCase().includes(query);
 
-      return categoryMatch && subcategoryMatch && searchMatch;
+      return subcategoryMatch && searchMatch;
     });
-  }, [content.images, activeCategory, activeSubcategory, search]);
+  }, [categoryImages, activeSubcategory, search]);
+
+  const stats = useMemo(() => {
+    const categoryCount = categoryImages.length;
+    const visibleCount = categoryImages.filter((item) => item.visible).length;
+    const hiddenCount = categoryCount - visibleCount;
+
+    return {
+      total: content.images.length,
+      categoryCount,
+      visibleCount,
+      hiddenCount,
+      categories: content.categories.length,
+    };
+  }, [content.images, content.categories, categoryImages]);
 
   const updateContent = (changes) => {
     setContent((previous) => normalizeContent({ ...previous, ...changes }));
@@ -487,7 +481,9 @@ export default function AdminGallery() {
       });
 
       showNotice(
-        `${uploaded.length} image${uploaded.length > 1 ? "s" : ""} uploaded. Click Save Changes to publish them.`
+        `${uploaded.length} image${
+          uploaded.length > 1 ? "s" : ""
+        } uploaded. Click Save Changes to publish them.`
       );
     } catch (error) {
       console.error("Gallery image upload error:", error);
@@ -505,6 +501,10 @@ export default function AdminGallery() {
     try {
       if (file.size > 6 * 1024 * 1024) {
         throw new Error("Image must be smaller than 6 MB.");
+      }
+
+      if (!file.type.startsWith("image/")) {
+        throw new Error("Please select an image file.");
       }
 
       const url = await uploadFile(file);
@@ -547,14 +547,6 @@ export default function AdminGallery() {
     showNotice("Image deleted locally. Click Save Changes to publish.");
   };
 
-  const toggleImageSelection = (id) => {
-    setSelectedImages((previous) =>
-      previous.includes(id)
-        ? previous.filter((item) => item !== id)
-        : [...previous, id]
-    );
-  };
-
   const deleteSelected = () => {
     if (!selectedImages.length) return;
 
@@ -565,7 +557,28 @@ export default function AdminGallery() {
     });
 
     setSelectedImages([]);
-    showNotice("Selected images deleted locally. Click Save Changes to publish.");
+    showNotice(
+      "Selected images deleted locally. Click Save Changes to publish."
+    );
+  };
+
+  const toggleImageSelection = (id) => {
+    setSelectedImages((previous) =>
+      previous.includes(id)
+        ? previous.filter((item) => item !== id)
+        : [...previous, id]
+    );
+  };
+
+  const toggleSelectAllVisible = () => {
+    const ids = visibleImages.map((item) => item.id);
+    const allSelected = ids.length > 0 && ids.every((id) => selectedImages.includes(id));
+
+    setSelectedImages((previous) =>
+      allSelected
+        ? previous.filter((id) => !ids.includes(id))
+        : [...new Set([...previous, ...ids])]
+    );
   };
 
   const toggleImageVisibility = (id) => {
@@ -612,24 +625,8 @@ export default function AdminGallery() {
       oldName: category,
       name: category,
       description: content.categoryDescriptions?.[category] || "",
-      subcategories: (content.subcategories?.[category] || []).map((item) => ({
-        ...item,
-      })),
     });
     setModal("category");
-  };
-
-  const openAchievementEditor = (achievement = null) => {
-    setDraft(
-      achievement || {
-        id: `achievement-${Date.now()}`,
-        title: "",
-        year: new Date().getFullYear().toString(),
-        icon: "Trophy",
-        visible: true,
-      }
-    );
-    setModal("achievement");
   };
 
   const openImageEditor = (image) => {
@@ -666,26 +663,6 @@ export default function AdminGallery() {
       return;
     }
 
-    if (modal === "achievement") {
-      if (!draft.title?.trim()) {
-        showNotice("Achievement title is required.", "error");
-        return;
-      }
-
-      const exists = content.achievements.some((item) => item.id === draft.id);
-
-      updateContent({
-        achievements: exists
-          ? content.achievements.map((item) =>
-              item.id === draft.id ? { ...draft } : item
-            )
-          : [...content.achievements, { ...draft }],
-      });
-
-      closeModal();
-      return;
-    }
-
     if (modal === "category") {
       const oldName = draft.oldName;
       const newName = draft.name?.trim();
@@ -710,25 +687,19 @@ export default function AdminGallery() {
         item === oldName ? newName : item
       );
 
-      const categoryDescriptions = {
-        ...content.categoryDescriptions,
-      };
-
+      const categoryDescriptions = { ...content.categoryDescriptions };
       delete categoryDescriptions[oldName];
       categoryDescriptions[newName] = draft.description || "";
 
-      const subcategories = {
-        ...content.subcategories,
-      };
-
+      const subcategories = { ...content.subcategories };
+      if (!subcategories[newName]) {
+        subcategories[newName] = subcategories[oldName] || [];
+      }
       delete subcategories[oldName];
-      subcategories[newName] = (draft.subcategories || []).filter((item) =>
-        item.name?.trim()
-      );
 
       const images = content.images.map((item) =>
         item.category === oldName
-          ? { ...item, category: newName, subcategory: "" }
+          ? { ...item, category: newName }
           : item
       );
 
@@ -739,11 +710,9 @@ export default function AdminGallery() {
         images,
       });
 
-      if (activeCategory === oldName) {
-        setActiveCategory(newName);
-      }
-
+      if (activeCategory === oldName) setActiveCategory(newName);
       closeModal();
+      return;
     }
   };
 
@@ -782,14 +751,10 @@ export default function AdminGallery() {
     const remaining = content.categories.filter((item) => item !== category);
     const replacement = remaining[0];
 
-    const categoryDescriptions = {
-      ...content.categoryDescriptions,
-    };
+    const categoryDescriptions = { ...content.categoryDescriptions };
     delete categoryDescriptions[category];
 
-    const subcategories = {
-      ...content.subcategories,
-    };
+    const subcategories = { ...content.subcategories };
     delete subcategories[category];
 
     updateContent({
@@ -852,12 +817,25 @@ export default function AdminGallery() {
       subcategory.description || ""
     );
 
+    const newName = name.trim();
+
+    const duplicate = (content.subcategories?.[activeCategory] || []).some(
+      (item) =>
+        item.id !== subcategory.id &&
+        item.name.toLowerCase() === newName.toLowerCase()
+    );
+
+    if (duplicate) {
+      showNotice("That subcategory already exists.", "error");
+      return;
+    }
+
     const updated = (content.subcategories?.[activeCategory] || []).map(
       (item) =>
         item.id === subcategory.id
           ? {
               ...item,
-              name: name.trim(),
+              name: newName,
               description: description ?? item.description,
             }
           : item
@@ -868,10 +846,16 @@ export default function AdminGallery() {
         ...content.subcategories,
         [activeCategory]: updated,
       },
+      images: content.images.map((item) =>
+        item.category === activeCategory &&
+        item.subcategory === subcategory.name
+          ? { ...item, subcategory: newName }
+          : item
+      ),
     });
 
     if (activeSubcategory === subcategory.name) {
-      setActiveSubcategory(name.trim());
+      setActiveSubcategory(newName);
     }
 
     showNotice("Subcategory updated. Click Save Changes to publish.");
@@ -888,6 +872,7 @@ export default function AdminGallery() {
         [activeCategory]: updated,
       },
       images: content.images.map((item) =>
+        item.category === activeCategory &&
         item.subcategory === subcategory.name
           ? { ...item, subcategory: "" }
           : item
@@ -899,22 +884,6 @@ export default function AdminGallery() {
     }
 
     showNotice("Subcategory deleted locally. Click Save Changes to publish.");
-  };
-
-  const deleteAchievement = (id) => {
-    updateContent({
-      achievements: content.achievements.filter((item) => item.id !== id),
-    });
-
-    showNotice("Achievement deleted locally. Click Save Changes to publish.");
-  };
-
-  const toggleAchievement = (id) => {
-    updateContent({
-      achievements: content.achievements.map((item) =>
-        item.id === id ? { ...item, visible: !item.visible } : item
-      ),
-    });
   };
 
   if (loading) {
@@ -929,13 +898,19 @@ export default function AdminGallery() {
     );
   }
 
+  const selectedVisibleCount = visibleImages.filter((item) =>
+    selectedImages.includes(item.id)
+  ).length;
+
   return (
     <>
       <style>{ADMIN_CSS}</style>
 
       {notice && (
         <div className={`ag-notice ${notice.type}`}>
-          <div>{notice.type === "success" ? <Check size={17} /> : <X size={17} />}</div>
+          <div>
+            {notice.type === "success" ? <Check size={17} /> : <X size={17} />}
+          </div>
           <span>{notice.message}</span>
         </div>
       )}
@@ -944,11 +919,11 @@ export default function AdminGallery() {
         <header className="ag-topbar">
           <div className="ag-topbar-inner">
             <button
-              className="ag-secondary"
+              className="ag-topbar-button"
               onClick={() => navigate("/admin/dashboard")}
             >
               <ArrowLeft size={16} />
-              Back to Dashboard
+              Dashboard
             </button>
 
             <div className="ag-brand">
@@ -963,7 +938,7 @@ export default function AdminGallery() {
 
             <div className="ag-top-actions">
               <a
-                className="ag-secondary ag-link-button"
+                className="ag-topbar-button"
                 href="/gallery"
                 target="_blank"
                 rel="noreferrer"
@@ -985,7 +960,7 @@ export default function AdminGallery() {
         </header>
 
         <main className="ag-container">
-          <section className="ag-hero">
+          <section className="ag-page-heading">
             <div>
               <span className="ag-kicker">
                 <Camera size={14} />
@@ -993,202 +968,118 @@ export default function AdminGallery() {
               </span>
               <h1>Manage School Gallery</h1>
               <p>
-                Edit the complete public Gallery page from one place. Add
-                photos, change titles, manage categories, achievements, and
-                publish everything to the user website.
+                Upload and organize school photos, edit image details, control
+                visibility, and update the public Gallery page.
               </p>
             </div>
 
-            <div className="ag-hero-stat">
-              <strong>{content.images.length}</strong>
-              <span>Total Images</span>
-            </div>
+            <button
+              className="ag-settings-button"
+              onClick={() => setShowSettings((value) => !value)}
+            >
+              <Settings2 size={16} />
+              Page Settings
+              <ChevronDown
+                size={15}
+                className={showSettings ? "rotate" : ""}
+              />
+            </button>
           </section>
 
-          <section className="ag-grid-two">
-            <div className="ag-card">
-              <div className="ag-card-head">
+          {showSettings && (
+            <section className="ag-settings-panel">
+              <div className="ag-settings-title">
                 <div>
-                  <span className="ag-section-label">Hero Section</span>
-                  <h2>Gallery landing section</h2>
+                  <span className="ag-section-label">Page Content</span>
+                  <h2>Quickly edit public sections</h2>
                 </div>
-                <button className="ag-edit" onClick={openHeroEditor}>
-                  <Edit3 size={15} />
-                  Edit
-                </button>
-              </div>
-
-              <div className="ag-preview-dark">
-                <small>{content.heroBadge}</small>
-                <h3>
-                  {content.heroTitle}{" "}
-                  <em>{content.heroHighlightedText}</em>
-                </h3>
-                <p>{content.heroSubtitle}</p>
-                <div className="ag-preview-buttons">
-                  <span>{content.heroExploreText}</span>
-                  <span>{content.heroAchievementText}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="ag-card">
-              <div className="ag-card-head">
-                <div>
-                  <span className="ag-section-label">Main Gallery</span>
-                  <h2>Heading and introduction</h2>
-                </div>
-                <button className="ag-edit" onClick={openMainEditor}>
-                  <Edit3 size={15} />
-                  Edit
-                </button>
-              </div>
-
-              <div className="ag-main-preview">
-                <span>{content.badge}</span>
-                <h3>
-                  {content.title} <em>{content.highlightedText}</em>
-                </h3>
-                <p>{content.description}</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="ag-card">
-            <div className="ag-card-head ag-wrap-head">
-              <div>
-                <span className="ag-section-label">Categories</span>
-                <h2>Organize the gallery</h2>
-                <p>
-                  Categories and subcategories are shown on the public Gallery
-                  page.
-                </p>
-              </div>
-
-              <button className="ag-primary" onClick={addCategory}>
-                <Plus size={16} />
-                Add Category
-              </button>
-            </div>
-
-            <div className="ag-category-tabs">
-              {content.categories.map((category) => (
                 <button
-                  key={category}
-                  className={
-                    activeCategory === category ? "active" : ""
-                  }
-                  onClick={() => {
-                    setActiveCategory(category);
-                    setActiveSubcategory("");
-                  }}
+                  className="ag-icon-button"
+                  onClick={() => setShowSettings(false)}
                 >
-                  <ImageIcon size={14} />
-                  {category}
-                </button>
-              ))}
-            </div>
-
-            <div className="ag-category-content">
-              <div className="ag-category-info">
-                <div>
-                  <span className="ag-section-label">Selected Category</span>
-                  <h3>{activeCategory}</h3>
-                  <p>
-                    {content.categoryDescriptions?.[activeCategory] ||
-                      "No description added yet."}
-                  </p>
-                </div>
-
-                <div className="ag-category-actions">
-                  <button
-                    className="ag-edit"
-                    onClick={() => openCategoryEditor(activeCategory)}
-                  >
-                    <Edit3 size={15} />
-                    Edit Category
-                  </button>
-
-                  <button
-                    className="ag-danger-outline"
-                    onClick={() => deleteCategory(activeCategory)}
-                  >
-                    <Trash2 size={15} />
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-              <div className="ag-sub-head">
-                <div>
-                  <strong>Subcategories</strong>
-                  <span>
-                    {currentSubcategories.length} available
-                  </span>
-                </div>
-                <button className="ag-small-button" onClick={addSubcategory}>
-                  <Plus size={14} />
-                  Add Subcategory
+                  <X size={17} />
                 </button>
               </div>
 
-              <div className="ag-sub-list">
-                <button
-                  className={!activeSubcategory ? "selected" : ""}
-                  onClick={() => setActiveSubcategory("")}
-                >
-                  <span>All {activeCategory}</span>
-                  <small>All photos</small>
-                </button>
-
-                {currentSubcategories.map((subcategory) => (
-                  <div className="ag-sub-row" key={subcategory.id}>
-                    <button
-                      className={
-                        activeSubcategory === subcategory.name ? "selected" : ""
-                      }
-                      onClick={() =>
-                        setActiveSubcategory(subcategory.name)
-                      }
-                    >
-                      <span>{subcategory.name}</span>
-                      <small>
-                        {subcategory.visible ? "Visible" : "Hidden"}
-                      </small>
-                    </button>
-
-                    <button
-                      className="ag-row-icon"
-                      title="Edit subcategory"
-                      onClick={() => editSubcategory(subcategory)}
-                    >
-                      <Edit3 size={14} />
-                    </button>
-
-                    <button
-                      className="ag-row-icon danger"
-                      title="Delete subcategory"
-                      onClick={() => deleteSubcategory(subcategory)}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+              <div className="ag-settings-grid">
+                <div className="ag-setting-card">
+                  <div>
+                    <span>Hero</span>
+                    <strong>{content.heroTitle}</strong>
                   </div>
-                ))}
+                  <button className="ag-edit" onClick={openHeroEditor}>
+                    <Edit3 size={14} />
+                    Edit
+                  </button>
+                </div>
+
+                <div className="ag-setting-card">
+                  <div>
+                    <span>Main Introduction</span>
+                    <strong>{content.title}</strong>
+                  </div>
+                  <button className="ag-edit" onClick={openMainEditor}>
+                    <Edit3 size={14} />
+                    Edit
+                  </button>
+                </div>
+
+                <div className="ag-setting-card">
+                  <div>
+                    <span>Closing Message</span>
+                    <strong>{content.bottomTitle}</strong>
+                  </div>
+                  <button className="ag-edit" onClick={openBottomEditor}>
+                    <Edit3 size={14} />
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
+          <section className="ag-stat-grid">
+            <div className="ag-stat-card">
+              <div className="ag-stat-icon"><ImageIcon size={18} /></div>
+              <div>
+                <strong>{stats.total}</strong>
+                <span>Total Photos</span>
+              </div>
+            </div>
+
+            <div className="ag-stat-card">
+              <div className="ag-stat-icon"><LayoutGrid size={18} /></div>
+              <div>
+                <strong>{stats.categories}</strong>
+                <span>Categories</span>
+              </div>
+            </div>
+
+            <div className="ag-stat-card">
+              <div className="ag-stat-icon"><Eye size={18} /></div>
+              <div>
+                <strong>{stats.visibleCount}</strong>
+                <span>Visible in {activeCategory}</span>
+              </div>
+            </div>
+
+            <div className="ag-stat-card">
+              <div className="ag-stat-icon"><EyeOff size={18} /></div>
+              <div>
+                <strong>{stats.hiddenCount}</strong>
+                <span>Hidden in {activeCategory}</span>
               </div>
             </div>
           </section>
 
-          <section className="ag-card">
-            <div className="ag-card-head ag-wrap-head">
+          <section className="ag-card ag-manager-card">
+            <div className="ag-card-head">
               <div>
-                <span className="ag-section-label">Photo Manager</span>
-                <h2>
-                  {activeCategory}
-                  {activeSubcategory ? ` / ${activeSubcategory}` : ""}
-                </h2>
+                <span className="ag-section-label">Photo Library</span>
+                <h2>Manage your photos</h2>
                 <p>
-                  Upload, edit, hide, replace, or delete individual gallery
-                  images.
+                  Choose a category, upload photos, then edit or organize them
+                  directly from the cards below.
                 </p>
               </div>
 
@@ -1206,7 +1097,7 @@ export default function AdminGallery() {
                   disabled={uploading}
                 >
                   <Upload size={16} />
-                  {uploading ? "Uploading..." : "Upload Images"}
+                  {uploading ? "Uploading..." : "Upload Photos"}
                 </button>
 
                 <input
@@ -1220,52 +1111,195 @@ export default function AdminGallery() {
               </div>
             </div>
 
-            <div className="ag-toolbar">
-              <div className="ag-toolbar-left">
+            <div className="ag-category-strip">
+              <div className="ag-category-list">
+                {content.categories.map((category) => (
+                  <button
+                    key={category}
+                    className={activeCategory === category ? "active" : ""}
+                    onClick={() => {
+                      setActiveCategory(category);
+                      setActiveSubcategory("");
+                      setSelectedImages([]);
+                    }}
+                  >
+                    <ImageIcon size={14} />
+                    {category}
+                    <span>
+                      {
+                        content.images.filter(
+                          (item) => item.category === category
+                        ).length
+                      }
+                    </span>
+                  </button>
+                ))}
+
+                <button className="add-category-tab" onClick={addCategory}>
+                  <Plus size={14} />
+                  Add Category
+                </button>
+              </div>
+            </div>
+
+            <div className="ag-category-toolbar">
+              <div className="ag-category-title">
+                <div className="ag-category-title-icon">
+                  <ImageIcon size={18} />
+                </div>
+                <div>
+                  <strong>{activeCategory}</strong>
+                  <span>
+                    {stats.categoryCount} photo
+                    {stats.categoryCount === 1 ? "" : "s"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="ag-category-actions">
                 <button
-                  className={!activeSubcategory ? "active" : ""}
+                  className="ag-edit"
+                  onClick={() => openCategoryEditor(activeCategory)}
+                >
+                  <Edit3 size={14} />
+                  Edit Category
+                </button>
+
+                <button
+                  className="ag-danger-outline"
+                  onClick={() => deleteCategory(activeCategory)}
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <div className="ag-category-description">
+              <div>
+                <span className="ag-section-label">Category Description</span>
+                <p>
+                  {content.categoryDescriptions?.[activeCategory] ||
+                    "No description added yet."}
+                </p>
+              </div>
+
+              <button
+                className="ag-small-button"
+                onClick={() => openCategoryEditor(activeCategory)}
+              >
+                <Edit3 size={13} />
+                Edit Description
+              </button>
+            </div>
+
+            <div className="ag-subcategory-row">
+              <div className="ag-subcategory-label">
+                <strong>Filter by subcategory</strong>
+                <button onClick={addSubcategory}>
+                  <Plus size={13} />
+                  Add
+                </button>
+              </div>
+
+              <div className="ag-subcategory-list">
+                <button
+                  className={!activeSubcategory ? "selected" : ""}
                   onClick={() => setActiveSubcategory("")}
                 >
                   All
                 </button>
 
                 {currentSubcategories.map((subcategory) => (
-                  <button
-                    key={subcategory.id}
-                    className={
-                      activeSubcategory === subcategory.name ? "active" : ""
-                    }
-                    onClick={() => setActiveSubcategory(subcategory.name)}
-                  >
-                    {subcategory.name}
-                  </button>
+                  <div className="ag-subcategory-item" key={subcategory.id}>
+                    <button
+                      className={
+                        activeSubcategory === subcategory.name
+                          ? "selected"
+                          : ""
+                      }
+                      onClick={() =>
+                        setActiveSubcategory(subcategory.name)
+                      }
+                    >
+                      {subcategory.name}
+                    </button>
+
+                    <button
+                      title="Edit subcategory"
+                      onClick={() => editSubcategory(subcategory)}
+                    >
+                      <Edit3 size={12} />
+                    </button>
+
+                    <button
+                      className="danger"
+                      title="Delete subcategory"
+                      onClick={() => deleteSubcategory(subcategory)}
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
                 ))}
               </div>
+            </div>
 
-              <input
-                className="ag-search"
-                placeholder="Search gallery images..."
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
+            <div className="ag-photo-toolbar">
+              <div className="ag-toolbar-selection">
+                <label className="ag-select-all">
+                  <input
+                    type="checkbox"
+                    checked={
+                      visibleImages.length > 0 &&
+                      selectedVisibleCount === visibleImages.length
+                    }
+                    onChange={toggleSelectAllVisible}
+                  />
+                  <span>Select all visible</span>
+                </label>
+
+                {selectedImages.length > 0 && (
+                  <span className="ag-selected-count">
+                    {selectedImages.length} selected
+                  </span>
+                )}
+              </div>
+
+              <div className="ag-search-box">
+                <Search size={15} />
+                <input
+                  placeholder="Search photos..."
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+                {search && (
+                  <button onClick={() => setSearch("")}>
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
             </div>
 
             {visibleImages.length === 0 ? (
               <div className="ag-empty">
-                <ImageIcon size={38} />
-                <h3>No images in this selection</h3>
+                <div className="ag-empty-icon">
+                  <ImageIcon size={32} />
+                </div>
+                <h3>No photos found</h3>
                 <p>
-                  Upload images to{" "}
-                  {activeSubcategory || activeCategory} to start building the
-                  gallery.
+                  {search
+                    ? "Try another search term."
+                    : `Upload photos to ${activeSubcategory || activeCategory} to start building the gallery.`}
                 </p>
-                <button
-                  className="ag-primary"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload size={15} />
-                  Upload Image
-                </button>
+                {!search && (
+                  <button
+                    className="ag-primary"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload size={15} />
+                    Upload Photos
+                  </button>
+                )}
               </div>
             ) : (
               <div className="ag-image-grid">
@@ -1285,13 +1319,7 @@ export default function AdminGallery() {
                     </div>
 
                     <div className="ag-image-preview">
-                      {image.image ? (
-                        <img src={image.image} alt={image.title} />
-                      ) : (
-                        <div className="ag-no-image">
-                          <ImageIcon size={32} />
-                        </div>
-                      )}
+                      <img src={image.image} alt={image.title} />
 
                       {!image.visible && (
                         <div className="ag-hidden-label">
@@ -1306,7 +1334,7 @@ export default function AdminGallery() {
                           onClick={() => openImageEditor(image)}
                         >
                           <Edit3 size={14} />
-                          Edit
+                          Edit Details
                         </button>
 
                         <button
@@ -1343,15 +1371,17 @@ export default function AdminGallery() {
                         )}
                       </div>
 
-                      <h3>{image.title}</h3>
-                      <p>{image.description || "No description added."}</p>
+                      <h3 title={image.title}>{image.title}</h3>
+                      <p>
+                        {image.description || "No description added."}
+                      </p>
 
                       <div className="ag-image-meta">
                         <small>{image.date}</small>
 
-                        <div>
+                        <div className="ag-card-actions">
                           <button
-                            title={image.visible ? "Hide image" : "Show image"}
+                            title={image.visible ? "Hide photo" : "Show photo"}
                             onClick={() => toggleImageVisibility(image.id)}
                           >
                             {image.visible ? (
@@ -1362,7 +1392,7 @@ export default function AdminGallery() {
                           </button>
 
                           <button
-                            title="Edit image"
+                            title="Edit details"
                             onClick={() => openImageEditor(image)}
                           >
                             <Edit3 size={15} />
@@ -1370,7 +1400,7 @@ export default function AdminGallery() {
 
                           <button
                             className="danger"
-                            title="Delete image"
+                            title="Delete photo"
                             onClick={() => deleteImage(image.id)}
                           >
                             <Trash2 size={15} />
@@ -1384,91 +1414,24 @@ export default function AdminGallery() {
             )}
           </section>
 
-          <section className="ag-card">
-            <div className="ag-card-head ag-wrap-head">
-              <div>
-                <span className="ag-section-label">Achievements</span>
-                <h2>Manage achievement cards</h2>
-                <p>
-                  These cards are displayed on the public Gallery page.
-                </p>
-              </div>
-
-              <button
-                className="ag-primary"
-                onClick={() => openAchievementEditor()}
-              >
-                <Plus size={16} />
-                Add Achievement
-              </button>
-            </div>
-
-            <div className="ag-achievement-grid">
-              {content.achievements.map((achievement) => (
-                <article
-                  className={`ag-achievement-card ${
-                    !achievement.visible ? "hidden-card" : ""
-                  }`}
-                  key={achievement.id}
-                >
-                  <div className="ag-achievement-icon">
-                    <AchievementIcon type={achievement.icon} size={22} />
-                  </div>
-
-                  <div className="ag-achievement-copy">
-                    <span>{achievement.year}</span>
-                    <h3>{achievement.title}</h3>
-                  </div>
-
-                  <div className="ag-achievement-actions">
-                    <button onClick={() => toggleAchievement(achievement.id)}>
-                      {achievement.visible ? (
-                        <Eye size={15} />
-                      ) : (
-                        <EyeOff size={15} />
-                      )}
-                    </button>
-
-                    <button onClick={() => openAchievementEditor(achievement)}>
-                      <Edit3 size={15} />
-                    </button>
-
-                    <button
-                      className="danger"
-                      onClick={() => deleteAchievement(achievement.id)}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="ag-card">
-            <div className="ag-card-head">
-              <div>
-                <span className="ag-section-label">Bottom Section</span>
-                <h2>Closing Gallery message</h2>
-              </div>
-              <button className="ag-edit" onClick={openBottomEditor}>
-                <Edit3 size={15} />
-                Edit
-              </button>
-            </div>
-
-            <div className="ag-bottom-preview">
-              <strong>{content.bottomTitle}</strong>
+          <section className="ag-card ag-bottom-card">
+            <div>
+              <span className="ag-section-label">Closing Section</span>
+              <h2>{content.bottomTitle}</h2>
               <p>{content.bottomDescription}</p>
-              <small>{content.bottomNote}</small>
             </div>
+
+            <button className="ag-edit" onClick={openBottomEditor}>
+              <Edit3 size={15} />
+              Edit Closing Message
+            </button>
           </section>
 
           <div className="ag-save-bar">
             <div>
               <strong>Ready to publish your Gallery?</strong>
               <span>
-                Changes are local until you click Save Changes.
+                Your edits stay local until you click Save Changes.
               </span>
             </div>
 
@@ -1522,7 +1485,7 @@ export default function AdminGallery() {
             }
           />
           <Field
-            label="Achievement Button Text"
+            label="Second Button Text"
             value={draft.heroAchievementText}
             onChange={(value) =>
               setDraft({ ...draft, heroAchievementText: value })
@@ -1534,7 +1497,7 @@ export default function AdminGallery() {
       {modal === "main" && (
         <Modal
           title="Edit Main Gallery Section"
-          subtitle="Change the badge, title, highlighted word, and description."
+          subtitle="Change the badge, title, highlighted word, and introduction."
           onClose={closeModal}
           onSave={saveModal}
         >
@@ -1568,20 +1531,20 @@ export default function AdminGallery() {
 
       {modal === "bottom" && (
         <Modal
-          title="Edit Bottom Section"
+          title="Edit Closing Section"
           subtitle="Control the final message shown below the Gallery."
           onClose={closeModal}
           onSave={saveModal}
         >
           <Field
-            label="Bottom Title"
+            label="Closing Title"
             value={draft.bottomTitle}
             onChange={(value) =>
               setDraft({ ...draft, bottomTitle: value })
             }
           />
           <Field
-            label="Bottom Description"
+            label="Description"
             value={draft.bottomDescription}
             textarea
             onChange={(value) =>
@@ -1589,7 +1552,7 @@ export default function AdminGallery() {
             }
           />
           <Field
-            label="Bottom Note"
+            label="Note"
             value={draft.bottomNote}
             onChange={(value) =>
               setDraft({ ...draft, bottomNote: value })
@@ -1601,7 +1564,7 @@ export default function AdminGallery() {
       {modal === "category" && (
         <Modal
           title="Edit Category"
-          subtitle="Rename the category and manage its description."
+          subtitle="Rename the category and update its public description."
           onClose={closeModal}
           onSave={saveModal}
         >
@@ -1619,95 +1582,13 @@ export default function AdminGallery() {
               setDraft({ ...draft, description: value })
             }
           />
-
-          <div className="ag-modal-subtitle-row">
-            <strong>Subcategories</strong>
-            <span>{draft.subcategories?.length || 0}</span>
-          </div>
-
-          <div className="ag-modal-subcategories">
-            {(draft.subcategories || []).map((item) => (
-              <div className="ag-modal-subcategory" key={item.id}>
-                <div>
-                  <strong>{item.name}</strong>
-                  <small>{item.description || "No description"}</small>
-                </div>
-                <button
-                  className="ag-row-icon danger"
-                  onClick={() =>
-                    setDraft({
-                      ...draft,
-                      subcategories: draft.subcategories.filter(
-                        (subItem) => subItem.id !== item.id
-                      ),
-                    })
-                  }
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))}
-
-            {!draft.subcategories?.length && (
-              <div className="ag-modal-empty">No subcategories.</div>
-            )}
-          </div>
-        </Modal>
-      )}
-
-      {modal === "achievement" && (
-        <Modal
-          title="Edit Achievement"
-          subtitle="This card will appear in the public Gallery achievement section."
-          onClose={closeModal}
-          onSave={saveModal}
-        >
-          <Field
-            label="Achievement Title"
-            value={draft.title}
-            onChange={(value) => setDraft({ ...draft, title: value })}
-          />
-
-          <Field
-            label="Year"
-            value={draft.year}
-            onChange={(value) => setDraft({ ...draft, year: value })}
-          />
-
-          <label className="ag-field">
-            <span>Icon</span>
-            <div className="ag-select-wrap">
-              <select
-                value={draft.icon || "Trophy"}
-                onChange={(event) =>
-                  setDraft({ ...draft, icon: event.target.value })
-                }
-              >
-                <option value="Trophy">Trophy</option>
-                <option value="Award">Award</option>
-                <option value="Star">Star</option>
-              </select>
-              <ChevronDown size={15} />
-            </div>
-          </label>
-
-          <label className="ag-check-field">
-            <input
-              type="checkbox"
-              checked={draft.visible !== false}
-              onChange={(event) =>
-                setDraft({ ...draft, visible: event.target.checked })
-              }
-            />
-            <span>Show this achievement on the public Gallery</span>
-          </label>
         </Modal>
       )}
 
       {modal === "image" && (
         <Modal
-          title="Edit Gallery Image"
-          subtitle="All of these fields are shown/used by the public Gallery."
+          title="Edit Photo Details"
+          subtitle="Update the information used by the public Gallery."
           onClose={closeModal}
           onSave={saveModal}
         >
@@ -1721,13 +1602,13 @@ export default function AdminGallery() {
             </div>
 
             <div>
-              <strong>{draft.title || "Gallery Image"}</strong>
+              <strong>{draft.title || "Gallery Photo"}</strong>
               <small>{draft.category}</small>
             </div>
           </div>
 
           <Field
-            label="Image Title"
+            label="Photo Title"
             value={draft.title}
             onChange={(value) => setDraft({ ...draft, title: value })}
           />
@@ -1803,7 +1684,7 @@ export default function AdminGallery() {
                 setDraft({ ...draft, visible: event.target.checked })
               }
             />
-            <span>Show this image on the public Gallery</span>
+            <span>Show this photo on the public Gallery</span>
           </label>
         </Modal>
       )}
@@ -1814,7 +1695,7 @@ export default function AdminGallery() {
 const ADMIN_CSS = `
 :root{
   --ag-bg:#f2eee9;
-  --ag-card:#ffffff;
+  --ag-card:#fff;
   --ag-dark:#1c121c;
   --ag-maroon:#531d35;
   --ag-maroon-2:#6d2845;
@@ -1825,7 +1706,7 @@ const ADMIN_CSS = `
   --ag-border:#e5ddd7;
   --ag-soft:#faf7f3;
   --ag-danger:#d94d58;
-  --ag-shadow:0 18px 50px rgba(40,25,30,.08);
+  --ag-shadow:0 14px 42px rgba(40,25,30,.07);
 }
 
 *{box-sizing:border-box}
@@ -1833,8 +1714,8 @@ const ADMIN_CSS = `
 .ag-page{
   min-height:100vh;
   background:
-    radial-gradient(circle at 12% 0%,rgba(229,195,110,.13),transparent 28%),
-    radial-gradient(circle at 90% 15%,rgba(73,189,221,.10),transparent 25%),
+    radial-gradient(circle at 10% 0%,rgba(229,195,110,.12),transparent 27%),
+    radial-gradient(circle at 90% 12%,rgba(73,189,221,.09),transparent 24%),
     var(--ag-bg);
   color:var(--ag-text);
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -1845,72 +1726,78 @@ const ADMIN_CSS = `
   position:sticky;
   top:0;
   z-index:50;
-  background:rgba(28,18,28,.96);
+  background:rgba(28,18,28,.97);
   border-bottom:1px solid rgba(255,255,255,.08);
   backdrop-filter:blur(16px);
 }
 
 .ag-topbar-inner{
   width:min(1440px,calc(100% - 36px));
-  min-height:76px;
+  min-height:72px;
   margin:auto;
   display:flex;
   align-items:center;
-  gap:18px;
+  gap:16px;
 }
 
 .ag-brand{
   flex:1;
   display:flex;
   align-items:center;
-  gap:11px;
-  color:white;
+  gap:10px;
+  color:#fff;
 }
 
 .ag-brand-icon{
-  width:39px;
-  height:39px;
-  border-radius:12px;
+  width:38px;
+  height:38px;
+  border-radius:11px;
   display:grid;
   place-items:center;
-  background:linear-gradient(135deg,var(--ag-gold),#f5e0a2);
+  background:linear-gradient(135deg,var(--ag-gold),#f4dda0);
   color:#34231d;
 }
 
 .ag-brand strong{display:block;font-size:14px}
-.ag-brand small{display:block;color:#c9b8c3;font-size:10px;margin-top:2px}
+.ag-brand small{display:block;color:#c9b8c3;font-size:9px;margin-top:2px}
 
-.ag-top-actions{display:flex;align-items:center;gap:9px}
+.ag-top-actions{display:flex;align-items:center;gap:8px}
 
-.ag-secondary,
+.ag-topbar-button{
+  min-height:39px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 12px;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;
+  background:transparent;
+  color:#eee8ef;
+  text-decoration:none;
+  font:inherit;
+  font-size:10px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.ag-topbar-button:hover{
+  background:rgba(255,255,255,.06);
+}
+
 .ag-primary,
+.ag-secondary,
 .ag-edit,
 .ag-danger,
 .ag-danger-outline,
 .ag-small-button,
 .ag-icon-button,
-.ag-row-icon{
+.ag-settings-button{
   border:0;
   font:inherit;
   cursor:pointer;
   transition:.2s ease;
 }
-
-.ag-secondary{
-  min-height:40px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  padding:0 13px;
-  border:1px solid var(--ag-border);
-  border-radius:11px;
-  background:white;
-  color:#4e4a56;
-  text-decoration:none;
-}
-
-.ag-secondary:hover{transform:translateY(-1px);border-color:#cdbfb7}
 
 .ag-primary{
   min-height:40px;
@@ -1919,467 +1806,559 @@ const ADMIN_CSS = `
   justify-content:center;
   gap:7px;
   padding:0 15px;
-  border-radius:11px;
+  border-radius:10px;
   background:linear-gradient(100deg,#e9c718,#58c4dc);
   color:#17151b;
-  font-weight:800;
-  box-shadow:0 8px 18px rgba(70,60,30,.12);
+  font-size:10px;
+  font-weight:900;
+  box-shadow:0 8px 18px rgba(70,60,30,.1);
 }
 
 .ag-primary:hover{transform:translateY(-1px)}
 .ag-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}
 
-.ag-topbar .ag-secondary{
-  background:transparent;
-  border-color:rgba(255,255,255,.15);
-  color:#eee8ef;
-}
-
 .ag-container{
   width:min(1440px,calc(100% - 36px));
-  margin:28px auto 0;
+  margin:25px auto 0;
 }
 
-.ag-hero{
-  min-height:210px;
-  padding:34px 38px;
-  border:1px solid rgba(255,255,255,.7);
-  border-radius:27px;
-  background:linear-gradient(120deg,#fffdf8,#eef8f7);
-  box-shadow:var(--ag-shadow);
+.ag-page-heading{
+  padding:27px 31px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:30px;
-}
-
-.ag-kicker,
-.ag-section-label{
-  color:var(--ag-maroon);
-  font-size:10px;
-  font-weight:900;
-  letter-spacing:.13em;
-  text-transform:uppercase;
+  gap:25px;
+  border:1px solid #fff;
+  border-radius:21px;
+  background:linear-gradient(120deg,#fffdf8,#eef8f7);
+  box-shadow:var(--ag-shadow);
 }
 
 .ag-kicker{
   display:inline-flex;
   align-items:center;
   gap:6px;
-  padding:8px 12px;
+  padding:7px 10px;
   border-radius:999px;
   background:#f5e8ef;
+  color:var(--ag-maroon);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.13em;
+  text-transform:uppercase;
 }
 
-.ag-hero h1{
-  margin:13px 0 7px;
+.ag-page-heading h1{
+  margin:10px 0 6px;
   font-family:Georgia,serif;
-  font-size:clamp(36px,4vw,58px);
-  line-height:.98;
-}
-
-.ag-hero p{
-  max-width:780px;
-  margin:0;
-  color:#5e5b69;
-  font-size:13px;
-  line-height:1.75;
-}
-
-.ag-hero-stat{
-  min-width:145px;
-  padding:22px;
-  border-radius:19px;
-  background:var(--ag-dark);
-  color:white;
-  text-align:center;
-}
-
-.ag-hero-stat strong{
-  display:block;
-  color:var(--ag-gold);
-  font-size:38px;
+  font-size:clamp(32px,4vw,48px);
   line-height:1;
 }
 
-.ag-hero-stat span{
-  display:block;
-  margin-top:8px;
-  color:#d8cbd5;
+.ag-page-heading p{
+  max-width:780px;
+  margin:0;
+  color:var(--ag-muted);
+  font-size:11px;
+  line-height:1.7;
+}
+
+.ag-settings-button{
+  min-height:41px;
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:0 13px;
+  border:1px solid var(--ag-border);
+  border-radius:10px;
+  background:#fff;
+  color:#4e4853;
   font-size:10px;
+  font-weight:900;
+}
+
+.ag-settings-button:hover{transform:translateY(-1px)}
+.ag-settings-button .rotate{transform:rotate(180deg)}
+
+.ag-settings-panel{
+  margin-top:15px;
+  padding:19px;
+  border:1px solid var(--ag-border);
+  border-radius:17px;
+  background:#fff;
+  box-shadow:var(--ag-shadow);
+}
+
+.ag-settings-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:13px;
+}
+
+.ag-settings-title h2{
+  margin:5px 0 0;
+  font-family:Georgia,serif;
+  font-size:20px;
+}
+
+.ag-settings-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.ag-setting-card{
+  padding:13px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border:1px solid var(--ag-border);
+  border-radius:12px;
+  background:var(--ag-soft);
+}
+
+.ag-setting-card span{
+  display:block;
+  color:#8a8189;
+  font-size:8px;
   font-weight:800;
   text-transform:uppercase;
   letter-spacing:.08em;
 }
 
-.ag-grid-two{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-  margin-top:20px;
+.ag-setting-card strong{
+  display:block;
+  max-width:260px;
+  margin-top:4px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:10px;
 }
 
-.ag-card{
-  margin-top:20px;
-  padding:25px;
+.ag-stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-top:15px;
+}
+
+.ag-stat-card{
+  min-height:82px;
+  padding:15px;
+  display:flex;
+  align-items:center;
+  gap:11px;
   border:1px solid var(--ag-border);
-  border-radius:22px;
-  background:var(--ag-card);
+  border-radius:14px;
+  background:#fff;
   box-shadow:var(--ag-shadow);
 }
 
-.ag-grid-two .ag-card{margin-top:0}
+.ag-stat-icon{
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:#f2e6ec;
+  color:#6d2845;
+}
+
+.ag-stat-card strong{
+  display:block;
+  font-family:Georgia,serif;
+  font-size:25px;
+  line-height:1;
+}
+
+.ag-stat-card span{
+  display:block;
+  margin-top:4px;
+  color:#88808a;
+  font-size:8px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+
+.ag-card{
+  margin-top:15px;
+  padding:22px;
+  border:1px solid var(--ag-border);
+  border-radius:19px;
+  background:#fff;
+  box-shadow:var(--ag-shadow);
+}
 
 .ag-card-head{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
-  gap:20px;
-  margin-bottom:19px;
+  gap:18px;
+  margin-bottom:17px;
 }
 
-.ag-wrap-head{align-items:flex-start}
+.ag-section-label{
+  color:var(--ag-maroon);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
 
 .ag-card-head h2{
-  margin:6px 0 0;
+  margin:5px 0 0;
   font-family:Georgia,serif;
-  font-size:25px;
+  font-size:24px;
 }
 
 .ag-card-head p{
-  margin:7px 0 0;
+  margin:6px 0 0;
   color:var(--ag-muted);
-  font-size:11px;
+  font-size:10px;
+  line-height:1.6;
+}
+
+.ag-upload-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:7px;
 }
 
 .ag-edit,
 .ag-small-button{
-  min-height:36px;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:0 11px;
-  border:1px solid var(--ag-border);
-  border-radius:10px;
-  background:white;
-  color:#4d4855;
-  font-size:11px;
-  font-weight:800;
-}
-
-.ag-edit:hover,.ag-small-button:hover{border-color:#c8b9b1;transform:translateY(-1px)}
-
-.ag-preview-dark{
-  min-height:235px;
-  padding:30px;
-  border-radius:18px;
-  overflow:hidden;
-  background:
-    radial-gradient(circle at 80% 20%,rgba(229,195,110,.2),transparent 24%),
-    linear-gradient(135deg,#21131f,#541d35);
-  color:white;
-}
-
-.ag-preview-dark small{
-  color:var(--ag-gold);
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:.16em;
-}
-
-.ag-preview-dark h3{
-  max-width:570px;
-  margin:13px 0;
-  font-family:Georgia,serif;
-  font-size:32px;
-  line-height:1.04;
-}
-
-.ag-preview-dark h3 em{
-  color:#e8c96f;
-  font-style:normal;
-}
-
-.ag-preview-dark p{
-  max-width:600px;
-  margin:0;
-  color:#eee0e6;
-  font-size:11px;
-  line-height:1.7;
-}
-
-.ag-preview-buttons{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:20px;
-}
-
-.ag-preview-buttons span{
-  padding:8px 11px;
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:999px;
-  color:white;
-  font-size:9px;
-  font-weight:800;
-}
-
-.ag-main-preview{
-  min-height:235px;
-  padding:30px;
-  border-radius:18px;
-  background:linear-gradient(145deg,#faf7f2,#f4edf0);
-  border:1px solid #eee5de;
-}
-
-.ag-main-preview span{
-  color:#8b6c2c;
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:.14em;
-}
-
-.ag-main-preview h3{
-  margin:13px 0 10px;
-  font-family:Georgia,serif;
-  font-size:32px;
-  line-height:1.05;
-}
-
-.ag-main-preview h3 em{
-  color:var(--ag-maroon-2);
-  font-style:normal;
-}
-
-.ag-main-preview p{
-  max-width:650px;
-  color:var(--ag-muted);
-  font-size:11px;
-  line-height:1.8;
-}
-
-.ag-category-tabs{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-bottom:19px;
-}
-
-.ag-category-tabs button,
-.ag-toolbar-left button{
-  min-height:38px;
-  padding:0 13px;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  border:1px solid var(--ag-border);
-  border-radius:10px;
-  background:#fff;
-  color:#625c67;
-  font-size:10px;
-  font-weight:900;
-  cursor:pointer;
-}
-
-.ag-category-tabs button.active,
-.ag-toolbar-left button.active{
-  background:var(--ag-dark);
-  border-color:var(--ag-dark);
-  color:white;
-}
-
-.ag-category-content{
-  padding:20px;
-  border-radius:17px;
-  background:#faf8f5;
-  border:1px solid #ece4dd;
-}
-
-.ag-category-info{
-  display:flex;
-  justify-content:space-between;
-  gap:20px;
-  padding-bottom:20px;
-  border-bottom:1px solid #e7ded6;
-}
-
-.ag-category-info h3{
-  margin:5px 0 6px;
-  font-family:Georgia,serif;
-  font-size:25px;
-}
-
-.ag-category-info p{
-  max-width:800px;
-  margin:0;
-  color:var(--ag-muted);
-  font-size:11px;
-  line-height:1.7;
-}
-
-.ag-category-actions{
-  display:flex;
-  align-items:flex-start;
-  gap:7px;
-}
-
-.ag-danger,
-.ag-danger-outline{
-  min-height:36px;
+  min-height:35px;
   display:inline-flex;
   align-items:center;
   justify-content:center;
   gap:6px;
-  padding:0 11px;
-  border-radius:10px;
+  padding:0 10px;
+  border:1px solid var(--ag-border);
+  border-radius:9px;
+  background:#fff;
+  color:#514b55;
+  font-size:9px;
+  font-weight:900;
+}
+
+.ag-edit:hover,.ag-small-button:hover{
+  border-color:#cbbdb5;
+  transform:translateY(-1px);
+}
+
+.ag-danger,
+.ag-danger-outline{
+  min-height:35px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 10px;
+  border-radius:9px;
   background:#fff1f1;
   color:var(--ag-danger);
   border:1px solid #f5d3d5;
-  font-size:10px;
+  font-size:9px;
   font-weight:900;
 }
 
 .ag-danger:hover,.ag-danger-outline:hover{background:#ffe7e8}
 
-.ag-sub-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-  margin:18px 0 10px;
+.ag-category-strip{
+  padding:3px 0 14px;
+  border-bottom:1px solid #eee6df;
 }
 
-.ag-sub-head div{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.ag-sub-head strong{font-size:12px}
-.ag-sub-head span{color:#948b93;font-size:10px}
-
-.ag-sub-list{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-}
-
-.ag-sub-list>button,
-.ag-sub-row>button{
-  min-height:57px;
-  padding:10px 12px;
-  text-align:left;
-  border:1px solid var(--ag-border);
-  border-radius:12px;
-  background:white;
-  cursor:pointer;
-}
-
-.ag-sub-list>button.selected,
-.ag-sub-row>button.selected{
-  border-color:#6e3150;
-  background:#f6edf2;
-}
-
-.ag-sub-list button span,
-.ag-sub-row button span{
-  display:block;
-  font-size:10px;
-  font-weight:900;
-  color:#37323b;
-}
-
-.ag-sub-list button small,
-.ag-sub-row button small{
-  display:block;
-  margin-top:4px;
-  color:#918891;
-  font-size:8px;
-}
-
-.ag-sub-row{
-  display:grid;
-  grid-template-columns:1fr 35px 35px;
-  gap:5px;
-}
-
-.ag-row-icon{
-  width:35px;
-  height:35px;
-  align-self:center;
-  display:grid;
-  place-items:center;
-  border:1px solid var(--ag-border);
-  border-radius:9px;
-  background:white;
-  color:#645c66;
-}
-
-.ag-row-icon:hover{background:#f6f2ee}
-.ag-row-icon.danger{color:var(--ag-danger)}
-
-.ag-upload-actions{
+.ag-category-list{
   display:flex;
   flex-wrap:wrap;
   gap:7px;
 }
 
-.ag-toolbar{
+.ag-category-list>button{
+  min-height:36px;
+  padding:0 11px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  border:1px solid var(--ag-border);
+  border-radius:9px;
+  background:#fff;
+  color:#625c67;
+  font:inherit;
+  font-size:9px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.ag-category-list>button span{
+  min-width:19px;
+  height:19px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:#f3ece8;
+  color:#8c7d7d;
+  font-size:8px;
+}
+
+.ag-category-list>button.active{
+  background:var(--ag-dark);
+  border-color:var(--ag-dark);
+  color:#fff;
+}
+
+.ag-category-list>button.active span{
+  background:rgba(255,255,255,.13);
+  color:#fff;
+}
+
+.ag-category-list .add-category-tab{
+  border-style:dashed;
+  color:var(--ag-maroon);
+}
+
+.ag-category-toolbar{
+  margin-top:14px;
+  padding:13px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:14px;
-  padding:13px;
-  margin-bottom:18px;
-  border:1px solid var(--ag-border);
+  gap:15px;
+  border:1px solid #e9e0d9;
   border-radius:13px;
   background:#faf8f5;
 }
 
-.ag-toolbar-left{
+.ag-category-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.ag-category-title-icon{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:#f0e1e8;
+  color:#6d2845;
+}
+
+.ag-category-title strong{
+  display:block;
+  font-family:Georgia,serif;
+  font-size:19px;
+}
+
+.ag-category-title span{
+  display:block;
+  margin-top:3px;
+  color:#91878e;
+  font-size:8px;
+}
+
+.ag-category-actions{
+  display:flex;
+  gap:6px;
+}
+
+.ag-category-description{
+  padding:13px 2px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.ag-category-description p{
+  max-width:900px;
+  margin:5px 0 0;
+  color:var(--ag-muted);
+  font-size:10px;
+  line-height:1.65;
+}
+
+.ag-subcategory-row{
+  padding:13px;
+  border:1px solid #eee5de;
+  border-radius:13px;
+  background:#faf8f5;
+}
+
+.ag-subcategory-label{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:9px;
+}
+
+.ag-subcategory-label strong{
+  font-size:9px;
+  color:#49434c;
+}
+
+.ag-subcategory-label button{
+  border:0;
+  background:transparent;
+  color:#6d2845;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font:inherit;
+  font-size:9px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.ag-subcategory-list{
   display:flex;
   flex-wrap:wrap;
   gap:6px;
 }
 
-.ag-toolbar-left button{
-  min-height:32px;
+.ag-subcategory-list>button,
+.ag-subcategory-item>button:first-child{
+  min-height:31px;
   padding:0 10px;
-  font-size:9px;
-}
-
-.ag-search{
-  width:min(300px,100%);
-  min-height:38px;
-  padding:0 12px;
   border:1px solid var(--ag-border);
-  border-radius:10px;
-  background:white;
-  outline:none;
+  border-radius:8px;
+  background:#fff;
+  color:#625c67;
   font:inherit;
-  font-size:11px;
+  font-size:8px;
+  font-weight:900;
+  cursor:pointer;
 }
 
-.ag-search:focus{border-color:#9c6a7f}
+.ag-subcategory-list>button.selected,
+.ag-subcategory-item>button:first-child.selected{
+  border-color:#6d2845;
+  background:#f2e5eb;
+  color:#64243f;
+}
+
+.ag-subcategory-item{
+  display:flex;
+  gap:3px;
+}
+
+.ag-subcategory-item>button:not(:first-child){
+  width:29px;
+  height:31px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--ag-border);
+  border-radius:8px;
+  background:#fff;
+  color:#6d626b;
+  cursor:pointer;
+}
+
+.ag-subcategory-item>button.danger{color:var(--ag-danger)}
+
+.ag-photo-toolbar{
+  margin:15px 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.ag-toolbar-selection{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.ag-select-all{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  color:#5e5861;
+  font-size:9px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.ag-select-all input{
+  width:15px;
+  height:15px;
+  accent-color:#672441;
+}
+
+.ag-selected-count{
+  padding:5px 8px;
+  border-radius:999px;
+  background:#f2e6ec;
+  color:#6d2845;
+  font-size:8px;
+  font-weight:900;
+}
+
+.ag-search-box{
+  width:min(310px,100%);
+  min-height:37px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:0 10px;
+  border:1px solid var(--ag-border);
+  border-radius:9px;
+  background:#fff;
+  color:#8d838a;
+}
+
+.ag-search-box input{
+  flex:1;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  font:inherit;
+  font-size:10px;
+}
+
+.ag-search-box button{
+  width:23px;
+  height:23px;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:6px;
+  background:#f2eeeb;
+  color:#777078;
+  cursor:pointer;
+}
 
 .ag-image-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:14px;
+  gap:13px;
 }
 
 .ag-image-card{
   position:relative;
   overflow:hidden;
   border:1px solid var(--ag-border);
-  border-radius:17px;
-  background:white;
+  border-radius:15px;
+  background:#fff;
   transition:.2s ease;
 }
 
 .ag-image-card:hover{
   transform:translateY(-2px);
-  box-shadow:0 14px 35px rgba(40,25,30,.09);
+  box-shadow:0 13px 30px rgba(40,25,30,.09);
 }
 
 .ag-image-card.hidden-card{opacity:.62}
@@ -2387,18 +2366,18 @@ const ADMIN_CSS = `
 .ag-image-check{
   position:absolute;
   z-index:3;
-  left:11px;
-  top:11px;
+  top:9px;
+  left:9px;
 }
 
 .ag-image-check input{
   width:17px;
   height:17px;
-  accent-color:#63213e;
+  accent-color:#672441;
 }
 
 .ag-image-preview{
-  height:225px;
+  height:205px;
   position:relative;
   overflow:hidden;
   background:#eae2da;
@@ -2411,25 +2390,17 @@ const ADMIN_CSS = `
   object-fit:cover;
 }
 
-.ag-no-image{
-  width:100%;
-  height:100%;
-  display:grid;
-  place-items:center;
-  color:#9e9289;
-}
-
 .ag-hidden-label{
   position:absolute;
-  right:10px;
-  top:10px;
+  right:9px;
+  top:9px;
   display:flex;
   align-items:center;
   gap:5px;
   padding:6px 8px;
   border-radius:999px;
-  background:#24131dcc;
-  color:white;
+  background:#24131ddd;
+  color:#fff;
   font-size:8px;
   font-weight:900;
 }
@@ -2440,245 +2411,209 @@ const ADMIN_CSS = `
   display:flex;
   align-items:flex-end;
   justify-content:center;
-  gap:7px;
-  padding:13px;
+  gap:6px;
+  padding:11px;
   opacity:0;
-  background:linear-gradient(transparent,rgba(20,10,18,.78));
+  background:linear-gradient(transparent,rgba(20,10,18,.8));
   transition:.2s ease;
 }
 
 .ag-image-card:hover .ag-image-overlay{opacity:1}
 
 .ag-overlay-button{
-  min-height:32px;
-  padding:0 10px;
+  min-height:31px;
+  padding:0 9px;
   display:inline-flex;
   align-items:center;
   gap:5px;
   border:1px solid rgba(255,255,255,.3);
-  border-radius:9px;
-  background:rgba(255,255,255,.94);
+  border-radius:8px;
+  background:rgba(255,255,255,.95);
   color:#291c24;
-  font-size:9px;
+  font:inherit;
+  font-size:8px;
   font-weight:900;
   cursor:pointer;
 }
 
-.ag-image-body{padding:15px}
+.ag-image-body{padding:13px}
 
 .ag-image-tags{
+  min-height:19px;
   display:flex;
   flex-wrap:wrap;
-  gap:5px;
+  gap:4px;
 }
 
 .ag-image-tags span{
-  padding:5px 7px;
+  padding:4px 6px;
   border-radius:999px;
   background:#f2e8ee;
   color:#6e3450;
-  font-size:8px;
+  font-size:7px;
   font-weight:900;
 }
 
 .ag-image-body h3{
-  margin:9px 0 5px;
+  margin:8px 0 4px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
   font-family:Georgia,serif;
-  font-size:18px;
-  line-height:1.12;
+  font-size:16px;
 }
 
 .ag-image-body p{
-  min-height:34px;
+  height:32px;
+  overflow:hidden;
   margin:0;
   color:var(--ag-muted);
-  font-size:10px;
+  font-size:9px;
   line-height:1.6;
 }
 
 .ag-image-meta{
+  margin-top:11px;
+  padding-top:9px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:8px;
-  margin-top:13px;
-  padding-top:10px;
   border-top:1px solid #eee6df;
 }
 
 .ag-image-meta small{
   color:#958b91;
-  font-size:8px;
+  font-size:7px;
   font-weight:800;
 }
 
-.ag-image-meta div{
+.ag-card-actions{
   display:flex;
   gap:4px;
 }
 
-.ag-image-meta button,
-.ag-achievement-actions button{
-  width:30px;
-  height:30px;
+.ag-card-actions button{
+  width:29px;
+  height:29px;
   display:grid;
   place-items:center;
   border:1px solid var(--ag-border);
-  border-radius:8px;
-  background:white;
+  border-radius:7px;
+  background:#fff;
   color:#5d5660;
   cursor:pointer;
 }
 
-.ag-image-meta button:hover,
-.ag-achievement-actions button:hover{background:#f5f1ed}
-
-.ag-image-meta button.danger,
-.ag-achievement-actions button.danger{color:var(--ag-danger)}
+.ag-card-actions button:hover{background:#f5f1ed}
+.ag-card-actions button.danger{color:var(--ag-danger)}
 
 .ag-empty{
-  padding:65px 20px;
+  padding:55px 20px;
   text-align:center;
   border:1px dashed #d7ccc4;
-  border-radius:17px;
+  border-radius:15px;
   color:#988e95;
 }
 
+.ag-empty-icon{
+  width:54px;
+  height:54px;
+  margin:0 auto;
+  display:grid;
+  place-items:center;
+  border-radius:15px;
+  background:#f3ebe7;
+  color:#8e7c82;
+}
+
 .ag-empty h3{
-  margin:10px 0 5px;
+  margin:10px 0 4px;
   color:#3c3540;
   font-family:Georgia,serif;
+  font-size:20px;
 }
 
 .ag-empty p{
-  max-width:520px;
-  margin:0 auto 16px;
-  font-size:10px;
+  max-width:500px;
+  margin:0 auto 15px;
+  font-size:9px;
   line-height:1.6;
 }
 
-.ag-achievement-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
-}
-
-.ag-achievement-card{
+.ag-bottom-card{
   display:flex;
   align-items:center;
-  gap:10px;
-  padding:14px;
-  border:1px solid var(--ag-border);
-  border-radius:14px;
-  background:#faf8f5;
+  justify-content:space-between;
+  gap:20px;
 }
 
-.ag-achievement-card.hidden-card{opacity:.55}
-
-.ag-achievement-icon{
-  width:43px;
-  height:43px;
-  flex:0 0 43px;
-  display:grid;
-  place-items:center;
-  border-radius:12px;
-  background:#f1e2e8;
-  color:#712947;
-}
-
-.ag-achievement-copy{
-  flex:1;
-  min-width:0;
-}
-
-.ag-achievement-copy span{
-  color:#9a762d;
-  font-size:8px;
-  font-weight:900;
-}
-
-.ag-achievement-copy h3{
-  margin:3px 0 0;
-  font-size:11px;
-  line-height:1.3;
-}
-
-.ag-achievement-actions{
-  display:flex;
-  gap:3px;
-}
-
-.ag-bottom-preview{
-  padding:28px;
-  text-align:center;
-  border-radius:18px;
-  color:white;
-  background:linear-gradient(135deg,#291321,#682641);
-}
-
-.ag-bottom-preview strong{
-  display:block;
+.ag-bottom-card h2{
+  margin:5px 0;
   font-family:Georgia,serif;
-  font-size:30px;
+  font-size:23px;
 }
 
-.ag-bottom-preview p{
-  margin:8px auto;
-  color:#f4e8ed;
-  font-size:11px;
-}
-
-.ag-bottom-preview small{
-  color:#e6c875;
-  font-size:9px;
-  font-weight:800;
+.ag-bottom-card p{
+  margin:0;
+  color:var(--ag-muted);
+  font-size:10px;
 }
 
 .ag-save-bar{
   position:sticky;
-  bottom:16px;
+  bottom:14px;
   z-index:20;
-  margin-top:22px;
-  padding:15px 18px;
+  margin-top:18px;
+  padding:13px 16px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:18px;
-  border:1px solid rgba(255,255,255,.7);
-  border-radius:17px;
-  background:rgba(255,255,255,.94);
-  box-shadow:0 18px 50px rgba(30,20,25,.14);
+  gap:15px;
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:14px;
+  background:rgba(255,255,255,.95);
+  box-shadow:0 17px 45px rgba(30,20,25,.14);
   backdrop-filter:blur(14px);
 }
 
-.ag-save-bar strong{display:block;font-size:12px}
-.ag-save-bar span{display:block;margin-top:3px;color:#8a8188;font-size:9px}
+.ag-save-bar strong{
+  display:block;
+  font-size:10px;
+}
+
+.ag-save-bar span{
+  display:block;
+  margin-top:3px;
+  color:#8a8188;
+  font-size:8px;
+}
 
 .ag-notice{
   position:fixed;
   z-index:100;
-  right:20px;
-  top:90px;
-  max-width:420px;
-  padding:12px 14px;
+  right:18px;
+  top:88px;
+  max-width:410px;
+  padding:11px 13px;
   display:flex;
   align-items:center;
-  gap:9px;
-  border-radius:12px;
-  color:white;
+  gap:8px;
+  border-radius:11px;
+  color:#fff;
   background:#24131f;
   box-shadow:0 15px 40px rgba(0,0,0,.18);
-  font-size:11px;
+  font-size:10px;
   font-weight:700;
 }
 
 .ag-notice>div{
-  width:28px;
-  height:28px;
-  flex:0 0 28px;
+  width:26px;
+  height:26px;
+  flex:0 0 26px;
   display:grid;
   place-items:center;
-  border-radius:8px;
+  border-radius:7px;
   background:rgba(255,255,255,.12);
 }
 
@@ -2688,28 +2623,28 @@ const ADMIN_CSS = `
   position:fixed;
   inset:0;
   z-index:200;
-  padding:20px;
+  padding:18px;
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:auto;
   background:rgba(20,10,18,.72);
-  backdrop-filter:blur(9px);
+  backdrop-filter:blur(8px);
 }
 
 .ag-modal{
-  width:min(720px,100%);
-  max-height:min(88vh,850px);
+  width:min(680px,100%);
+  max-height:88vh;
   display:flex;
   flex-direction:column;
   overflow:hidden;
-  border-radius:20px;
-  background:white;
+  border-radius:18px;
+  background:#fff;
   box-shadow:0 35px 100px rgba(0,0,0,.3);
 }
 
 .ag-modal-head{
-  padding:20px 22px;
+  padding:19px 21px;
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
@@ -2728,49 +2663,64 @@ const ADMIN_CSS = `
 .ag-modal-head h2{
   margin:5px 0 0;
   font-family:Georgia,serif;
-  font-size:25px;
+  font-size:23px;
 }
 
 .ag-modal-head p{
   margin:5px 0 0;
   color:#88808a;
-  font-size:10px;
+  font-size:9px;
 }
 
 .ag-icon-button{
-  width:35px;
-  height:35px;
+  width:34px;
+  height:34px;
   display:grid;
   place-items:center;
-  border-radius:9px;
+  border-radius:8px;
   background:#f5f1ed;
   color:#5b535c;
 }
 
 .ag-modal-body{
-  padding:22px;
+  padding:20px 21px;
   overflow:auto;
 }
 
 .ag-modal-foot{
-  padding:14px 22px;
+  padding:13px 21px;
   display:flex;
   justify-content:flex-end;
-  gap:8px;
+  gap:7px;
   border-top:1px solid #eee6df;
   background:#faf8f5;
 }
 
+.ag-secondary{
+  min-height:39px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 13px;
+  border:1px solid var(--ag-border);
+  border-radius:9px;
+  background:#fff;
+  color:#4e4a56;
+  font-size:10px;
+  font-weight:800;
+}
+
 .ag-field{
   display:block;
-  margin-bottom:16px;
+  margin-bottom:15px;
 }
 
 .ag-field>span{
   display:block;
-  margin-bottom:6px;
+  margin-bottom:5px;
   color:#4a4450;
-  font-size:10px;
+  font-size:9px;
   font-weight:900;
 }
 
@@ -2779,127 +2729,81 @@ const ADMIN_CSS = `
 .ag-field select{
   width:100%;
   border:1px solid #ddd4cd;
-  border-radius:10px;
+  border-radius:9px;
   outline:none;
-  background:white;
+  background:#fff;
   color:#27222b;
   font:inherit;
-  font-size:11px;
+  font-size:10px;
 }
 
 .ag-field input,
 .ag-field select{
-  min-height:42px;
-  padding:0 11px;
+  min-height:41px;
+  padding:0 10px;
 }
 
 .ag-field textarea{
-  min-height:100px;
-  padding:11px;
+  min-height:92px;
+  padding:10px;
   resize:vertical;
   line-height:1.6;
 }
 
 .ag-field input:focus,
 .ag-field textarea:focus,
-.ag-field select:focus{border-color:#8b5169;box-shadow:0 0 0 3px #8b516915}
+.ag-field select:focus{
+  border-color:#8b5169;
+  box-shadow:0 0 0 3px #8b516915;
+}
 
 .ag-select-wrap{position:relative}
-.ag-select-wrap select{appearance:none;padding-right:34px}
-.ag-select-wrap svg{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:#847b83}
+.ag-select-wrap select{appearance:none;padding-right:32px}
+.ag-select-wrap svg{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
+  color:#847b83;
+}
 
 .ag-check-field{
   display:flex;
   align-items:center;
   gap:8px;
-  padding:11px;
+  padding:10px;
   border:1px solid #e8dfd8;
-  border-radius:10px;
+  border-radius:9px;
   background:#faf8f5;
-  font-size:10px;
+  font-size:9px;
   font-weight:700;
 }
 
 .ag-check-field input{
-  width:16px;
-  height:16px;
+  width:15px;
+  height:15px;
   accent-color:#672441;
-}
-
-.ag-modal-subtitle-row{
-  display:flex;
-  justify-content:space-between;
-  margin:18px 0 8px;
-  color:#4a4450;
-  font-size:10px;
-}
-
-.ag-modal-subtitle-row span{
-  width:23px;
-  height:23px;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-  background:#f2e8ed;
-  color:#6d2846;
-  font-size:9px;
-  font-weight:900;
-}
-
-.ag-modal-subcategories{
-  display:grid;
-  gap:7px;
-}
-
-.ag-modal-subcategory{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px;
-  border:1px solid #e6ddd6;
-  border-radius:10px;
-}
-
-.ag-modal-subcategory strong{
-  display:block;
-  font-size:10px;
-}
-
-.ag-modal-subcategory small{
-  display:block;
-  margin-top:3px;
-  color:#938a91;
-  font-size:8px;
-}
-
-.ag-modal-empty{
-  padding:20px;
-  text-align:center;
-  color:#958b92;
-  border:1px dashed #ddd2ca;
-  border-radius:10px;
-  font-size:9px;
 }
 
 .ag-edit-image{
   display:flex;
   align-items:center;
-  gap:12px;
-  padding:10px;
-  margin-bottom:17px;
+  gap:11px;
+  padding:9px;
+  margin-bottom:15px;
   border:1px solid #e8dfd8;
-  border-radius:12px;
+  border-radius:10px;
   background:#faf8f5;
 }
 
 .ag-edit-image-preview{
-  width:80px;
-  height:58px;
+  width:75px;
+  height:54px;
   display:grid;
   place-items:center;
   overflow:hidden;
-  border-radius:8px;
+  border-radius:7px;
   background:#e8dfd8;
   color:#988d93;
 }
@@ -2912,7 +2816,7 @@ const ADMIN_CSS = `
 
 .ag-edit-image strong{
   display:block;
-  font-size:11px;
+  font-size:10px;
 }
 
 .ag-edit-image small{
@@ -2927,14 +2831,14 @@ const ADMIN_CSS = `
   display:grid;
   place-items:center;
   align-content:center;
-  gap:12px;
+  gap:11px;
   background:var(--ag-bg);
   color:#4f4851;
 }
 
 .ag-spinner{
-  width:38px;
-  height:38px;
+  width:36px;
+  height:36px;
   border:4px solid #ddd2ca;
   border-top-color:#6a2847;
   border-radius:50%;
@@ -2945,55 +2849,34 @@ const ADMIN_CSS = `
 
 @media(max-width:1100px){
   .ag-image-grid{grid-template-columns:repeat(2,1fr)}
-  .ag-achievement-grid{grid-template-columns:repeat(2,1fr)}
-  .ag-sub-list{grid-template-columns:1fr 1fr}
+  .ag-stat-grid{grid-template-columns:repeat(2,1fr)}
+  .ag-settings-grid{grid-template-columns:1fr}
 }
 
 @media(max-width:850px){
-  .ag-grid-two{grid-template-columns:1fr}
-  .ag-topbar-inner{flex-wrap:wrap;padding:10px 0}
-  .ag-brand{order:-1;flex-basis:100%}
-  .ag-top-actions{margin-left:auto}
-  .ag-hero{align-items:flex-start;flex-direction:column}
-  .ag-category-info{flex-direction:column}
-}
-
-/* ============================================================
-   MOBILE ADMIN GALLERY
-   Keep the existing AdminDashboard mobile sidebar/header visible.
-   Only the Gallery action buttons are adjusted below for small screens.
-   ============================================================ */
-@media(max-width:650px){
-  /* Keep the AdminDashboard mobile sidebar above Gallery content when it is open. */
-  .ag-topbar{
-    z-index:20;
-  }
-
-  .ag-container,.ag-topbar-inner{width:min(100% - 20px,1440px)}
-  .ag-card{padding:17px}
-  .ag-hero{padding:25px 20px}
-  .ag-image-grid{grid-template-columns:1fr}
-  .ag-achievement-grid{grid-template-columns:1fr}
-  .ag-sub-list{grid-template-columns:1fr}
-  .ag-toolbar{align-items:stretch;flex-direction:column}
-  .ag-search{width:100%}
-
-  /* Mobile-only: keep View Gallery and Save Changes stacked and tappable. */
-  .ag-top-actions{
-    width:100%;
-    display:grid;
-    grid-template-columns:1fr;
-    gap:8px;
-  }
-
-  .ag-top-actions > *{
-    width:100%;
-    min-width:0;
-    flex:none;
-  }
-
+  .ag-page-heading{align-items:flex-start;flex-direction:column}
+  .ag-category-toolbar,.ag-bottom-card{align-items:flex-start;flex-direction:column}
   .ag-category-actions{width:100%}
   .ag-category-actions>*{flex:1}
+}
+
+@media(max-width:650px){
+  .ag-container,.ag-topbar-inner{width:min(100% - 20px,1440px)}
+  .ag-topbar-inner{min-height:auto;padding:9px 0;flex-wrap:wrap}
+  .ag-brand{order:-1;flex-basis:100%}
+  .ag-top-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .ag-top-actions>*{width:100%}
+  .ag-page-heading{padding:22px 19px}
+  .ag-card{padding:16px}
+  .ag-card-head{flex-direction:column}
+  .ag-upload-actions{width:100%}
+  .ag-upload-actions>*{flex:1}
+  .ag-stat-grid{grid-template-columns:1fr 1fr}
+  .ag-image-grid{grid-template-columns:1fr}
+  .ag-category-description{align-items:flex-start;flex-direction:column}
+  .ag-category-description .ag-small-button{width:100%}
+  .ag-photo-toolbar{align-items:stretch;flex-direction:column}
+  .ag-search-box{width:100%}
   .ag-save-bar{align-items:stretch;flex-direction:column}
   .ag-save-bar .ag-primary{width:100%}
 }

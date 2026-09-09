@@ -8,9 +8,24 @@ import {
   MapPin,
   Pencil,
   Plus,
-  Sparkles,
   Trash2,
   X,
+  School,
+  Monitor,
+  FlaskConical,
+  Library,
+  Trophy,
+  Palette,
+  Presentation,
+  BusFront,
+  ShieldCheck,
+  Sparkles,
+  HeartHandshake,
+  Lightbulb,
+  Brain,
+  Users,
+  HandHeart,
+  Mic2,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------
@@ -43,38 +58,43 @@ const facilityTints = [
 // ---------------------------------------------------------------------
 // Default content
 // ---------------------------------------------------------------------
+export const FACILITIES_CONTENT_VERSION = 2;
+
 export const defaultFacilitiesContent = {
+  facilitiesVersion: FACILITIES_CONTENT_VERSION,
   badgeText: "Our School",
-  title: "Spaces Built For How Students Actually Learn",
-  highlightedText: "Learn",
+  title: "Creating an environment where students can learn, explore, create, and grow.",
+  highlightedText: "learn",
   subtitle:
-    "Red Rose Boarding School provides modern facilities that create an engaging, practical, and technology-driven learning environment for every student.",
+    "At Red Rose English Boarding School, we strive to provide a safe, supportive, and stimulating learning environment where students can develop academically, physically, socially, and creatively. Our facilities are designed to complement classroom learning and encourage students to explore their interests and talents.",
   learnMoreText: "Learn More",
   highlightsTitle: "Facility Highlights",
 
-  // Editable intro section
-  introBadge: "Life Beyond The Classroom",
-  introTitle: "Places that make learning feel real.",
+  introBadge: "School Facilities",
+  introTitle: "Spaces where learning comes to life.",
   introHighlightedText: "learning",
   introDescription:
-    "Our School is designed as more than a collection of rooms. Each space gives students an opportunity to read, experiment, create, perform, travel safely, stay active, and discover the confidence that comes from doing things for themselves.",
+    "Our facilities are more than buildings and equipment. They are spaces where learning comes to life. We continually work to improve our learning environment and provide students with opportunities to learn through experience, technology, creativity, collaboration, and participation.",
 
-  // Editable Facility Highlights section heading
-  sectionKicker: "Explore Our School",
-  sectionTitle: "Facility Highlights",
-  sectionHighlightedText: "Highlights",
+  sectionKicker: "Our Key Facilities",
+  sectionTitle: "Facilities Designed For Student Growth",
+  sectionHighlightedText: "Student Growth",
   sectionSubtitle:
-    "Explore the spaces and services that support the academic, creative, physical, and social development of our students.",
+    "Explore the facilities, learning opportunities, and supportive spaces that help our students learn, grow, create, communicate, and participate with confidence.",
+
+  approachTitle: "Our Approach",
+  approachDescription:
+    "Facilities are more than buildings and equipment—they are spaces where learning comes to life. We continually work to improve our learning environment and provide students with opportunities to learn through experience, technology, creativity, collaboration, and participation.",
 
   facilities: [
     {
       id: 1,
-      title: "Digital Library",
-      category: "Knowledge Hub",
+      title: "Modern Classrooms",
+      category: "Learning Spaces",
       description:
-        "A quiet, well-stocked reading room alongside e-books, journals, and research databases students can reach from any classroom.",
+        "Bright, comfortable, and learning-focused classrooms that support interactive teaching and active participation.",
       details:
-        "Students can browse physical shelves or sign into digital collections — e-books, academic journals, reference databases, and curated learning platforms — all from a single login.",
+        "The classrooms provide a comfortable and supportive setting for everyday learning, encouraging students to participate actively, interact with lessons, and develop their understanding with confidence.",
       imageUrl: "",
       imageZoom: 1,
       imageOffsetX: 0,
@@ -84,12 +104,12 @@ export const defaultFacilitiesContent = {
     },
     {
       id: 2,
-      title: "Tech Lab",
-      category: "Innovation",
+      title: "Computer & ICT Facilities",
+      category: "Technology & Digital Learning",
       description:
-        "A 40-seat computer lab where students get hands-on with the software and skills their exams — and future jobs — will actually ask for.",
+        "Technology-supported learning spaces that help students develop essential digital skills.",
       details:
-        "40+ networked computers, programming environments, office software, and multimedia tools, with a teacher-led session every week from Grade 6 upward.",
+        "The computer and ICT facilities give students opportunities to use technology as part of their learning and build practical digital skills needed for study and everyday life.",
       imageUrl: "",
       imageZoom: 1,
       imageOffsetX: 0,
@@ -99,12 +119,12 @@ export const defaultFacilitiesContent = {
     },
     {
       id: 3,
-      title: "Science Center",
-      category: "Discovery",
+      title: "Science Laboratory",
+      category: "Practical Learning",
       description:
-        "Separate Physics, Chemistry, and Biology labs where the textbook diagram finally becomes something a student can hold.",
+        "Practical learning facilities where students can observe, experiment, and connect theoretical knowledge with real-world applications.",
       details:
-        "Fully equipped, separately ventilated labs for each science stream, with safety gear, demonstration benches, and enough apparatus for every student to run their own experiment — not just watch one.",
+        "The science laboratory allows students to observe scientific processes, carry out experiments, and connect what they learn in class with practical and real-world applications.",
       imageUrl: "",
       imageZoom: 1,
       imageOffsetX: 0,
@@ -114,43 +134,27 @@ export const defaultFacilitiesContent = {
     },
     {
       id: 4,
-      title: "School Transport",
-      category: "Safety & Comfort",
+      title: "Library & Reading Resources",
+      category: "Knowledge & Reading",
       description:
-        "Monitored bus routes across Hetauda, so getting to school safely isn't something a family has to solve on their own.",
+        "A learning space that encourages reading, research, independent learning, and intellectual curiosity.",
       details:
-        "Red Rose Boarding School provides safe transportation with experienced drivers, route management, student safety monitoring, and comfortable buses for daily travel.",
+        "The library and reading resources provide students with a dedicated space to read, research, study independently, explore information, and develop intellectual curiosity.",
       imageUrl: "",
       imageZoom: 1,
       imageOffsetX: 0,
       imageOffsetY: 0,
       visible: true,
       color: "#8B5CF6",
-      busRoutes: [
-        {
-          id: 1,
-          name: "Route 1",
-          from: "Hetauda – New Bus Park",
-          to: "School School",
-          stops: ["New Bus Park", "Chandranagar", "Bhanu Chowk", "School School"],
-        },
-        {
-          id: 2,
-          name: "Route 2",
-          from: "Hetauda – Old Bus Park",
-          to: "School School",
-          stops: ["Old Bus Park", "Milan Chowk", "Bishnupur", "School School"],
-        },
-      ],
     },
     {
       id: 5,
-      title: "Performance Hall",
-      category: "Arts & Culture",
+      title: "Sports & Recreation",
+      category: "Fitness & Recreation",
       description:
-        "A full auditorium for assemblies, cultural programs, and the kind of stage time that builds confidence a classroom can't.",
+        "Facilities and spaces that encourage physical fitness, teamwork, discipline, and healthy competition.",
       details:
-        "Tiered seating, a proper sound and lighting rig, and a stage large enough for full-school assemblies, exhibitions, and end-of-year cultural programs.",
+        "Sports and recreation facilities encourage students to stay physically active while developing teamwork, discipline, cooperation, confidence, and a healthy sense of competition.",
       imageUrl: "",
       imageZoom: 1,
       imageOffsetX: 0,
@@ -160,12 +164,194 @@ export const defaultFacilitiesContent = {
     },
     {
       id: 6,
-      title: "Sports Complex",
-      category: "Fitness & Wellness",
+      title: "Creative & Cultural Activities",
+      category: "Arts & Culture",
       description:
-        "Open playgrounds and indoor courts where football, basketball, and volleyball teams train under proper coaching.",
+        "Opportunities and spaces for art, music, cultural activities, performances, and creative expression.",
       details:
-        "A full-size outdoor ground plus an indoor court, used for daily PE periods, house tournaments, and after-school training ahead of zonal and district competitions.",
+        "Students have opportunities to explore art, music, cultural activities, performances, and creative expression while discovering and developing their individual talents.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: palette.primary,
+    },
+    {
+      id: 7,
+      title: "Multipurpose Spaces",
+      category: "School Events",
+      description:
+        "Suitable spaces for assemblies, presentations, workshops, competitions, celebrations, and school events.",
+      details:
+        "Multipurpose spaces provide flexible venues for assemblies, presentations, workshops, competitions, celebrations, and other activities that bring the school community together.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: palette.secondary,
+    },
+    {
+      id: 8,
+      title: "Transportation",
+      category: "Safety & Convenience",
+      description:
+        "School transportation designed to support convenient and organized student travel.",
+      details:
+        "The school's transportation service is designed to support convenient and organized student travel and make daily journeys to and from school easier for students and families.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: palette.accent2,
+      // Official Bus Route-2083 routes supplied by the school.
+      // These are defaults only: routes added/edited from Admin are preserved.
+      busRoutes: [
+        {
+          id: "bus-1",
+          name: "Bus 1",
+          from: "School",
+          to: "Ghyampe",
+          stops: ["Ghyampe", "Sano Gangate"],
+        },
+        {
+          id: "bus-2",
+          name: "Bus 2",
+          from: "School",
+          to: "Buddha Chowk",
+          stops: ["Buddha Chowk", "Gairi Gaun"],
+        },
+        {
+          id: "bus-3",
+          name: "Bus 3",
+          from: "School",
+          to: "Jatey",
+          stops: ["Jatey", "Panesh"],
+        },
+        {
+          id: "bus-4",
+          name: "Bus 4",
+          from: "School",
+          to: "Hatilet",
+          stops: ["Hatilet", "Jarung"],
+        },
+      ],
+    },
+    {
+      id: 9,
+      title: "Safety & Security",
+      category: "Student Safety",
+      description:
+        "A secure school environment with appropriate safety measures to ensure students can learn with confidence.",
+      details:
+        "Safety and security are an important part of school life, with appropriate measures intended to provide students with a secure, supportive, and confident learning environment.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: "#8B5CF6",
+    },
+    {
+      id: 10,
+      title: "Clean & Hygienic Environment",
+      category: "Health & Wellbeing",
+      description:
+        "Well-maintained facilities that promote cleanliness, hygiene, and student well-being.",
+      details:
+        "A clean and hygienic environment helps maintain student wellbeing and provides comfortable, well-maintained spaces for learning and daily school activities.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: "#14B8A6",
+    },
+    {
+      id: 11,
+      title: "Child-Friendly Environment",
+      category: "Student Wellbeing",
+      description:
+        "A safe, caring, welcoming, and supportive atmosphere where every child feels respected, valued, and comfortable expressing themselves.",
+      details:
+        "The school aims to provide a safe and caring atmosphere where every child feels respected and valued and can express themselves comfortably and confidently.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: palette.primary,
+    },
+    {
+      id: 12,
+      title: "Activity-Based Learning",
+      category: "Learning Approach",
+      description:
+        "Learning through activities, experiments, projects, games, discussions, and practical experiences to make education engaging and meaningful.",
+      details:
+        "Activity-based learning allows students to learn through participation, experiments, projects, games, discussions, and practical experiences, making education more engaging and meaningful.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: palette.secondary,
+    },
+    {
+      id: 13,
+      title: "Critical Thinking & Problem Solving",
+      category: "Skills Development",
+      description:
+        "Classroom practices that encourage students to ask questions, analyze situations, find solutions, and think independently.",
+      details:
+        "Students are encouraged to ask questions, analyze situations, explore solutions, and think independently so they can approach challenges thoughtfully.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: palette.accent2,
+    },
+    {
+      id: 14,
+      title: "Collaborative Learning",
+      category: "Team Learning",
+      description:
+        "Group activities and peer interaction that develop communication, cooperation, leadership, and interpersonal skills.",
+      details:
+        "Collaborative learning gives students opportunities to work together, share ideas, communicate clearly, cooperate on tasks, and develop leadership and interpersonal skills.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: "#8B5CF6",
+    },
+    {
+      id: 15,
+      title: "Values-Based Education",
+      category: "Character & Values",
+      description:
+        "Emphasis on discipline, responsibility, respect, kindness, honesty, and other values that contribute to responsible citizenship.",
+      details:
+        "Values-based education emphasizes discipline, responsibility, respect, kindness, honesty, and other positive values that help students develop responsible and respectful character.",
+      imageUrl: "",
+      imageZoom: 1,
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      visible: true,
+      color: "#14B8A6",
+    },
+    {
+      id: 16,
+      title: "Presentation & Communication Opportunities",
+      category: "Confidence & Communication",
+      description:
+        "Activities that help students build confidence, communication skills, leadership, and public-speaking abilities.",
+      details:
+        "Students receive opportunities to present ideas, communicate with others, build confidence, develop leadership skills, and become more comfortable with public speaking.",
       imageUrl: "",
       imageZoom: 1,
       imageOffsetX: 0,
@@ -201,26 +387,117 @@ function getFacilityImageStyle(facility = {}) {
   };
 }
 
-function normalizeFacilities(facilities) {
-  if (!Array.isArray(facilities)) return defaultFacilitiesContent.facilities;
-  return facilities.map((facility, index) => ({
-    ...(defaultFacilitiesContent.facilities[index] || {}),
-    ...facility,
-    id: facility.id || Date.now() + index,
-    imageZoom: clampNumber(facility.imageZoom, 1, 3, 1),
-    imageOffsetX: clampNumber(facility.imageOffsetX, -60, 60, 0),
-    imageOffsetY: clampNumber(facility.imageOffsetY, -60, 60, 0),
-    visible: facility.visible !== false,
-    busRoutes: facility.busRoutes || [],
-    color: facility.color || facilityTints[index % facilityTints.length],
-  }));
+function isTransportationFacility(facility = {}) {
+  const title = String(facility?.title || "").trim().toLowerCase();
+
+  return (
+    title === "transportation" ||
+    title === "school transport" ||
+    title === "transport"
+  );
 }
 
-export function mergeFacilitiesContent(saved = {}) {
+function getDefaultTransportationRoutes() {
+  const transportation = defaultFacilitiesContent.facilities.find(
+    (facility) => facility.title === "Transportation"
+  );
+
+  return Array.isArray(transportation?.busRoutes)
+    ? transportation.busRoutes
+    : [];
+}
+
+function normalizeBusRoutes(routes) {
+  if (!Array.isArray(routes)) return [];
+
+  return routes
+    .filter(Boolean)
+    .map((route, index) => ({
+      id: route?.id ?? `bus-${index + 1}`,
+      name: String(route?.name || `Bus ${index + 1}`),
+      from: String(route?.from || ""),
+      to: String(route?.to || ""),
+      stops: Array.isArray(route?.stops)
+        ? route.stops.filter(Boolean).map((stop) => String(stop))
+        : [],
+    }));
+}
+
+function normalizeFacilities(facilities, options = {}) {
+  const savedList = Array.isArray(facilities) ? facilities : [];
+  const isCurrentVersion = options.isCurrentVersion !== false;
+
+  // IMPORTANT:
+  // - Current saved facilities are used exactly as saved.
+  // - We do NOT map old records onto the new defaults. That was the reason
+  //   deleted/old facilities could appear again.
+  // - Old/legacy facility content is replaced by the new school content only
+  //   when the stored content has not been migrated to version 2.
+  const sourceList =
+    isCurrentVersion && savedList.length > 0
+      ? savedList
+      : defaultFacilitiesContent.facilities;
+
+  const normalizedList = sourceList.map((facility, index) => {
+    const fallback = defaultFacilitiesContent.facilities.find(
+      (item) =>
+        String(item?.title || "").trim().toLowerCase() ===
+        String(facility?.title || "").trim().toLowerCase()
+    ) || defaultFacilitiesContent.facilities[index % defaultFacilitiesContent.facilities.length];
+
+    return {
+      ...fallback,
+      ...(facility || {}),
+      id: facility?.id ?? fallback.id ?? `facility-${index + 1}`,
+      title: String(facility?.title || fallback.title),
+      category: String(facility?.category || fallback.category),
+      description: String(facility?.description || fallback.description),
+      details: String(facility?.details || fallback.details),
+      imageUrl: "",
+      imageZoom: clampNumber(facility?.imageZoom, 1, 3, 1),
+      imageOffsetX: clampNumber(facility?.imageOffsetX, -60, 60, 0),
+      imageOffsetY: clampNumber(facility?.imageOffsetY, -60, 60, 0),
+      visible: facility?.visible !== false,
+      busRoutes: Array.isArray(facility?.busRoutes) ? facility.busRoutes : [],
+      color:
+        facility?.color ||
+        fallback?.color ||
+        facilityTints[index % facilityTints.length],
+      busRoutes: isTransportationFacility(facility)
+        ? normalizeBusRoutes(
+            Array.isArray(facility?.busRoutes) && facility.busRoutes.length > 0
+              ? facility.busRoutes
+              : fallback?.busRoutes?.length
+                ? fallback.busRoutes
+                : getDefaultTransportationRoutes()
+          )
+        : [],
+    };
+  });
+
+  return normalizedList;
+}
+
+export function mergeFacilitiesContent(saved = {}, options = {}) {
+  const raw = saved || {};
+  const currentVersion =
+    Number(raw.facilitiesVersion) === FACILITIES_CONTENT_VERSION;
+
+  const useSavedFacilities =
+    options.forceDefaults !== true && currentVersion && Array.isArray(raw.facilities);
+
   return {
     ...defaultFacilitiesContent,
-    ...(saved || {}),
-    facilities: normalizeFacilities(saved.facilities),
+    ...raw,
+    facilitiesVersion: FACILITIES_CONTENT_VERSION,
+    facilities: normalizeFacilities(
+      useSavedFacilities ? raw.facilities : defaultFacilitiesContent.facilities,
+      { isCurrentVersion: useSavedFacilities }
+    ),
+    approachTitle:
+      raw?.approachTitle || defaultFacilitiesContent.approachTitle,
+    approachDescription:
+      raw?.approachDescription || defaultFacilitiesContent.approachDescription,
   };
 }
 
@@ -415,18 +692,62 @@ function DecorativeBackdrop() {
   );
 }
 
-function FacilityVisual({ facility, tint }) {
-  if (facility.imageUrl) {
-    return <img src={facility.imageUrl} alt={facility.title} style={getFacilityImageStyle(facility)} />;
-  }
+function FacilityVisual({ facility, tint, displayNumber }) {
+  const visualMap = {
+    "Modern Classrooms": { Icon: School, word: "LEARNING", accent: "#D7AD55" },
+    "Computer & ICT Facilities": { Icon: Monitor, word: "ICT & DIGITAL", accent: "#8FC7A6" },
+    "Science Laboratory": { Icon: FlaskConical, word: "DISCOVER", accent: "#F0C878" },
+    "Library & Reading Resources": { Icon: Library, word: "READ • RESEARCH", accent: "#D9B8C8" },
+    "Sports & Recreation": { Icon: Trophy, word: "FITNESS & TEAMWORK", accent: "#D7AD55" },
+    "Creative & Cultural Activities": { Icon: Palette, word: "ARTS & CULTURE", accent: "#D7AD55" },
+    "Multipurpose Spaces": { Icon: Presentation, word: "SCHOOL EVENTS", accent: "#EFD89B" },
+    "Transportation": { Icon: BusFront, word: "SAFE TRAVEL", accent: "#D7AD55" },
+    "Safety & Security": { Icon: ShieldCheck, word: "SAFETY", accent: "#EFD89B" },
+    "Clean & Hygienic Environment": { Icon: Sparkles, word: "CLEAN & HYGIENIC", accent: "#9ED5C0" },
+    "Child-Friendly Environment": { Icon: HeartHandshake, word: "CARE & BELONGING", accent: "#F0C878" },
+    "Activity-Based Learning": { Icon: Lightbulb, word: "LEARN BY DOING", accent: "#D7AD55" },
+    "Critical Thinking & Problem Solving": { Icon: Brain, word: "THINK • SOLVE", accent: "#EFD89B" },
+    "Collaborative Learning": { Icon: Users, word: "TOGETHER", accent: "#A9D8C1" },
+    "Values-Based Education": { Icon: HandHeart, word: "VALUES", accent: "#F0C878" },
+    "Presentation & Communication Opportunities": { Icon: Mic2, word: "COMMUNICATION", accent: "#D7AD55" },
+  };
+
+  const visual = visualMap[facility.title] || {
+    Icon: Sparkles,
+    word: facility.category || "OUR SCHOOL",
+    accent: "#D7AD55",
+  };
+
+  const Icon = visual.Icon;
 
   return (
     <div
-      className="w-full h-full flex flex-col items-center justify-center text-center px-6"
-      style={{ background: `linear-gradient(150deg, ${tint} 0%, ${palette.dark} 140%)` }}
+      className="facility-art"
+      style={{
+        "--facility-tint": tint,
+        "--facility-accent": visual.accent,
+      }}
+      aria-label={`${facility.title} illustration`}
     >
-      <div className="text-xs font-bold uppercase tracking-[0.16em]" style={{ color: "rgba(255,255,255,0.6)" }}>
-        {facility.category}
+      <div className="facility-art-grid" />
+      <div className="facility-art-orbit facility-art-orbit-one" />
+      <div className="facility-art-orbit facility-art-orbit-two" />
+
+      <div className="facility-art-topline">
+        <span>{String(displayNumber ?? facility.id).padStart(2, "0")}</span>
+        <span>{visual.word}</span>
+      </div>
+
+      <div className="facility-art-center">
+        <div className="facility-art-icon-ring">
+          <Icon strokeWidth={1.25} />
+        </div>
+        <div className="facility-art-title">{facility.title}</div>
+      </div>
+
+      <div className="facility-art-bottomline">
+        <span>RED ROSE</span>
+        <span>SECONDARY ENGLISH SCHOOL</span>
       </div>
     </div>
   );
@@ -489,14 +810,23 @@ export function Facilities({
   onDeleteTarget = () => {},
   onAddTarget = () => {},
 }) {
-  const [content, setContent] = useState(() =>
-    mergeFacilitiesContent(contentOverride || defaultFacilitiesContent)
+  const [content, setContent] = useState(
+    contentOverride
+      ? mergeFacilitiesContent(contentOverride)
+      : null
   );
+  const [contentLoading, setContentLoading] = useState(!contentOverride);
   const [selectedFacility, setSelectedFacility] = useState(null);
 
   useEffect(() => {
     if (contentOverride) {
-      setContent(mergeFacilitiesContent(contentOverride));
+      const overrideVersion = Number(contentOverride?.facilitiesVersion);
+      setContent(
+        mergeFacilitiesContent(contentOverride, {
+          forceDefaults: overrideVersion !== FACILITIES_CONTENT_VERSION,
+        })
+      );
+      setContentLoading(false);
       return undefined;
     }
 
@@ -511,12 +841,22 @@ export function Facilities({
         if (!alive) return;
 
         const saved = res.data?.data?.content || {};
-        setContent(mergeFacilitiesContent(saved));
+        const savedVersion = Number(saved?.facilitiesVersion);
+
+        setContent(
+          mergeFacilitiesContent(saved, {
+            forceDefaults: savedVersion !== FACILITIES_CONTENT_VERSION,
+          })
+        );
       } catch (error) {
         console.error("Facilities content load error:", error);
         if (alive) {
-          setContent(mergeFacilitiesContent(defaultFacilitiesContent));
+          setContent(mergeFacilitiesContent(defaultFacilitiesContent, {
+            forceDefaults: true,
+          }));
         }
+      } finally {
+        if (alive) setContentLoading(false);
       }
     };
 
@@ -537,9 +877,84 @@ export function Facilities({
     };
   }, [selectedFacility, editMode]);
 
-  const visibleFacilities = content.facilities.filter(
+  if (contentLoading || !content) {
+    return (
+      <section className="facilities-page">
+        <style>{`
+          .facilities-loading {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 40px 24px;
+            background: #f6efe2;
+          }
+          .facilities-loading-card {
+            width: min(720px, 100%);
+            min-height: 300px;
+            border-radius: 28px;
+            background: #fffaf1;
+            border: 1px solid rgba(42,16,35,.08);
+            box-shadow: 0 22px 55px rgba(42,16,35,.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+          }
+          .facilities-loading-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 3px solid rgba(169,45,77,.14);
+            border-top-color: #a92d4d;
+            animation: facilities-spin .8s linear infinite;
+          }
+          .facilities-loading-text {
+            color: #76686d;
+            font: 800 10px/1.2 Arial, sans-serif;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+          }
+          @keyframes facilities-spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+        <div className="facilities-loading">
+          <div className="facilities-loading-card" aria-label="Loading facilities">
+            <div className="facilities-loading-mark" />
+            <div className="facilities-loading-text">Loading School Facilities</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Transportation and Library are displayed in each other's positions.
+  // Their stored IDs are NOT changed. Because numbering follows the
+  // displayed order, Transportation becomes 04 and Library becomes 08.
+  const visibleFacilities = [...content.facilities].filter(
     (facility) => facility.visible !== false
   );
+
+  const transportationIndex = visibleFacilities.findIndex(
+    isTransportationFacility
+  );
+  const libraryIndex = visibleFacilities.findIndex(
+    (facility) => facility?.title === "Library & Reading Resources"
+  );
+
+  if (
+    transportationIndex >= 0 &&
+    libraryIndex >= 0 &&
+    transportationIndex !== libraryIndex
+  ) {
+    [visibleFacilities[transportationIndex], visibleFacilities[libraryIndex]] = [
+      visibleFacilities[libraryIndex],
+      visibleFacilities[transportationIndex],
+    ];
+  }
+
+  const getFacilityDisplayNumber = (_facility, index) => index + 1;
 
   const getFacilityInitials = (title = "Facility") => {
     const words = title.trim().split(/\s+/).filter(Boolean);
@@ -604,12 +1019,12 @@ export function Facilities({
           overflow: hidden;
           border-radius: 0 0 34px 34px;
           padding: 70px 72px 88px;
-          color: #fff;
+          color: #211523;
           background:
-            radial-gradient(circle at 85% 25%, rgba(169,45,77,.58), transparent 27%),
-            radial-gradient(circle at 18% 80%, rgba(215,173,85,.12), transparent 30%),
-            linear-gradient(135deg, #160d19 0%, #2b1024 50%, #3d172d 100%);
-          box-shadow: 0 26px 55px rgba(43,16,36,.20);
+            radial-gradient(circle at 85% 25%, rgba(169,45,77,.10), transparent 27%),
+            radial-gradient(circle at 18% 80%, rgba(215,173,85,.10), transparent 30%),
+            linear-gradient(135deg, #FDEDEE 0%, #FBD9DC 50%, #F6C3C8 100%);
+          box-shadow: 0 26px 55px rgba(169,45,77,.14);
         }
 
         .facilities-hero::before {
@@ -671,7 +1086,7 @@ export function Facilities({
         .facilities-hero h1 {
           margin: 22px 0 0;
           max-width: 800px;
-          color: white;
+          color: #211523;
           font-family: var(--font-display, Georgia, serif);
           font-size: clamp(48px, 7vw, 82px);
           font-weight: 700;
@@ -680,13 +1095,13 @@ export function Facilities({
         }
 
         .facilities-hero h1 .highlight {
-          color: var(--rr-gold-light);
+          color: #A92D4D;
         }
 
         .facilities-hero-description {
           max-width: 720px;
           margin-top: 24px;
-          color: rgba(255,255,255,.72);
+          color: #76686D;
           font-size: 16px;
           line-height: 1.75;
         }
@@ -875,17 +1290,104 @@ export function Facilities({
           transition: transform .65s cubic-bezier(.22,1,.36,1);
         }
 
-        .facility-row:hover .facility-row-image > div,
-        .facility-row:hover .facility-row-image img {
-          transform: scale(1.045);
+        /* =========================================================
+           SIMPLE FACILITY VISUALS
+           No bubbles, orbit rings, circles, or stock photographs.
+        ========================================================= */
+
+        .facility-art {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          min-height: 310px;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          background:
+            linear-gradient(145deg,
+              color-mix(in srgb, var(--facility-tint) 92%, #000 8%),
+              color-mix(in srgb, var(--facility-tint) 58%, #211523 42%)
+            );
         }
 
-        .facility-row-image::after {
-          content: "";
+        .facility-art-grid,
+        .facility-art-orbit {
+          display: none;
+        }
+
+        .facility-art-topline,
+        .facility-art-bottomline {
           position: absolute;
-          inset: 0;
-          background: linear-gradient(90deg, rgba(22,13,25,.18), transparent 55%);
-          pointer-events: none;
+          z-index: 3;
+          left: 24px;
+          right: 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: rgba(255,255,255,.72);
+          font-size: 8px;
+          font-weight: 900;
+          letter-spacing: .18em;
+          text-transform: uppercase;
+        }
+
+        .facility-art-topline { top: 22px; }
+        .facility-art-bottomline { bottom: 21px; opacity: .62; }
+
+        .facility-art-topline span:first-child {
+          color: rgba(255,255,255,.92);
+          font-family: Georgia, serif;
+          font-size: 13px;
+        }
+
+        .facility-art-center {
+          position: relative;
+          z-index: 2;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 30px;
+        }
+
+        .facility-art-icon-ring {
+          width: 78px;
+          height: 78px;
+          display: grid;
+          place-items: center;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
+        }
+
+        .facility-art-icon-ring::before {
+          display: none;
+        }
+
+        .facility-art-icon-ring svg {
+          width: 62px;
+          height: 62px;
+          color: var(--facility-accent);
+          filter: none;
+        }
+
+        .facility-art-title {
+          max-width: 310px;
+          margin-top: 17px;
+          color: rgba(255,255,255,.92);
+          font-family: var(--font-display, Georgia, serif);
+          font-size: clamp(19px, 2.1vw, 26px);
+          line-height: 1.08;
+          letter-spacing: -.025em;
+        }
+
+
+        .facility-row-image::after {
+          content: none;
         }
 
         .facility-row-badge {
@@ -965,6 +1467,28 @@ export function Facilities({
           line-height: 1.75;
         }
 
+        .facility-bus-teaser {
+          width: fit-content;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          margin-top: 14px;
+          padding: 8px 11px;
+          border: 1px solid rgba(169,45,77,.14);
+          border-radius: 999px;
+          color: var(--rr-red);
+          background: rgba(169,45,77,.055);
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+
+        .facility-bus-teaser-arrow {
+          color: var(--rr-gold);
+          font-size: 12px;
+        }
+
         .facility-learn {
           width: fit-content;
           margin-top: 21px;
@@ -1011,6 +1535,72 @@ export function Facilities({
         .facility-row-image:focus-within .facility-admin-image {
           opacity: 1;
           transform: translateY(0);
+        }
+
+        /* ================= OUR APPROACH ================= */
+
+        .facilities-approach {
+          position: relative;
+          margin-top: 82px;
+          padding: 58px 58px 62px;
+          overflow: hidden;
+          border: 1px solid rgba(169,45,77,.13);
+          border-radius: 28px;
+          background:
+            radial-gradient(circle at 90% 20%, rgba(215,173,85,.13), transparent 30%),
+            linear-gradient(135deg, #fffaf1 0%, #f5eadb 100%);
+          box-shadow: 0 18px 42px rgba(56,31,43,.07);
+        }
+
+        .facilities-approach::after {
+          content: "";
+          position: absolute;
+          right: -90px;
+          bottom: -110px;
+          width: 280px;
+          height: 280px;
+          border: 1px solid rgba(169,45,77,.12);
+          border-radius: 50%;
+          box-shadow:
+            0 0 0 24px rgba(169,45,77,.025),
+            0 0 0 48px rgba(215,173,85,.025);
+          pointer-events: none;
+        }
+
+        .facilities-approach-kicker {
+          position: relative;
+          z-index: 2;
+          color: var(--rr-red);
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .24em;
+          text-transform: uppercase;
+        }
+
+        .facilities-approach-title {
+          position: relative;
+          z-index: 2;
+          max-width: 850px;
+          margin-top: 14px;
+          color: var(--rr-ink);
+          font-family: var(--font-display, Georgia, serif);
+          font-size: clamp(32px, 4vw, 52px);
+          line-height: 1.04;
+          letter-spacing: -.04em;
+        }
+
+        .facilities-approach-title span {
+          color: var(--rr-red);
+        }
+
+        .facilities-approach-copy {
+          position: relative;
+          z-index: 2;
+          max-width: 900px;
+          margin-top: 20px;
+          color: var(--rr-muted);
+          font-size: 15px;
+          line-height: 1.85;
         }
 
         /* ================= ADD BUTTON ================= */
@@ -1233,11 +1823,38 @@ export function Facilities({
           margin-top: 20px;
         }
 
+        .facility-routes-heading {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+
         .facility-routes-title {
           color: var(--rr-red);
           font-size: 9px;
           font-weight: 900;
           letter-spacing: .2em;
+          text-transform: uppercase;
+        }
+
+        .facility-routes-count {
+          padding: 4px 8px;
+          border-radius: 999px;
+          color: #704c58;
+          background: #f8eee4;
+          font-size: 8px;
+          font-weight: 900;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+
+        .facility-routes-note {
+          margin-top: 5px;
+          color: #927e84;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: .12em;
           text-transform: uppercase;
         }
 
@@ -1249,27 +1866,51 @@ export function Facilities({
         }
 
         .facility-route-card {
-          padding: 13px;
+          padding: 15px;
           border: 1px solid rgba(169,45,77,.11);
-          border-radius: 14px;
+          border-radius: 16px;
           background: white;
+          box-shadow: 0 5px 14px rgba(42,16,35,.035);
         }
 
         .facility-route-name {
           color: var(--rr-ink);
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 900;
+          margin-bottom: 12px;
         }
 
-        .facility-route-line {
-          margin-top: 5px;
+        .facility-route-field {
+          display: grid;
+          grid-template-columns: 86px minmax(0, 1fr);
+          gap: 8px;
+          align-items: start;
+          padding: 7px 0;
+          border-top: 1px solid rgba(169,45,77,.07);
+        }
+
+        .facility-route-field:first-of-type {
+          border-top: 0;
+          padding-top: 0;
+        }
+
+        .facility-route-field-label {
+          color: var(--rr-red);
+          font-size: 8px;
+          font-weight: 900;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+        }
+
+        .facility-route-field-value {
           color: var(--rr-muted);
           font-size: 10px;
-          line-height: 1.55;
+          font-weight: 700;
+          line-height: 1.5;
+          word-break: break-word;
         }
 
         .facility-route-stops {
-          margin-top: 8px;
           display: flex;
           flex-wrap: wrap;
           gap: 5px;
@@ -1383,6 +2024,13 @@ export function Facilities({
             padding: 48px 8px 40px;
           }
 
+          .facilities-approach {
+            margin-top: 55px;
+            padding: 38px 24px 42px;
+            border-radius: 22px;
+          }
+
+
           .facilities-intro-title {
             font-size: 38px;
           }
@@ -1394,8 +2042,26 @@ export function Facilities({
 
           .facility-row-image,
           .facility-row.reverse .facility-row-image {
-            min-height: 210px;
+            min-height: 230px;
             border-radius: 22px 22px 0 0;
+          }
+
+          .facility-art {
+            min-height: 230px;
+          }
+
+          .facility-art-icon-ring {
+            width: 70px;
+            height: 70px;
+          }
+
+          .facility-art-icon-ring svg {
+            width: 52px;
+            height: 52px;
+          }
+
+          .facility-art-title {
+            font-size: 17px;
           }
 
           .facility-row-content {
@@ -1434,6 +2100,10 @@ export function Facilities({
 
           .facility-routes-grid {
             grid-template-columns: 1fr;
+          }
+
+          .facility-route-field {
+            grid-template-columns: 82px minmax(0, 1fr);
           }
         }
       `}</style>
@@ -1608,7 +2278,11 @@ export function Facilities({
                     <div className="facility-row-badge">{facility.category}</div>
 
                     <div className="absolute inset-0">
-                      <FacilityVisual facility={facility} tint={tint} />
+                      <FacilityVisual
+                        facility={facility}
+                        tint={tint}
+                        displayNumber={getFacilityDisplayNumber(facility, i)}
+                      />
                     </div>
 
                     {editMode && (
@@ -1623,14 +2297,14 @@ export function Facilities({
                           });
                         }}
                         className="facility-admin-image"
-                        title="Change facility image"
+                        title="Change facility visual"
                       >
                         <Camera className="w-4 h-4" />
                       </button>
                     )}
 
                     <div className="facility-row-number">
-                      {String(i + 1).padStart(2, "0")}
+                      {String(getFacilityDisplayNumber(facility, i)).padStart(2, "0")}
                     </div>
                   </div>
 
@@ -1642,6 +2316,17 @@ export function Facilities({
                     <p className="facility-row-description">
                       {facility.description}
                     </p>
+
+                    {isTransportationFacility(facility) &&
+                      facility.busRoutes?.length > 0 && (
+                        <div className="facility-bus-teaser">
+                          <Bus className="w-3.5 h-3.5" />
+                          <span>
+                            {facility.busRoutes.length} bus routes available
+                          </span>
+                          <span className="facility-bus-teaser-arrow">→</span>
+                        </div>
+                      )}
 
                     <button
                       type="button"
@@ -1662,6 +2347,33 @@ export function Facilities({
               );
             })}
           </div>
+
+
+        {/* ================= OUR APPROACH ================= */}
+        <EditableWrap
+          editMode={editMode}
+          target={{ type: "pageApproach" }}
+          onEditTarget={onEditTarget}
+          label="Edit Our Approach"
+        >
+          <motion.section
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.6 }}
+            className="facilities-approach"
+          >
+            <div className="facilities-approach-kicker">Our Approach</div>
+            <h2 className="facilities-approach-title">
+              Facilities are more than buildings and equipment—
+              <span>they are spaces where learning comes to life.</span>
+            </h2>
+            <p className="facilities-approach-copy">
+              {content.approachDescription ||
+                "We continually work to improve our learning environment and provide students with opportunities to learn through experience, technology, creativity, collaboration, and participation."}
+            </p>
+          </motion.section>
+        </EditableWrap>
 
         <AddFacilityButton editMode={editMode} onAddTarget={onAddTarget} />
 
@@ -1722,22 +2434,21 @@ export function Facilities({
                     {selectedFacility.description}
                   </p>
 
-                  {/*
-                    FIX: was previously gated on
-                    `selectedFacility.title === "School Transport"`, which is
-                    a fragile string match. If the facility title is ever
-                    edited in the admin panel (e.g. renamed to "Transport &
-                    Buses"), the routes silently stop showing here even
-                    though the data is still saved. Now this checks the
-                    actual data (busRoutes array) instead of the title text,
-                    so it always reflects what's really stored — and stays
-                    in sync with the admin editor's isBusFacility check.
-                  */}
+
                   {selectedFacility.busRoutes &&
                     selectedFacility.busRoutes.length > 0 && (
                       <div className="facility-routes">
-                        <div className="facility-routes-title">
-                          Available Bus Routes
+                        <div className="facility-routes-heading">
+                          <div className="facility-routes-title">
+                            Available Bus Routes
+                          </div>
+                          <span className="facility-routes-count">
+                            {selectedFacility.busRoutes.length} routes
+                          </span>
+                        </div>
+
+                        <div className="facility-routes-note">
+                          Bus Route-2083
                         </div>
 
                         <div className="facility-routes-grid">
@@ -1747,22 +2458,45 @@ export function Facilities({
                                 {route.name}
                               </div>
 
-                              <div className="facility-route-line">
-                                {route.from || "Not set"} → {route.to || "Not set"}
+                              <div className="facility-route-field">
+                                <div className="facility-route-field-label">
+                                  Starting Point
+                                </div>
+                                <div className="facility-route-field-value">
+                                  {route.from || "Not set"}
+                                </div>
                               </div>
 
-                              {route.stops?.length > 0 && (
-                                <div className="facility-route-stops">
-                                  {route.stops.map((stop, index) => (
-                                    <span
-                                      className="facility-route-stop"
-                                      key={`${stop}-${index}`}
-                                    >
-                                      {stop}
-                                    </span>
-                                  ))}
+                              <div className="facility-route-field">
+                                <div className="facility-route-field-label">
+                                  Destination
                                 </div>
-                              )}
+                                <div className="facility-route-field-value">
+                                  {route.to || "Not set"}
+                                </div>
+                              </div>
+
+                              <div className="facility-route-field">
+                                <div className="facility-route-field-label">
+                                  Stops
+                                </div>
+                                <div className="facility-route-field-value">
+                                  {route.stops?.length > 0 ? (
+                                    <div className="facility-route-stops">
+                                      {route.stops.map((stop, index) => (
+                                        <span
+                                          className="facility-route-stop"
+                                          key={`${stop}-${index}`}
+                                        >
+                                          {stop}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    "No stops added"
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>

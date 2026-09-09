@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import api from "../../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { Award, Camera, ChevronLeft, ChevronRight, Download, Grid3X3, Image as ImageIcon, Maximize2, Sparkles, Star, Trophy, X, ZoomIn, ZoomOut } from "lucide-react";
-
-/* ============================================================
-   RED ROSE SCHOOL — PUBLIC GALLERY (READ ONLY)
-   ============================================================ */
+import { Camera, ChevronLeft, ChevronRight, Download, Grid3X3, Image as ImageIcon, Maximize2, Sparkles, X, ZoomIn, ZoomOut } from "lucide-react";
 
 const COLORS = {
   burgundy: "#24131F",
@@ -29,13 +25,6 @@ const FALLBACK_DESCRIPTIONS = {
   Certificate: "Certificates and awards recognize achievement, participation, discipline, excellence, and student accomplishments.",
 };
 
-const DEFAULT_ACHIEVEMENTS = [
-  { id: "1", title: "Top School Award", year: "2024", icon: "Trophy", visible: true },
-  { id: "2", title: "STEM Excellence", year: "2023", icon: "Award", visible: true },
-  { id: "3", title: "Sports Champion", year: "2024", icon: "Trophy", visible: true },
-  { id: "4", title: "Community Service", year: "2023", icon: "Star", visible: true },
-];
-
 const DEFAULT_CONTENT = {
   heroBadge: "SCHOOL GALLERY",
   heroTitle: "Moments That Become Memories",
@@ -50,7 +39,6 @@ const DEFAULT_CONTENT = {
   categories: DEFAULT_CATEGORIES,
   categoryDescriptions: FALLBACK_DESCRIPTIONS,
   subcategories: {},
-  achievements: DEFAULT_ACHIEVEMENTS,
   images: [],
   bottomTitle: "Every picture tells a story.",
   bottomDescription: "Explore the moments, celebrate the achievements, and remember the journey.",
@@ -180,33 +168,6 @@ function GalleryHero({ content, totalPhotos, onExplore }) {
         </div>
       </div>
       <div className="gallery-hero-bottom"><ZigZag color={COLORS.cream} /></div>
-    </section>
-  );
-}
-
-function Achievements({ achievements }) {
-  const list = Array.isArray(achievements) && achievements.length ? achievements : DEFAULT_ACHIEVEMENTS;
-  const visibleList = list.filter((item) => item.visible !== false);
-
-  return (
-    <section className="gallery-achievements">
-      <div className="gallery-shell">
-        <div className="gallery-section-heading">
-          <div className="gallery-label"><span />Our Achievements</div>
-          <h2>Celebrating <em>Excellence</em></h2>
-          <p>Every certificate, competition, and achievement represents a student who chose to learn, participate, and grow.</p>
-        </div>
-        <div className="gallery-achievement-grid">
-          {visibleList.map((achievement, index) => (
-            <motion.article key={achievement.id || index} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ delay: index * 0.06 }} whileHover={{ y: -5 }} className="gallery-achievement-card">
-              <div className="gallery-achievement-icon"><IconForAchievement icon={achievement.icon} /></div>
-              <span className="gallery-achievement-year">{achievement.year}</span>
-              <h3>{achievement.title}</h3>
-              <div className="gallery-achievement-rule" />
-            </motion.article>
-          ))}
-        </div>
-      </div>
     </section>
   );
 }
@@ -360,7 +321,6 @@ export default function Gallery() {
   return (
     <main className="red-rose-gallery">
       <GalleryHero content={content} totalPhotos={totalPhotos} onExplore={() => galleryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })} />
-      <Achievements achievements={content.achievements} />
 
       <section ref={galleryRef} className="gallery-main">
         <div className="gallery-shell">
@@ -402,46 +362,34 @@ const PUBLIC_GALLERY_CSS = `
   .red-rose-gallery { --burgundy: ${COLORS.burgundy}; --burgundy-2: ${COLORS.burgundy2}; --rose: ${COLORS.rose}; --gold: ${COLORS.gold}; --gold-light: ${COLORS.goldLight}; --cream: ${COLORS.cream}; --paper: ${COLORS.paper}; --paper-dark: ${COLORS.paperDark}; --text: ${COLORS.text}; --muted: ${COLORS.muted}; min-height: 100vh; overflow-x: hidden; color: var(--text); background: var(--cream); position: relative; }
   .gallery-shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
   .gallery-gold-text { color: var(--rose); }
-  .gallery-hero { position: relative; min-height: 680px; display: flex; align-items: center; overflow: hidden; background: radial-gradient(circle at 15% 15%, rgba(199,154,59,.16), transparent 24%), radial-gradient(circle at 85% 70%, rgba(166,43,79,.28), transparent 30%), linear-gradient(135deg, #24131f 0%, #351725 50%, #512036 100%); }
-  .gallery-hero-pattern { position: absolute; inset: 0; opacity: .12; background-image: radial-gradient(circle, rgba(255,255,255,.9) 1px, transparent 1.3px); background-size: 18px 18px; mask-image: linear-gradient(to bottom, black, transparent); }
-  .gallery-hero::after { content: ""; position: absolute; inset: auto 0 0; height: 180px; background: linear-gradient(to top, rgba(36,19,31,.5), transparent); pointer-events: none; }
+  .gallery-hero { position: relative; min-height: 680px; display: flex; align-items: center; overflow: hidden; background: radial-gradient(circle at 15% 15%, rgba(182,74,99,.08), transparent 24%), radial-gradient(circle at 85% 70%, rgba(166,43,79,.10), transparent 30%), linear-gradient(135deg, #FDEDEE 0%, #FBD9DC 50%, #F6C3C8 100%); box-shadow: 0 28px 70px rgba(182,74,99,.14); }
+  .gallery-hero-pattern { position: absolute; inset: 0; opacity: .12; background-image: radial-gradient(circle, rgba(166,43,79,.18) 1px, transparent 1.3px); background-size: 18px 18px; mask-image: linear-gradient(to bottom, black, transparent); }
+  .gallery-hero::after { content: ""; position: absolute; inset: auto 0 0; height: 180px; background: linear-gradient(to top, rgba(166,43,79,.10), transparent); pointer-events: none; }
   .gallery-hero-glow { position: absolute; border-radius: 50%; filter: blur(4px); pointer-events: none; }
-  .gallery-hero-glow-one { width: 280px; height: 280px; left: -120px; top: 130px; background: rgba(199,154,59,.10); box-shadow: 0 0 120px rgba(199,154,59,.15); }
-  .gallery-hero-glow-two { width: 350px; height: 350px; right: -160px; bottom: 30px; background: rgba(166,43,79,.16); box-shadow: 0 0 130px rgba(166,43,79,.18); }
+  .gallery-hero-glow-one { width: 280px; height: 280px; left: -120px; top: 130px; background: rgba(199,154,59,.08); box-shadow: 0 0 120px rgba(199,154,59,.12); }
+  .gallery-hero-glow-two { width: 350px; height: 350px; right: -160px; bottom: 30px; background: rgba(166,43,79,.08); box-shadow: 0 0 130px rgba(166,43,79,.12); }
   .gallery-hero-inner { position: relative; z-index: 3; width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 120px 0 105px; text-align: center; }
   .gallery-label { display: inline-flex; align-items: center; gap: 10px; color: var(--rose); font-size: 11px; font-weight: 900; letter-spacing: .20em; text-transform: uppercase; }
   .gallery-label > span { width: 32px; height: 1px; background: var(--gold); }
-  .gallery-label-light { color: #e6cf98; }
-  .gallery-label-light > span { background: var(--gold-light); }
-  .gallery-hero h1 { max-width: 850px; margin: 24px auto 0; color: white; font-family: Georgia, "Times New Roman", serif; font-size: clamp(45px, 7vw, 82px); line-height: 1.02; letter-spacing: -.045em; font-weight: 700; }
-  .gallery-hero h1 em { color: var(--gold-light); font-style: normal; }
-  .gallery-hero h1::after { content: ""; display: block; width: 75px; height: 3px; margin: 24px auto 0; border-radius: 99px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-  .gallery-hero p { max-width: 690px; margin: 25px auto 0; color: rgba(255,255,255,.70); font-size: 16px; line-height: 1.85; }
+  .gallery-label-light { color: #8F2345; }
+  .gallery-label-light > span { background: #8F2345; }
+  .gallery-hero h1 { max-width: 850px; margin: 24px auto 0; color: #211824; font-family: Georgia, "Times New Roman", serif; font-size: clamp(45px, 7vw, 82px); line-height: 1.02; letter-spacing: -.045em; font-weight: 700; }
+  .gallery-hero h1 em { color: #A62B4F; font-style: normal; }
+  .gallery-hero h1::after { content: ""; display: block; width: 75px; height: 3px; margin: 24px auto 0; border-radius: 99px; background: linear-gradient(90deg, transparent, #A62B4F, transparent); }
+  .gallery-hero p { max-width: 690px; margin: 25px auto 0; color: #786C72; font-size: 16px; line-height: 1.85; }
   .gallery-hero-actions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
   .gallery-gold-button { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 12px; padding: 13px 19px; color: #291b1e; background: var(--gold-light); font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 10px 28px rgba(199,154,59,.18); transition: transform .25s ease, box-shadow .25s ease; }
   .gallery-gold-button:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(199,154,59,.25); }
-  .gallery-hero-note { display: inline-flex; align-items: center; gap: 8px; padding: 12px 16px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; color: rgba(255,255,255,.70); background: rgba(255,255,255,.045); backdrop-filter: blur(10px); font-size: 12px; font-weight: 700; }
-  .gallery-hero-note svg { color: var(--gold-light); }
+  .gallery-hero-note { display: inline-flex; align-items: center; gap: 8px; padding: 12px 16px; border: 1px solid rgba(166,43,79,.18); border-radius: 12px; color: #6F5960; background: rgba(255,255,255,.34); backdrop-filter: blur(10px); font-size: 12px; font-weight: 700; }
+  .gallery-hero-note svg { color: #8F2345; }
   .gallery-hero-stats { display: flex; align-items: center; justify-content: center; gap: 28px; margin-top: 44px; }
   .gallery-hero-stats div { display: flex; flex-direction: column; gap: 2px; }
-  .gallery-hero-stats strong { color: white; font-size: 24px; font-weight: 800; }
-  .gallery-hero-stats span { color: rgba(255,255,255,.45); font-size: 9px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-  .gallery-hero-stats i { width: 1px; height: 30px; background: rgba(255,255,255,.14); }
+  .gallery-hero-stats strong { color: #211824; font-size: 24px; font-weight: 800; }
+  .gallery-hero-stats span { color: #8A7077; font-size: 9px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+  .gallery-hero-stats i { width: 1px; height: 30px; background: rgba(166,43,79,.18); }
   .gallery-hero-bottom { position: absolute; z-index: 5; left: 0; right: 0; bottom: -1px; height: 34px; }
   .gallery-zigzag { width: 100%; height: 100%; }
-  .gallery-achievements { padding: 85px 0 95px; background: radial-gradient(circle at 10% 20%, rgba(166,43,79,.055), transparent 25%), radial-gradient(circle at 90% 70%, rgba(199,154,59,.09), transparent 25%), var(--cream); }
-  .gallery-section-heading { max-width: 700px; margin: 0 auto 42px; text-align: center; position: relative; }
-  .gallery-section-heading h2 { margin: 15px 0 12px; color: var(--text); font-family: Georgia, "Times New Roman", serif; font-size: clamp(35px, 5vw, 52px); line-height: 1; letter-spacing: -.04em; }
-  .gallery-section-heading h2 em { color: var(--rose); font-style: normal; }
-  .gallery-section-heading p { margin: 0 auto; max-width: 620px; color: var(--muted); font-size: 14px; line-height: 1.8; }
-  .gallery-achievement-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  .gallery-achievement-card { position: relative; overflow: hidden; padding: 27px 18px; border: 1px solid #e9ddcf; border-radius: 20px; text-align: center; background: var(--paper); box-shadow: 0 8px 25px rgba(55,39,30,.045); }
-  .gallery-achievement-card::before { content: ""; position: absolute; width: 90px; height: 90px; right: -45px; top: -45px; border-radius: 50%; background: rgba(199,154,59,.10); }
-  .gallery-achievement-icon { position: relative; z-index: 1; width: 52px; height: 52px; margin: 0 auto 13px; display: flex; align-items: center; justify-content: center; border-radius: 16px; color: var(--rose); background: #f1dfe4; }
-  .gallery-achievement-year { position: relative; z-index: 1; color: #987329; font-size: 10px; font-weight: 900; letter-spacing: .15em; }
-  .gallery-achievement-card h3 { position: relative; z-index: 1; margin: 7px 0 13px; color: var(--text); font-size: 15px; font-weight: 800; }
-  .gallery-achievement-rule { width: 28px; height: 2px; margin: 0 auto; border-radius: 99px; background: linear-gradient(90deg, var(--rose), var(--gold)); }
-  .gallery-main { position: relative; padding: 100px 0 120px; background: radial-gradient(circle at 0% 10%, rgba(166,43,79,.05), transparent 25%), radial-gradient(circle at 100% 70%, rgba(199,154,59,.08), transparent 25%), #f6eee3; scroll-margin-top: 20px; }
+  .gallery-main { position: relative; padding: 78px 0 120px; background: radial-gradient(circle at 0% 10%, rgba(166,43,79,.05), transparent 25%), radial-gradient(circle at 100% 70%, rgba(199,154,59,.08), transparent 25%), #f6eee3; scroll-margin-top: 20px; }
   .gallery-main::before { content: ""; position: absolute; inset: 0; opacity: .35; pointer-events: none; background-image: radial-gradient(#d9cabb .8px, transparent .8px); background-size: 26px 26px; }
   .gallery-main-heading { position: relative; z-index: 1; max-width: 780px; margin: 0 auto 40px; text-align: center; }
   .gallery-main-heading h2 { margin: 15px 0 13px; color: var(--text); font-family: Georgia, "Times New Roman", serif; font-size: clamp(38px, 5vw, 61px); line-height: 1; letter-spacing: -.045em; }
@@ -524,7 +472,6 @@ const PUBLIC_GALLERY_CSS = `
   .gallery-closing-note { display: block; margin-top: 14px; color: rgba(255,255,255,.4); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 
   @media (max-width: 1050px) {
-    .gallery-achievement-grid { grid-template-columns: repeat(2, 1fr); }
     .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .gallery-viewer { grid-template-columns: 1fr; }
     .gallery-viewer-photo { min-height: 470px; }
@@ -539,9 +486,7 @@ const PUBLIC_GALLERY_CSS = `
     .gallery-hero-actions { flex-direction: column; }
     .gallery-gold-button, .gallery-hero-note { width: min(320px, 100%); justify-content: center; }
     .gallery-hero-stats { gap: 16px; margin-top: 34px; }
-    .gallery-achievements, .gallery-main { padding: 70px 0; }
-    .gallery-achievement-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .gallery-achievement-card { padding: 21px 12px; }
+    .gallery-main { padding: 70px 0; }
     .gallery-grid { grid-template-columns: 1fr; }
     .gallery-card-image { height: 290px; flex-basis: 290px; }
     .gallery-open-button { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -553,7 +498,6 @@ const PUBLIC_GALLERY_CSS = `
   }
 
   @media (max-width: 430px) {
-    .gallery-achievement-grid { grid-template-columns: 1fr; }
     .gallery-tabs { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; padding: 2px 2px 8px; }
     .gallery-tab { flex: 0 0 auto; }
     .gallery-hero-stats { gap: 10px; }
@@ -572,5 +516,4 @@ const PUBLIC_GALLERY_CSS = `
 `;
 
 const ADMIN_OVERLAY_CSS = `
-  /* NO EDIT BUTTONS, NO ADMIN MODALS, NO UPLOAD BUTTONS IN THIS FILE. */
 `;
