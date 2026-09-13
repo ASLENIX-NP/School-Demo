@@ -36,7 +36,59 @@ const STAFF_ACCENTS = [
   { solid: theme.inkSoft, soft: "rgba(45,28,42,0.08)", ring: "rgba(45,28,42,0.30)", grad: theme.gradInk },
 ];
 
-const API_URL = "http://localhost:5000";
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/$/, "");
+
+// Keep image URLs usable in both local development and production.
+// Absolute ImageKit/Cloudinary/etc. URLs are left untouched. Relative
+// upload paths are resolved against the backend origin.
+function resolveAssetUrl(value) {
+  if (!value || typeof value !== "string") return "";
+
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  if (/^(https?:)?\/\//i.test(trimmed) || trimmed.startsWith("data:")) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith("blob:")) return trimmed;
+
+  if (trimmed.startsWith("/")) {
+    return `${API_URL}${trimmed}`;
+  }
+
+  return `${API_URL}/${trimmed}`;
+}
+
+// The backend has returned the content in slightly different wrappers over
+// the life of this project. Accept all known shapes so the public About page
+// does not silently fall back to the old hard-coded content.
+function extractAboutContent(payload) {
+  return (
+    payload?.data?.content ||
+    payload?.content ||
+    payload?.data?.data?.content ||
+    payload?.data ||
+    null
+  );
+}
+
+function normalizeAboutImages(saved = {}) {
+  const normalized = {
+    ...saved,
+    storyImageUrl: resolveAssetUrl(saved.storyImageUrl),
+    messages: Array.isArray(saved.messages)
+      ? saved.messages.map((message) => ({
+          ...message,
+          image: resolveAssetUrl(message?.image),
+        }))
+      : saved.messages,
+  };
+
+  return normalized;
+}
 
 // Torn-paper (deckle edge) clip-paths used for the story photo and the
 // message popup — the page's one recurring "material" motif.
@@ -620,7 +672,7 @@ export default function About({
 }) {
   const [content, setContent] = useState(() =>
     contentOverride
-      ? mergeAboutContent(contentOverride)
+      ? mergeAboutContent(normalizeAboutImages(contentOverride))
       : mergeAboutContent({
           ...defaultAboutContent,
           storyImageUrl: "",
@@ -635,17 +687,29 @@ export default function About({
 
   useEffect(() => {
     if (contentOverride) {
-      setContent(mergeAboutContent(contentOverride));
+      setContent(mergeAboutContent(normalizeAboutImages(contentOverride)));
       return undefined;
     }
     let alive = true;
     const loadAboutContent = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get(`${API_URL}/api/site-content/about`, { timeout: 10000 });
+        const res = await axios.get(`${API_URL}/api/site-content/about`, {
+          timeout: 15000,
+          headers: { Accept: "application/json" },
+        });
         if (!alive) return;
-        const saved = res.data?.data?.content;
-        if (saved) setContent(mergeAboutContent(saved));
+
+        const saved = extractAboutContent(res.data);
+
+        if (saved && typeof saved === "object") {
+          setContent(mergeAboutContent(normalizeAboutImages(saved)));
+        } else {
+          console.warn(
+            "About content API returned no usable content.",
+            res.data
+          );
+        }
       } catch (error) {
         console.error("About content load error:", error);
       } finally {
