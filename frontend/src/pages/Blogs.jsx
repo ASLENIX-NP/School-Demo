@@ -149,10 +149,30 @@ function BlogCard({ post, index, featured = false }) {
   );
 }
 
-export default function Blogs() {
-  const [content, setContent] = useState(() =>
-    mergeBlogContent(defaultBlogContent)
+/* =========================================================
+   LOADING SKELETON
+   Shown while the real content is being fetched, instead of
+   letting the hardcoded defaultBlogContent flash on screen.
+========================================================= */
+
+function BlogsSkeleton() {
+  return (
+    <div className="rr-blog-skeleton-wrap" aria-busy="true" aria-label="Loading stories">
+      <div className="rr-blog-skeleton rr-blog-skeleton-feature" />
+      <div className="rr-blog-skeleton-grid">
+        <div className="rr-blog-skeleton rr-blog-skeleton-card" />
+        <div className="rr-blog-skeleton rr-blog-skeleton-card" />
+        <div className="rr-blog-skeleton rr-blog-skeleton-card" />
+      </div>
+    </div>
   );
+}
+
+export default function Blogs() {
+  // No default seed here — content starts empty so the hardcoded
+  // defaultBlogContent never renders before the real data arrives.
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
@@ -169,15 +189,17 @@ export default function Blogs() {
 
         if (!alive) return;
 
-        setContent(
-          mergeBlogContent(res.data?.data?.content || {})
-        );
+        setContent(mergeBlogContent(res.data?.data?.content || {}));
       } catch (error) {
         console.error("Blog content load error:", error);
 
+        // Only fall back to the hardcoded/default content if the
+        // API call actually fails — not while it's still pending.
         if (alive) {
           setContent(mergeBlogContent(defaultBlogContent));
         }
+      } finally {
+        if (alive) setLoading(false);
       }
     };
 
@@ -192,19 +214,19 @@ export default function Blogs() {
   // 2. FILTER POSTS (Use useMemo for performance)
   // =========================================================
   const visiblePosts = useMemo(() => {
-    const allPosts = content.posts || [];
-    
+    const allPosts = content?.posts || [];
+
     return allPosts.filter((post) => {
-      const matchQuery = !query || 
+      const matchQuery = !query ||
         post.title?.toLowerCase().includes(query.toLowerCase()) ||
         post.excerpt?.toLowerCase().includes(query.toLowerCase()) ||
         post.content?.toLowerCase().includes(query.toLowerCase());
-      
+
       const matchCategory = category === "All" || post.category === category;
 
       return matchQuery && matchCategory;
     });
-  }, [content.posts, query, category]);
+  }, [content, query, category]);
 
   // =========================================================
   // 3. JSX RENDERING (Return this OUTSIDE the useEffect)
@@ -941,6 +963,44 @@ export default function Blogs() {
           box-shadow: 0 18px 40px rgba(69,48,38,.08);
         }
 
+        /* LOADING SKELETON */
+        .rr-blog-skeleton-wrap {
+          margin-top: 24px;
+        }
+
+        .rr-blog-skeleton {
+          border-radius: 23px;
+          background: linear-gradient(
+            100deg,
+            #efe6d7 30%,
+            #f7f1e5 50%,
+            #efe6d7 70%
+          );
+          background-size: 200% 100%;
+          animation: rr-blog-shimmer 1.4s ease-in-out infinite;
+        }
+
+        .rr-blog-skeleton-feature {
+          height: 410px;
+          border-radius: 28px;
+        }
+
+        .rr-blog-skeleton-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 20px;
+          margin-top: 24px;
+        }
+
+        .rr-blog-skeleton-card {
+          height: 445px;
+        }
+
+        @keyframes rr-blog-shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+
         /* RESPONSIVE */
         @media (max-width: 1050px) {
           .rr-blog-hero-grid {
@@ -952,6 +1012,10 @@ export default function Blogs() {
           }
 
           .rr-blog-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .rr-blog-skeleton-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
@@ -1044,7 +1108,16 @@ export default function Blogs() {
             gap: 16px;
           }
 
+          .rr-blog-skeleton-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+
           .rr-blog-card {
+            height: 435px;
+          }
+
+          .rr-blog-skeleton-card {
             height: 435px;
           }
         }
@@ -1066,16 +1139,16 @@ export default function Blogs() {
             <div className="rr-blog-hero-grid">
               <div>
                 <div className="rr-blog-kicker">
-                  {content.pageBadge || "School Journal"}
+                  {content?.pageBadge || "School Journal"}
                 </div>
 
                 <h1>
-                  {content.pageTitle || "Stories from"}{" "}
+                  {content?.pageTitle || "Stories from"}{" "}
                   <span>Red Rose.</span>
                 </h1>
 
                 <p className="rr-blog-hero-description">
-                  {content.pageDescription ||
+                  {content?.pageDescription ||
                     "Explore school activities, academic achievements, student voices, competitions, celebrations, and the everyday moments that make our school community special."}
                 </p>
               </div>
@@ -1118,7 +1191,7 @@ export default function Blogs() {
             </div>
 
             <div className="rr-blog-filters">
-              {(content.categories || ["All"]).map((cat) => (
+              {(content?.categories || ["All"]).map((cat) => (
                 <button
                   key={cat}
                   type="button"
@@ -1133,7 +1206,11 @@ export default function Blogs() {
             </div>
           </div>
 
-          {visiblePosts.length > 0 && (
+          {/* While the real content is loading, show a skeleton
+              instead of any hardcoded/default post data. */}
+          {loading && <BlogsSkeleton />}
+
+          {!loading && visiblePosts.length > 0 && (
             <>
               <div className="rr-blog-section-heading">
                 <div>
@@ -1264,7 +1341,7 @@ export default function Blogs() {
             </>
           )}
 
-          {visiblePosts.length === 0 && (
+          {!loading && visiblePosts.length === 0 && (
             <div className="rr-blog-empty">
               <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-full bg-[#f3e8d8] text-[#A52B4A]">
                 <Calendar className="h-6 w-6" />
