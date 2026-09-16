@@ -293,8 +293,6 @@ const defaultStatsData = {
   story: {
     badge: "Our Story",
     title: "Building Tomorrow's Leaders Today",
-    imageTopTitle: "Our School",
-    imageTopSubtitle: "Hetauda-2",
     paragraphs: [
       "Established with a vision to provide quality education in Makawanpur, Red Rose Secondary English Boarding School has grown as one of Hetauda's respected academic institutions.",
       "With students from Play Group to Grade 10, the school focuses on academic discipline, values, creativity, digital learning, and holistic student development.",
@@ -1042,23 +1040,6 @@ export default function Stats({
                       </div>
                     </div>
                   )}
-
-                  <StatsEditableWrap
-                    editMode={editMode}
-                    target={{ type: "storyImageText" }}
-                    onEditTarget={onEditTarget}
-                  >
-                    <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 z-20 pointer-events-none">
-                      <div className="backdrop-blur-md bg-white/15 p-3.5 sm:p-4 rounded-2xl border border-white/25 inline-block shadow-lg">
-                        <div className="rr-serif text-white text-lg sm:text-xl font-semibold">
-                          {data.story?.imageTopTitle || "Our School"}
-                        </div>
-                        <div className="text-white/80 text-xs sm:text-sm">
-                          {data.story?.imageTopSubtitle || "Hetauda-2"}
-                        </div>
-                      </div>
-                    </div>
-                  </StatsEditableWrap>
 
                   {(data.story?.imageBottomTitle || data.story?.imageBottomDescription) && (
                     <div className="absolute top-5 right-5 z-20 max-w-[260px] rounded-2xl bg-slate-950/55 backdrop-blur-md border border-white/20 p-4 text-white">
