@@ -35,7 +35,8 @@ const THEME = {
   textMuted: "#7C6B6F",
   white: "#FFFFFF",
   gradRose: "linear-gradient(135deg, #6E1733 0%, #9C2748 55%, #C6486B 100%)",
-  gradInk: "linear-gradient(160deg, #17101C 0%, #2A1826 55%, #3A2130 100%)",
+  // Lightened from a near-black ink gradient to a softer maroon tone.
+  gradInk: "linear-gradient(160deg, #5A2038 0%, #7C2A45 55%, #A13655 100%)",
   gradGold: "linear-gradient(135deg, #E7CE9C 0%, #B98A42 100%)",
 };
 
