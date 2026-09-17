@@ -1549,57 +1549,6 @@ export function Hero({
         </div>
       </div>
 
-      {/* ===================================================
-          BOTTOM SCROLL INDICATOR
-      =================================================== */}
-
-      {!editMode && (
-        <motion.div
-          initial={{
-            opacity: 0,
-          }}
-          animate={{
-            opacity: 1,
-          }}
-          transition={{
-            delay: 1.2,
-          }}
-          className="
-            absolute
-            bottom-5
-            left-1/2
-            hidden
-            -translate-x-1/2
-            items-center
-            gap-2
-            lg:flex
-          "
-        >
-          <div
-            className="h-1.5 w-1.5 rounded-full"
-            style={{
-              background: THEME.gold,
-            }}
-          />
-
-          <span
-            className="rr-mono text-[9px] font-bold uppercase tracking-[0.3em]"
-            style={{
-              color: THEME.textMuted,
-            }}
-          >
-            Discover{" "}
-            {heroData.schoolName.split(" ")[0]}
-          </span>
-
-          <div
-            className="h-px w-12"
-            style={{
-              background: `${THEME.ink}15`,
-            }}
-          />
-        </motion.div>
-      )}
     </section>
   );
 }
