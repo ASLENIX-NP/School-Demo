@@ -15,20 +15,16 @@ import {
 } from "lucide-react";
 
 import {
-  defaultBlogContent,
   formatBlogDate,
   getAuthorInfo,
   getReadTime,
   makeBlogSlug,
-  mergeBlogContent,
   normalizeBlogPost,
 } from "./blogUtils";
 
 export {
-  defaultBlogContent,
   formatBlogDate,
   makeBlogSlug,
-  mergeBlogContent,
   normalizeBlogPost,
 };
 
@@ -38,7 +34,7 @@ function getPlainExcerpt(post = {}) {
     .replace(/\s+/g, " ")
     .trim();
 
-  if (!text) return "Read this school update and explore the latest insights.";
+  if (!text) return "";
   return text.length > 145 ? `${text.slice(0, 145).trim()}...` : text;
 }
 
@@ -96,10 +92,12 @@ function BlogCard({ post, index, featured = false }) {
               </span>
             )}
 
-            <span className="rr-blog-category">
-              <Tag className="h-3 w-3" />
-              {post.category || "School Life"}
-            </span>
+            {post.category && (
+              <span className="rr-blog-category">
+                <Tag className="h-3 w-3" />
+                {post.category}
+              </span>
+            )}
           </div>
 
           <div className="rr-blog-card-index">
@@ -185,18 +183,47 @@ export default function Blogs() {
 
     const loadBlogs = async () => {
       try {
-        const res = await api.get("/api/site-content/blogs");
+        // Always read the current server state. Do NOT merge with or
+        // fall back to any local/default blog data. An empty posts array
+        // from Admin Blog is a valid state and must stay empty here.
+        const res = await api.get("/api/site-content/blogs", {
+          params: { _t: Date.now() },
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        });
 
         if (!alive) return;
 
-        setContent(mergeBlogContent(res.data?.data?.content || {}));
+        const serverContent =
+          res.data?.data?.content ??
+          res.data?.content ??
+          res.data?.data ??
+          {};
+
+        const serverPosts = Array.isArray(serverContent?.posts)
+          ? serverContent.posts
+              .filter(Boolean)
+              .map((post) => normalizeBlogPost(post))
+          : [];
+
+        setContent({
+          ...serverContent,
+          posts: serverPosts,
+          categories: Array.isArray(serverContent?.categories)
+            ? serverContent.categories
+            : [],
+        });
       } catch (error) {
         console.error("Blog content load error:", error);
 
-        // Only fall back to the hardcoded/default content if the
-        // API call actually fails — not while it's still pending.
+        // Never recreate deleted/demo posts when the API fails.
         if (alive) {
-          setContent(mergeBlogContent(defaultBlogContent));
+          setContent({
+            posts: [],
+            categories: [],
+          });
         }
       } finally {
         if (alive) setLoading(false);
@@ -1139,18 +1166,16 @@ export default function Blogs() {
             <div className="rr-blog-hero-grid">
               <div>
                 <div className="rr-blog-kicker">
-                  {content?.pageBadge || "School Journal"}
+                  {content?.pageBadge || ""}
                 </div>
 
-                <h1>
-                  {content?.pageTitle || "Stories from"}{" "}
-                  <span>Red Rose.</span>
-                </h1>
+                {content?.pageTitle && <h1>{content.pageTitle}</h1>}
 
-                <p className="rr-blog-hero-description">
-                  {content?.pageDescription ||
-                    "Explore school activities, academic achievements, student voices, competitions, celebrations, and the everyday moments that make our school community special."}
-                </p>
+                {content?.pageDescription && (
+                  <p className="rr-blog-hero-description">
+                    {content.pageDescription}
+                  </p>
+                )}
               </div>
 
               <div className="rr-blog-hero-mark" aria-hidden="true">
@@ -1191,7 +1216,7 @@ export default function Blogs() {
             </div>
 
             <div className="rr-blog-filters">
-              {(content?.categories || ["All"]).map((cat) => (
+              {(Array.isArray(content?.categories) ? content.categories : []).map((cat) => (
                 <button
                   key={cat}
                   type="button"
@@ -1236,7 +1261,7 @@ export default function Blogs() {
 
               {/* =================================================
                   FEATURED STORY
-                  First post gets a distinctive editorial layout.
+                  The first visible post returned by Admin Blog gets a distinctive editorial layout.
               ================================================== */}
               <motion.article
                 initial={{ opacity: 0, y: 20 }}
@@ -1276,10 +1301,12 @@ export default function Blogs() {
                       </Link>
 
                       <div className="rr-blog-feature-content">
-                        <div className="rr-blog-feature-label">
-                          <Tag className="h-3 w-3" />
-                          {post.category || "School Life"}
-                        </div>
+                        {post.category && (
+                          <div className="rr-blog-feature-label">
+                            <Tag className="h-3 w-3" />
+                            {post.category}
+                          </div>
+                        )}
 
                         <h3>{post.title}</h3>
 

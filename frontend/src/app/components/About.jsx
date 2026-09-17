@@ -881,15 +881,6 @@ export default function About({
                 </div>
               </div>
 
-              {/* wax-seal badge */}
-              <div
-                className="absolute -bottom-6 -right-4 sm:right-4 w-24 h-24 rounded-full flex flex-col items-center justify-center rotate-[-8deg]"
-                style={{ background: theme.gradGold, boxShadow: "0 16px 30px rgba(185,138,66,0.45), inset 0 2px 4px rgba(255,255,255,0.4)", border: `3px solid ${theme.card}` }}
-              >
-                <span className="rr-serif text-[11px] font-bold leading-tight text-center px-2" style={{ color: theme.ink }}>
-                  {content.storyBadgeYear}
-                </span>
-              </div>
             </TiltCard>
           </EditableWrap>
 

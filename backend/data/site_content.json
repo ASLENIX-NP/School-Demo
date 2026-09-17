@@ -368,38 +368,7 @@
       "Sports",
       "Notice"
     ],
-    "posts": [
-      {
-        "id": 1787288202421,
-        "title": "New Blog Post",
-        "slug": "new-blog-post-1787288202421",
-        "category": "Academics",
-        "date": "2026-08-21",
-        "excerpt": "Short summary for this blog post.",
-        "content": "Write the full blog content here.",
-        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1787288223852_20260624_161357_p3N7IBP6N.jpg",
-        "imageAlt": "New Blog Post",
-        "pinned": true,
-        "visible": true,
-        "author": "Smriti Team",
-        "authorRole": "School Administration"
-      },
-      {
-        "id": "post-2",
-        "title": "Students Win National Science & Robotics Competition Gold Medal",
-        "slug": "students-win-national-science-robotics-competition-gold-medal-post-2",
-        "category": "Achievements",
-        "date": "2026-07-15",
-        "excerpt": "Our Grade 9 and 10 STEM innovation team secured the top prize at the National Inter-School Science Fair for their autonomous solar-powered water purification model.",
-        "content": "We are thrilled to announce that our young innovators from Red Rose Secondary English School achieved 1st place in the National Inter-School STEM Championship. Their project presented a cost-effective, IoT-monitored water filtration system designed for rural communities.",
-        "imageUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786093654139_Screenshot__3__vtL1j1JoO.png",
-        "imageAlt": "Robotics Competition",
-        "pinned": false,
-        "visible": true,
-        "author": "Academic Council",
-        "authorRole": "STEM Department"
-      }
-    ]
+    "posts": []
   },
   "footer": {
     "logoUrl": "https://ik.imagekit.io/xwmp1pd0y/school_uploads/1786448654957_images_KFuQ3AEa6.png",
