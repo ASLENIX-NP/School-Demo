@@ -419,7 +419,9 @@ export default function AdminHome() {
   const openEditor = (target) => {
     setSuccess(""); setError(""); setEditingTarget(target);
     
-    if (target.type === "heroBadge") {
+    if (target.type === "heroSchoolName") {
+      setModalForm({ schoolName: form.hero.schoolName || "" });
+    } else if (target.type === "heroBadge") {
       setModalForm({ badge: form.hero.badge || "" });
     } else if (target.type === "heroTitle") {
       setModalForm({
@@ -652,7 +654,9 @@ export default function AdminHome() {
     try {
       let nextForm = mergeHomeContent(form);
       
-      if (editingTarget.type === "heroBadge") {
+      if (editingTarget.type === "heroSchoolName") {
+        nextForm.hero = { ...nextForm.hero, schoolName: modalForm.schoolName || "" };
+      } else if (editingTarget.type === "heroBadge") {
         nextForm.hero = { ...nextForm.hero, badge: modalForm.badge || "" };
       } else if (editingTarget.type === "heroTitle") {
         nextForm.hero = {
@@ -753,7 +757,7 @@ export default function AdminHome() {
   const modalTitle = useMemo(() => {
     if (!editingTarget) return "";
     const titles = {
-      heroBadge: "Edit Hero Badge", heroTitle: "Edit Hero Title", heroDescription: "Edit Hero Description",
+      heroSchoolName: "Edit School Name", heroBadge: "Edit Hero Badge", heroTitle: "Edit Hero Title", heroDescription: "Edit Hero Description",
       heroButtons: "Edit Hero Buttons", heroImage: "Change Hero Image", heroImageText: "Edit Hero Image Text",
       heroMeta: "Edit School Details",
       statsHeader: "Edit School Highlights Heading", statsCard: "Edit Highlight Number Card",
@@ -773,6 +777,7 @@ export default function AdminHome() {
 
   const saveButtonText = useMemo(() => {
     if (!editingTarget) return "Save";
+    if (editingTarget.type === "heroSchoolName") return "Save School Name";
     if (editingTarget.type === "heroImage") return "Save Hero Images";
     if (editingTarget.type === "storyImage") return "Save Story Image";
     if (editingTarget.type === "heroTitle") return "Save Hero Title";
@@ -864,6 +869,15 @@ export default function AdminHome() {
                 </div>
 
                 <div className="space-y-5">
+                  {editingTarget.type === "heroSchoolName" && (
+                    <Field
+                      label="School Name"
+                      value={modalForm.schoolName}
+                      onChange={(value) => updateModalField("schoolName", value)}
+                      placeholder="RED ROSE SCHOOL"
+                    />
+                  )}
+
                   {editingTarget.type === "heroImage" && (
                     <>
                       <div className="rounded-3xl p-5" style={{ background: "linear-gradient(145deg, rgba(15,23,42,0.96), rgba(30,41,59,0.92))", border: "1px solid rgba(255,255,255,0.12)" }}>
