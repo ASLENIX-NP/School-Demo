@@ -194,7 +194,7 @@ export function Navbar({
           backdropFilter: "blur(16px)",
         }}
       >
-        <nav className="max-w-[1400px] mx-auto h-[70px] md:h-[80px] px-5 md:px-8 flex items-center justify-between">
+        <nav className="max-w-[1700px] w-full mx-auto h-[70px] md:h-[80px] px-5 md:px-10 lg:px-12 flex items-center justify-between">
           <Link
             to="/"
             onClick={(e) => {
@@ -284,7 +284,7 @@ export function Navbar({
             </div>
           </Link>
 
-          <div className="hidden xl:flex items-center gap-0.5">
+          <div className="hidden xl:flex items-center gap-1">
             {visibleLinks.map((link) => {
               const active = isActive(link.href);
 
@@ -299,8 +299,8 @@ export function Navbar({
                   }}
                   className={
                     editMode
-                      ? "group relative px-3.5 py-2 text-sm font-medium transition-colors duration-300 cursor-pointer"
-                      : "group relative px-3.5 py-2 text-sm font-medium transition-colors duration-300"
+                      ? "group relative px-4 py-2 text-sm font-medium transition-colors duration-300 cursor-pointer"
+                      : "group relative px-4 py-2 text-sm font-medium transition-colors duration-300"
                   }
                   title={editMode ? `Edit ${link.label}` : ""}
                   style={{
@@ -309,7 +309,7 @@ export function Navbar({
                 >
                   {link.label}
                   <span
-                    className={`absolute left-3.5 right-3.5 -bottom-0.5 h-[2px] origin-left transition-transform duration-300 ${active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                    className={`absolute left-4 right-4 -bottom-0.5 h-[2px] origin-left transition-transform duration-300 ${active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                       }`}
                     style={{ background: theme.rose }}
                   />
@@ -377,7 +377,7 @@ export function Navbar({
               backdropFilter: "blur(16px)",
             }}
           >
-            <div className="max-w-[1400px] mx-auto p-4 grid gap-1">
+            <div className="max-w-[1700px] w-full mx-auto p-4 md:px-6 grid gap-1">
               {visibleLinks.map((link) => {
                 const active = isActive(link.href);
 
