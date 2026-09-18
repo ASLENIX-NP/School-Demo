@@ -194,7 +194,7 @@ export function Navbar({
           backdropFilter: "blur(16px)",
         }}
       >
-        <nav className="max-w-[1700px] w-full mx-auto h-[70px] md:h-[80px] px-5 md:px-10 lg:px-12 flex items-center justify-between">
+        <nav className="max-w-[1600px] w-full mx-auto h-[70px] md:h-[80px] px-5 md:px-9 lg:px-11 flex items-center justify-between">
           <Link
             to="/"
             onClick={(e) => {
@@ -208,7 +208,7 @@ export function Navbar({
                 behavior: "smooth",
               });
             }}
-            className="flex items-center gap-3 group flex-shrink-0"
+            className="flex items-center gap-4 group flex-shrink-0"
           >
             <div
               onClick={(e) => selectEditTarget(e, { type: "logo" })}
@@ -222,8 +222,8 @@ export function Navbar({
               <div
                 className="rounded-xl overflow-hidden bg-white"
                 style={{
-                  width: "42px",
-                  height: "42px",
+                  width: "46px",
+                  height: "46px",
                   border: `1.5px solid ${theme.gold}`,
                   boxShadow: `0 0 0 3px ${theme.gold}1F`,
                 }}
@@ -284,7 +284,7 @@ export function Navbar({
             </div>
           </Link>
 
-          <div className="hidden xl:flex items-center gap-1">
+          <div className="hidden xl:flex items-center gap-3.5">
             {visibleLinks.map((link) => {
               const active = isActive(link.href);
 
@@ -299,8 +299,8 @@ export function Navbar({
                   }}
                   className={
                     editMode
-                      ? "group relative px-4 py-2 text-sm font-medium transition-colors duration-300 cursor-pointer"
-                      : "group relative px-4 py-2 text-sm font-medium transition-colors duration-300"
+                      ? "group relative px-3.5 py-2 text-sm font-medium transition-colors duration-300 cursor-pointer"
+                      : "group relative px-3.5 py-2 text-sm font-medium transition-colors duration-300"
                   }
                   title={editMode ? `Edit ${link.label}` : ""}
                   style={{
@@ -328,7 +328,7 @@ export function Navbar({
                     selectEditTarget(e, { type: "admission" });
                   }
                 }}
-                className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
+                className="group relative inline-flex items-center gap-2 px-5.5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
                 style={{
                   color: theme.ink,
                   background: theme.gradGold,
