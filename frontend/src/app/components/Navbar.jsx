@@ -53,7 +53,9 @@ export function mergeNavbarContent(saved = {}) {
     ...defaultNavbarContent,
     ...saved,
     links: defaultNavbarContent.links.map((defaultLink) => {
-      const savedLink = savedLinks.find((link) => link.id === defaultLink.id);
+      const savedLink = savedLinks.find(
+        (link) => link.id === defaultLink.id
+      );
 
       return {
         ...defaultLink,
@@ -113,11 +115,12 @@ function HoverEditIcon({ icon: Icon = Pencil, label = "Edit" }) {
 export function Navbar({
   editMode = false,
   contentOverride = null,
-  onEditTarget = () => { },
+  onEditTarget = () => {},
 }) {
   const [navbarContent, setNavbarContent] = useState(
     mergeNavbarContent(contentOverride || defaultNavbarContent)
   );
+
   const [scrolled, setScrolled] = useState(editMode);
   const [open, setOpen] = useState(false);
   const location = useLocation();
@@ -174,8 +177,12 @@ export function Navbar({
     onEditTarget(target);
   };
 
-  const visibleLinks = navbarContent.links.filter((link) => link.visible);
-  const logoSrc = navbarContent.logoUrl || defaultSchoolLogo;
+  const visibleLinks = navbarContent.links.filter(
+    (link) => link.visible
+  );
+
+  const logoSrc =
+    navbarContent.logoUrl || defaultSchoolLogo;
 
   return (
     <div className="rr-nav">
@@ -185,7 +192,11 @@ export function Navbar({
         initial={editMode ? false : { y: -24, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className={editMode ? "relative z-50 w-full" : "fixed top-0 left-0 right-0 z-50 w-full"}
+        className={
+          editMode
+            ? "relative z-50 w-full"
+            : "fixed top-0 left-0 right-0 z-50 w-full"
+        }
         style={{
           background: scrolled
             ? `linear-gradient(180deg, ${theme.ink}F7 0%, ${theme.ink}F0 100%)`
@@ -211,7 +222,9 @@ export function Navbar({
             className="flex items-center gap-4 group flex-shrink-0"
           >
             <div
-              onClick={(e) => selectEditTarget(e, { type: "logo" })}
+              onClick={(e) =>
+                selectEditTarget(e, { type: "logo" })
+              }
               className={
                 editMode
                   ? "relative group cursor-pointer rounded-xl"
@@ -219,11 +232,10 @@ export function Navbar({
               }
               title={editMode ? "Change logo image" : ""}
             >
+              {/* ONLY CHANGE: enlarged logo */}
               <div
-                className="rounded-xl overflow-hidden bg-white"
+                className="rounded-xl overflow-hidden bg-white w-[58px] h-[58px] md:w-[68px] md:h-[68px]"
                 style={{
-                  width: "46px",
-                  height: "46px",
                   border: `1.5px solid ${theme.gold}`,
                   boxShadow: `0 0 0 3px ${theme.gold}1F`,
                 }}
@@ -231,16 +243,23 @@ export function Navbar({
                 <img
                   src={logoSrc}
                   alt="School Logo"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain p-1"
                 />
               </div>
 
-              {editMode && <HoverEditIcon icon={Camera} label="Change Logo" />}
+              {editMode && (
+                <HoverEditIcon
+                  icon={Camera}
+                  label="Change Logo"
+                />
+              )}
             </div>
 
             <div className="hidden sm:block">
               <div
-                onClick={(e) => selectEditTarget(e, { type: "schoolName" })}
+                onClick={(e) =>
+                  selectEditTarget(e, { type: "schoolName" })
+                }
                 className={
                   editMode
                     ? "relative group cursor-pointer rounded-lg px-1"
@@ -258,11 +277,20 @@ export function Navbar({
                   {navbarContent.schoolName}
                 </div>
 
-                {editMode && <HoverEditIcon icon={Pencil} label="Edit Name" />}
+                {editMode && (
+                  <HoverEditIcon
+                    icon={Pencil}
+                    label="Edit Name"
+                  />
+                )}
               </div>
 
               <div
-                onClick={(e) => selectEditTarget(e, { type: "schoolSubtitle" })}
+                onClick={(e) =>
+                  selectEditTarget(e, {
+                    type: "schoolSubtitle",
+                  })
+                }
                 className={
                   editMode
                     ? "relative group cursor-pointer rounded-lg px-1"
@@ -278,7 +306,10 @@ export function Navbar({
                 </div>
 
                 {editMode && (
-                  <HoverEditIcon icon={Pencil} label="Edit Subtitle" />
+                  <HoverEditIcon
+                    icon={Pencil}
+                    label="Edit Subtitle"
+                  />
                 )}
               </div>
             </div>
@@ -294,7 +325,10 @@ export function Navbar({
                   to={link.href || "/"}
                   onClick={(e) => {
                     if (editMode) {
-                      selectEditTarget(e, { type: "link", id: link.id });
+                      selectEditTarget(e, {
+                        type: "link",
+                        id: link.id,
+                      });
                     }
                   }}
                   className={
@@ -304,16 +338,28 @@ export function Navbar({
                   }
                   title={editMode ? `Edit ${link.label}` : ""}
                   style={{
-                    color: active ? theme.goldSoft : "rgba(245,238,226,0.75)",
+                    color: active
+                      ? theme.goldSoft
+                      : "rgba(245,238,226,0.75)",
                   }}
                 >
                   {link.label}
+
                   <span
-                    className={`absolute left-4 right-4 -bottom-0.5 h-[2px] origin-left transition-transform duration-300 ${active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                      }`}
+                    className={`absolute left-4 right-4 -bottom-0.5 h-[2px] origin-left transition-transform duration-300 ${
+                      active
+                        ? "scale-x-100"
+                        : "scale-x-0 group-hover:scale-x-100"
+                    }`}
                     style={{ background: theme.rose }}
                   />
-                  {editMode && <HoverEditIcon icon={Pencil} label="Edit Link" />}
+
+                  {editMode && (
+                    <HoverEditIcon
+                      icon={Pencil}
+                      label="Edit Link"
+                    />
+                  )}
                 </Link>
               );
             })}
@@ -322,10 +368,15 @@ export function Navbar({
           {navbarContent.showAdmissionButton && (
             <div className="hidden xl:flex items-center gap-3 flex-shrink-0">
               <Link
-                to={navbarContent.admissionButtonLink || "/admissions"}
+                to={
+                  navbarContent.admissionButtonLink ||
+                  "/admissions"
+                }
                 onClick={(e) => {
                   if (editMode) {
-                    selectEditTarget(e, { type: "admission" });
+                    selectEditTarget(e, {
+                      type: "admission",
+                    });
                   }
                 }}
                 className="group relative inline-flex items-center gap-2 px-5.5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
@@ -335,10 +386,17 @@ export function Navbar({
                   boxShadow: `0 10px 26px ${theme.gold}45`,
                 }}
               >
-                {navbarContent.admissionButtonText || "Admission Open"}
+                {navbarContent.admissionButtonText ||
+                  "Admission Open"}
+
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
 
-                {editMode && <HoverEditIcon icon={Pencil} label="Edit Button" />}
+                {editMode && (
+                  <HoverEditIcon
+                    icon={Pencil}
+                    label="Edit Button"
+                  />
+                )}
               </Link>
             </div>
           )}
@@ -354,7 +412,11 @@ export function Navbar({
             }}
             aria-label="Toggle navigation menu"
           >
-            {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {open ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </nav>
       </motion.header>
@@ -387,16 +449,25 @@ export function Navbar({
                     to={link.href || "/"}
                     onClick={(e) => {
                       if (editMode) {
-                        selectEditTarget(e, { type: "link", id: link.id });
+                        selectEditTarget(e, {
+                          type: "link",
+                          id: link.id,
+                        });
                       } else {
                         setOpen(false);
                       }
                     }}
                     className="px-4 py-3 rounded-lg text-sm font-medium transition-all border-l-2"
                     style={{
-                      color: active ? theme.goldSoft : "rgba(245,238,226,0.8)",
-                      background: active ? `${theme.rose}18` : "transparent",
-                      borderColor: active ? theme.rose : "transparent",
+                      color: active
+                        ? theme.goldSoft
+                        : "rgba(245,238,226,0.8)",
+                      background: active
+                        ? `${theme.rose}18`
+                        : "transparent",
+                      borderColor: active
+                        ? theme.rose
+                        : "transparent",
                     }}
                   >
                     {link.label}
@@ -406,13 +477,22 @@ export function Navbar({
 
               {navbarContent.showAdmissionButton && (
                 <Link
-                  to={navbarContent.admissionButtonLink || "/admissions"}
+                  to={
+                    navbarContent.admissionButtonLink ||
+                    "/admissions"
+                  }
                   onClick={(e) => {
                     if (editMode) {
-                      selectEditTarget(e, { type: "admission" });
+                      selectEditTarget(e, {
+                        type: "admission",
+                      });
                     } else {
                       setOpen(false);
-                      window.dispatchEvent(new CustomEvent("open-admission-inquiry"));
+                      window.dispatchEvent(
+                        new CustomEvent(
+                          "open-admission-inquiry"
+                        )
+                      );
                     }
                   }}
                   className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-sm font-bold text-center transition-all hover:scale-105 hover:-translate-y-0.5 active:scale-95"
@@ -422,7 +502,9 @@ export function Navbar({
                     boxShadow: `0 10px 24px ${theme.gold}45`,
                   }}
                 >
-                  {navbarContent.admissionButtonText || "Admission Open"}
+                  {navbarContent.admissionButtonText ||
+                    "Admission Open"}
+
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               )}

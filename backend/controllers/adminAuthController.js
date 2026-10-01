@@ -21,7 +21,7 @@ const JWT_SECRET =
 // ADMIN ACCOUNT
 // =====================================================
 
-const ADMIN_EMAIL = "admin@school.com";
+const ADMIN_EMAIL = "ebsredrose@gmail.com";
 
 const DEFAULT_ADMIN_PASSWORD = "admin123";
 

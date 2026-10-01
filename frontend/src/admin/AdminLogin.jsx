@@ -93,7 +93,7 @@ function createSmallAdminUser(
     email:
       user.email ??
       fallbackEmail ??
-      "admin@school.com",
+      "ebsredrose@gmail.com",
 
     name:
       user.name ??

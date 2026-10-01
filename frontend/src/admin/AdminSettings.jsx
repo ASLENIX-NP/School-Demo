@@ -59,12 +59,12 @@ const MAX_DEVICES = 4;
 const DEFAULT_SETTINGS = {
   id: 1,
   admin_name: "School Administrator",
-  admin_email: "admin@school.com",
+  admin_email: "ebsredrose@gmail.com",
   username: "admin",
   role: "Administrator",
   profile_photo: "",
   school_name: "Red Rose Secondary English Boarding School",
-  school_email: "admin@school.com",
+  school_email: "ebsredrose@gmail.com",
   session_timeout: 30,
   max_login_attempts: 5,
   lock_account: true,
@@ -1854,7 +1854,7 @@ export default function AdminSettings() {
               value={email}
               onChange={setEmail}
               type="email"
-              placeholder="admin@school.com"
+              placeholder="ebsredrose@gmail.com "
             />
 
             <div className="rounded-2xl bg-amber-50 p-4 text-xs font-semibold leading-5 text-amber-800">
